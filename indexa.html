@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANT - Menu chính</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #a8edd9;
+            --purple-primary: #6c5ce7;
+            --text-main: #2c3e50;
+            --text-sub: #636e72;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .screen {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem 1.5rem 4rem 1.5rem;
+            position: relative;
+            background: linear-gradient(135deg, #a8edd9 0%, #fed6e3 100%);
+        }
+
+        .welcome-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        /* HEADER LOGO & CHỮ ANT TO GẤP ĐÔI */
+        .header-small {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.9rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .text-3d-small {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            font-size: clamp(3.8rem, 10vw, 5rem); /* Tăng kích thước gấp đôi */
+            color: #FF5500;
+            letter-spacing: 1.5px;
+            line-height: 1;
+            text-shadow: 
+                -1px -1px 0px #FFAA00,
+                -2px -2px 0px #FFCC00,
+                1px 1px 0px #CC3300,
+                2px 2px 0px #992200,
+                3px 3px 0px #661100,
+                0px 6px 12px rgba(204, 51, 0, 0.3);
+        }
+
+        .logo-small-wrapper {
+            position: relative;
+            width: clamp(70px, 16vw, 90px); /* Tăng kích thước gấp đôi */
+            height: clamp(70px, 16vw, 90px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: floatLogo 3.5s ease-in-out infinite;
+        }
+
+        .ant-logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0px 8px 15px rgba(255, 85, 0, 0.25)) drop-shadow(0px 3px 8px rgba(255, 255, 255, 0.8));
+        }
+
+        /* CÂU SLOGAN ĐƯỢC CHỈNH MÀU SẮC DỊU DÀNG & TINH TẾ */
+        .main-slogan {
+            font-size: clamp(0.95rem, 3.2vw, 1.15rem);
+            font-weight: 700;
+            color: #34495e;
+            margin-bottom: 2rem;
+            letter-spacing: 0.4px;
+            opacity: 0.9;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+        }
+
+        /* KHUNG CHỨA NÚT BỐ CỤC THON GỌN, TINH TẾ */
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+            width: 100%;
+            max-width: 320px; /* Tối ưu độ rộng thon gọn */
+        }
+
+        .menu-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.85rem 1.3rem; /* Thu gọn padding tinh tế */
+            border-radius: 16px;
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: 700;
+            font-size: 0.98rem;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .menu-btn i.btn-icon {
+            font-size: 1.05rem;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-learn { border-left: 4px solid #0984e3; }
+        .btn-learn:hover {
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(9, 132, 227, 0.18);
+        }
+
+        .btn-practice { border-left: 4px solid #FF5500; }
+        .btn-practice:hover {
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 85, 0, 0.18);
+        }
+
+        .btn-other { border-left: 4px solid #6c5ce7; }
+        .btn-other:hover {
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.18);
+        }
+
+        /* NÚT THOÁT QUAY VỀ INDEXA.HTML */
+        .btn-exit { border-left: 4px solid #d63031; }
+        .btn-exit:hover {
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(214, 48, 49, 0.18);
+        }
+
+        .app-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 0.8rem;
+            text-align: center;
+            background: linear-gradient(to top, rgba(254, 214, 227, 0.8) 0%, rgba(254, 214, 227, 0) 100%);
+            backdrop-filter: blur(4px);
+            z-index: 10;
+        }
+
+        .footer-text {
+            font-size: 0.8rem;
+            color: #636e72;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+        }
+
+        @keyframes floatLogo {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MÀN HÌNH MENU CHÍNH -->
+    <section class="screen">
+        <div class="welcome-content">
+            
+            <div class="header-small">
+                <h1 class="text-3d-small">ANT</h1>
+                <div class="logo-small-wrapper">
+                    <img src="logo.png" alt="ANT Logo" class="ant-logo-img">
+                </div>
+            </div>
+
+            <h2 class="main-slogan">Tích lũy kiến thức, chạm đích thành công</h2>
+
+            <div class="menu-container">
+                <!-- Nút 1: Tìm hiểu kiến thức -->
+                <a href="Vatli/index.html" class="menu-btn btn-learn">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-book-open btn-icon" style="color: #0984e3;"></i>
+                        <span>Tìm hiểu kiến thức (chờ)</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="font-size: 0.8rem; opacity: 0.4;"></i>
+                </a>
+
+                <!-- Nút 2: Luyện đề -->
+                <a href="./Luyende/index.html" class="menu-btn btn-practice">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-pen-ruler btn-icon" style="color: #FF5500;"></i>
+                        <span>Luyện đề</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="font-size: 0.8rem; opacity: 0.4;"></i>
+                </a>
+
+                <!-- Nút 3: Khác -->
+                <a href="#" class="menu-btn btn-other" onclick="alert('Tính năng đang được phát triển!')">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-cubes btn-icon" style="color: #6c5ce7;"></i>
+                        <span>Khác (chờ)</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="font-size: 0.8rem; opacity: 0.4;"></i>
+                </a>
+
+                <!-- Nút 4: Thoát -> Quay lại index.html -->
+                <a href="index.html" class="menu-btn btn-exit">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-right-from-bracket btn-icon" style="color: #d63031;"></i>
+                        <span>Thoát</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="font-size: 0.8rem; opacity: 0.4;"></i>
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER BẢN QUYỀN -->
+    <footer class="app-footer">
+        <p class="footer-text">ANT App © Designed by MHP298</p>
+    </footer>
+
+</body>
+</html>
