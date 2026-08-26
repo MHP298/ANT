@@ -161,6 +161,22 @@
         }
         .form-group input:focus, .form-group select:focus { border-color: var(--accent-blue); background: #ffffff; box-shadow: 0 0 6px rgba(9, 132, 227, 0.2); }
         
+        /* GIAO DIỆN Ô NHẬP MÃ BẢO MẬT (CÓ NÚT CON MẮT) */
+        .password-input-group {
+            position: relative; display: flex; align-items: center; width: 100%;
+        }
+        .password-input-group input {
+            width: 100%; padding: 10px 40px 10px 14px; border: 1.5px solid #dcdde1;
+            border-radius: var(--radius-sm); outline: none; font-size: 0.95em;
+            background: #f8f9fa; font-weight: bold; color: var(--primary-candy); text-align: center;
+        }
+        .password-toggle-btn {
+            position: absolute; right: 12px; background: none; border: none;
+            cursor: pointer; color: #8395a7; font-size: 1.1em; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; height: 100%;
+        }
+        .password-toggle-btn:hover { color: var(--primary-candy); }
+
         .link-grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .link-grid-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
         .grid-subject-grade-topic { display: grid; grid-template-columns: 130px 90px 1fr; gap: 10px; }
@@ -361,12 +377,17 @@
         </div>
     </div>
 
-    <!-- POPUP NHẬP MÃ -->
+    <!-- POPUP NHẬP MÃ BẢO MẬT (CÓ NÚT CON MẮT HOẠT ĐỘNG HOÀN HẢO) -->
     <div class="modal" id="codeModal">
         <div class="modal-content-code">
             <h2 style="color: var(--primary-candy); font-size: 1.15em; margin-bottom: 14px; font-weight: 800;">Bạn nhập Mã đề/Mã GV vào ô bên dưới</h2>
             <div class="form-group" style="margin-top: 8px;">
-                <input type="text" id="accessCodeInput" placeholder="Nhập ANT để làm đề của MHP298" style="text-align: center; font-size: 0.95em; font-weight: bold; color: var(--primary-candy); padding: 10px 14px;">
+                <div class="password-input-group">
+                    <input type="password" id="accessCodeInput" placeholder="Nhập ANT để làm đề của MHP298">
+                    <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility()" title="Ẩn/Hiện mã">
+                        <i class="fa-solid fa-eye" id="togglePasswordIcon"></i>
+                    </button>
+                </div>
             </div>
             <div class="btn-group" style="margin-top: 16px;">
                 <button class="btn btn-secondary" onclick="closeModal('codeModal')">Hủy</button>
@@ -888,8 +909,12 @@
         let currentQuestionIndex = 0;
 
         function resetAllFormInputs() {
-            const inputs = document.querySelectorAll('.modal input[type="text"], .modal input[type="number"]');
+            const inputs = document.querySelectorAll('.modal input[type="text"], .modal input[type="password"], .modal input[type="number"]');
             inputs.forEach(input => input.value = '');
+            const pwdInput = document.getElementById('accessCodeInput');
+            if(pwdInput) pwdInput.type = 'password';
+            const icon = document.getElementById('togglePasswordIcon');
+            if(icon) icon.className = "fa-solid fa-eye";
         }
 
         function openPopup(mode) {
@@ -899,6 +924,19 @@
 
         function openHelpModal() { document.getElementById('helpModal').style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        /* BẬT / TẮT HIỂN THỊ MÃ BẢO MẬT CHUẨN XÁC */
+        function togglePasswordVisibility() {
+            const pwdInput = document.getElementById('accessCodeInput');
+            const icon = document.getElementById('togglePasswordIcon');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                icon.className = "fa-solid fa-eye-slash";
+            } else {
+                pwdInput.type = 'password';
+                icon.className = "fa-solid fa-eye";
+            }
+        }
 
         function handleSecuritySelectChange(selectElem) {
             showQuestionInPDF = (selectElem.value === "true");
@@ -956,21 +994,28 @@
             document.getElementById('bankCodeDisplayModal').style.display = 'flex';
         }
 
-        /* HỆ THỐNG QUÉT CỘT C TRONG CSV VÀ BẬT POPUP DÁN ẢNH (ĐÃ TÍCH HỢP CẦU NỐI CORS PROXY) */
+        /* HÀM CHUYỂN ĐỔI LINK DRIVE BẤT KỲ THÀNH LINK CSV TRỰC TIẾP */
+        function convertDriveUrlToCsv(url) {
+            if (!url) return "";
+            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                return `https://docs.google.com/spreadsheets/d/${match[1]}/gviz/tq?tqx=out:csv`;
+            }
+            return url;
+        }
+
+        /* HỆ THỐNG QUÉT CỘT C TRONG CSV VÀ BẬT POPUP DÁN ẢNH */
         async function scanCsvForImages(partKey) {
             const csvInputId = partKey === 'P1' ? 'driveLinkCsvP1' : (partKey === 'P2' ? 'driveLinkCsvP2' : 'driveLinkCsvP3');
-            const driveUrl = document.getElementById(csvInputId).value.trim();
+            const rawUrl = document.getElementById(csvInputId).value.trim();
 
-            if (!driveUrl) {
+            if (!rawUrl) {
                 alert(`Thầy/Cô vui lòng dán Link CSV Đáp án của ${partKey} trước khi load ảnh!`);
                 return;
             }
 
             try {
-                const match = driveUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                const directUrl = match && match[1] ? `https://docs.google.com/spreadsheets/d/${match[1]}/gviz/tq?tqx=out:csv` : driveUrl;
-                
-                // Cầu nối CORS Proxy để trình duyệt đọc dữ liệu Google Drive không bị chặn
+                const directUrl = convertDriveUrlToCsv(rawUrl);
                 const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(directUrl)}`;
                 
                 const response = await fetch(proxyUrl);
@@ -979,14 +1024,15 @@
                 
                 let targetQuestionsWithImage = [];
 
-                lines.forEach(line => {
-                    if (!line.trim()) return;
-                    const cols = line.split(/[,;]/);
+                for (let i = 1; i < lines.length; i++) {
+                    let line = lines[i];
+                    if (!line.trim()) continue;
+                    const cols = line.split(/[,;\t]/);
                     if (cols.length >= 3) {
-                        let rawKey = cols[0].replace(/"/g, '').trim();
-                        let colCFlag = cols[2].replace(/"/g, '').trim().toLowerCase();
+                        let rawKey = cols[0].replace(/["']/g, '').trim();
+                        let colCFlag = cols[2].replace(/["']/g, '').trim().toLowerCase();
 
-                        if (rawKey && (colCFlag === 'anh' || colCFlag === 'ảnh')) {
+                        if (rawKey && (colCFlag.includes('anh') || colCFlag.includes('ảnh'))) {
                             const numMatch = rawKey.match(/\d+/);
                             const qIndex = numMatch ? numMatch[0] : rawKey;
                             targetQuestionsWithImage.push({
@@ -995,7 +1041,7 @@
                             });
                         }
                     }
-                });
+                }
 
                 if (targetQuestionsWithImage.length === 0) {
                     alert(`Không tìm thấy câu nào có đánh dấu 'anh' ở Cột C trong file CSV của ${partKey}!`);
@@ -1224,15 +1270,16 @@
         async function fetchCsvAnswerKey(driveUrl, partPrefix = "P1") {
             if (!driveUrl) return;
             try {
-                const match = driveUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                const directUrl = match && match[1] ? `https://docs.google.com/spreadsheets/d/${match[1]}/gviz/tq?tqx=out:csv` : driveUrl;
+                const directUrl = convertDriveUrlToCsv(driveUrl);
                 const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(directUrl)}`;
                 
                 const response = await fetch(proxyUrl);
                 const textData = await response.text();
                 const lines = textData.split(/\r?\n/);
                 
-                lines.forEach(line => {
+                for (let i = 1; i < lines.length; i++) {
+                    let line = lines[i];
+                    if (!line.trim()) continue;
                     const cols = line.split(/[,;]/);
                     if (cols.length >= 2) {
                         let rawKey = cols[0].replace(/"/g, '').trim();
@@ -1253,7 +1300,7 @@
                             answerKeyMap[rawKey] = val;
                         }
                     }
-                });
+                }
             } catch (err) {
                 console.warn("Lỗi tải file CSV đáp án:", err);
             }
