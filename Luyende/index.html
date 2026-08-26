@@ -161,7 +161,6 @@
         }
         .form-group input:focus, .form-group select:focus { border-color: var(--accent-blue); background: #ffffff; box-shadow: 0 0 6px rgba(9, 132, 227, 0.2); }
         
-        /* GIAO DIỆN Ô NHẬP MÃ BẢO MẬT (CÓ NÚT CON MẮT) */
         .password-input-group {
             position: relative; display: flex; align-items: center; width: 100%;
         }
@@ -377,7 +376,7 @@
         </div>
     </div>
 
-    <!-- POPUP NHẬP MÃ BẢO MẬT (CÓ NÚT CON MẮT HOẠT ĐỘNG HOÀN HẢO) -->
+    <!-- POPUP NHẬP MÃ BẢO MẬT (CÓ NÚT CON MẮT) -->
     <div class="modal" id="codeModal">
         <div class="modal-content-code">
             <h2 style="color: var(--primary-candy); font-size: 1.15em; margin-bottom: 14px; font-weight: 800;">Bạn nhập Mã đề/Mã GV vào ô bên dưới</h2>
@@ -399,7 +398,7 @@
         </div>
     </div>
 
-    <!-- POPUP HƯỚNG DẪN SỬ DỤNG LẦN ĐẦU -->
+    <!-- POPUP HƯỚNG DẪN SỬ DỤNG LẦN ĐẦU (CHỐNG TRÙNG MÃ GV TUYỆT ĐỐI) -->
     <div class="modal" id="firstTimeGuideModal">
         <div class="modal-content-compact" style="max-width: 580px;">
             <h2 style="color: var(--accent-orange); font-size: 1.2em; text-align: center; font-weight: 900; margin-bottom: 6px;">
@@ -604,7 +603,7 @@
         </div>
     </div>
 
-    <!-- POPUP CẤU TRÚC ĐỀ VÀ ĐIỂM -->
+    <!-- POPUP CẤU TRÚC ĐỀ VÀ ĐIỂM CHI TIẾT (ĐÃ FIX TỰ ĐỘNG CỘNG ĐIỂM) -->
     <div class="modal" id="gradingScaleModal" style="z-index: 1050;">
         <div class="modal-content" style="max-width: 680px; padding: 20px 24px;">
             <h2 style="color: #2c3e50; text-align: center; margin-bottom: 12px; font-size: 1.15em; font-weight:800;">
@@ -613,9 +612,10 @@
             
             <div class="form-group" style="background: #fff5f5; padding: 8px 14px; border-radius: 10px; border: 1.5px solid #ff7675; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px;">
                 <label style="color: #d63031; font-size: 0.9em; margin: 0; font-weight: 800; white-space: nowrap;">🎯 Điểm toàn bài:</label>
-                <input type="number" id="gradeTotalInput" step="0.25" placeholder="VD: 10" style="max-width: 130px; text-align: center; padding: 6px 10px; font-weight: 800; color: #d63031; border: 1.5px solid #ff7675; background: #ffffff;" oninput="recalculateGradingScale()">
+                <input type="number" id="gradeTotalInput" step="0.25" placeholder="VD: 10" style="max-width: 130px; text-align: center; padding: 6px 10px; font-weight: 800; color: #d63031; border: 1.5px solid #ff7675; background: #ffffff;">
             </div>
 
+            <!-- PHẦN I -->
             <div class="struct-card-p1">
                 <div class="struct-header">
                     <div class="struct-header-left">
@@ -632,6 +632,7 @@
                 </div>
             </div>
 
+            <!-- PHẦN II -->
             <div class="struct-card-p2">
                 <div class="struct-header">
                     <div class="struct-header-left">
@@ -657,6 +658,7 @@
                 </div>
             </div>
 
+            <!-- PHẦN III -->
             <div class="struct-card-p3">
                 <div class="struct-header">
                     <div class="struct-header-left">
@@ -946,11 +948,26 @@
             return fullName.trim().split(/\s+/).map(w => w[0].toUpperCase()).join('');
         }
 
+        /* TẠO MÃ GV VỚI CƠ CHẾ CHỐNG TRÙNG LẶP TUYỆT ĐỐI */
         function generateTeacherCode() {
             const name = document.getElementById('initTeacherName').value.trim();
             if (!name) { alert("Thầy/Cô vui lòng nhập Họ tên trước khi tạo mã!"); return; }
-            const rand4Digits = Math.floor(1000 + Math.random() * 9000);
-            const finalCode = `${rand4Digits}_${getInitials(name)}`;
+            
+            let finalCode = "";
+            let isDuplicate = true;
+            let safetyCounter = 0;
+
+            while (isDuplicate && safetyCounter < 10) {
+                const rand4Digits = Math.floor(1000 + Math.random() * 9000);
+                finalCode = `${rand4Digits}_${getInitials(name)}`;
+                
+                const existingProfile = localStorage.getItem('ant_teacher_profile_' + finalCode);
+                if (!existingProfile) {
+                    isDuplicate = false;
+                }
+                safetyCounter++;
+            }
+
             document.getElementById('generatedTeacherCodeDisplay').value = finalCode;
         }
 
@@ -1707,11 +1724,41 @@
         function openGradingScaleModal() {
             document.getElementById('gradeTotalInput').value = '';
             ['1','2','3'].forEach(p => { document.getElementById('chkPart' + p).checked = false; document.getElementById('bodyPart' + p).style.display = 'none'; });
-            document.getElementById('gradingAlertBox').style.display = 'none';
+            recalculateGradingScale();
             document.getElementById('gradingScaleModal').style.display = 'flex';
         }
 
-        function recalculateGradingScale() { document.getElementById('gradingAlertBox').style.display = 'none'; }
+        /* HÀM TỰ ĐỘNG TÍNH TOÁN VÀ CẬP NHẬT TỔNG ĐIỂM TỪNG PHẦN NGAY LẬP TỨC */
+        function recalculateGradingScale() {
+            document.getElementById('gradingAlertBox').style.display = 'none';
+
+            const hasP1 = document.getElementById('chkPart1').checked;
+            let p1Total = 0;
+            if (hasP1) {
+                const c = parseFloat(document.getElementById('p1CountInput').value) || 0;
+                const perQ = parseFloat(document.getElementById('p1PerQInput').value) || 0;
+                p1Total = c * perQ;
+            }
+            document.getElementById('p1TotalScore').innerText = p1Total.toFixed(2);
+
+            const hasP2 = document.getElementById('chkPart2').checked;
+            let p2Total = 0;
+            if (hasP2) {
+                const c = parseFloat(document.getElementById('p2CountInput').value) || 0;
+                const perQ = parseFloat(document.getElementById('p2PerQInput').value) || 0;
+                p2Total = c * perQ;
+            }
+            document.getElementById('p2TotalScore').innerText = p2Total.toFixed(2);
+
+            const hasP3 = document.getElementById('chkPart3').checked;
+            let p3Total = 0;
+            if (hasP3) {
+                const c = parseFloat(document.getElementById('p3CountInput').value) || 0;
+                const perQ = parseFloat(document.getElementById('p3PerQInput').value) || 0;
+                p3Total = c * perQ;
+            }
+            document.getElementById('p3TotalScore').innerText = p3Total.toFixed(2);
+        }
 
         function saveGradingScaleConfig() {
             const totalGoal = parseFloat(document.getElementById('gradeTotalInput').value);
@@ -1728,10 +1775,29 @@
             let p1PerQ = hasP1 ? (parseFloat(document.getElementById('p1PerQInput').value) || 0) : 0;
             let p2C = hasP2 ? (parseInt(document.getElementById('p2CountInput').value) || 0) : 0;
             let p2PerQ = hasP2 ? (parseFloat(document.getElementById('p2PerQInput').value) || 0) : 0;
+            let subA = hasP2 ? (parseFloat(document.getElementById('p2SubA').value) || 0) : 0;
+            let subB = hasP2 ? (parseFloat(document.getElementById('p2SubB').value) || 0) : 0;
+            let subC = hasP2 ? (parseFloat(document.getElementById('p2SubC').value) || 0) : 0;
+            let subD = hasP2 ? (parseFloat(document.getElementById('p2SubD').value) || 0) : 0;
             let p3C = hasP3 ? (parseInt(document.getElementById('p3CountInput').value) || 0) : 0;
             let p3PerQ = hasP3 ? (parseFloat(document.getElementById('p3PerQInput').value) || 0) : 0;
 
-            tempGradingScale = { totalExamScore: totalGoal, hasP1, p1Count: p1C, p1PerQ, hasP2, p2Count: p2C, p2PerQ, p2SubA: 0.1, p2SubB: 0.25, p2SubC: 0.5, p2SubD: 1.0, hasP3, p3Count: p3C, p3PerQ };
+            const sumTotal = (p1C * p1PerQ) + (p2C * p2PerQ) + (p3C * p3PerQ);
+            if (Math.abs(sumTotal - totalGoal) > 0.001) {
+                alertBox.style.display = 'block';
+                alertBox.style.background = '#ffeaa7';
+                alertBox.style.color = '#d63031';
+                alertBox.innerText = `⛔ Điểm tổng (${sumTotal.toFixed(2)} đ) chưa khớp với Điểm toàn bài (${totalGoal.toFixed(2)} đ)!`;
+                return;
+            }
+
+            tempGradingScale = {
+                totalExamScore: totalGoal,
+                hasP1, p1Count: p1C, p1PerQ,
+                hasP2, p2Count: p2C, p2PerQ, p2SubA: subA, p2SubB: subB, p2SubC: subC, p2SubD: subD,
+                hasP3, p3Count: p3C, p3PerQ
+            };
+
             closeModal('gradingScaleModal');
         }
     </script>
