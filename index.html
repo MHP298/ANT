@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANT - Nền tảng học tập thông minh</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #a8edd9;
+            --purple-primary: #6c5ce7;
+            --purple-gradient: linear-gradient(135deg, #6c5ce7 0%, #8c7ae6 100%);
+            --text-main: #2d3436;
+            --text-sub: #636e72;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .screen {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem 1.5rem 5rem 1.5rem;
+            position: relative;
+            background: linear-gradient(135deg, #a8edd9 0%, #fed6e3 100%);
+        }
+
+        .welcome-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .brand-lockup {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            margin-bottom: 1.2rem;
+            transform: translateX(10px);
+        }
+
+        .text-3d-orange {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            font-size: clamp(4.5rem, 14vw, 7rem);
+            line-height: 0.85;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #FF5500;
+            text-shadow: 
+                -1px -1px 0px #FFAA00,
+                -2px -2px 0px #FFCC00,
+                -1px 0px 0px #FF8800,
+                0px -1px 0px #FF8800,
+                1px 1px 0px #CC3300,
+                2px 2px 0px #992200,
+                3px 3px 0px #661100,
+                0px 8px 15px rgba(204, 51, 0, 0.35),
+                0px 15px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .logo-wrapper {
+            position: relative;
+            width: clamp(85px, 12vw, 110px);
+            height: clamp(85px, 12vw, 110px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            animation: floatLogo 3.5s ease-in-out infinite;
+        }
+
+        .logo-wrapper::before {
+            content: '';
+            position: absolute;
+            width: 115%;
+            height: 115%;
+            background: radial-gradient(circle, rgba(255, 107, 0, 0.2) 0%, rgba(255, 107, 0, 0) 70%);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .ant-logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0px 8px 15px rgba(255, 85, 0, 0.25)) drop-shadow(0px 3px 10px rgba(255, 255, 255, 0.8));
+        }
+
+        .brand-subtitle {
+            font-size: clamp(1rem, 3.2vw, 1.35rem);
+            font-weight: 800;
+            color: #2d3436;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.95;
+            white-space: nowrap;
+            margin-bottom: 0.5rem;
+        }
+
+        .brand-slogan {
+            font-size: 0.95rem;
+            color: var(--text-sub);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 2.2rem;
+        }
+
+        .btn-start {
+            background: var(--purple-gradient);
+            color: #FFFFFF;
+            border: 2px solid #ffffff;
+            padding: 1.05rem 2.8rem;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(108, 92, 231, 0.35);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .btn-start:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(108, 92, 231, 0.5);
+        }
+
+        .app-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 1rem;
+            text-align: center;
+            background: linear-gradient(to top, rgba(254, 214, 227, 0.8) 0%, rgba(254, 214, 227, 0) 100%);
+            backdrop-filter: blur(4px);
+            z-index: 10;
+        }
+
+        .footer-text {
+            font-size: 0.82rem;
+            color: #636e72;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+        }
+
+        @keyframes floatLogo {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            .brand-lockup { transform: translateX(0px); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MÀN HÌNH CHÀO MỪNG -->
+    <section class="screen">
+        <div class="welcome-content">
+            
+            <div class="brand-lockup">
+                <h1 class="text-3d-orange">ANT</h1>
+                <div class="logo-wrapper">
+                    <img src="logo.png" alt="ANT Logo" class="ant-logo-img">
+                </div>
+            </div>
+
+            <h2 class="brand-subtitle">Achieve New Targets</h2>
+            <p class="brand-slogan">Nền tảng học tập thông minh</p>
+
+            <a href="indexa.html" class="btn-start">
+                <span>Bắt đầu chinh phục</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+
+        </div>
+    </section>
+
+    <!-- FOOTER BẢN QUYỀN -->
+    <footer class="app-footer">
+        <p class="footer-text">ANT App © Designed by MHP298</p>
+    </footer>
+
+</body>
+</html>
