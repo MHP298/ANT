@@ -32,6 +32,8 @@
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- THƯ VIỆN ĐỌC ĐA ĐỊNH DẠNG EXCEL & CSV (SHEETJS) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
     <!-- FontAwesome & Google Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -398,7 +400,7 @@
         </div>
     </div>
 
-    <!-- POPUP HƯỚNG DẪN SỬ DỤNG LẦN ĐẦU (BỔ SUNG NÚT HỦY) -->
+    <!-- POPUP HƯỚNG DẪN SỬ DỤNG LẦN ĐẦU -->
     <div class="modal" id="firstTimeGuideModal">
         <div class="modal-content-compact" style="max-width: 580px;">
             <h2 style="color: var(--accent-orange); font-size: 1.2em; text-align: center; font-weight: 900; margin-bottom: 6px;">
@@ -508,25 +510,25 @@
                         <i class="fa-solid fa-link"></i> Link drive Đề:
                     </span>
                     <span style="font-weight:800; font-size:0.83em; color: #6c5ce7; padding-left: 2px; display:flex; align-items:center; gap:5px;">
-                        <i class="fa-solid fa-link"></i> Link drive Đáp án:
+                        <i class="fa-solid fa-link"></i> Link drive Đáp án (CSV / Excel):
                     </span>
                 </div>
                 
                 <div class="link-part-row">
                     <input type="text" class="input-box-exam" id="driveLinkType1" placeholder="Link đề Phần 1...">
-                    <input type="text" class="input-box-answer" id="driveLinkCsvP1" placeholder="Link CSV P1 (Cột C có 'anh')...">
+                    <input type="text" class="input-box-answer" id="driveLinkCsvP1" placeholder="Link CSV/Excel P1 (Cột C có 'anh')...">
                     <button type="button" class="btn-action-uniform" style="background: var(--accent-green); color: #fff; padding: 0 10px;" onclick="scanCsvForImages('P1')">🖼️ Load Ảnh</button>
                 </div>
 
                 <div class="link-part-row">
                     <input type="text" class="input-box-exam" id="driveLinkType2" placeholder="Link đề Phần 2...">
-                    <input type="text" class="input-box-answer" id="driveLinkCsvP2" placeholder="Link CSV P2...">
+                    <input type="text" class="input-box-answer" id="driveLinkCsvP2" placeholder="Link CSV/Excel P2...">
                     <button type="button" class="btn-action-uniform" style="background: var(--accent-green); color: #fff; padding: 0 10px;" onclick="scanCsvForImages('P2')">🖼️ Load Ảnh</button>
                 </div>
 
                 <div class="link-part-row">
                     <input type="text" class="input-box-exam" id="driveLinkType3" placeholder="Link đề Phần 3...">
-                    <input type="text" class="input-box-answer" id="driveLinkCsvP3" placeholder="Link CSV P3...">
+                    <input type="text" class="input-box-answer" id="driveLinkCsvP3" placeholder="Link CSV/Excel P3...">
                     <button type="button" class="btn-action-uniform" style="background: var(--accent-green); color: #fff; padding: 0 10px;" onclick="scanCsvForImages('P3')">🖼️ Load Ảnh</button>
                 </div>
             </div>
@@ -584,7 +586,7 @@
                 📤 Hoàn Tất Thiết Lập Ngân Hàng Đề
             </h2>
             <p style="font-size: 0.85em; color: #2d3436; font-weight: 600; line-height: 1.5; margin-bottom: 10px;">
-                Thầy cô tải file CSV bên dưới về máy và đưa lên Drive riêng của thầy cô, cài đặt chế độ chia sẻ là <b>"Người xem"</b>.
+                Thầy cô tải file mẫu bên dưới về máy và đưa lên Drive riêng của thầy cô, cài đặt chế độ chia sẻ là <b>"Người xem"</b>.
             </p>
 
             <div class="csv-download-trigger" id="downloadCsvTriggerBtn" onclick="triggerDownloadGeneratedCSV()">
@@ -685,16 +687,16 @@
         </div>
     </div>
 
-    <!-- POPUP HƯỚNG DẪN TẠO CSV -->
+    <!-- POPUP HƯỚNG DẪN TẠO FILE -->
     <div class="modal" id="helpModal">
         <div class="modal-content" style="max-width:580px; padding: 22px 24px; text-align: center;">
             <h2 style="color: var(--accent-orange); font-size: 1.2em; font-weight:800;">
-                💡 Hướng Dẫn Soạn File Excel & Lưu CSV
+                💡 Hướng Dẫn Soạn File Excel / CSV Đáp Án
             </h2>
             
             <div class="csv-guide-box">
                 <p style="font-weight: 800; color: #2c3e50; margin-bottom: 8px;">
-                    1. Quy cách lập bảng Excel Đáp Án (Cột A, B và C đính kèm ảnh):
+                    1. Quy cách lập bảng Đáp Án (Cột A, B và C đính kèm ảnh):
                 </p>
                 <p style="font-size: 0.85em; color: #475569; margin-bottom: 6px;">
                     • <b>Cột A:</b> Tên câu (Ví dụ: <i>Câu 1</i>, <i>Câu 2</i>...)<br>
@@ -710,10 +712,10 @@
                 </div>
 
                 <p style="margin-top: 12px; font-weight: 800; color: #2c3e50;">
-                    2. Định dạng bắt buộc khi Lưu file (Save As):
+                    2. Định dạng hỗ trợ:
                 </p>
-                <p style="margin-top: 4px; color: #2d3436; font-size: 0.95em;">
-                    Trong <b>Save as type</b>, chọn <b>CSV UTF-8 (Comma delimited) (*.csv)</b>
+                <p style="margin-top: 4px; color: #2d3436; font-size: 0.9em;">
+                    Thầy cô có thể sử dụng trực tiếp file Excel (<b>.xlsx</b>) hoặc <b>CSV</b> tải lên Google Drive ở chế độ công khai người xem.
                 </p>
             </div>
 
@@ -928,7 +930,6 @@
         function openHelpModal() { document.getElementById('helpModal').style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        /* BẬT / TẮT HIỂN THỊ MÃ BẢO MẬT CHUẨN XÁC */
         function togglePasswordVisibility() {
             const pwdInput = document.getElementById('accessCodeInput');
             const icon = document.getElementById('togglePasswordIcon');
@@ -949,7 +950,6 @@
             return fullName.trim().split(/\s+/).map(w => w[0].toUpperCase()).join('');
         }
 
-        /* TẠO MÃ GV VỚI CƠ CHẾ CHỐNG TRÙNG LẶP TUYỆT ĐỐI */
         function generateTeacherCode() {
             const name = document.getElementById('initTeacherName').value.trim();
             if (!name) { alert("Thầy/Cô vui lòng nhập Họ tên trước khi tạo mã!"); return; }
@@ -972,7 +972,6 @@
             document.getElementById('generatedTeacherCodeDisplay').value = finalCode;
         }
 
-        /* HÀM HỦY TẠI POPUP HƯỚNG DẪN LẦN ĐẦU (QUAY LẠI POPUP NHẬP MÃ) */
         function cancelFirstTimeGuide() {
             closeModal('firstTimeGuideModal');
             openPopup('drive');
@@ -1018,34 +1017,60 @@
             document.getElementById('bankCodeDisplayModal').style.display = 'flex';
         }
 
-        /* HÀM CHUYỂN ĐỔI LINK DRIVE BẤT KỲ THÀNH LINK CSV TRỰC TIẾP */
-        function convertDriveUrlToCsv(url) {
+        /* HÀM HỖ TRỢ CHUYỂN ĐỔI LINK DRIVE SANG LINK TẢI DỮ LIỆU THỌC HOẶC EXCEL */
+        function getDriveFileFetchUrl(url) {
             if (!url) return "";
             const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
             if (match && match[1]) {
-                return `https://docs.google.com/spreadsheets/d/${match[1]}/gviz/tq?tqx=out:csv`;
+                // Nếu là Google Sheets, dùng gviz để lấy CSV cho nhẹ
+                return `https://docs.google.com/spreadsheets/d/${match[1]}/export?format=xlsx`;
             }
             return url;
         }
 
-        /* HỆ THỐNG QUÉT CỘT C TRONG CSV VÀ BẬT POPUP DÁN ẢNH */
+        /* HÀM THÔNG MINH ĐỌC CẢ FILE EXCEL (.XLSX) LẪN CSV */
+        async function fetchAndParseSpreadsheetData(driveUrl) {
+            if (!driveUrl) return [];
+            try {
+                // Tự động chuyển link drive thành link export xlsx chuẩn để SheetJS đọc
+                const match = driveUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                let fetchUrl = driveUrl;
+                if (match && match[1]) {
+                    fetchUrl = `https://docs.google.com/spreadsheets/d/${match[1]}/export?format=xlsx`;
+                }
+
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(fetchUrl)}`;
+                const response = await fetch(proxyUrl);
+                const arrayBuffer = await response.arrayBuffer();
+
+                // Dùng thư viện XLSX đọc nhị phân file Excel/CSV cực kỳ mạnh mẽ
+                const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+
+                // Chuyển worksheet thành mảng các dòng (dạng text/csv)
+                const csvText = XLSX.utils.sheet_to_csv(worksheet);
+                return csvText.split(/\r?\n/);
+            } catch (err) {
+                console.warn("Lỗi đọc file qua Proxy, thử fallback trực tiếp:", err);
+                const response = await fetch(driveUrl);
+                const text = await response.text();
+                return text.split(/\r?\n/);
+            }
+        }
+
+        /* HỆ THỐNG QUÉT CỘT C TRONG FILE (EXCEL HOẶC CSV) ĐỂ TẢI ẢNH */
         async function scanCsvForImages(partKey) {
             const csvInputId = partKey === 'P1' ? 'driveLinkCsvP1' : (partKey === 'P2' ? 'driveLinkCsvP2' : 'driveLinkCsvP3');
             const rawUrl = document.getElementById(csvInputId).value.trim();
 
             if (!rawUrl) {
-                alert(`Thầy/Cô vui lòng dán Link CSV Đáp án của ${partKey} trước khi load ảnh!`);
+                alert(`Thầy/Cô vui lòng dán Link CSV/Excel Đáp án của ${partKey} trước khi load ảnh!`);
                 return;
             }
 
             try {
-                const directUrl = convertDriveUrlToCsv(rawUrl);
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(directUrl)}`;
-                
-                const response = await fetch(proxyUrl);
-                const textData = await response.text();
-                const lines = textData.split(/\r?\n/);
-                
+                const lines = await fetchAndParseSpreadsheetData(rawUrl);
                 let targetQuestionsWithImage = [];
 
                 for (let i = 1; i < lines.length; i++) {
@@ -1068,15 +1093,15 @@
                 }
 
                 if (targetQuestionsWithImage.length === 0) {
-                    alert(`Không tìm thấy câu nào có đánh dấu 'anh' ở Cột C trong file CSV của ${partKey}!`);
+                    alert(`Không tìm thấy câu nào có đánh dấu 'anh' ở Cột C trong file của ${partKey}!`);
                     return;
                 }
 
                 renderImageUploadPopup(targetQuestionsWithImage);
 
             } catch (err) {
-                console.error("Lỗi đọc CSV quét ảnh:", err);
-                alert("Không thể đọc file CSV. Thầy/Cô kiểm tra lại link Google Drive hoặc quyền chia sẻ công khai!");
+                console.error("Lỗi đọc file quét ảnh:", err);
+                alert("Không thể đọc file. Thầy/Cô kiểm tra lại link Google Drive hoặc quyền chia sẻ công khai!");
             }
         }
 
@@ -1294,12 +1319,7 @@
         async function fetchCsvAnswerKey(driveUrl, partPrefix = "P1") {
             if (!driveUrl) return;
             try {
-                const directUrl = convertDriveUrlToCsv(driveUrl);
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(directUrl)}`;
-                
-                const response = await fetch(proxyUrl);
-                const textData = await response.text();
-                const lines = textData.split(/\r?\n/);
+                const lines = await fetchAndParseSpreadsheetData(driveUrl);
                 
                 for (let i = 1; i < lines.length; i++) {
                     let line = lines[i];
@@ -1326,7 +1346,7 @@
                     }
                 }
             } catch (err) {
-                console.warn("Lỗi tải file CSV đáp án:", err);
+                console.warn("Lỗi tải file đáp án:", err);
             }
         }
 
@@ -1735,7 +1755,6 @@
             document.getElementById('gradingScaleModal').style.display = 'flex';
         }
 
-        /* HÀM TỰ ĐỘNG TÍNH TOÁN VÀ CẬP NHẬT TỔNG ĐIỂM TỪNG PHẦN NGAY LẬP TỨC */
         function recalculateGradingScale() {
             document.getElementById('gradingAlertBox').style.display = 'none';
 
