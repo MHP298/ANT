@@ -92,7 +92,6 @@
         }
         #dynamicBannerContainer img.active { opacity: 1; }
 
-        /* KHUNG CHÍNH - LINH ĐỘNG THEO THIẾT BỊ */
         .main-container {
             display: grid;
             grid-template-columns: 22% 78%;
@@ -432,7 +431,6 @@
         }
         .btn-download:hover { background: #21867a; }
 
-        /* --- MEDIA QUERY RESPONSIVE CHO ĐIỆN THOẠI HOẶC MÀN HÌNH NHỎ (XEM DỌC) --- */
         @media screen and (max-width: 768px) {
             body {
                 height: auto;
@@ -547,7 +545,7 @@
         let homeworks = [];
         let albums = [];
         let banners = [];
-        let subAccounts = [];
+        let subAccounts = []; // Danh sách tài khoản cán bộ lớp + tài khoản admin phụ
         let trashBin = [];
 
         let currentUser = null;
@@ -570,8 +568,16 @@
                 } else {
                     notifications = [{ id: 1, title: "Kế hoạch năm học mới", content: "Chào mừng các em đến với năm học 2026-2027.", timestamp: Date.now() - 3600000, date: "2026-09-01 08:00", author: "Admin (Mr.Z)", mediaUrl: "", mediaType: "" }];
                     homeworks = [];
+                    // Mặc định khởi tạo tài khoản admin phụ nếu chưa có
+                    subAccounts = [{ name: "admin", pass: "ad1234", studentName: "Quản Trị Viên Phụ", isAdmin: true }];
                     saveDataToFirebase();
                 }
+                // Đảm bảo luôn có tài khoản admin (ad1234) trong subAccounts để admin298 có thể đổi pass được
+                let hasAdminSub = subAccounts.find(acc => acc.name === "admin");
+                if (!hasAdminSub) {
+                    subAccounts.push({ name: "admin", pass: "ad1234", studentName: "Quản Trị Viên Phụ", isAdmin: true });
+                }
+
                 if (callback) callback();
                 renderApp();
             }).catch((error) => {
@@ -603,7 +609,7 @@
                     <h3>Khám Phá</h3>
                     <button class="menu-btn" onclick="switchView('noti_list')">📢 Xem thông báo</button>
                     <button class="menu-btn" onclick="switchView('homework_list')">📚 Xem báo bài</button>
-                    <button class="menu-btn" onclick="switchView('album_list')">🖼️ Góc kỷ niệm</button>
+                    <button class="menu-btn" onclick="switchView('album_list')">🖼️ Ảnh/Clip lớp</button>
                 `;
             } else if (currentUser.role === 'admin') {
                 html = `
@@ -614,7 +620,7 @@
                     <button class="menu-btn" onclick="switchView('admin_banner')">✨ Tải ảnh banner</button>
                     <button class="menu-btn" onclick="toggleSubMenu('adminAccSub')">👥 Quản lý tài khoản</button>
                     <div id="adminAccSub" class="sub-menu" style="display:none;">
-                        <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_create_acc')">➕ Tạo tài khoản</button>
+                        <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_create_acc')">➕ Tạo tài khoản cán bộ lớp</button>
                         <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_del_acc')">🗑️ Xóa tài khoản</button>
                     </div>
                     <button class="menu-btn" onclick="toggleSubMenu('adminNotiSub')">📋 Quản lý thông báo</button>
@@ -891,60 +897,58 @@
                     </div>
                 `;
             }
-            else if (currentView === 'admin_album' || currentView === 'sub_album') {
-                b.innerHTML = `
-                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">📷 Đăng Ảnh / Clip Lớp</h3>
-                    <div class="form-group">
-                        <label>Tiêu đề:</label>
-                        <input type="text" id="albTitle" placeholder="Tiêu đề ảnh hoặc video...">
-                    </div>
-                    <div class="form-group">
-                        <label>Đường dẫn (Link ảnh / Link Video .mp4 / Google Drive):</label>
-                        <input type="text" id="albLink" placeholder="Dán link ảnh hoặc video vào đây...">
-                    </div>
-                    <button class="menu-btn" style="justify-content:center;" onclick="submitAlbum()">Đăng Lên</button>
-                `;
-            }
-            else if (currentView === 'admin_banner') {
-                b.innerHTML = `
-                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">✨ Quản Lý Ảnh Banner</h3>
-                    <div class="form-group">
-                        <label>Dán Link Ảnh Banner:</label>
-                        <input type="text" id="bannerLinkInput" placeholder="Dán link ảnh banner vào đây...">
-                    </div>
-                    <button class="menu-btn" style="justify-content:center; margin-bottom:10px;" onclick="addBannerLink()">Thêm Link Banner</button>
-                    <div id="bannerPreviewGrid" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; max-height:140px; overflow-y:auto;"></div>
-                    <button class="menu-btn btn-del" style="width:100%; justify-content:center;" onclick="clearBanners()">Xóa Tất Cả Banner</button>
-                `;
-                renderBannerPreviews();
-            }
             else if (currentView === 'admin_create_acc') {
+                // Giao diện Tạo tài khoản cán bộ lớp gọn gàng, căn giữa phần B
                 b.innerHTML = `
-                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">➕ Tạo Tài Khoản Phụ Mới</h3>
-                    <div class="form-group">
-                        <label>Tên tài khoản:</label>
-                        <input type="text" id="newAccName" placeholder="Nhập tên tài khoản...">
-                    </div>
-                    <div class="form-group">
-                        <label>Password tự động (Quy ước xy: x = chữ cái đầu, y = 4 số):</label>
-                        <div style="display:flex; gap:8px;">
-                            <input type="text" id="newAccPass" readonly placeholder="Bấm nút tạo..." style="flex:1; background:#f1f1f1;">
-                            <button class="menu-btn" onclick="generatePassword()">Tạo Pass</button>
+                    <div style="max-width:380px; margin: 20px auto; width:100%; display:flex; flex-direction:column; gap:10px;">
+                        <h3 style="color:var(--primary); text-align:center; font-size: 1.05rem; margin-bottom:4px;">➕ Tạo Tài Khoản Cán Bộ Lớp</h3>
+                        
+                        <div class="form-group">
+                            <label>Họ tên tài khoản đầy đủ:</label>
+                            <input type="text" id="newStudentName" placeholder="Nhập họ tên đầy đủ...">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tên tài khoản:</label>
+                            <input type="text" id="newAccName" placeholder="Nhập tên tài khoản...">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Password tự động (Quy ước xy: x = chữ cái đầu, y = 4 số):</label>
+                            <input type="text" id="newAccPass" readonly placeholder="Hệ thống tự tạo khi bấm Tạo mới..." style="background:#f9f9f9; font-weight:bold; color:#457b9d;">
+                        </div>
+
+                        <div style="display:flex; gap:8px; margin-top:4px;">
+                            <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="saveOrUpdateAccount()">Tạo mới</button>
+                            <button class="menu-btn" style="flex:1; justify-content:center; background:#6c757d;" onclick="switchView('admin_manage_noti')">Hủy</button>
+                        </div>
+
+                        <!-- Khung hiển thị thông tin vừa tạo để tiện copy -->
+                        <div id="createdAccountResult" style="display:none; background:#f1faee; border:1px dashed #2a9d8f; padding:10px; border-radius:6px; margin-top:6px;">
+                            <p style="font-size:0.78rem; font-weight:bold; color:#1d3557; margin-bottom:4px;">✅ Đã lưu tài khoản thành công:</p>
+                            <div style="font-size:0.82rem; color:#333;">
+                                <div><b>Tài khoản:</b> <span id="resUser" style="color:#e63946; user-select:all;"></span></div>
+                                <div><b>Mật khẩu:</b> <span id="resPass" style="color:#e63946; user-select:all;"></span></div>
+                            </div>
+                        </div>
+
+                        <!-- Dòng thông báo màu nổi bật ở dưới cùng -->
+                        <div style="background:#fff3cd; color:#856404; padding:8px; border-radius:6px; font-size:0.78rem; text-align:center; font-weight:bold; border:1px solid #ffeeba; margin-top:6px;">
+                            ⚠️ Nhập Họ tên tài khoản đầy đủ hoặc Tên tài khoản để tạo mới hoặc đổi password
                         </div>
                     </div>
-                    <button class="menu-btn" style="justify-content:center; margin-top:6px;" onclick="saveNewAccount()">Tạo Mới Tài Khoản</button>
                 `;
             }
             else if (currentView === 'admin_del_acc') {
-                b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">🗑️ Danh Sách Tài Khoản Phụ</h3>`;
+                b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">🗑️ Danh Sách Tài Khoản Cán Bộ Lớp</h3>`;
                 if (subAccounts.length === 0) {
-                    b.innerHTML += '<p style="color:#6c757d;">Chưa có tài khoản phụ nào.</p>';
+                    b.innerHTML += '<p style="color:#6c757d;">Chưa có tài khoản nào.</p>';
                 } else {
                     subAccounts.forEach((acc, idx) => {
                         b.innerHTML += `
                             <div class="card-item">
-                                <div><b>Tài khoản:</b> ${acc.name} <br><span style="font-size:0.72rem; color:#6c757d;">Pass: ${acc.pass}</span></div>
-                                <button class="menu-btn btn-del" onclick="deleteAccount(${idx})">Xóa</button>
+                                <div><b>Học sinh:</b> ${acc.studentName || 'Chưa cập nhật'} <br><b>Tài khoản:</b> ${acc.name} <br><span style="font-size:0.72rem; color:#6c757d;">Pass: ${acc.pass}</span></div>
+                                ${acc.name !== 'admin' ? `<button class="menu-btn btn-del" onclick="deleteAccount(${idx})">Xóa</button>` : '<span style="font-size:0.72rem; color:#e63946; font-weight:bold;">Tài khoản cố định</span>'}
                             </div>
                         `;
                     });
@@ -986,7 +990,7 @@
             else if (currentView === 'trash_noti') {
                 b.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <h3 style="color:var(--primary); font-size: 0.95rem;">📁 Thư Mục Đã Xóa</h3>
+                        <h3 style="color:var(--primary); font-size: 1rem;">📁 Thư Mục Đã Xóa</h3>
                         <button class="menu-btn btn-del" style="padding:4px 8px; font-size:0.75rem;" onclick="deleteSelectedTrash()">Xóa vĩnh viễn đã chọn</button>
                     </div>
                 `;
@@ -1009,6 +1013,63 @@
                     });
                 }
             }
+        }
+
+        // --- XỬ LÝ TÀI KHOẢN VÀ MẬT KHẨU ---
+        function saveOrUpdateAccount() {
+            let studentName = document.getElementById('newStudentName').value.trim();
+            let accName = document.getElementById('newAccName').value.trim();
+
+            if (!studentName && !accName) {
+                alert("Vui lòng nhập Họ tên tài khoản đầy đủ hoặc Tên tài khoản!");
+                return;
+            }
+
+            if (!accName && studentName) {
+                let parts = studentName.split(" ");
+                accName = parts[parts.length - 1].toLowerCase();
+            }
+
+            let initials = "";
+            if (studentName) {
+                let words = studentName.split(" ");
+                words.forEach(w => { if(w.length > 0) initials += w.charAt(0).toLowerCase(); });
+            } else {
+                initials = accName.charAt(0).toLowerCase();
+            }
+            let randomNum = Math.floor(1000 + Math.random() * 9000);
+            let generatedPass = initials + randomNum;
+
+            document.getElementById('newAccPass').value = generatedPass;
+
+            // Kiểm tra nếu là tài khoản admin phụ
+            if (accName.toLowerCase() === 'admin') {
+                let adminAcc = subAccounts.find(acc => acc.name === 'admin');
+                if (adminAcc) {
+                    adminAcc.pass = generatedPass;
+                    if(studentName) adminAcc.studentName = studentName;
+                } else {
+                    subAccounts.push({ name: 'admin', pass: generatedPass, studentName: studentName || 'Quản Trị Viên Phụ', isAdmin: true });
+                }
+                alert("Đã cập nhật mật khẩu mới cho tài khoản admin thành công!");
+            } else {
+                let existingIndex = subAccounts.findIndex(acc => acc.name.toLowerCase() === accName.toLowerCase());
+
+                if (existingIndex !== -1) {
+                    subAccounts[existingIndex].pass = generatedPass;
+                    subAccounts[existingIndex].studentName = studentName || subAccounts[existingIndex].studentName;
+                    alert("Đã cập nhật (ghi đè) mật khẩu mới thành công!");
+                } else {
+                    subAccounts.push({ name: accName, pass: generatedPass, studentName: studentName });
+                    alert("Tạo tài khoản cán bộ lớp thành công!");
+                }
+            }
+
+            saveDataToFirebase();
+
+            document.getElementById('resUser').innerText = accName;
+            document.getElementById('resPass').innerText = generatedPass;
+            document.getElementById('createdAccountResult').style.display = 'block';
         }
 
         function formatDoc(cmd, value = null) {
@@ -1142,8 +1203,13 @@
         function togglePasswordVisibility() {
             let passInput = document.getElementById('loginPass');
             let toggleBtn = document.querySelector('.toggle-password');
-            if (passInput.type === 'password') { passInput.type = 'text'; toggleBtn.innerText = '🙈'; }
-            else { passInput.type = 'password'; toggleBtn.innerText = '👁️'; }
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                toggleBtn.innerText = '🙈';
+            } else {
+                passInput.type = 'password';
+                toggleBtn.innerText = '👁️';
+            }
         }
 
         function changePage(step) { notiPageOffset += step; renderContentB(); }
@@ -1152,13 +1218,26 @@
             let u = document.getElementById('loginUser').value.trim();
             let p = document.getElementById('loginPass').value.trim();
 
-            if (u === 'admin' && p === 'ADMIN298') {
-                currentUser = { name: "Admin (Mr.Z)", role: "admin" };
+            // 1. Tài khoản tối thượng cố định trong mã nguồn
+            if (u === 'admin298' && p === 'ADMIN298') {
+                currentUser = { name: "Admin Tối Thượng (admin298)", role: "admin" };
                 switchView('admin_manage_noti');
-            } else {
+            } 
+            // 2. Tài khoản admin phụ (có thể thay đổi pass qua giao diện)
+            else if (u === 'admin') {
+                let foundAdmin = subAccounts.find(acc => acc.name === 'admin' && acc.pass === p);
+                if (foundAdmin || p === 'ad1234') {
+                    currentUser = { name: "Admin Phụ (admin)", role: "admin" };
+                    switchView('admin_manage_noti');
+                } else {
+                    alert("Mật khẩu tài khoản admin không chính xác!");
+                }
+            } 
+            // 3. Các tài khoản cán bộ lớp khác
+            else {
                 let found = subAccounts.find(acc => acc.name === u && acc.pass === p);
                 if (found) {
-                    currentUser = { name: found.name, role: "sub" };
+                    currentUser = { name: found.studentName || found.name, role: "sub" };
                     switchView('sub_manage_noti');
                 } else {
                     alert("Tên tài khoản hoặc mật khẩu không chính xác!");
@@ -1168,25 +1247,12 @@
 
         function logout() { currentUser = null; switchView('home'); }
 
-        function generatePassword() {
-            let nameInput = document.getElementById('newAccName').value.trim();
-            if (!nameInput) { alert("Vui lòng nhập tên tài khoản trước!"); return; }
-            let firstChar = nameInput.charAt(0).toLowerCase();
-            let randomNum = Math.floor(1000 + Math.random() * 9000);
-            document.getElementById('newAccPass').value = firstChar + randomNum;
-        }
-
-        function saveNewAccount() {
-            let name = document.getElementById('newAccName').value.trim();
-            let pass = document.getElementById('newAccPass').value.trim();
-            if (!name || !pass) { alert("Vui lòng điền đủ thông tin!"); return; }
-            subAccounts.push({ name, pass });
-            saveDataToFirebase();
-            alert("Tạo tài khoản thành công!");
-            switchView('admin_del_acc');
-        }
-
         function deleteAccount(idx) {
+            let targetAcc = subAccounts[idx];
+            if (targetAcc && targetAcc.name === 'admin') {
+                alert("Không thể xóa tài khoản admin chính!");
+                return;
+            }
             if (confirm("Xóa tài khoản này?")) {
                 subAccounts.splice(idx, 1);
                 saveDataToFirebase();
