@@ -565,6 +565,9 @@
             adminNotiSub: false
         };
 
+        // Biến lưu giữ thông tin tài khoản vừa tạo để không bị mất
+        let lastCreatedAccountInfo = "Chưa có thông tin tài khoản được tạo...";
+
         function loadDataFromFirebase(callback) {
             db.collection("class_data").doc("main_store").get().then((doc) => {
                 if (doc.exists) {
@@ -946,23 +949,43 @@
                 `;
             }
             else if (currentView === 'admin_banner') {
+                // Giao diện Quản Lý Ảnh Banner chỉnh lại 3 nút ngang hàng, thêm ô tải file, chia 2 phần trái phải bên dưới
                 b.innerHTML = `
                     <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">✨ Quản Lý Ảnh Banner</h3>
                     <div class="form-group">
                         <label>Dán Link Ảnh Banner:</label>
                         <input type="text" id="bannerLinkInput" placeholder="Dán link ảnh banner vào đây...">
                     </div>
-                    <div style="display:flex; justify-content:center; gap:12px; margin-top:6px;">
-                        <button class="menu-btn" style="width:160px; justify-content:center; background:#2a9d8f;" onclick="addBannerLink()">Thêm Link Banner</button>
+                    <div class="form-group">
+                        <label>Hoặc tải ảnh banner từ máy:</label>
+                        <input type="file" id="bannerFileInput" accept="image/*">
+                    </div>
+                    <div style="display:flex; justify-content:center; gap:10px; margin-top:6px;">
+                        <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="addBannerLink()">Thêm Link Banner</button>
+                        <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="addBannerFile()">Tải Ảnh Lên</button>
+                        <button class="menu-btn" style="flex:1; justify-content:center; background:#e63946;" onclick="clearBanners()">Xóa Tất Cả Banner</button>
+                    </div>
+                    <div style="display:flex; gap:10px; margin-top:10px; border-top:1px solid #ddd; padding-top:10px;">
+                        <!-- Phần 1 bên trái: Ô preview -->
+                        <div style="flex:1; background:white; padding:8px; border-radius:6px; border:1px solid #ced4da; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:110px;">
+                            <label style="font-size:0.72rem; font-weight:bold; color:var(--primary); margin-bottom:4px;">🖼️ Preview Banner Đang Dùng</label>
+                            <div id="bannerPreviewBox" style="width:100%; height:80px; background:#000; border-radius:4px; overflow:hidden; display:flex; align-items:center; justify-content:center;">
+                                <span style="font-size:0.7rem; color:#aaa;">Chưa có ảnh</span>
+                            </div>
+                        </div>
+                        <!-- Phần 2 bên phải: Danh sách ảnh đã tải/dán kèm nút xóa -->
+                        <div style="flex:1; background:white; padding:8px; border-radius:6px; border:1px solid #ced4da; display:flex; flex-direction:column;">
+                            <label style="font-size:0.72rem; font-weight:bold; color:var(--primary); margin-bottom:4px;">📋 Danh Sách Banner (${banners.length})</label>
+                            <div id="bannerListContainer" style="max-height:90px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; flex:1;"></div>
+                        </div>
+                    </div>
+                    <div style="display:flex; justify-content:center; margin-top:8px;">
                         <button class="menu-btn" style="width:140px; justify-content:center; background:#6c757d;" onclick="switchView('home')">Hủy</button>
                     </div>
-                    <div id="bannerPreviewGrid" style="display:flex; flex-wrap:wrap; gap:8px; margin:8px 0; max-height:120px; overflow-y:auto;"></div>
-                    <button class="menu-btn btn-del" style="width:100%; justify-content:center;" onclick="clearBanners()">Xóa Tất Cả Banner</button>
                 `;
-                renderBannerPreviews();
+                renderBannerManagementUI();
             }
             else if (currentView === 'admin_create_acc') {
-                // Đã loại bỏ hoàn toàn ô Password tự động, thay bằng ô "Thông tin tài khoản" cố định có nút copy
                 b.innerHTML = `
                     <div style="max-width:380px; margin: 10px auto; width:100%; display:flex; flex-direction:column; gap:8px;">
                         <h3 style="color:var(--primary); text-align:center; font-size: 1rem; margin-bottom:2px;">➕ Tạo tài khoản/pass mới</h3>
@@ -982,11 +1005,11 @@
                             <button class="menu-btn" style="width:140px; justify-content:center; background:#6c757d;" onclick="switchView('admin_manage_noti')">Hủy</button>
                         </div>
 
-                        <!-- Ô hiển thị cố định "Thông tin tài khoản" với icon/nút copy -->
+                        <!-- Ô hiển thị cố định thông tin tài khoản không bị mất -->
                         <div style="margin-top:6px;">
                             <label style="font-weight:600; font-size:0.75rem; color:var(--primary);">Thông tin tài khoản:</label>
                             <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
-                                <input type="text" id="resAccountInfo" readonly placeholder="Chưa có thông tin tài khoản được tạo..." style="flex:1; background:#f9f9f9; font-weight:bold; color:#e63946; padding:6px 8px; border:1px solid #ced4da; border-radius:6px; font-size:0.85srem;">
+                                <input type="text" id="resAccountInfo" readonly value="${lastCreatedAccountInfo}" style="flex:1; background:#f9f9f9; font-weight:bold; color:#e63946; padding:6px 8px; border:1px solid #ced4da; border-radius:6px; font-size:0.82rem;">
                                 <button class="menu-btn" style="padding:6px 10px; background:#2a9d8f; font-size:0.78rem;" onclick="copyAccountInfo()" title="Copy thông tin">📋 Copy</button>
                             </div>
                         </div>
@@ -1122,14 +1145,15 @@
 
             saveDataToFirebase();
 
-            // Hiển thị cố định thông tin vào ô bên dưới để copy dễ dàng
-            let infoText = `Tài khoản: ${accName} | Mật khẩu: ${generatedPass}`;
-            document.getElementById('resAccountInfo').value = infoText;
+            // Lưu thông tin cố định vào biến để giữ lại không bị mất
+            lastCreatedAccountInfo = `Tài khoản: ${accName} | Mật khẩu: ${generatedPass}`;
+            let infoBox = document.getElementById('resAccountInfo');
+            if (infoBox) infoBox.value = lastCreatedAccountInfo;
         }
 
         function copyAccountInfo() {
             let infoBox = document.getElementById('resAccountInfo');
-            if (!infoBox.value) {
+            if (!infoBox || !infoBox.value || infoBox.value.includes("Chưa có")) {
                 alert("Chưa có thông tin tài khoản để copy!");
                 return;
             }
@@ -1246,25 +1270,76 @@
 
         function addBannerLink() {
             let link = document.getElementById('bannerLinkInput').value.trim();
-            if (link) { banners.push(link); saveDataToFirebase(); document.getElementById('bannerLinkInput').value = ''; alert("Thêm banner thành công!"); }
+            if (link) { 
+                banners.push(link); 
+                saveDataToFirebase(); 
+                document.getElementById('bannerLinkInput').value = ''; 
+                renderBannerManagementUI();
+                alert("Thêm banner thành công!"); 
+            }
         }
 
-        function renderBannerPreviews() {
-            let grid = document.getElementById('bannerPreviewGrid');
-            if (!grid) return;
-            grid.innerHTML = '';
-            banners.forEach((src, idx) => {
-                grid.innerHTML += `
-                    <div style="position:relative; width:70px; height:50px;">
-                        <img src="${src}" style="width:100%; height:100%; object-fit:cover; border-radius:4px;">
-                        <button onclick="removeBanner(${idx})" style="position:absolute; top:-4px; right:-4px; background:red; color:white; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; cursor:pointer;">×</button>
-                    </div>
-                `;
-            });
+        function addBannerFile() {
+            let fileInput = document.getElementById('bannerFileInput');
+            if (fileInput.files && fileInput.files[0]) {
+                let reader = new FileReader();
+                reader.onload = (e) => {
+                    banners.push(e.target.result);
+                    saveDataToFirebase();
+                    fileInput.value = '';
+                    renderBannerManagementUI();
+                    alert("Tải ảnh banner lên thành công!");
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                alert("Vui lòng chọn file ảnh từ máy!");
+            }
         }
 
-        function removeBanner(idx) { banners.splice(idx, 1); saveDataToFirebase(); renderBannerPreviews(); }
-        function clearBanners() { if (confirm("Xóa toàn bộ banner?")) { banners = []; saveDataToFirebase(); renderBannerPreviews(); } }
+        function renderBannerManagementUI() {
+            let previewBox = document.getElementById('bannerPreviewBox');
+            let listContainer = document.getElementById('bannerListContainer');
+            if (!previewBox || !listContainer) return;
+
+            // Hiển thị ảnh preview đầu tiên
+            if (banners.length > 0) {
+                previewBox.innerHTML = `<img src="${banners[0]}" style="width:100%; height:100%; object-fit:cover;">`;
+            } else {
+                previewBox.innerHTML = `<span style="font-size:0.7rem; color:#aaa;">Chưa có ảnh</span>`;
+            }
+
+            // Hiển thị danh sách ảnh bên phải kèm nút xóa
+            listContainer.innerHTML = '';
+            if (banners.length === 0) {
+                listContainer.innerHTML = `<span style="font-size:0.75rem; color:#6c757d; text-align:center; margin-top:20px;">Chưa có banner nào</span>`;
+            } else {
+                banners.forEach((src, idx) => {
+                    listContainer.innerHTML += `
+                        <div style="display:flex; align-items:center; justify-content:space-between; background:#f8f9fa; padding:4px 6px; border-radius:4px; border:1px solid #eee;">
+                            <div style="display:flex; align-items:center; gap:6px; overflow:hidden;">
+                                <img src="${src}" style="width:30px; height:20px; object-fit:cover; border-radius:2px;">
+                                <span style="font-size:0.72rem; color:#333; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:110px;">Banner ${idx + 1}</span>
+                            </div>
+                            <button class="menu-btn btn-del" style="padding:2px 6px; font-size:0.68rem;" onclick="removeBannerItem(${idx})">Xóa</button>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        function removeBannerItem(idx) {
+            banners.splice(idx, 1);
+            saveDataToFirebase();
+            renderBannerManagementUI();
+        }
+
+        function clearBanners() { 
+            if (confirm("Xóa toàn bộ banner?")) { 
+                banners = []; 
+                saveDataToFirebase(); 
+                renderBannerManagementUI(); 
+            } 
+        }
 
         function changeAlbum(step) {
             let card = document.getElementById('card3d');
