@@ -238,16 +238,47 @@
             font-size: 0.8rem;
         }
 
-        .form-group input, .form-group textarea, .form-group select {
+        .form-group input, .form-group select {
             padding: 7px 9px;
             border: 1px solid #ced4da;
             border-radius: 6px;
             font-size: 0.88rem;
         }
 
-        .form-group textarea {
-            height: 90px;
-            resize: vertical;
+        /* Thanh công cụ soạn thảo phong phú */
+        .editor-toolbar {
+            display: flex;
+            gap: 4px;
+            background: #e9ecef;
+            padding: 4px;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            border: 1px solid #ced4da;
+            border-bottom: none;
+        }
+        .editor-toolbar button {
+            background: white;
+            border: 1px solid #ced4da;
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: var(--primary);
+        }
+        .editor-toolbar button:hover { background: #dee2e6; }
+
+        .rich-editor {
+            min-height: 110px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ced4da;
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+            padding: 8px;
+            background: white;
+            font-size: 0.88rem;
+            outline: none;
         }
 
         .password-wrapper {
@@ -255,12 +286,10 @@
             display: flex;
             align-items: center;
         }
-
         .password-wrapper input {
             width: 100%;
             padding-right: 35px;
         }
-
         .toggle-password {
             position: absolute;
             right: 8px;
@@ -284,7 +313,6 @@
             align-items: center;
             margin: 10px 0;
         }
-
         .card-3d {
             width: 100%;
             max-width: 500px;
@@ -296,15 +324,10 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             background: #fff;
         }
-
-        .card-3d.flip {
-            transform: rotateY(180deg);
-        }
-
+        .card-3d.flip { transform: rotateY(180deg); }
         .card-face {
             position: absolute;
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             backface-visibility: hidden;
             border-radius: 10px;
             overflow: hidden;
@@ -315,7 +338,6 @@
             padding: 10px;
             background: #fff;
         }
-
         .card-face img {
             max-width: 100%;
             max-height: 280px;
@@ -323,10 +345,7 @@
             border-radius: 6px;
             cursor: pointer;
         }
-
-        .card-back {
-            transform: rotateY(180deg);
-        }
+        .card-back { transform: rotateY(180deg); }
 
         .modal {
             display: none;
@@ -337,7 +356,6 @@
             align-items: center;
             z-index: 1000;
         }
-
         .modal-content {
             background: white;
             padding: 18px;
@@ -497,6 +515,7 @@
         animateCanvas();
 
         let notifications = [];
+        let homeworks = []; // Mảng dữ liệu báo bài mới
         let albums = [];
         let banners = [];
         let subAccounts = [];
@@ -505,6 +524,7 @@
         let currentUser = null;
         let currentView = 'home';
         let notiPageOffset = 0;
+        let homeworkPageOffset = 0;
         let albumIndex = 0;
         let editingNotiId = null;
 
@@ -513,12 +533,14 @@
                 if (doc.exists) {
                     let data = doc.data();
                     notifications = data.notifications || [];
+                    homeworks = data.homeworks || [];
                     albums = data.albums || [];
                     banners = data.banners || [];
                     subAccounts = data.subAccounts || [];
                     trashBin = data.trashBin || [];
                 } else {
                     notifications = [{ id: 1, title: "Kế hoạch năm học mới", content: "Chào mừng các em đến với năm học 2026-2027.", timestamp: Date.now() - 3600000, date: "2026-09-01 08:00", author: "Admin (Mr.Z)", mediaUrl: "", mediaType: "" }];
+                    homeworks = [];
                     saveDataToFirebase();
                 }
                 if (callback) callback();
@@ -530,7 +552,7 @@
 
         function saveDataToFirebase() {
             db.collection("class_data").doc("main_store").set({
-                notifications, albums, banners, subAccounts, trashBin
+                notifications, homeworks, albums, banners, subAccounts, trashBin
             }).then(() => {
                 renderApp();
             }).catch((error) => {
@@ -551,12 +573,14 @@
                     <button class="menu-btn" onclick="switchView('login')" style="background:#1d3557; margin-bottom: 2px;">🔑 Đăng nhập</button>
                     <h3>Khám Phá</h3>
                     <button class="menu-btn" onclick="switchView('noti_list')">📢 Xem thông báo</button>
+                    <button class="menu-btn" onclick="switchView('homework_list')">📚 Xem báo bài</button>
                     <button class="menu-btn" onclick="switchView('album_list')">🖼️ Ảnh/Clip lớp</button>
                 `;
             } else if (currentUser.role === 'admin') {
                 html = `
                     <div style="font-size:0.78rem; padding:5px; background:#e0fbfc; border-radius:5px; font-weight:bold; color:#1d3557;">👑 ${currentUser.name}</div>
                     <button class="menu-btn" onclick="switchView('admin_post')">✍️ Đăng thông báo mới</button>
+                    <button class="menu-btn" onclick="switchView('admin_homework')">📖 Đăng báo bài</button>
                     <button class="menu-btn" onclick="switchView('admin_album')">📷 Đăng ảnh/clip</button>
                     <button class="menu-btn" onclick="switchView('admin_banner')">✨ Tải ảnh banner</button>
                     <button class="menu-btn" onclick="toggleSubMenu('adminAccSub')">👥 Quản lý tài khoản</button>
@@ -575,6 +599,7 @@
                 html = `
                     <div style="font-size:0.78rem; padding:5px; background:#e0fbfc; border-radius:5px; font-weight:bold; color:#1d3557;">👤 ${currentUser.name}</div>
                     <button class="menu-btn" onclick="switchView('sub_post')">✍️ Đăng thông báo mới</button>
+                    <button class="menu-btn" onclick="switchView('admin_homework')">📖 Đăng báo bài</button>
                     <button class="menu-btn" onclick="switchView('sub_album')">📷 Đăng ảnh/clip</button>
                     <button class="menu-btn" onclick="switchView('sub_manage_noti')">📋 Quản lý bài đăng</button>
                     <button class="menu-btn" onclick="logout()" style="background:#e63946; margin-top:4px;">🚪 Đăng xuất</button>
@@ -591,6 +616,7 @@
         function switchView(view) {
             currentView = view;
             notiPageOffset = 0;
+            homeworkPageOffset = 0;
             editingNotiId = null;
             renderApp();
         }
@@ -635,7 +661,60 @@
                     }
                     b.appendChild(pageNav);
                 }
-            } 
+            }
+            else if (currentView === 'homework_list') {
+                let sortedHw = [...homeworks].sort((a,b) => b.id - a.id);
+                let sliceHw = sortedHw.slice(homeworkPageOffset, homeworkPageOffset + 5);
+
+                b.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <h3 style="color:var(--primary); font-size: 1rem;">📚 Danh Sách Báo Bài</h3>
+                    </div>
+                `;
+
+                if (sliceHw.length === 0) {
+                    b.innerHTML += '<p style="color:#6c757d; text-align:center; margin-top:20px;">Chưa có nội dung báo bài nào.</p>';
+                } else {
+                    sliceHw.forEach(item => {
+                        let div = document.createElement('div');
+                        div.className = 'card-item';
+                        div.innerHTML = `
+                            <div class="card-info" style="cursor:pointer; flex:1;" onclick="showHwDetail(${item.id})">
+                                <h4>${item.title}</h4>
+                                <span>📅 ${item.date} | ✍️ ${item.author}</span>
+                            </div>
+                        `;
+                        b.appendChild(div);
+                    });
+
+                    let pageNav = document.createElement('div');
+                    pageNav.className = 'pagination-bar';
+                    if (homeworkPageOffset > 0) {
+                        pageNav.innerHTML += `<button class="menu-btn" style="padding:4px 8px; font-size:0.75rem;" onclick="changeHwPage(-5)">⬅️ Trở về</button>`;
+                    }
+                    if (homeworkPageOffset + 5 < sortedHw.length) {
+                        pageNav.innerHTML += `<button class="menu-btn" style="padding:4px 8px; font-size:0.75rem;" onclick="changeHwPage(5)">Xem tiếp ➡️</button>`;
+                    }
+                    b.appendChild(pageNav);
+                }
+            }
+            else if (currentView === 'homework_detail') {
+                let item = homeworks.find(h => h.id === window.currentHwId);
+                if (!item) { switchView('homework_list'); return; }
+
+                b.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <button class="menu-btn" style="padding:5px 10px; font-size:0.8rem;" onclick="switchView('homework_list')">⬅️ Quay lại danh sách</button>
+                        <span style="font-size:0.8rem; color:#6c757d;">📅 ${item.date}</span>
+                    </div>
+                    <div style="background:white; padding:15px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.05);">
+                        <h3 style="color:var(--primary); margin-bottom:4px;">${item.title}</h3>
+                        <p style="font-size:0.8rem; color:#457b9d; margin-bottom:10px;">Đăng bởi: <b>${item.author}</b></p>
+                        <hr style="border:0; border-top:1px solid #eee; margin-bottom:10px;">
+                        <div style="font-size:0.92rem; line-height:1.5;">${item.content}</div>
+                    </div>
+                `;
+            }
             else if (currentView === 'full_detail') {
                 let item = notifications.find(n => n.id === window.currentDetailId);
                 if (!item) { switchView('noti_list'); return; }
@@ -661,7 +740,7 @@
                         <h3 style="color:var(--primary); margin-bottom:4px;">Thông báo số ${item.id}: ${item.title}</h3>
                         <p style="font-size:0.8rem; color:#457b9d; margin-bottom:10px;">Đăng bởi: <b>${item.author}</b></p>
                         <hr style="border:0; border-top:1px solid #eee; margin-bottom:10px;">
-                        <div style="font-size:0.92rem; line-height:1.5; white-space: pre-line;">${item.content}</div>
+                        <div style="font-size:0.92rem; line-height:1.5;">${item.content}</div>
                         ${mediaHtml}
                         <div style="margin-top:10px;">${downloadHtml}</div>
                     </div>
@@ -735,7 +814,14 @@
                     </div>
                     <div class="form-group">
                         <label>Nội dung thông báo:</label>
-                        <textarea id="postContent" placeholder="Nhập nội dung...">${editContent}</textarea>
+                        <div class="editor-toolbar">
+                            <button type="button" onclick="formatDoc('bold')"><b>B</b></button>
+                            <button type="button" onclick="formatDoc('italic')"><i>I</i></button>
+                            <button type="button" onclick="formatDoc('underline')"><u>U</u></button>
+                            <button type="button" onclick="formatDoc('justifyCenter')">Canh giữa</button>
+                            <button type="button" onclick="formatDoc('justifyFull')">Canh đều</button>
+                        </div>
+                        <div id="postContent" class="rich-editor" contenteditable="true">${editContent}</div>
                     </div>
                     <div class="form-group">
                         <label>Tải lên tệp từ máy (Ảnh/Clip):</label>
@@ -748,6 +834,31 @@
                     <div style="display:flex; gap:8px;">
                         <button class="menu-btn" style="flex:1; justify-content:center;" onclick="submitNotification()">${isEditing ? 'Lưu Thay Đổi' : 'Đăng Ngay'}</button>
                         ${isEditing ? `<button class="menu-btn" style="background:#6c757d; justify-content:center;" onclick="cancelEdit()">Hủy</button>` : ''}
+                    </div>
+                `;
+            }
+            else if (currentView === 'admin_homework') {
+                let computedHwTitle = getCalculatedHomeworkTitle();
+                b.innerHTML = `
+                    <h3 style="color:var(--primary); font-size: 1rem; margin-bottom:8px;">📖 Đăng Báo Bài</h3>
+                    <div class="form-group">
+                        <label>Tiêu đề (Tự động hiển thị):</label>
+                        <input type="text" id="hwTitle" value="${computedHwTitle}" readonly style="background:#f1f1f1; font-weight:bold; color:var(--primary);">
+                    </div>
+                    <div class="form-group">
+                        <label>Nội dung báo bài:</label>
+                        <div class="editor-toolbar">
+                            <button type="button" onclick="formatDoc('bold')"><b>B</b></button>
+                            <button type="button" onclick="formatDoc('italic')"><i>I</i></button>
+                            <button type="button" onclick="formatDoc('underline')"><u>U</u></button>
+                            <button type="button" onclick="formatDoc('justifyCenter')">Canh giữa</button>
+                            <button type="button" onclick="formatDoc('justifyFull')">Canh đều</button>
+                        </div>
+                        <div id="hwContent" class="rich-editor" contenteditable="true"></div>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="submitHomework()">Đăng</button>
+                        <button class="menu-btn" style="flex:1; justify-content:center; background:#6c757d;" onclick="switchView('home')">Hủy</button>
                     </div>
                 `;
             }
@@ -869,6 +980,70 @@
                     });
                 }
             }
+        }
+
+        // --- HÀM HỖ TRỢ SOẠN THẢO VÀ TÍNH TOÁN NGÀY BÁO BÀI ---
+        function formatDoc(cmd, value = null) {
+            document.execCommand(cmd, false, value);
+        }
+
+        function getCalculatedHomeworkTitle() {
+            let targetDate = new Date();
+            targetDate.setDate(targetDate.getDate() + 1); // Cộng thêm 1 ngày
+            let dayOfWeek = targetDate.getDay(); // 0 là CN, 6 là Thứ 7
+
+            if (dayOfWeek === 6) { // Nếu là Thứ 7, nhảy cóc sang Thứ Hai (+2 ngày)
+                targetDate.setDate(targetDate.getDate() + 2);
+            } else if (dayOfWeek === 0) { // Nếu là Chủ Nhật, nhảy cóc sang Thứ Hai (+1 ngày)
+                targetDate.setDate(targetDate.getDate() + 1);
+            }
+
+            let daysMap = ["Chủ Nhật", "Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy"];
+            let dName = daysMap[targetDate.getDay()];
+            let dayNum = String(targetDate.getDate()).padStart(2, '0');
+            let monthNum = String(targetDate.getMonth() + 1).padStart(2, '0');
+            let yearNum = targetDate.getFullYear();
+
+            return `BÁO BÀI thứ ${dName} ngày ${dayNum}/${monthNum}/${yearNum}`;
+        }
+
+        function submitHomework() {
+            let title = document.getElementById('hwTitle').value.trim();
+            let content = document.getElementById('hwContent').innerHTML.trim();
+
+            if (!content || content === "<br>") {
+                alert("Vui lòng nhập nội dung báo bài!");
+                return;
+            }
+
+            let maxId = homeworks.length > 0 ? Math.max(...homeworks.map(h => h.id)) : 0;
+            let newId = maxId + 1;
+            let now = new Date();
+            let dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+            homeworks.push({
+                id: newId,
+                title: title,
+                content: content,
+                timestamp: Date.now(),
+                date: dateStr,
+                author: currentUser.name
+            });
+
+            saveDataToFirebase();
+            alert("Đăng báo bài thành công!");
+            switchView('homework_list');
+        }
+
+        function showHwDetail(id) {
+            window.currentHwId = id;
+            currentView = 'homework_detail';
+            renderContentB();
+        }
+
+        function changeHwPage(step) {
+            homeworkPageOffset += step;
+            renderContentB();
         }
 
         function showFullDetail(id) {
@@ -994,14 +1169,13 @@
         function startEdit(id) { editingNotiId = id; switchView(currentUser.role === 'admin' ? 'admin_post' : 'sub_post'); }
         function cancelEdit() { editingNotiId = null; switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti'); }
 
-        // --- ĐĂNG THÔNG BÁO HỖ TRỢ CẢ TẢI FILE LÊN VÀ DÁN LINK ---
         function submitNotification() {
             let title = document.getElementById('postTitle').value.trim();
-            let content = document.getElementById('postContent').value.trim();
+            let content = document.getElementById('postContent').innerHTML.trim();
             let fileInput = document.getElementById('postMediaFile');
             let linkInput = document.getElementById('postMediaLink').value.trim();
 
-            if (!title || !content) { alert("Vui lòng nhập tiêu đề và nội dung!"); return; }
+            if (!title || !content || content === "<br>") { alert("Vui lòng nhập tiêu đề và nội dung!"); return; }
 
             let processSave = (mediaUrl, mediaType) => {
                 if (editingNotiId !== null) {
@@ -1014,7 +1188,7 @@
                             item.mediaType = mediaType;
                         }
                     }
-                    alert("Đã cập nhật thông báo thành công!");
+                    alert("Đã cập nhật thông báo!");
                 } else {
                     let maxId = notifications.length > 0 ? Math.max(...notifications.map(n => n.id)) : 0;
                     let newId = maxId + 1;
@@ -1033,7 +1207,6 @@
                 switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti');
             };
 
-            // Ưu tiên lấy link nếu có dán, nếu không thì lấy file tải lên từ máy
             if (linkInput) {
                 let isVideo = linkInput.endsWith('.mp4') || linkInput.includes('youtube') || linkInput.includes('drive.google.com');
                 processSave(linkInput, isVideo ? 'video' : 'image');
@@ -1092,6 +1265,45 @@
                 saveDataToFirebase();
             }
         }
+
+        // --- HÀM ZOOM ẢNH ---
+        let currentScale = 1;
+        let panX = 0, panY = 0;
+        let isDragging = false;
+        let startX = 0, startY = 0;
+
+        function openZoomModal(imgSrc) {
+            let modal = document.getElementById('zoomModal');
+            let img = document.getElementById('zoomedImg');
+            img.src = imgSrc;
+            currentScale = 1; panX = 0; panY = 0;
+            updateImageTransform();
+            modal.style.display = 'flex';
+        }
+
+        function closeZoomModal() { document.getElementById('zoomModal').style.display = 'none'; }
+        function zoomIn() { currentScale = Math.min(currentScale + 0.3, 4); updateImageTransform(); }
+        function zoomOut() { currentScale = Math.max(currentScale - 0.3, 0.5); updateImageTransform(); }
+        function resetZoom() { currentScale = 1; panX = 0; panY = 0; updateImageTransform(); }
+        function updateImageTransform() {
+            let img = document.getElementById('zoomedImg');
+            img.style.transform = `translate(${panX}px, ${panY}px) scale(${currentScale})`;
+        }
+
+        const zoomModalEl = document.getElementById('zoomModal');
+        zoomModalEl.addEventListener('mousedown', (e) => {
+            isDragging = true; startX = e.clientX - panX; startY = e.clientY - panY;
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            panX = e.clientX - startX; panY = e.clientY - startY;
+            updateImageTransform();
+        });
+        window.addEventListener('mouseup', () => { isDragging = false; });
+        zoomModalEl.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY < 0) zoomIn(); else zoomOut();
+        }, { passive: false });
 
         function openSearchModal() { document.getElementById('searchModal').style.display = 'flex'; }
         function closeSearchModal() { document.getElementById('searchModal').style.display = 'none'; }
