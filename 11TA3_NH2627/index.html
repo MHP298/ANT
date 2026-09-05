@@ -738,8 +738,12 @@
                         <textarea id="postContent" placeholder="Nhập nội dung...">${editContent}</textarea>
                     </div>
                     <div class="form-group">
-                        <label>Dán Link URL Ảnh / Clip / Google Drive:</label>
-                        <input type="text" id="postMediaLink" value="${editLink}" placeholder="Dán link trực tiếp vào đây...">
+                        <label>Tải lên tệp từ máy (Ảnh/Clip):</label>
+                        <input type="file" id="postMediaFile" accept="image/*,video/mp4">
+                    </div>
+                    <div class="form-group">
+                        <label>Hoặc dán Link URL / Link Google Drive / Link Video:</label>
+                        <input type="text" id="postMediaLink" value="${editLink.startsWith('http') ? editLink : ''}" placeholder="Dán link trực tiếp...">
                     </div>
                     <div style="display:flex; gap:8px;">
                         <button class="menu-btn" style="flex:1; justify-content:center;" onclick="submitNotification()">${isEditing ? 'Lưu Thay Đổi' : 'Đăng Ngay'}</button>
@@ -990,41 +994,66 @@
         function startEdit(id) { editingNotiId = id; switchView(currentUser.role === 'admin' ? 'admin_post' : 'sub_post'); }
         function cancelEdit() { editingNotiId = null; switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti'); }
 
+        // --- ĐĂNG THÔNG BÁO HỖ TRỢ CẢ TẢI FILE LÊN VÀ DÁN LINK ---
         function submitNotification() {
             let title = document.getElementById('postTitle').value.trim();
             let content = document.getElementById('postContent').value.trim();
+            let fileInput = document.getElementById('postMediaFile');
             let linkInput = document.getElementById('postMediaLink').value.trim();
 
             if (!title || !content) { alert("Vui lòng nhập tiêu đề và nội dung!"); return; }
 
-            let isVideo = linkInput.endsWith('.mp4') || linkInput.includes('youtube') || linkInput.includes('drive.google.com');
-            let mediaType = isVideo ? 'video' : 'image';
+            let processSave = (mediaUrl, mediaType) => {
+                if (editingNotiId !== null) {
+                    let item = notifications.find(n => n.id === editingNotiId);
+                    if (item) {
+                        item.title = title;
+                        item.content = content;
+                        if (mediaUrl) {
+                            item.mediaUrl = mediaUrl;
+                            item.mediaType = mediaType;
+                        }
+                    }
+                    alert("Đã cập nhật thông báo thành công!");
+                } else {
+                    let maxId = notifications.length > 0 ? Math.max(...notifications.map(n => n.id)) : 0;
+                    let newId = maxId + 1;
+                    let now = new Date();
+                    let dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
-            if (editingNotiId !== null) {
-                let item = notifications.find(n => n.id === editingNotiId);
-                if (item) {
-                    item.title = title;
-                    item.content = content;
-                    item.mediaUrl = linkInput;
-                    item.mediaType = mediaType;
+                    notifications.push({
+                        id: newId, title, content, timestamp: Date.now(), date: dateStr,
+                        author: currentUser.name, mediaUrl: mediaUrl || "", mediaType: mediaType || ""
+                    });
+                    alert("Đăng thông báo thành công!");
                 }
-                alert("Đã cập nhật thông báo!");
+
+                saveDataToFirebase();
+                editingNotiId = null;
+                switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti');
+            };
+
+            // Ưu tiên lấy link nếu có dán, nếu không thì lấy file tải lên từ máy
+            if (linkInput) {
+                let isVideo = linkInput.endsWith('.mp4') || linkInput.includes('youtube') || linkInput.includes('drive.google.com');
+                processSave(linkInput, isVideo ? 'video' : 'image');
+            } else if (fileInput.files && fileInput.files[0]) {
+                let file = fileInput.files[0];
+                let isVideo = file.type.startsWith('video');
+                let reader = new FileReader();
+                reader.onload = (e) => {
+                    processSave(e.target.result, isVideo ? 'video' : 'image');
+                };
+                reader.readAsDataURL(file);
             } else {
-                let maxId = notifications.length > 0 ? Math.max(...notifications.map(n => n.id)) : 0;
-                let newId = maxId + 1;
-                let now = new Date();
-                let dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-
-                notifications.push({
-                    id: newId, title, content, timestamp: Date.now(), date: dateStr,
-                    author: currentUser.name, mediaUrl: linkInput, mediaType
-                });
-                alert("Đăng thông báo thành công!");
+                let existingMediaUrl = "";
+                let existingMediaType = "";
+                if (editingNotiId !== null) {
+                    let oldItem = notifications.find(n => n.id === editingNotiId);
+                    if (oldItem) { existingMediaUrl = oldItem.mediaUrl; existingMediaType = oldItem.mediaType; }
+                }
+                processSave(existingMediaUrl, existingMediaType);
             }
-
-            saveDataToFirebase();
-            editingNotiId = null;
-            switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti');
         }
 
         function deleteNotification(id) {
