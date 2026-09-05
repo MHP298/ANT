@@ -867,7 +867,6 @@
                     if (item) { editTitle = item.title; editContent = item.content; editLink = item.mediaUrl || ''; }
                 }
 
-                // Giao diện Đăng thông báo mới với nút Hủy quay về màn hình chính
                 b.innerHTML = `
                     <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">${isEditing ? '✏️ Chỉnh Sửa Thông Báo' : '✍️ Đăng Thông Báo Mới'}</h3>
                     <div class="form-group">
@@ -895,10 +894,10 @@
                         <label>Hoặc dán Link URL / Link Google Drive:</label>
                         <input type="text" id="postMediaLink" value="${editLink.startsWith('http') ? editLink : ''}" placeholder="Dán link trực tiếp...">
                     </div>
-                    <div style="display:flex; gap:8px; margin-top:4px;">
-                        <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="submitNotification()">${isEditing ? 'Lưu Thay Đổi' : 'Đăng Ngay'}</button>
-                        <button class="menu-btn" style="flex:1; justify-content:center; background:#6c757d;" onclick="switchView('home')">Hủy</button>
-                        ${isEditing ? `<button class="menu-btn" style="background:#6c757d; justify-content:center;" onclick="cancelEdit()">Hủy chỉnh sửa</button>` : ''}
+                    <div style="display:flex; justify-content:center; gap:12px; margin-top:6px;">
+                        <button class="menu-btn" style="width:140px; justify-content:center; background:#2a9d8f;" onclick="submitNotification()">${isEditing ? 'Lưu Thay Đổi' : 'Đăng Ngay'}</button>
+                        <button class="menu-btn" style="width:140px; justify-content:center; background:#6c757d;" onclick="switchView('home')">Hủy</button>
+                        ${isEditing ? `<button class="menu-btn" style="width:140px; background:#6c757d; justify-content:center;" onclick="cancelEdit()">Hủy chỉnh sửa</button>` : ''}
                     </div>
                 `;
             }
@@ -923,14 +922,13 @@
                         </div>
                         <div id="hwContent" class="rich-editor" contenteditable="true"></div>
                     </div>
-                    <div style="display:flex; gap:8px; margin-top:4px;">
-                        <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="submitHomework()">Đăng</button>
-                        <button class="menu-btn" style="flex:1; justify-content:center; background:#6c757d;" onclick="switchView('home')">Hủy</button>
+                    <div style="display:flex; justify-content:center; gap:12px; margin-top:6px;">
+                        <button class="menu-btn" style="width:140px; justify-content:center; background:#2a9d8f;" onclick="submitHomework()">Đăng</button>
+                        <button class="menu-btn" style="width:140px; justify-content:center; background:#6c757d;" onclick="switchView('home')">Hủy</button>
                     </div>
                 `;
             }
             else if (currentView === 'admin_album' || currentView === 'sub_album') {
-                // Giao diện Đăng Ảnh/Clip Lớp với nút Hủy quay về màn hình chính
                 b.innerHTML = `
                     <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">📷 Đăng Ảnh / Clip Lớp</h3>
                     <div class="form-group">
@@ -941,23 +939,22 @@
                         <label>Đường dẫn (Link ảnh / Link Video .mp4 / Google Drive):</label>
                         <input type="text" id="albLink" placeholder="Dán link ảnh hoặc video vào đây...">
                     </div>
-                    <div style="display:flex; gap:8px; margin-top:4px;">
-                        <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="submitAlbum()">Đăng Lên</button>
-                        <button class="menu-btn" style="flex:1; justify-content:center; background:#6c757d;" onclick="switchView('home')">Hủy</button>
+                    <div style="display:flex; justify-content:center; gap:12px; margin-top:6px;">
+                        <button class="menu-btn" style="width:140px; justify-content:center; background:#2a9d8f;" onclick="submitAlbum()">Đăng Lên</button>
+                        <button class="menu-btn" style="width:140px; justify-content:center; background:#6c757d;" onclick="switchView('home')">Hủy</button>
                     </div>
                 `;
             }
             else if (currentView === 'admin_banner') {
-                // Giao diện Quản Lý Ảnh Banner với nút Hủy quay về màn hình chính
                 b.innerHTML = `
                     <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">✨ Quản Lý Ảnh Banner</h3>
                     <div class="form-group">
                         <label>Dán Link Ảnh Banner:</label>
                         <input type="text" id="bannerLinkInput" placeholder="Dán link ảnh banner vào đây...">
                     </div>
-                    <div style="display:flex; gap:8px; margin-top:4px;">
-                        <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="addBannerLink()">Thêm Link Banner</button>
-                        <button class="menu-btn" style="flex:1; justify-content:center; background:#6c757d;" onclick="switchView('home')">Hủy</button>
+                    <div style="display:flex; justify-content:center; gap:12px; margin-top:6px;">
+                        <button class="menu-btn" style="width:160px; justify-content:center; background:#2a9d8f;" onclick="addBannerLink()">Thêm Link Banner</button>
+                        <button class="menu-btn" style="width:140px; justify-content:center; background:#6c757d;" onclick="switchView('home')">Hủy</button>
                     </div>
                     <div id="bannerPreviewGrid" style="display:flex; flex-wrap:wrap; gap:8px; margin:8px 0; max-height:120px; overflow-y:auto;"></div>
                     <button class="menu-btn btn-del" style="width:100%; justify-content:center;" onclick="clearBanners()">Xóa Tất Cả Banner</button>
@@ -965,6 +962,7 @@
                 renderBannerPreviews();
             }
             else if (currentView === 'admin_create_acc') {
+                // Đã loại bỏ hoàn toàn ô Password tự động, thay bằng ô "Thông tin tài khoản" cố định có nút copy
                 b.innerHTML = `
                     <div style="max-width:380px; margin: 10px auto; width:100%; display:flex; flex-direction:column; gap:8px;">
                         <h3 style="color:var(--primary); text-align:center; font-size: 1rem; margin-bottom:2px;">➕ Tạo tài khoản/pass mới</h3>
@@ -979,21 +977,17 @@
                             <input type="text" id="newAccName" placeholder="Nhập tên tài khoản...">
                         </div>
 
-                        <div class="form-group">
-                            <label>Password tự động (Quy ước xy: x = chữ cái đầu, y = 4 số):</label>
-                            <input type="text" id="newAccPass" readonly placeholder="Hệ thống tự tạo khi bấm Tạo mới..." style="background:#f9f9f9; font-weight:bold; color:#457b9d;">
+                        <div style="display:flex; justify-content:center; gap:12px; margin-top:4px;">
+                            <button class="menu-btn" style="width:140px; justify-content:center; background:#2a9d8f;" onclick="saveOrUpdateAccount()">Tạo mới</button>
+                            <button class="menu-btn" style="width:140px; justify-content:center; background:#6c757d;" onclick="switchView('admin_manage_noti')">Hủy</button>
                         </div>
 
-                        <div style="display:flex; gap:8px; margin-top:2px;">
-                            <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="saveOrUpdateAccount()">Tạo mới</button>
-                            <button class="menu-btn" style="flex:1; justify-content:center; background:#6c757d;" onclick="switchView('admin_manage_noti')">Hủy</button>
-                        </div>
-
-                        <div id="createdAccountResult" style="display:none; background:#f1faee; border:1px dashed #2a9d8f; padding:8px; border-radius:6px; margin-top:4px;">
-                            <p style="font-size:0.75rem; font-weight:bold; color:#1d3557; margin-bottom:2px;">✅ Đã lưu tài khoản thành công:</p>
-                            <div style="font-size:0.8rem; color:#333;">
-                                <div><b>Tài khoản:</b> <span id="resUser" style="color:#e63946; user-select:all;"></span></div>
-                                <div><b>Mật khẩu:</b> <span id="resPass" style="color:#e63946; user-select:all;"></span></div>
+                        <!-- Ô hiển thị cố định "Thông tin tài khoản" với icon/nút copy -->
+                        <div style="margin-top:6px;">
+                            <label style="font-weight:600; font-size:0.75rem; color:var(--primary);">Thông tin tài khoản:</label>
+                            <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
+                                <input type="text" id="resAccountInfo" readonly placeholder="Chưa có thông tin tài khoản được tạo..." style="flex:1; background:#f9f9f9; font-weight:bold; color:#e63946; padding:6px 8px; border:1px solid #ced4da; border-radius:6px; font-size:0.85srem;">
+                                <button class="menu-btn" style="padding:6px 10px; background:#2a9d8f; font-size:0.78rem;" onclick="copyAccountInfo()" title="Copy thông tin">📋 Copy</button>
                             </div>
                         </div>
                     </div>
@@ -1104,8 +1098,6 @@
             let randomNum = Math.floor(1000 + Math.random() * 9000);
             let generatedPass = initials + randomNum;
 
-            document.getElementById('newAccPass').value = generatedPass;
-
             if (accName.toLowerCase() === 'admin') {
                 let adminAcc = subAccounts.find(acc => acc.name === 'admin');
                 if (adminAcc) {
@@ -1130,9 +1122,24 @@
 
             saveDataToFirebase();
 
-            document.getElementById('resUser').innerText = accName;
-            document.getElementById('resPass').innerText = generatedPass;
-            document.getElementById('createdAccountResult').style.display = 'block';
+            // Hiển thị cố định thông tin vào ô bên dưới để copy dễ dàng
+            let infoText = `Tài khoản: ${accName} | Mật khẩu: ${generatedPass}`;
+            document.getElementById('resAccountInfo').value = infoText;
+        }
+
+        function copyAccountInfo() {
+            let infoBox = document.getElementById('resAccountInfo');
+            if (!infoBox.value) {
+                alert("Chưa có thông tin tài khoản để copy!");
+                return;
+            }
+            infoBox.select();
+            infoBox.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(infoBox.value).then(() => {
+                alert("Đã copy thông tin tài khoản thành công!");
+            }).catch(err => {
+                alert("Không thể copy tự động, vui lòng bôi đen và copy thủ công.");
+            });
         }
 
         function formatDoc(cmd, value = null) {
