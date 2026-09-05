@@ -284,6 +284,11 @@
             font-size: 0.85rem;
             outline: none;
         }
+        .rich-editor img {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+        }
 
         .password-wrapper {
             position: relative;
@@ -545,7 +550,7 @@
         let homeworks = [];
         let albums = [];
         let banners = [];
-        let subAccounts = []; // Danh sách tài khoản cán bộ lớp + tài khoản admin phụ
+        let subAccounts = [];
         let trashBin = [];
 
         let currentUser = null;
@@ -554,6 +559,11 @@
         let homeworkPageOffset = 0;
         let albumIndex = 0;
         let editingNotiId = null;
+
+        let menuState = {
+            adminAccSub: false,
+            adminNotiSub: false
+        };
 
         function loadDataFromFirebase(callback) {
             db.collection("class_data").doc("main_store").get().then((doc) => {
@@ -568,11 +578,11 @@
                 } else {
                     notifications = [{ id: 1, title: "Kế hoạch năm học mới", content: "Chào mừng các em đến với năm học 2026-2027.", timestamp: Date.now() - 3600000, date: "2026-09-01 08:00", author: "Admin (Mr.Z)", mediaUrl: "", mediaType: "" }];
                     homeworks = [];
-                    // Mặc định khởi tạo tài khoản admin phụ nếu chưa có
+                    albums = [];
+                    banners = [];
                     subAccounts = [{ name: "admin", pass: "ad1234", studentName: "Quản Trị Viên Phụ", isAdmin: true }];
                     saveDataToFirebase();
                 }
-                // Đảm bảo luôn có tài khoản admin (ad1234) trong subAccounts để admin298 có thể đổi pass được
                 let hasAdminSub = subAccounts.find(acc => acc.name === "admin");
                 if (!hasAdminSub) {
                     subAccounts.push({ name: "admin", pass: "ad1234", studentName: "Quản Trị Viên Phụ", isAdmin: true });
@@ -609,32 +619,38 @@
                     <h3>Khám Phá</h3>
                     <button class="menu-btn" onclick="switchView('noti_list')">📢 Xem thông báo</button>
                     <button class="menu-btn" onclick="switchView('homework_list')">📚 Xem báo bài</button>
-                    <button class="menu-btn" onclick="switchView('album_list')">🖼️ Ảnh/Clip lớp</button>
+                    <button class="menu-btn" onclick="switchView('album_list')">🖼️ Góc kỷ niệm</button>
                 `;
             } else if (currentUser.role === 'admin') {
+                let accSubDisplay = menuState.adminAccSub ? 'flex' : 'none';
+                let notiSubDisplay = menuState.adminNotiSub ? 'flex' : 'none';
+
                 html = `
                     <div style="font-size:0.75rem; padding:4px; background:#e0fbfc; border-radius:5px; font-weight:bold; color:#1d3557;">👑 ${currentUser.name}</div>
                     <button class="menu-btn" onclick="switchView('admin_post')">✍️ Đăng thông báo mới</button>
-                    <button class="menu-btn" onclick="switchView('admin_homework')">📖 Đăng báo bài</button>
+                    <button class="menu-btn" onclick="switchView('admin_homework')">📖 Đăng báo bài mới</button>
                     <button class="menu-btn" onclick="switchView('admin_album')">📷 Đăng ảnh/clip</button>
                     <button class="menu-btn" onclick="switchView('admin_banner')">✨ Tải ảnh banner</button>
+                    
                     <button class="menu-btn" onclick="toggleSubMenu('adminAccSub')">👥 Quản lý tài khoản</button>
-                    <div id="adminAccSub" class="sub-menu" style="display:none;">
-                        <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_create_acc')">➕ Tạo tài khoản cán bộ lớp</button>
-                        <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_del_acc')">🗑️ Xóa tài khoản</button>
+                    <div id="adminAccSub" class="sub-menu" style="display:${accSubDisplay};">
+                        <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_create_acc')">➕ Tạo tài khoản/pass mới</button>
+                        <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_del_acc')">🗑️ Danh sách tài khoản</button>
                     </div>
+
                     <button class="menu-btn" onclick="toggleSubMenu('adminNotiSub')">📋 Quản lý thông báo</button>
-                    <div id="adminNotiSub" class="sub-menu" style="display:none;">
+                    <div id="adminNotiSub" class="sub-menu" style="display:${notiSubDisplay};">
                         <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_manage_noti')">📜 Danh sách bài đăng</button>
                         <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('trash_noti')">📁 Thông báo đã xóa</button>
                     </div>
+
                     <button class="menu-btn" onclick="logout()" style="background:#e63946; margin-top:4px;">🚪 Đăng xuất</button>
                 `;
             } else {
                 html = `
                     <div style="font-size:0.75rem; padding:4px; background:#e0fbfc; border-radius:5px; font-weight:bold; color:#1d3557;">👤 ${currentUser.name}</div>
                     <button class="menu-btn" onclick="switchView('sub_post')">✍️ Đăng thông báo mới</button>
-                    <button class="menu-btn" onclick="switchView('admin_homework')">📖 Đăng báo bài</button>
+                    <button class="menu-btn" onclick="switchView('admin_homework')">📖 Đăng báo bài mới</button>
                     <button class="menu-btn" onclick="switchView('sub_album')">📷 Đăng ảnh/clip</button>
                     <button class="menu-btn" onclick="switchView('sub_manage_noti')">📋 Quản lý bài đăng</button>
                     <button class="menu-btn" onclick="logout()" style="background:#e63946; margin-top:4px;">🚪 Đăng xuất</button>
@@ -644,8 +660,8 @@
         }
 
         function toggleSubMenu(id) {
-            let el = document.getElementById(id);
-            el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+            menuState[id] = !menuState[id];
+            renderSidebarA();
         }
 
         function switchView(view) {
@@ -782,7 +798,7 @@
                 `;
             }
             else if (currentView === 'album_list') {
-                b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">🖼️ Thư Viện Ảnh / Clip Lớp</h3>`;
+                b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">🖼️ Góc Kỷ Niệm</h3>`;
                 if (albums.length === 0) {
                     b.innerHTML += '<p style="color:#6c757d;">Chưa có nội dung nào được đăng.</p>';
                 } else {
@@ -853,7 +869,9 @@
                             <button type="button" onclick="formatDoc('bold')"><b>B</b></button>
                             <button type="button" onclick="formatDoc('italic')"><i>I</i></button>
                             <button type="button" onclick="formatDoc('underline')"><u>U</u></button>
+                            <button type="button" onclick="formatDoc('justifyLeft')">Canh trái</button>
                             <button type="button" onclick="formatDoc('justifyCenter')">Canh giữa</button>
+                            <button type="button" onclick="formatDoc('justifyRight')">Canh phải</button>
                             <button type="button" onclick="formatDoc('justifyFull')">Canh đều</button>
                         </div>
                         <div id="postContent" class="rich-editor" contenteditable="true">${editContent}</div>
@@ -875,7 +893,7 @@
             else if (currentView === 'admin_homework') {
                 let computedHwTitle = getCalculatedHomeworkTitle();
                 b.innerHTML = `
-                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">📖 Đăng Báo Bài</h3>
+                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">📖 Đăng Báo Bài Mới</h3>
                     <div class="form-group">
                         <label>Tiêu đề (Tự động hiển thị):</label>
                         <input type="text" id="hwTitle" value="${computedHwTitle}" readonly style="background:#f1f1f1; font-weight:bold; color:var(--primary);">
@@ -886,7 +904,9 @@
                             <button type="button" onclick="formatDoc('bold')"><b>B</b></button>
                             <button type="button" onclick="formatDoc('italic')"><i>I</i></button>
                             <button type="button" onclick="formatDoc('underline')"><u>U</u></button>
+                            <button type="button" onclick="formatDoc('justifyLeft')">Canh trái</button>
                             <button type="button" onclick="formatDoc('justifyCenter')">Canh giữa</button>
+                            <button type="button" onclick="formatDoc('justifyRight')">Canh phải</button>
                             <button type="button" onclick="formatDoc('justifyFull')">Canh đều</button>
                         </div>
                         <div id="hwContent" class="rich-editor" contenteditable="true"></div>
@@ -897,11 +917,37 @@
                     </div>
                 `;
             }
+            else if (currentView === 'admin_album' || currentView === 'sub_album') {
+                b.innerHTML = `
+                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">📷 Đăng Ảnh / Clip Lớp</h3>
+                    <div class="form-group">
+                        <label>Tiêu đề:</label>
+                        <input type="text" id="albTitle" placeholder="Tiêu đề ảnh hoặc video...">
+                    </div>
+                    <div class="form-group">
+                        <label>Đường dẫn (Link ảnh / Link Video .mp4 / Google Drive):</label>
+                        <input type="text" id="albLink" placeholder="Dán link ảnh hoặc video vào đây...">
+                    </div>
+                    <button class="menu-btn" style="justify-content:center;" onclick="submitAlbum()">Đăng Lên</button>
+                `;
+            }
+            else if (currentView === 'admin_banner') {
+                b.innerHTML = `
+                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">✨ Quản Lý Ảnh Banner</h3>
+                    <div class="form-group">
+                        <label>Dán Link Ảnh Banner:</label>
+                        <input type="text" id="bannerLinkInput" placeholder="Dán link ảnh banner vào đây...">
+                    </div>
+                    <button class="menu-btn" style="justify-content:center; margin-bottom:10px;" onclick="addBannerLink()">Thêm Link Banner</button>
+                    <div id="bannerPreviewGrid" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; max-height:140px; overflow-y:auto;"></div>
+                    <button class="menu-btn btn-del" style="width:100%; justify-content:center;" onclick="clearBanners()">Xóa Tất Cả Banner</button>
+                `;
+                renderBannerPreviews();
+            }
             else if (currentView === 'admin_create_acc') {
-                // Giao diện Tạo tài khoản cán bộ lớp gọn gàng, căn giữa phần B
                 b.innerHTML = `
                     <div style="max-width:380px; margin: 20px auto; width:100%; display:flex; flex-direction:column; gap:10px;">
-                        <h3 style="color:var(--primary); text-align:center; font-size: 1.05rem; margin-bottom:4px;">➕ Tạo Tài Khoản Cán Bộ Lớp</h3>
+                        <h3 style="color:var(--primary); text-align:center; font-size: 1.05rem; margin-bottom:4px;">➕ Tạo tài khoản/pass mới</h3>
                         
                         <div class="form-group">
                             <label>Họ tên tài khoản đầy đủ:</label>
@@ -923,7 +969,6 @@
                             <button class="menu-btn" style="flex:1; justify-content:center; background:#6c757d;" onclick="switchView('admin_manage_noti')">Hủy</button>
                         </div>
 
-                        <!-- Khung hiển thị thông tin vừa tạo để tiện copy -->
                         <div id="createdAccountResult" style="display:none; background:#f1faee; border:1px dashed #2a9d8f; padding:10px; border-radius:6px; margin-top:6px;">
                             <p style="font-size:0.78rem; font-weight:bold; color:#1d3557; margin-bottom:4px;">✅ Đã lưu tài khoản thành công:</p>
                             <div style="font-size:0.82rem; color:#333;">
@@ -932,7 +977,6 @@
                             </div>
                         </div>
 
-                        <!-- Dòng thông báo màu nổi bật ở dưới cùng -->
                         <div style="background:#fff3cd; color:#856404; padding:8px; border-radius:6px; font-size:0.78rem; text-align:center; font-weight:bold; border:1px solid #ffeeba; margin-top:6px;">
                             ⚠️ Nhập Họ tên tài khoản đầy đủ hoặc Tên tài khoản để tạo mới hoặc đổi password
                         </div>
@@ -941,46 +985,51 @@
             }
             else if (currentView === 'admin_del_acc') {
                 b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">🗑️ Danh Sách Tài Khoản Cán Bộ Lớp</h3>`;
-                if (subAccounts.length === 0) {
-                    b.innerHTML += '<p style="color:#6c757d;">Chưa có tài khoản nào.</p>';
+                
+                let filteredAccounts = subAccounts.filter(acc => acc.name.toLowerCase() !== 'admin');
+
+                if (filteredAccounts.length === 0) {
+                    b.innerHTML += '<p style="color:#6c757d;">Chưa có tài khoản nào khác.</p>';
                 } else {
-                    subAccounts.forEach((acc, idx) => {
+                    filteredAccounts.forEach((acc, idx) => {
                         b.innerHTML += `
                             <div class="card-item">
-                                <div><b>Học sinh:</b> ${acc.studentName || 'Chưa cập nhật'} <br><b>Tài khoản:</b> ${acc.name} <br><span style="font-size:0.72rem; color:#6c757d;">Pass: ${acc.pass}</span></div>
-                                ${acc.name !== 'admin' ? `<button class="menu-btn btn-del" onclick="deleteAccount(${idx})">Xóa</button>` : '<span style="font-size:0.72rem; color:#e63946; font-weight:bold;">Tài khoản cố định</span>'}
+                                <div class="card-info" style="flex:1;">
+                                    <h4>STT ${idx + 1}: ${acc.studentName || 'Chưa cập nhật'}</h4>
+                                    <span>👤 <b>Tài khoản:</b> ${acc.name} | 🔑 <b>Pass:</b> ${acc.pass}</span>
+                                </div>
+                                <button class="menu-btn btn-del" onclick="deleteAccountByName('${acc.name}')">Xóa</button>
                             </div>
                         `;
                     });
                 }
             }
             else if (currentView === 'admin_manage_noti' || currentView === 'sub_manage_noti') {
-                let list = currentView === 'admin_manage_noti' 
+                let notiList = currentView === 'admin_manage_noti' 
                     ? [...notifications].sort((a,b) => b.id - a.id) 
                     : notifications.filter(n => n.author === currentUser.name).sort((a,b) => b.id - a.id);
 
-                b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">📋 Quản Lý Thông Báo (${list.length})</h3>`;
+                let hwList = [...homeworks].sort((a,b) => b.id - a.id);
+
+                b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">📋 Quản Lý Bài Đăng (Thông Báo & Báo Bài)</h3>`;
                 
-                if (list.length === 0) {
-                    b.innerHTML += '<p style="color:#6c757d;">Không có thông báo nào.</p>';
+                let combinedList = [
+                    ...notiList.map(item => ({ ...item, typeLabel: '📢 Thông báo', uniqueKey: 'n_' + item.id, isHomework: false })),
+                    ...hwList.map(item => ({ ...item, typeLabel: '📚 Báo bài', uniqueKey: 'h_' + item.id, isHomework: true }))
+                ];
+
+                if (combinedList.length === 0) {
+                    b.innerHTML += '<p style="color:#6c757d;">Không có bài đăng nào.</p>';
                 } else {
-                    let maxId = notifications.length > 0 ? Math.max(...notifications.map(n => n.id)) : 0;
-                    let currentTime = Date.now();
-
-                    list.slice(notiPageOffset, notiPageOffset + 5).forEach(item => {
-                        let isNewest = (item.id === maxId);
-                        let within10Mins = (currentTime - (item.timestamp || 0)) < 600000;
-                        let showEditBtn = isNewest && within10Mins;
-
+                    combinedList.forEach(item => {
                         b.innerHTML += `
                             <div class="card-item">
-                                <div class="card-info" style="cursor:pointer; flex:1;" onclick="showFullDetail(${item.id})">
-                                    <h4>Thông báo số ${item.id}: ${item.title}</h4>
+                                <div class="card-info" style="flex:1;">
+                                    <h4>[${item.typeLabel}] ${item.title}</h4>
                                     <span>📅 ${item.date} | ✍️ ${item.author}</span>
                                 </div>
                                 <div style="display:flex; align-items:center;">
-                                    ${showEditBtn ? `<button class="menu-btn btn-edit" onclick="startEdit(${item.id})">Chỉnh sửa</button>` : ''}
-                                    <button class="menu-btn btn-del" onclick="deleteNotification(${item.id})">Xóa</button>
+                                    <button class="menu-btn btn-del" onclick="${item.isHomework ? `deleteHomework(${item.id})` : `deleteNotification(${item.id})`}">Xóa</button>
                                 </div>
                             </div>
                         `;
@@ -1015,7 +1064,6 @@
             }
         }
 
-        // --- XỬ LÝ TÀI KHOẢN VÀ MẬT KHẨU ---
         function saveOrUpdateAccount() {
             let studentName = document.getElementById('newStudentName').value.trim();
             let accName = document.getElementById('newAccName').value.trim();
@@ -1042,7 +1090,6 @@
 
             document.getElementById('newAccPass').value = generatedPass;
 
-            // Kiểm tra nếu là tài khoản admin phụ
             if (accName.toLowerCase() === 'admin') {
                 let adminAcc = subAccounts.find(acc => acc.name === 'admin');
                 if (adminAcc) {
@@ -1122,6 +1169,13 @@
             saveDataToFirebase();
             alert("Đăng báo bài thành công!");
             switchView('homework_list');
+        }
+
+        function deleteHomework(id) {
+            if (confirm("Xóa bài báo bài này?")) {
+                homeworks = homeworks.filter(h => h.id !== id);
+                saveDataToFirebase();
+            }
         }
 
         function showHwDetail(id) {
@@ -1218,12 +1272,10 @@
             let u = document.getElementById('loginUser').value.trim();
             let p = document.getElementById('loginPass').value.trim();
 
-            // 1. Tài khoản tối thượng cố định trong mã nguồn
             if (u === 'admin298' && p === 'ADMIN298') {
                 currentUser = { name: "Admin Tối Thượng (admin298)", role: "admin" };
                 switchView('admin_manage_noti');
             } 
-            // 2. Tài khoản admin phụ (có thể thay đổi pass qua giao diện)
             else if (u === 'admin') {
                 let foundAdmin = subAccounts.find(acc => acc.name === 'admin' && acc.pass === p);
                 if (foundAdmin || p === 'ad1234') {
@@ -1233,7 +1285,6 @@
                     alert("Mật khẩu tài khoản admin không chính xác!");
                 }
             } 
-            // 3. Các tài khoản cán bộ lớp khác
             else {
                 let found = subAccounts.find(acc => acc.name === u && acc.pass === p);
                 if (found) {
@@ -1247,14 +1298,13 @@
 
         function logout() { currentUser = null; switchView('home'); }
 
-        function deleteAccount(idx) {
-            let targetAcc = subAccounts[idx];
-            if (targetAcc && targetAcc.name === 'admin') {
+        function deleteAccountByName(accName) {
+            if (accName.toLowerCase() === 'admin') {
                 alert("Không thể xóa tài khoản admin chính!");
                 return;
             }
             if (confirm("Xóa tài khoản này?")) {
-                subAccounts.splice(idx, 1);
+                subAccounts = subAccounts.filter(acc => acc.name !== accName);
                 saveDataToFirebase();
                 renderContentB();
             }
@@ -1272,6 +1322,10 @@
             if (!title || !content || content === "<br>") { alert("Vui lòng nhập tiêu đề và nội dung!"); return; }
 
             let processSave = (mediaUrl, mediaType) => {
+                if (mediaUrl && mediaType === 'image') {
+                    content += `<br><img src="${mediaUrl}" style="display:block; margin:0 auto; max-width:100%;">`;
+                }
+
                 if (editingNotiId !== null) {
                     let item = notifications.find(n => n.id === editingNotiId);
                     if (item) {
