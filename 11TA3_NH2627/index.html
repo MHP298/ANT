@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang Thông Tin Lớp 11TA3 - 2026-2027</title>
+    <!-- Thêm thư viện Firebase SDK từ Google -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
     <style>
         :root {
             --primary: #1d3557;
@@ -31,10 +35,7 @@
 
         #bgCanvas {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
             background: var(--bg-gradient);
         }
@@ -80,16 +81,13 @@
             display: none;
         }
         #dynamicBannerContainer img {
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             object-fit: cover;
             position: absolute;
             transition: opacity 1s ease-in-out;
             opacity: 0;
         }
-        #dynamicBannerContainer img.active {
-            opacity: 1;
-        }
+        #dynamicBannerContainer img.active { opacity: 1; }
 
         .main-container {
             display: grid;
@@ -360,15 +358,6 @@
             margin-top: 8px;
         }
 
-        .link-preview {
-            background: #f1faee;
-            border: 1px dashed #a8dadc;
-            padding: 6px;
-            border-radius: 5px;
-            margin-top: 5px;
-            font-size: 0.85rem;
-        }
-
         .btn-download {
             background: #2a9d8f;
             color: white;
@@ -393,10 +382,7 @@
     </header>
 
     <div class="main-container">
-        <!-- PHẦN A -->
         <div class="sidebar-a" id="sidebarA"></div>
-
-        <!-- PHẦN B -->
         <div class="content-b">
             <div id="dynamicBannerContainer"></div>
             <div class="content-scroll" id="contentB"></div>
@@ -428,63 +414,78 @@
     </div>
 
     <script>
+        // --- CẤU HÌNH FIREBASE ĐÃ TÍCH HỢP SẴN ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyATUD-ddUU2Dg-3vpB9K8dO1W0FzK7ZIFI",
+            authDomain: "ta3nh2627.firebaseapp.com",
+            projectId: "ta3nh2627",
+            storageBucket: "ta3nh2627.firebasestorage.app",
+            messagingSenderId: "276398143272",
+            appId: "1:276398143272:web:a32d4c9fe908c5ca4c821d",
+            measurementId: "G-6D1FFK998C"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         // Canvas Animation
         const canvas = document.getElementById('bgCanvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         window.onresize = resizeCanvas;
         resizeCanvas();
-
         for (let i = 0; i < 30; i++) {
-            particles.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                radius: Math.random() * 2 + 1,
-                speedX: (Math.random() - 0.5) * 0.3,
-                speedY: (Math.random() - 0.5) * 0.3
-            });
+            particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, radius: Math.random() * 2 + 1, speedX: (Math.random() - 0.5) * 0.3, speedY: (Math.random() - 0.5) * 0.3 });
         }
-
         function animateCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
             particles.forEach(p => {
-                p.x += p.speedX;
-                p.y += p.speedY;
-                if (p.x < 0) p.x = canvas.width;
-                if (p.x > canvas.width) p.x = 0;
-                if (p.y < 0) p.y = canvas.height;
-                if (p.y > canvas.height) p.y = 0;
-
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fill();
+                p.x += p.speedX; p.y += p.speedY;
+                if (p.x < 0) p.x = canvas.width; if (p.x > canvas.width) p.x = 0;
+                if (p.y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fill();
             });
             requestAnimationFrame(animateCanvas);
         }
         animateCanvas();
 
-        // Data Management
-        let notifications = JSON.parse(localStorage.getItem('cls_11ta3_notis')) || [
-            { id: 1, title: "Kế hoạch năm học mới", content: "Chào mừng các em đến với năm học 2026-2027.", timestamp: Date.now() - 3600000, date: "2026-09-01 08:00", author: "Admin (Mr.Z)", mediaUrl: "", mediaType: "" }
-        ];
-        let albums = JSON.parse(localStorage.getItem('cls_11ta3_albums')) || [
-            { title: "Khai giảng năm học", mediaUrl: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600", type: "image", author: "Admin (Mr.Z)" }
-        ];
-        let banners = JSON.parse(localStorage.getItem('cls_11ta3_banners')) || [];
-        let subAccounts = JSON.parse(localStorage.getItem('cls_11ta3_accounts')) || [];
-        let trashBin = JSON.parse(localStorage.getItem('cls_11ta3_trash')) || [];
+        let notifications = [];
+        let albums = [];
+        let banners = [];
+        let subAccounts = [];
+        let trashBin = [];
 
         let currentUser = null;
         let currentView = 'home';
         let notiPageOffset = 0;
         let albumIndex = 0;
         let editingNotiId = null;
+
+        function loadDataFromFirebase(callback) {
+            db.collection("class_data").doc("main_store").get().then((doc) => {
+                if (doc.exists) {
+                    let data = doc.data();
+                    notifications = data.notifications || [];
+                    albums = data.albums || [];
+                    banners = data.banners || [];
+                    subAccounts = data.subAccounts || [];
+                    trashBin = data.trashBin || [];
+                } else {
+                    notifications = [{ id: 1, title: "Kế hoạch năm học mới", content: "Chào mừng các em đến với năm học 2026-2027.", timestamp: Date.now() - 3600000, date: "2026-09-01 08:00", author: "Admin (Mr.Z)", mediaUrl: "", mediaType: "" }];
+                    saveDataToFirebase();
+                }
+                if (callback) callback();
+            });
+        }
+
+        function saveDataToFirebase() {
+            db.collection("class_data").doc("main_store").set({
+                notifications, albums, banners, subAccounts, trashBin
+            }).then(() => {
+                renderApp();
+            });
+        }
 
         function renderApp() {
             renderSidebarA();
@@ -595,7 +596,7 @@
                         mediaHtml = `<video controls style="max-width:100%; max-height:280px; border-radius:6px; margin-top:8px;"><source src="${item.mediaUrl}" type="video/mp4">Trình duyệt không hỗ trợ.</video>`;
                         downloadHtml = `<a href="${item.mediaUrl}" download="video_thongbao_${item.id}.mp4" class="btn-download" target="_blank">📥 Download Clip</a>`;
                     } else {
-                        mediaHtml = `<img src="${item.mediaUrl}" style="max-width:100%; max-height:280px; border-radius:6px; margin-top:8px;">`;
+                        mediaHtml = `<img src="${item.mediaUrl}" style="max-width:100%; max-height:280px; border-radius:6px; margin-top:8px; cursor:pointer;" onclick="openZoomModal('${item.mediaUrl}')" title="Click để phóng to ảnh">`;
                         downloadHtml = `<a href="${item.mediaUrl}" download="anh_thongbao_${item.id}.png" class="btn-download" target="_blank">📥 Download Ảnh</a>`;
                     }
                 }
@@ -628,12 +629,8 @@
                         mediaRender = `
                             <div class="scene-3d" id="scene3dBox">
                                 <div class="card-3d" id="card3d">
-                                    <div class="card-face">
-                                        <img src="${alb.mediaUrl}" alt="Ảnh lớp">
-                                    </div>
-                                    <div class="card-face card-back">
-                                        <img src="${alb.mediaUrl}" alt="Ảnh lớp mặt sau">
-                                    </div>
+                                    <div class="card-face"><img src="${alb.mediaUrl}" alt="Ảnh lớp" style="cursor:pointer;" onclick="openZoomModal('${alb.mediaUrl}')"></div>
+                                    <div class="card-face card-back"><img src="${alb.mediaUrl}" alt="Ảnh lớp mặt sau" style="cursor:pointer;" onclick="openZoomModal('${alb.mediaUrl}')"></div>
                                 </div>
                             </div>
                         `;
@@ -673,9 +670,7 @@
             }
             else if (currentView === 'admin_post' || currentView === 'sub_post') {
                 let isEditing = editingNotiId !== null;
-                let editTitle = '';
-                let editContent = '';
-                let editLink = '';
+                let editTitle = ''; let editContent = ''; let editLink = '';
                 if (isEditing) {
                     let item = notifications.find(n => n.id === editingNotiId);
                     if (item) { editTitle = item.title; editContent = item.content; editLink = item.mediaUrl || ''; }
@@ -692,12 +687,8 @@
                         <textarea id="postContent" placeholder="Nhập nội dung...">${editContent}</textarea>
                     </div>
                     <div class="form-group">
-                        <label>Tải lên tệp từ máy (Ảnh/Clip):</label>
-                        <input type="file" id="postMediaFile" accept="image/*,video/mp4">
-                    </div>
-                    <div class="form-group">
-                        <label>Hoặc dán Link URL / Link Google Drive / Link Video:</label>
-                        <input type="text" id="postMediaLink" value="${editLink.startsWith('http') ? editLink : ''}" placeholder="Dán link trực tiếp...">
+                        <label>Dán Link URL Ảnh / Clip / Google Drive:</label>
+                        <input type="text" id="postMediaLink" value="${editLink}" placeholder="Dán link trực tiếp vào đây...">
                     </div>
                     <div style="display:flex; gap:8px;">
                         <button class="menu-btn" style="flex:1; justify-content:center;" onclick="submitNotification()">${isEditing ? 'Lưu Thay Đổi' : 'Đăng Ngay'}</button>
@@ -721,19 +712,15 @@
             }
             else if (currentView === 'admin_banner') {
                 b.innerHTML = `
-                    <h3 style="color:var(--primary); font-size: 1rem; margin-bottom:8px;">✨ Tải Ảnh Banner Trang Chủ</h3>
+                    <h3 style="color:var(--primary); font-size: 1rem; margin-bottom:8px;">✨ Quản Lý Ảnh Banner</h3>
                     <div class="form-group">
-                        <label>Chọn nhiều ảnh hoặc dán ảnh (Ctrl+V):</label>
-                        <input type="file" id="bannerFilesInput" accept="image/*" multiple>
-                        <div id="bannerPasteZone" style="border:2px dashed var(--accent); padding:8px; text-align:center; border-radius:5px; background:#f0f7f4; font-size:0.78rem; color:#1d3557; margin-top:3px;">📋 Click vào đây và nhấn Ctrl+V để dán ảnh banner</div>
+                        <label>Dán Link Ảnh Banner:</label>
+                        <input type="text" id="bannerLinkInput" placeholder="Dán link ảnh banner vào đây...">
                     </div>
+                    <button class="menu-btn" style="justify-content:center; margin-bottom:10px;" onclick="addBannerLink()">Thêm Link Banner</button>
                     <div id="bannerPreviewGrid" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; max-height:150px; overflow-y:auto;"></div>
-                    <div style="display:flex; gap:8px;">
-                        <button class="menu-btn" style="flex:1; justify-content:center;" onclick="submitBanners()">Đăng Banner</button>
-                        <button class="menu-btn btn-del" style="flex:1; justify-content:center;" onclick="clearBanners()">Xóa Tất Cả Banner</button>
-                    </div>
+                    <button class="menu-btn btn-del" style="width:100%; justify-content:center;" onclick="clearBanners()">Xóa Tất Cả Banner</button>
                 `;
-                setupBannerPasteListener();
                 renderBannerPreviews();
             }
             else if (currentView === 'admin_create_acc') {
@@ -867,89 +854,33 @@
             }
         }
 
-        let tempBannerList = [];
-        function setupBannerPasteListener() {
-            let fileInput = document.getElementById('bannerFilesInput');
-            fileInput.onchange = (e) => {
-                let files = e.target.files;
-                for (let file of files) {
-                    let reader = new FileReader();
-                    reader.onload = (evt) => {
-                        tempBannerList.push(evt.target.result);
-                        renderBannerPreviews();
-                    };
-                    reader.readAsDataURL(file);
-                }
-            };
-
-            window.onpaste = (e) => {
-                if (currentView === 'admin_banner') {
-                    let items = e.clipboardData.items;
-                    for (let i = 0; i < items.length; i++) {
-                        if (items[i].type.indexOf("image") !== -1) {
-                            let blob = items[i].getAsFile();
-                            let reader = new FileReader();
-                            reader.onload = (evt) => {
-                                tempBannerList.push(evt.target.result);
-                                renderBannerPreviews();
-                            };
-                            reader.readAsDataURL(blob);
-                            e.preventDefault();
-                        }
-                    }
-                }
-            };
+        function addBannerLink() {
+            let link = document.getElementById('bannerLinkInput').value.trim();
+            if (link) { banners.push(link); saveDataToFirebase(); document.getElementById('bannerLinkInput').value = ''; alert("Thêm banner thành công!"); }
         }
 
         function renderBannerPreviews() {
             let grid = document.getElementById('bannerPreviewGrid');
             if (!grid) return;
             grid.innerHTML = '';
-            tempBannerList.forEach((src, idx) => {
+            banners.forEach((src, idx) => {
                 grid.innerHTML += `
                     <div style="position:relative; width:70px; height:50px;">
                         <img src="${src}" style="width:100%; height:100%; object-fit:cover; border-radius:4px;">
-                        <button onclick="removeTempBanner(${idx})" style="position:absolute; top:-4px; right:-4px; background:red; color:white; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; cursor:pointer;">×</button>
+                        <button onclick="removeBanner(${idx})" style="position:absolute; top:-4px; right:-4px; background:red; color:white; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; cursor:pointer;">×</button>
                     </div>
                 `;
             });
         }
 
-        function removeTempBanner(idx) {
-            tempBannerList.splice(idx, 1);
-            renderBannerPreviews();
-        }
-
-        function submitBanners() {
-            if (tempBannerList.length === 0) {
-                alert("Vui lòng chọn hoặc dán ít nhất một ảnh banner!");
-                return;
-            }
-            banners = banners.concat(tempBannerList);
-            localStorage.setItem('cls_11ta3_banners', JSON.stringify(banners));
-            alert("Đã đăng ảnh banner thành công!");
-            tempBannerList = [];
-            renderBannerSlideshow();
-            renderBannerPreviews();
-        }
-
-        function clearBanners() {
-            if (confirm("Bạn có chắc muốn xóa toàn bộ ảnh banner?")) {
-                banners = [];
-                localStorage.setItem('cls_11ta3_banners', JSON.stringify(banners));
-                renderBannerSlideshow();
-                renderBannerPreviews();
-            }
-        }
+        function removeBanner(idx) { banners.splice(idx, 1); saveDataToFirebase(); renderBannerPreviews(); }
+        function clearBanners() { if (confirm("Xóa toàn bộ banner?")) { banners = []; saveDataToFirebase(); renderBannerPreviews(); } }
 
         function changeAlbum(step) {
             let card = document.getElementById('card3d');
             if (card) {
                 card.classList.add('flip');
-                setTimeout(() => {
-                    albumIndex += step;
-                    renderContentB();
-                }, 400);
+                setTimeout(() => { albumIndex += step; renderContentB(); }, 400);
             } else {
                 albumIndex += step;
                 renderContentB();
@@ -959,19 +890,11 @@
         function togglePasswordVisibility() {
             let passInput = document.getElementById('loginPass');
             let toggleBtn = document.querySelector('.toggle-password');
-            if (passInput.type === 'password') {
-                passInput.type = 'text';
-                toggleBtn.innerText = '🙈';
-            } else {
-                passInput.type = 'password';
-                toggleBtn.innerText = '👁️';
-            }
+            if (passInput.type === 'password') { passInput.type = 'text'; toggleBtn.innerText = '🙈'; }
+            else { passInput.type = 'password'; toggleBtn.innerText = '👁️'; }
         }
 
-        function changePage(step) {
-            notiPageOffset += step;
-            renderContentB();
-        }
+        function changePage(step) { notiPageOffset += step; renderContentB(); }
 
         function handleLogin() {
             let u = document.getElementById('loginUser').value.trim();
@@ -991,17 +914,11 @@
             }
         }
 
-        function logout() {
-            currentUser = null;
-            switchView('home');
-        }
+        function logout() { currentUser = null; switchView('home'); }
 
         function generatePassword() {
             let nameInput = document.getElementById('newAccName').value.trim();
-            if (!nameInput) {
-                alert("Vui lòng nhập tên tài khoản trước!");
-                return;
-            }
+            if (!nameInput) { alert("Vui lòng nhập tên tài khoản trước!"); return; }
             let firstChar = nameInput.charAt(0).toLowerCase();
             let randomNum = Math.floor(1000 + Math.random() * 9000);
             document.getElementById('newAccPass').value = firstChar + randomNum;
@@ -1010,166 +927,100 @@
         function saveNewAccount() {
             let name = document.getElementById('newAccName').value.trim();
             let pass = document.getElementById('newAccPass').value.trim();
-            if (!name || !pass) {
-                alert("Vui lòng điền đầy đủ thông tin và tạo mật khẩu!");
-                return;
-            }
+            if (!name || !pass) { alert("Vui lòng điền đủ thông tin!"); return; }
             subAccounts.push({ name, pass });
-            localStorage.setItem('cls_11ta3_accounts', JSON.stringify(subAccounts));
+            saveDataToFirebase();
             alert("Tạo tài khoản thành công!");
             switchView('admin_del_acc');
         }
 
         function deleteAccount(idx) {
-            if (confirm("Bạn có chắc muốn xóa tài khoản này?")) {
+            if (confirm("Xóa tài khoản này?")) {
                 subAccounts.splice(idx, 1);
-                localStorage.setItem('cls_11ta3_accounts', JSON.stringify(subAccounts));
+                saveDataToFirebase();
                 renderContentB();
             }
         }
 
-        function startEdit(id) {
-            editingNotiId = id;
-            switchView(currentUser.role === 'admin' ? 'admin_post' : 'sub_post');
-        }
-
-        function cancelEdit() {
-            editingNotiId = null;
-            switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti');
-        }
+        function startEdit(id) { editingNotiId = id; switchView(currentUser.role === 'admin' ? 'admin_post' : 'sub_post'); }
+        function cancelEdit() { editingNotiId = null; switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti'); }
 
         function submitNotification() {
             let title = document.getElementById('postTitle').value.trim();
             let content = document.getElementById('postContent').value.trim();
-            let fileInput = document.getElementById('postMediaFile');
             let linkInput = document.getElementById('postMediaLink').value.trim();
 
-            if (!title || !content) {
-                alert("Vui lòng nhập tiêu đề và nội dung!");
-                return;
-            }
+            if (!title || !content) { alert("Vui lòng nhập tiêu đề và nội dung!"); return; }
 
-            let processSave = (mediaUrl, mediaType) => {
-                if (editingNotiId !== null) {
-                    let item = notifications.find(n => n.id === editingNotiId);
-                    if (item) {
-                        item.title = title;
-                        item.content = content;
-                        if (mediaUrl) {
-                            item.mediaUrl = mediaUrl;
-                            item.mediaType = mediaType;
-                        }
-                    }
-                    alert("Đã cập nhật thông báo thành công!");
-                } else {
-                    let maxId = notifications.length > 0 ? Math.max(...notifications.map(n => n.id)) : 0;
-                    let newId = maxId + 1;
+            let isVideo = linkInput.endsWith('.mp4') || linkInput.includes('youtube') || linkInput.includes('drive.google.com');
+            let mediaType = isVideo ? 'video' : 'image';
 
-                    let now = new Date();
-                    let dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-
-                    notifications.push({
-                        id: newId,
-                        title,
-                        content,
-                        timestamp: Date.now(),
-                        date: dateStr,
-                        author: currentUser.name,
-                        mediaUrl: mediaUrl || "",
-                        mediaType: mediaType || ""
-                    });
-                    alert("Đăng thông báo thành công!");
+            if (editingNotiId !== null) {
+                let item = notifications.find(n => n.id === editingNotiId);
+                if (item) {
+                    item.title = title;
+                    item.content = content;
+                    item.mediaUrl = linkInput;
+                    item.mediaType = mediaType;
                 }
-
-                localStorage.setItem('cls_11ta3_notis', JSON.stringify(notifications));
-                editingNotiId = null;
-                switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti');
-            };
-
-            // Nếu người dùng nhập link URL trực tiếp
-            if (linkInput) {
-                let isVideo = linkInput.endsWith('.mp4') || linkInput.includes('youtube') || linkInput.includes('drive.google.com');
-                processSave(linkInput, isVideo ? 'video' : 'image');
-            } 
-            // Nếu người dùng tải file từ máy lên
-            else if (fileInput.files && fileInput.files[0]) {
-                let file = fileInput.files[0];
-                let isVideo = file.type.startsWith('video');
-                let reader = new FileReader();
-                reader.onload = (e) => {
-                    processSave(e.target.result, isVideo ? 'video' : 'image');
-                };
-                reader.readAsDataURL(file);
+                alert("Đã cập nhật thông báo!");
             } else {
-                let existingMediaUrl = "";
-                let existingMediaType = "";
-                if (editingNotiId !== null) {
-                    let oldItem = notifications.find(n => n.id === editingNotiId);
-                    if (oldItem) { existingMediaUrl = oldItem.mediaUrl; existingMediaType = oldItem.mediaType; }
-                }
-                processSave(existingMediaUrl, existingMediaType);
+                let maxId = notifications.length > 0 ? Math.max(...notifications.map(n => n.id)) : 0;
+                let newId = maxId + 1;
+                let now = new Date();
+                let dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+                notifications.push({
+                    id: newId, title, content, timestamp: Date.now(), date: dateStr,
+                    author: currentUser.name, mediaUrl: linkInput, mediaType
+                });
+                alert("Đăng thông báo thành công!");
             }
+
+            saveDataToFirebase();
+            editingNotiId = null;
+            switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti');
         }
 
         function deleteNotification(id) {
             let idx = notifications.findIndex(n => n.id === id);
             if (idx !== -1) {
                 let noti = notifications.splice(idx, 1)[0];
-                trashBin.push({
-                    ...noti,
-                    deletedBy: currentUser.name,
-                    deletedAt: new Date().toLocaleString()
-                });
-                localStorage.setItem('cls_11ta3_notis', JSON.stringify(notifications));
-                localStorage.setItem('cls_11ta3_trash', JSON.stringify(trashBin));
-                renderContentB();
+                trashBin.push({ ...noti, deletedBy: currentUser.name, deletedAt: new Date().toLocaleString() });
+                saveDataToFirebase();
             }
         }
 
         function submitAlbum() {
             let title = document.getElementById('albTitle').value.trim();
             let link = document.getElementById('albLink').value.trim();
-            if (!title || !link) {
-                alert("Vui lòng nhập tiêu đề và đường dẫn!");
-                return;
-            }
+            if (!title || !link) { alert("Nhập tiêu đề và đường dẫn!"); return; }
             let type = (link.endsWith('.mp4') || link.includes('youtube') || link.includes('drive.google.com/file')) ? 'video' : 'image';
             albums.push({ title, mediaUrl: link, type, author: currentUser.name });
-            localStorage.setItem('cls_11ta3_albums', JSON.stringify(albums));
+            saveDataToFirebase();
             alert("Đăng thành công!");
             switchView('album_list');
         }
 
         function restoreNotification(idx) {
             let item = trashBin.splice(idx, 1)[0];
-            delete item.deletedBy;
-            delete item.deletedAt;
+            delete item.deletedBy; delete item.deletedAt;
             notifications.push(item);
-            localStorage.setItem('cls_11ta3_notis', JSON.stringify(notifications));
-            localStorage.setItem('cls_11ta3_trash', JSON.stringify(trashBin));
-            renderContentB();
+            saveDataToFirebase();
         }
 
         function deleteSelectedTrash() {
             let checkboxes = document.querySelectorAll('.trash-check:checked');
-            if (checkboxes.length === 0) {
-                alert("Vui lòng chọn ít nhất một mục để xóa vĩnh viễn!");
-                return;
-            }
-            if (confirm("Bạn có chắc muốn xóa vĩnh viễn các mục đã chọn?")) {
+            if (checkboxes.length === 0) { alert("Chọn ít nhất một mục!"); return; }
+            if (confirm("Xóa vĩnh viễn các mục đã chọn?")) {
                 let indices = Array.from(checkboxes).map(cb => parseInt(cb.dataset.idx)).sort((a,b) => b-a);
                 indices.forEach(i => trashBin.splice(i, 1));
-                localStorage.setItem('cls_11ta3_trash', JSON.stringify(trashBin));
-                renderContentB();
+                saveDataToFirebase();
             }
         }
 
-        function openSearchModal() {
-            document.getElementById('searchModal').style.display = 'flex';
-        }
-        function closeSearchModal() {
-            document.getElementById('searchModal').style.display = 'none';
-        }
+        function openSearchModal() { document.getElementById('searchModal').style.display = 'flex'; }
+        function closeSearchModal() { document.getElementById('searchModal').style.display = 'none'; }
 
         function executeSearch() {
             let aName = document.getElementById('sAuthor').value.toLowerCase().trim();
@@ -1201,7 +1052,7 @@
             }
         }
 
-        renderApp();
+        loadDataFromFirebase();
     </script>
 </body>
 </html>
