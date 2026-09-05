@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang Thông Tin Lớp 11TA3 - 2026-2027</title>
-    <!-- Thêm thư viện Firebase SDK từ Google -->
+    <!-- Thư viện Firebase SDK (Bắt buộc phải có để tránh lỗi màn hình trắng) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
@@ -321,6 +321,7 @@
             max-height: 280px;
             object-fit: contain;
             border-radius: 6px;
+            cursor: pointer;
         }
 
         .card-back {
@@ -350,6 +351,43 @@
             max-height: 85vh;
             overflow-y: auto;
         }
+
+        /* CSS CHO POPUP ZOOM & PAN ẢNH */
+        #zoomModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            cursor: grab;
+        }
+        #zoomModal:active { cursor: grabbing; }
+        #zoomedImg {
+            transition: transform 0.1s ease-out;
+            max-width: 90vw;
+            max-height: 90vh;
+            user-select: none;
+            pointer-events: none;
+        }
+        .zoom-controls {
+            position: absolute;
+            bottom: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 3100;
+        }
+        .zoom-btn {
+            background: rgba(255,255,255,0.8);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .zoom-btn:hover { background: white; }
 
         .pagination-bar {
             display: flex;
@@ -382,7 +420,10 @@
     </header>
 
     <div class="main-container">
+        <!-- PHẦN A -->
         <div class="sidebar-a" id="sidebarA"></div>
+
+        <!-- PHẦN B -->
         <div class="content-b">
             <div id="dynamicBannerContainer"></div>
             <div class="content-scroll" id="contentB"></div>
@@ -413,8 +454,19 @@
         </div>
     </div>
 
+    <!-- POPUP ZOOM & PAN ẢNH -->
+    <div id="zoomModal" onclick="closeZoomModal(event)">
+        <img id="zoomedImg" src="" alt="Zoom Image">
+        <div class="zoom-controls" onclick="event.stopPropagation()">
+            <button class="zoom-btn" onclick="zoomIn()">➕ Phóng to</button>
+            <button class="zoom-btn" onclick="zoomOut()">➖ Thu nhỏ</button>
+            <button class="zoom-btn" onclick="resetZoom()">🔄 Đặt lại</button>
+            <button class="zoom-btn" style="background:#e63946; color:white;" onclick="closeZoomModal()">❌ Đóng</button>
+        </div>
+    </div>
+
     <script>
-        // --- CẤU HÌNH FIREBASE ĐÃ TÍCH HỢP SẴN ---
+        // --- CẤU HÌNH FIREBASE CHÍNH XỨC CỦA THẦY ---
         const firebaseConfig = {
             apiKey: "AIzaSyATUD-ddUU2Dg-3vpB9K8dO1W0FzK7ZIFI",
             authDomain: "ta3nh2627.firebaseapp.com",
@@ -629,8 +681,8 @@
                         mediaRender = `
                             <div class="scene-3d" id="scene3dBox">
                                 <div class="card-3d" id="card3d">
-                                    <div class="card-face"><img src="${alb.mediaUrl}" alt="Ảnh lớp" style="cursor:pointer;" onclick="openZoomModal('${alb.mediaUrl}')"></div>
-                                    <div class="card-face card-back"><img src="${alb.mediaUrl}" alt="Ảnh lớp mặt sau" style="cursor:pointer;" onclick="openZoomModal('${alb.mediaUrl}')"></div>
+                                    <div class="card-face"><img src="${alb.mediaUrl}" alt="Ảnh lớp" style="cursor:pointer;" onclick="openZoomModal('${alb.mediaUrl}')" title="Click để phóng to ảnh"></div>
+                                    <div class="card-face card-back"><img src="${alb.mediaUrl}" alt="Ảnh lớp mặt sau" style="cursor:pointer;" onclick="openZoomModal('${alb.mediaUrl}')" title="Click để phóng to ảnh"></div>
                                 </div>
                             </div>
                         `;
@@ -822,16 +874,73 @@
             renderContentB();
         }
 
+        // --- TÍNH NĂNG ZOOM & PAN ẢNH ---
+        let currentScale = 1;
+        let panX = 0, panY = 0;
+        let isDragging = false;
+        let startX = 0, startY = 0;
+
+        function openZoomModal(imgSrc) {
+            let modal = document.getElementById('zoomModal');
+            let img = document.getElementById('zoomedImg');
+            img.src = imgSrc;
+            currentScale = 1;
+            panX = 0; panY = 0;
+            updateImageTransform();
+            modal.style.display = 'flex';
+        }
+
+        function closeZoomModal() {
+            document.getElementById('zoomModal').style.display = 'none';
+        }
+
+        function zoomIn() {
+            currentScale = Math.min(currentScale + 0.3, 4);
+            updateImageTransform();
+        }
+
+        function zoomOut() {
+            currentScale = Math.max(currentScale - 0.3, 0.5);
+            updateImageTransform();
+        }
+
+        function resetZoom() {
+            currentScale = 1;
+            panX = 0; panY = 0;
+            updateImageTransform();
+        }
+
+        function updateImageTransform() {
+            let img = document.getElementById('zoomedImg');
+            img.style.transform = `translate(${panX}px, ${panY}px) scale(${currentScale})`;
+        }
+
+        const zoomModalEl = document.getElementById('zoomModal');
+        zoomModalEl.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX - panX;
+            startY = e.clientY - panY;
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            panX = e.clientX - startX;
+            panY = e.clientY - startY;
+            updateImageTransform();
+        });
+        window.addEventListener('mouseup', () => { isDragging = false; });
+
+        // Hỗ trợ cuộn chuột để zoom ảnh
+        zoomModalEl.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY < 0) zoomIn();
+            else zoomOut();
+        }, { passive: false });
+
         let bannerTimer = null;
         function renderBannerSlideshow() {
             let container = document.getElementById('dynamicBannerContainer');
             if (!container) return;
-
-            if (banners.length === 0) {
-                container.style.display = 'none';
-                return;
-            }
-
+            if (banners.length === 0) { container.style.display = 'none'; return; }
             container.style.display = 'block';
             container.innerHTML = '';
             banners.forEach((src, idx) => {
@@ -840,7 +949,6 @@
                 if (idx === 0) img.className = 'active';
                 container.appendChild(img);
             });
-
             if (bannerTimer) clearInterval(bannerTimer);
             if (banners.length > 1) {
                 let currentIdx = 0;
@@ -1052,6 +1160,7 @@
             }
         }
 
+        // Khởi chạy hệ thống tải dữ liệu đám mây Firebase
         loadDataFromFirebase();
     </script>
 </body>
