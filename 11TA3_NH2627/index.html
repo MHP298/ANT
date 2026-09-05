@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang Thông Tin Lớp 11TA3 - 2026-2027</title>
-    <!-- Thư viện Firebase SDK (Bắt buộc phải có để tránh lỗi màn hình trắng) -->
+    <!-- Thư viện Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
@@ -352,7 +352,6 @@
             overflow-y: auto;
         }
 
-        /* CSS CHO POPUP ZOOM & PAN ẢNH */
         #zoomModal {
             display: none;
             position: fixed;
@@ -420,10 +419,7 @@
     </header>
 
     <div class="main-container">
-        <!-- PHẦN A -->
         <div class="sidebar-a" id="sidebarA"></div>
-
-        <!-- PHẦN B -->
         <div class="content-b">
             <div id="dynamicBannerContainer"></div>
             <div class="content-scroll" id="contentB"></div>
@@ -466,7 +462,6 @@
     </div>
 
     <script>
-        // --- CẤU HÌNH FIREBASE CHÍNH XỨC CỦA THẦY ---
         const firebaseConfig = {
             apiKey: "AIzaSyATUD-ddUU2Dg-3vpB9K8dO1W0FzK7ZIFI",
             authDomain: "ta3nh2627.firebaseapp.com",
@@ -479,7 +474,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Canvas Animation
         const canvas = document.getElementById('bgCanvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -528,6 +522,9 @@
                     saveDataToFirebase();
                 }
                 if (callback) callback();
+                renderApp();
+            }).catch((error) => {
+                console.error("Lỗi tải dữ liệu từ Firebase: ", error);
             });
         }
 
@@ -536,6 +533,8 @@
                 notifications, albums, banners, subAccounts, trashBin
             }).then(() => {
                 renderApp();
+            }).catch((error) => {
+                console.error("Lỗi lưu dữ liệu lên Firebase: ", error);
             });
         }
 
@@ -874,68 +873,6 @@
             renderContentB();
         }
 
-        // --- TÍNH NĂNG ZOOM & PAN ẢNH ---
-        let currentScale = 1;
-        let panX = 0, panY = 0;
-        let isDragging = false;
-        let startX = 0, startY = 0;
-
-        function openZoomModal(imgSrc) {
-            let modal = document.getElementById('zoomModal');
-            let img = document.getElementById('zoomedImg');
-            img.src = imgSrc;
-            currentScale = 1;
-            panX = 0; panY = 0;
-            updateImageTransform();
-            modal.style.display = 'flex';
-        }
-
-        function closeZoomModal() {
-            document.getElementById('zoomModal').style.display = 'none';
-        }
-
-        function zoomIn() {
-            currentScale = Math.min(currentScale + 0.3, 4);
-            updateImageTransform();
-        }
-
-        function zoomOut() {
-            currentScale = Math.max(currentScale - 0.3, 0.5);
-            updateImageTransform();
-        }
-
-        function resetZoom() {
-            currentScale = 1;
-            panX = 0; panY = 0;
-            updateImageTransform();
-        }
-
-        function updateImageTransform() {
-            let img = document.getElementById('zoomedImg');
-            img.style.transform = `translate(${panX}px, ${panY}px) scale(${currentScale})`;
-        }
-
-        const zoomModalEl = document.getElementById('zoomModal');
-        zoomModalEl.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            startX = e.clientX - panX;
-            startY = e.clientY - panY;
-        });
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            panX = e.clientX - startX;
-            panY = e.clientY - startY;
-            updateImageTransform();
-        });
-        window.addEventListener('mouseup', () => { isDragging = false; });
-
-        // Hỗ trợ cuộn chuột để zoom ảnh
-        zoomModalEl.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            if (e.deltaY < 0) zoomIn();
-            else zoomOut();
-        }, { passive: false });
-
         let bannerTimer = null;
         function renderBannerSlideshow() {
             let container = document.getElementById('dynamicBannerContainer');
@@ -1160,7 +1097,6 @@
             }
         }
 
-        // Khởi chạy hệ thống tải dữ liệu đám mây Firebase
         loadDataFromFirebase();
     </script>
 </body>
