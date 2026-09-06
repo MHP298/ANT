@@ -552,6 +552,7 @@
         let banners = [];
         let subAccounts = [];
         let trashBin = [];
+        let scheduleUrl = "";
 
         let currentUser = null;
         let currentView = 'home';
@@ -565,7 +566,7 @@
             adminNotiSub: false
         };
 
-        // Biến lưu giữ thông tin tài khoản vừa tạo để không bị mất
+        // Biến lưu giữ thông tin tài khoản vừa tạo để không bị mất[cite: 4]
         let lastCreatedAccountInfo = "Chưa có thông tin tài khoản được tạo...";
 
         function loadDataFromFirebase(callback) {
@@ -578,12 +579,14 @@
                     banners = data.banners || [];
                     subAccounts = data.subAccounts || [];
                     trashBin = data.trashBin || [];
+                    scheduleUrl = data.scheduleUrl || "";
                 } else {
                     notifications = [{ id: 1, title: "Kế hoạch năm học mới", content: "Chào mừng các em đến với năm học 2026-2027.", timestamp: Date.now() - 3600000, date: "2026-09-01 08:00", author: "Admin (Mr.Z)", mediaUrl: "", mediaType: "" }];
                     homeworks = [];
                     albums = [];
                     banners = [];
                     subAccounts = [{ name: "admin", pass: "ad1234", studentName: "Quản Trị Viên Phụ", isAdmin: true }];
+                    scheduleUrl = "";
                     saveDataToFirebase();
                 }
                 let hasAdminSub = subAccounts.find(acc => acc.name === "admin");
@@ -600,7 +603,7 @@
 
         function saveDataToFirebase() {
             db.collection("class_data").doc("main_store").set({
-                notifications, homeworks, albums, banners, subAccounts, trashBin
+                notifications, homeworks, albums, banners, subAccounts, trashBin, scheduleUrl
             }).then(() => {
                 renderApp();
             }).catch((error) => {
@@ -622,6 +625,7 @@
                     <h3>Khám Phá</h3>
                     <button class="menu-btn" onclick="switchView('noti_list')">📢 Xem thông báo</button>
                     <button class="menu-btn" onclick="switchView('homework_list')">📚 Xem báo bài</button>
+                    <button class="menu-btn" onclick="switchView('schedule_view')">📅 Xem TKB</button>
                     <button class="menu-btn" onclick="switchView('album_list')">🖼️ Góc kỷ niệm</button>
                 `;
             } else if (currentUser.role === 'admin') {
@@ -632,6 +636,7 @@
                     <div style="font-size:0.75rem; padding:4px; background:#e0fbfc; border-radius:5px; font-weight:bold; color:#1d3557;">👑 ${currentUser.name}</div>
                     <button class="menu-btn" onclick="switchView('admin_post')">✍️ Đăng thông báo mới</button>
                     <button class="menu-btn" onclick="switchView('admin_homework')">📖 Đăng báo bài mới</button>
+                    <button class="menu-btn" onclick="switchView('admin_schedule')">📅 Đăng TKB</button>
                     <button class="menu-btn" onclick="switchView('admin_album')">📷 Đăng ảnh/clip</button>
                     <button class="menu-btn" onclick="switchView('admin_banner')">✨ Tải ảnh banner</button>
                     
@@ -654,6 +659,7 @@
                     <div style="font-size:0.75rem; padding:4px; background:#e0fbfc; border-radius:5px; font-weight:bold; color:#1d3557;">👤 ${currentUser.name}</div>
                     <button class="menu-btn" onclick="switchView('sub_post')">✍️ Đăng thông báo mới</button>
                     <button class="menu-btn" onclick="switchView('admin_homework')">📖 Đăng báo bài mới</button>
+                    <button class="menu-btn" onclick="switchView('admin_schedule')">📅 Đăng TKB</button>
                     <button class="menu-btn" onclick="switchView('sub_album')">📷 Đăng ảnh/clip</button>
                     <button class="menu-btn" onclick="switchView('sub_manage_noti')">📋 Quản lý bài đăng</button>
                     <button class="menu-btn" onclick="logout()" style="background:#e63946; margin-top:4px;">🚪 Đăng xuất</button>
@@ -725,6 +731,52 @@
                     }
                     b.appendChild(pageNav);
                 }
+            }
+            else if (currentView === 'schedule_view') {
+                b.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <h3 style="color:var(--primary); font-size: 0.95rem;">📅 Thời Khóa Biểu Lớp</h3>
+                    </div>
+                `;
+
+                if (!scheduleUrl) {
+                    b.innerHTML += '<p style="color:#6c757d; text-align:center; margin-top:20px;">Chưa cập nhật thời khóa biểu.</p>';
+                } else {
+                    b.innerHTML += `
+                        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; background:white; padding:10px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.04); overflow:hidden;">
+                            <div style="flex:1; width:100%; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                                <img src="${scheduleUrl}" alt="Thời khóa biểu" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:6px; cursor:pointer;" onclick="openZoomModal('${scheduleUrl}')" title="Click để phóng to TKB">
+                            </div>
+                            <div style="margin-top:8px;">
+                                <a href="${scheduleUrl}" download="ThoiKhoaBieu_11TA3.png" class="btn-download" target="_blank">📥 Tải xuống TKB</a>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            else if (currentView === 'admin_schedule') {
+                b.innerHTML = `
+                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">📅 Đăng / Cập Nhật Thời Khóa Biểu</h3>
+                    <div class="form-group">
+                        <label>Hoặc dán link ảnh TKB trực tiếp (URL / Google Drive):</label>
+                        <input type="text" id="scheduleLinkInput" placeholder="Dán link ảnh TKB vào đây..." value="${scheduleUrl.startsWith('http') ? scheduleUrl : ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Tải ảnh TKB từ máy:</label>
+                        <input type="file" id="scheduleFileInput" accept="image/*">
+                    </div>
+                    <div style="display:flex; justify-content:center; gap:10px; margin-top:4px;">
+                        <button class="menu-btn" style="width:110px; justify-content:center; background:#6c757d;" onclick="switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti')">Hủy</button>
+                        <button class="menu-btn" style="width:110px; justify-content:center; background:#2a9d8f;" onclick="saveSchedule()">Đăng</button>
+                        <button class="menu-btn" style="width:110px; justify-content:center; background:#e63946;" onclick="deleteSchedule()">Xóa</button>
+                    </div>
+                    <div style="flex:1; width:100%; margin-top:8px; border-radius:8px; border:1px solid #ced4da; background:#f8f9fa; display:flex; flex-direction:column; overflow:hidden; min-height:180px;">
+                        <div style="background:#e9ecef; padding:4px 8px; font-size:0.75rem; font-weight:bold; color:var(--primary); border-bottom:1px solid #ced4da;">🖼️ Preview TKB hiện tại</div>
+                        <div id="schedulePreviewArea" style="flex:1; width:100%; display:flex; align-items:center; justify-content:center; padding:8px; overflow:hidden;">
+                            ${scheduleUrl ? `<img src="${scheduleUrl}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${scheduleUrl}')">` : '<span style="color:#6c757d; font-size:0.8rem;">Chưa có ảnh TKB nào được lưu.</span>'}
+                        </div>
+                    </div>
+                `;
             }
             else if (currentView === 'homework_list') {
                 let sortedHw = [...homeworks].sort((a,b) => b.id - a.id);
@@ -949,7 +1001,6 @@
                 `;
             }
             else if (currentView === 'admin_banner') {
-                // Giao diện Quản Lý Ảnh Banner chỉnh lại 3 nút ngang hàng, thêm ô tải file, chia 2 phần trái phải bên dưới
                 b.innerHTML = `
                     <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">✨ Quản Lý Ảnh Banner</h3>
                     <div class="form-group">
@@ -1005,7 +1056,7 @@
                             <button class="menu-btn" style="width:140px; justify-content:center; background:#6c757d;" onclick="switchView('admin_manage_noti')">Hủy</button>
                         </div>
 
-                        <!-- Ô hiển thị cố định thông tin tài khoản không bị mất -->
+                        <!-- Ô hiển thị cố định thông tin tài khoản không bị mất[cite: 4] -->
                         <div style="margin-top:6px;">
                             <label style="font-weight:600; font-size:0.75rem; color:var(--primary);">Thông tin tài khoản:</label>
                             <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
@@ -1097,6 +1148,42 @@
             }
         }
 
+        function saveSchedule() {
+            let linkInput = document.getElementById('scheduleLinkInput').value.trim();
+            let fileInput = document.getElementById('scheduleFileInput');
+
+            if (fileInput.files && fileInput.files[0]) {
+                let reader = new FileReader();
+                reader.onload = (e) => {
+                    scheduleUrl = e.target.result;
+                    saveDataToFirebase();
+                    alert("Đã đăng Thời Khóa Biểu thành công!");
+                    renderContentB();
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else if (linkInput) {
+                scheduleUrl = linkInput;
+                saveDataToFirebase();
+                alert("Đã đăng Thời Khóa Biểu thành công!");
+                renderContentB();
+            } else {
+                alert("Vui lòng dán link hoặc chọn file ảnh Thời Khóa Biểu!");
+            }
+        }
+
+        function deleteSchedule() {
+            if (!scheduleUrl) {
+                alert("Hiện tại chưa có Thời Khóa Biểu để xóa!");
+                return;
+            }
+            if (confirm("Bạn có chắc chắn muốn xóa Thời Khóa Biểu này?")) {
+                scheduleUrl = "";
+                saveDataToFirebase();
+                alert("Đã xóa Thời Khóa Biểu!");
+                renderContentB();
+            }
+        }
+
         function saveOrUpdateAccount() {
             let studentName = document.getElementById('newStudentName').value.trim();
             let accName = document.getElementById('newAccName').value.trim();
@@ -1145,7 +1232,7 @@
 
             saveDataToFirebase();
 
-            // Lưu thông tin cố định vào biến để giữ lại không bị mất
+            // Lưu thông tin cố định vào biến để giữ lại không bị mất[cite: 4]
             lastCreatedAccountInfo = `Tài khoản: ${accName} | Mật khẩu: ${generatedPass}`;
             let infoBox = document.getElementById('resAccountInfo');
             if (infoBox) infoBox.value = lastCreatedAccountInfo;
@@ -1439,7 +1526,7 @@
                     let maxId = notifications.length > 0 ? Math.max(...notifications.map(n => n.id)) : 0;
                     let newId = maxId + 1;
                     let now = new Date();
-                    let dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                    let dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0討${String(now.getMinutes()).padStart(2,'0')}`;
 
                     notifications.push({
                         id: newId, title, content, timestamp: Date.now(), date: dateStr,
