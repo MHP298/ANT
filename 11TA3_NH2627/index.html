@@ -534,21 +534,19 @@
 
         let lastCreatedAccountInfo = "Chưa có thông tin tài khoản được tạo...";
 
-        // --- HÀM HỖ TRỢ TỰ ĐỘNG CHUYỂN ĐỔI LINK GOOGLE DRIVE THÀNH LINK ẢNH TRỰC TIẾP ---
+        // --- HÀM CHUẨN HÓA LINK GOOGLE DRIVE ---
         function parseGoogleDriveLink(url) {
             if (!url) return "";
             url = url.trim();
-            // Nếu là link dạng drive.google.com/file/d/ID/view hoặc /d/ID/...
             let match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
             if (match && match[1]) {
                 return `https://lh3.googleusercontent.com/d/${match[1]}`;
             }
-            // Nếu là dạng open?id=ID hoặc uc?id=ID
             let matchId = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
             if (matchId && matchId[1]) {
                 return `https://lh3.googleusercontent.com/d/${matchId[1]}`;
             }
-            return url; // Giữ nguyên nếu là link ảnh thông thường khác (Imgur, v.v.)
+            return url;
         }
 
         function loadDataFromFirebase(callback) {
@@ -724,13 +722,14 @@
                 if (!scheduleUrl) {
                     b.innerHTML += '<p style="color:#6c757d; text-align:center; margin-top:20px;">Chưa cập nhật thời khóa biểu.</p>';
                 } else {
+                    let parsedSCD = parseGoogleDriveLink(scheduleUrl);
                     b.innerHTML += `
                         <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; background:white; padding:10px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.04); overflow:hidden;">
                             <div style="flex:1; width:100%; display:flex; align-items:center; justify-content:center; overflow:hidden;">
-                                <img src="${scheduleUrl}" alt="Thời khóa biểu" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:6px; cursor:pointer;" onclick="openZoomModal('${scheduleUrl}')" title="Click để phóng to TKB">
+                                <img src="${parsedSCD}" alt="Thời khóa biểu" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:6px; cursor:pointer;" onclick="openZoomModal('${parsedSCD}')" title="Click để phóng to TKB">
                             </div>
                             <div style="margin-top:8px;">
-                                <a href="${scheduleUrl}" download="ThoiKhoaBieu_11TA3.png" class="btn-download" target="_blank">📥 Tải xuống TKB</a>
+                                <a href="${parsedSCD}" download="ThoiKhoaBieu_11TA3.png" class="btn-download" target="_blank">📥 Tải xuống TKB</a>
                             </div>
                         </div>
                     `;
@@ -744,7 +743,7 @@
                         <div style="flex:1; width:50%; border-radius:8px; border:1px solid #ced4da; background:#f8f9fa; display:flex; flex-direction:column; overflow:hidden;">
                             <div style="background:#e9ecef; padding:5px 8px; font-size:0.75rem; font-weight:bold; color:var(--primary); border-bottom:1px solid #ced4da;">🖼️ Preview TKB (Click để phóng to)</div>
                             <div id="schedulePreviewArea" style="flex:1; width:100%; display:flex; align-items:center; justify-content:center; padding:8px; overflow:hidden;">
-                                ${scheduleUrl ? `<img src="${scheduleUrl}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${scheduleUrl}')" title="Click để phóng to">` : '<span style="color:#6c757d; font-size:0.8rem;">Chưa có ảnh TKB.</span>'}
+                                ${scheduleUrl ? `<img src="${parseGoogleDriveLink(scheduleUrl)}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parseGoogleDriveLink(scheduleUrl)}')" title="Click để phóng to">` : '<span style="color:#6c757d; font-size:0.8rem;">Chưa có ảnh TKB.</span>'}
                             </div>
                         </div>
                         <!-- Cột Phải 50%: Form nhập liệu và 3 nút -->
@@ -960,8 +959,8 @@
                                 <label>Danh sách đường dẫn ảnh thông báo:</label>
                                 <div id="multiNotiLinksContainer" style="display:flex; flex-direction:column; gap:6px; max-height:250px; overflow-y:auto; padding-right:4px;">
                                     <div class="multi-link-row" style="display:flex; gap:6px; align-items:center;">
-                                        <input type="text" class="multi-input-link" placeholder="Dán link ảnh vào đây..." style="flex:1;" oninput="handleMultiNotiInput(this)">
-                                        <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiNotiLink(this)">👁️ Xem</button>
+                                        <input type="text" class="multi-input-link" placeholder="Dán link ảnh vào đây..." style="flex:1;" oninput="autoPreviewMultiNoti(this)">
+                                        <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiNotiLink(this)">👁️ Xem lại</button>
                                         <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeMultiNotiRow(this)">❌</button>
                                     </div>
                                 </div>
@@ -1031,8 +1030,8 @@
                                 <label>Danh sách đường dẫn ảnh báo bài:</label>
                                 <div id="multiHwLinksContainer" style="display:flex; flex-direction:column; gap:6px; max-height:250px; overflow-y:auto; padding-right:4px;">
                                     <div class="multi-hw-row" style="display:flex; gap:6px; align-items:center;">
-                                        <input type="text" class="multi-hw-input" placeholder="Dán link ảnh vào đây..." style="flex:1;" oninput="handleMultiHwInput(this)">
-                                        <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiHwLink(this)">👁️ Xem</button>
+                                        <input type="text" class="multi-hw-input" placeholder="Dán link ảnh vào đây..." style="flex:1;" oninput="autoPreviewMultiHw(this)">
+                                        <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiHwLink(this)">👁️ Xem lại</button>
                                         <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeMultiHwRow(this)">❌</button>
                                     </div>
                                 </div>
@@ -1068,8 +1067,8 @@
                                 <label>Danh sách đường dẫn ảnh:</label>
                                 <div id="albumLinksContainer" style="display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto; padding-right:4px;">
                                     <div class="album-link-row" style="display:flex; gap:6px; align-items:center;">
-                                        <input type="text" class="alb-input-link" placeholder="Dán link ảnh vào đây..." style="flex:1;" oninput="handleAlbumInput(this)">
-                                        <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleAlbumLink(this)">👁️ Xem</button>
+                                        <input type="text" class="alb-input-link" placeholder="Dán link ảnh vào đây..." style="flex:1;" oninput="autoPreviewAlbum(this)">
+                                        <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleAlbumLink(this)">👁️ Xem lại</button>
                                         <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeAlbumRow(this)">❌</button>
                                     </div>
                                 </div>
@@ -1105,8 +1104,8 @@
                                 <label>Danh sách đường dẫn ảnh Banner:</label>
                                 <div id="bannerLinksContainer" style="display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto; padding-right:4px;">
                                     <div class="banner-link-row" style="display:flex; gap:6px; align-items:center;">
-                                        <input type="text" class="banner-input-link" placeholder="Dán link ảnh banner..." style="flex:1;" oninput="handleBannerInput(this)">
-                                        <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleBannerLink(this)">👁️ Xem</button>
+                                        <input type="text" class="banner-input-link" placeholder="Dán link ảnh banner..." style="flex:1;" oninput="autoPreviewBanner(this)">
+                                        <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleBannerLink(this)">👁️ Xem lại</button>
                                         <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeBannerRow(this)">❌</button>
                                     </div>
                                 </div>
@@ -1240,7 +1239,7 @@
             }
         }
 
-        // --- CÁC HÀM XEM TRƯỚC TỨC THÌ & BANNER ---
+        // --- CÁC HÀM XEM TRƯỚC TỰ ĐỘNG ---
         function previewScheduleLink() {
             let link = document.getElementById('scheduleLinkInput').value.trim();
             let box = document.getElementById('schedulePreviewArea');
@@ -1265,122 +1264,58 @@
             }
         }
 
-        function handleBannerInput(inputElem) {
-            let row = inputElem.closest('.banner-link-row');
-            let container = document.getElementById('bannerLinksContainer');
-            let allRows = container.querySelectorAll('.banner-link-row');
-            let lastRow = allRows[allRows.length - 1];
-
-            if (row === lastRow && inputElem.value.trim().length > 0) {
-                let newRow = document.createElement('div');
-                newRow.className = 'banner-link-row';
-                newRow.style.cssText = 'display:flex; gap:6px; align-items:center;';
-                newRow.innerHTML = `
-                    <input type="text" class="banner-input-link" placeholder="Dán link ảnh banner tiếp theo..." style="flex:1;" oninput="handleBannerInput(this)">
-                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleBannerLink(this)">👁️ Xem</button>
-                    <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeBannerRow(this)">❌</button>
-                `;
-                container.appendChild(newRow);
+        function autoPreviewMultiNoti(inputElem) {
+            let link = inputElem.value.trim();
+            let previewBox = document.getElementById('multiNotiPreviewBox');
+            if (!previewBox) return;
+            if (link) {
+                let parsed = parseGoogleDriveLink(link);
+                previewBox.innerHTML = `<img src="${parsed}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parsed}')" title="Click để phóng to">`;
+            } else {
+                previewBox.innerHTML = `<span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>`;
             }
+            handleMultiNotiInput(inputElem);
         }
 
-        function previewSingleBannerLink(btn) {
-            let row = btn.closest('.banner-link-row');
-            let input = row.querySelector('.banner-input-link');
-            let link = input.value.trim();
+        function autoPreviewMultiHw(inputElem) {
+            let link = inputElem.value.trim();
+            let previewBox = document.getElementById('multiHwPreviewBox');
+            if (!previewBox) return;
+            if (link) {
+                let parsed = parseGoogleDriveLink(link);
+                previewBox.innerHTML = `<img src="${parsed}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parsed}')" title="Click để phóng to">`;
+            } else {
+                previewBox.innerHTML = `<span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>`;
+            }
+            handleMultiHwInput(inputElem);
+        }
+
+        function autoPreviewAlbum(inputElem) {
+            let link = inputElem.value.trim();
+            let previewBox = document.getElementById('albumLivePreviewBox');
+            if (!previewBox) return;
+            if (link) {
+                let parsed = parseGoogleDriveLink(link);
+                previewBox.innerHTML = `<img src="${parsed}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parsed}')" title="Click để phóng to">`;
+            } else {
+                previewBox.innerHTML = `<span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>`;
+            }
+            handleAlbumInput(inputElem);
+        }
+
+        function autoPreviewBanner(inputElem) {
+            let link = inputElem.value.trim();
             let previewBox = document.getElementById('bannerLivePreviewBox');
             if (!previewBox) return;
-
-            if (!link) {
-                alert("Vui lòng dán link banner trước khi xem!");
-                return;
-            }
-            let parsed = parseGoogleDriveLink(link);
-            previewBox.innerHTML = `<img src="${parsed}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parsed}')" title="Click để phóng to">`;
-        }
-
-        function removeBannerRow(btn) {
-            let row = btn.closest('.banner-link-row');
-            let container = document.getElementById('bannerLinksContainer');
-            let allRows = container.querySelectorAll('.banner-link-row');
-
-            if (allRows.length > 1) {
-                row.remove();
+            if (link) {
+                let parsed = parseGoogleDriveLink(link);
+                previewBox.innerHTML = `<img src="${parsed}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parsed}')" title="Click để phóng to">`;
             } else {
-                row.querySelector('.banner-input-link').value = '';
-                document.getElementById('bannerLivePreviewBox').innerHTML = `<span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>`;
+                previewBox.innerHTML = `<span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>`;
             }
+            handleBannerInput(inputElem);
         }
 
-        function previewBannerFileLive() {
-            let fileInput = document.getElementById('bannerFileInput');
-            let previewBox = document.getElementById('bannerLivePreviewBox');
-            if (fileInput.files && fileInput.files[0]) {
-                let reader = new FileReader();
-                reader.onload = (e) => {
-                    previewBox.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${e.target.result}')" title="Click để phóng to">`;
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-            }
-        }
-
-        function initBannerInputs() {
-            let container = document.getElementById('bannerLinksContainer');
-            if (!container) return;
-            if (banners.length > 0) {
-                container.innerHTML = '';
-                banners.forEach((src) => {
-                    let row = document.createElement('div');
-                    row.className = 'banner-link-row';
-                    row.style.cssText = 'display:flex; gap:6px; align-items:center;';
-                    row.innerHTML = `
-                        <input type="text" class="banner-input-link" value="${src.startsWith('http') || src.startsWith('data:') ? src : ''}" placeholder="Dán link ảnh banner..." style="flex:1;" oninput="handleBannerInput(this)">
-                        <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleBannerLink(this)">👁️ Xem</button>
-                        <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeBannerRow(this)">❌</button>
-                    `;
-                    container.appendChild(row);
-                });
-                let emptyRow = document.createElement('div');
-                emptyRow.className = 'banner-link-row';
-                emptyRow.style.cssText = 'display:flex; gap:6px; align-items:center;';
-                emptyRow.innerHTML = `
-                    <input type="text" class="banner-input-link" placeholder="Dán link ảnh banner tiếp theo..." style="flex:1;" oninput="handleBannerInput(this)">
-                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleBannerLink(this)">👁️ Xem</button>
-                    <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeBannerRow(this)">❌</button>
-                `;
-                container.appendChild(emptyRow);
-            }
-        }
-
-        function saveDynamicBanners() {
-            let fileInput = document.getElementById('bannerFileInput');
-            let inputElems = document.querySelectorAll('.banner-input-link');
-            let newBanners = [];
-
-            inputElems.forEach(inp => {
-                let val = inp.value.trim();
-                if (val) newBanners.push(parseGoogleDriveLink(val)); // Tự động quy đổi link Drive
-            });
-
-            if (fileInput.files && fileInput.files[0]) {
-                let reader = new FileReader();
-                reader.onload = (e) => {
-                    newBanners.unshift(e.target.result);
-                    banners = newBanners;
-                    saveDataToFirebase();
-                    alert("Đã lưu danh sách banner thành công!");
-                    renderBannerSlideshow();
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-            } else {
-                banners = newBanners;
-                saveDataToFirebase();
-                alert("Đã lưu danh sách banner thành công!");
-                renderBannerSlideshow();
-            }
-        }
-
-        // --- LOGIC HỖ TRỢ ĐĂNG NHIỀU ẢNH THÔNG BÁO ---
         function handleMultiNotiInput(inputElem) {
             let row = inputElem.closest('.multi-link-row');
             let container = document.getElementById('multiNotiLinksContainer');
@@ -1392,8 +1327,8 @@
                 newRow.className = 'multi-link-row';
                 newRow.style.cssText = 'display:flex; gap:6px; align-items:center;';
                 newRow.innerHTML = `
-                    <input type="text" class="multi-input-link" placeholder="Dán link ảnh tiếp theo..." style="flex:1;" oninput="handleMultiNotiInput(this)">
-                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiNotiLink(this)">👁️ Xem</button>
+                    <input type="text" class="multi-input-link" placeholder="Dán link ảnh tiếp theo..." style="flex:1;" oninput="autoPreviewMultiNoti(this)">
+                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiNotiLink(this)">👁️ Xem lại</button>
                     <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeMultiNotiRow(this)">❌</button>
                 `;
                 container.appendChild(newRow);
@@ -1403,17 +1338,7 @@
         function previewMultiNotiLink(btn) {
             let row = btn.closest('.multi-link-row');
             let input = row.querySelector('.multi-input-link');
-            let link = input.value.trim();
-            let previewBox = document.getElementById('multiNotiPreviewBox');
-            if (!previewBox) return;
-
-            if (!link) {
-                alert("Vui lòng dán đường dẫn ảnh vào ô này trước khi xem!");
-                return;
-            }
-
-            let parsed = parseGoogleDriveLink(link);
-            previewBox.innerHTML = `<img src="${parsed}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parsed}')" title="Click để phóng to">`;
+            autoPreviewMultiNoti(input);
         }
 
         function removeMultiNotiRow(btn) {
@@ -1453,7 +1378,6 @@
             switchView('admin_post');
         }
 
-        // --- LOGIC HỖ TRỢ ĐĂNG NHIỀU ẢNH BÁO BÀI ---
         function handleMultiHwInput(inputElem) {
             let row = inputElem.closest('.multi-hw-row');
             let container = document.getElementById('multiHwLinksContainer');
@@ -1465,8 +1389,8 @@
                 newRow.className = 'multi-hw-row';
                 newRow.style.cssText = 'display:flex; gap:6px; align-items:center;';
                 newRow.innerHTML = `
-                    <input type="text" class="multi-hw-input" placeholder="Dán link ảnh tiếp theo..." style="flex:1;" oninput="handleMultiHwInput(this)">
-                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiHwLink(this)">👁️ Xem</button>
+                    <input type="text" class="multi-hw-input" placeholder="Dán link ảnh tiếp theo..." style="flex:1;" oninput="autoPreviewMultiHw(this)">
+                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiHwLink(this)">👁️ Xem lại</button>
                     <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeMultiHwRow(this)">❌</button>
                 `;
                 container.appendChild(newRow);
@@ -1476,17 +1400,7 @@
         function previewMultiHwLink(btn) {
             let row = btn.closest('.multi-hw-row');
             let input = row.querySelector('.multi-hw-input');
-            let link = input.value.trim();
-            let previewBox = document.getElementById('multiHwPreviewBox');
-            if (!previewBox) return;
-
-            if (!link) {
-                alert("Vui lòng dán đường dẫn ảnh vào ô này trước khi xem!");
-                return;
-            }
-
-            let parsed = parseGoogleDriveLink(link);
-            previewBox.innerHTML = `<img src="${parsed}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parsed}')" title="Click để phóng to">`;
+            autoPreviewMultiHw(input);
         }
 
         function removeMultiHwRow(btn) {
@@ -1526,7 +1440,6 @@
             switchView('admin_homework');
         }
 
-        // --- LOGIC HỖ TRỢ ĐĂNG ẢNH KỶ NIỆM ---
         function handleAlbumInput(inputElem) {
             let row = inputElem.closest('.album-link-row');
             let container = document.getElementById('albumLinksContainer');
@@ -1538,8 +1451,8 @@
                 newRow.className = 'album-link-row';
                 newRow.style.cssText = 'display:flex; gap:6px; align-items:center;';
                 newRow.innerHTML = `
-                    <input type="text" class="alb-input-link" placeholder="Dán link ảnh tiếp theo..." style="flex:1;" oninput="handleAlbumInput(this)">
-                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleAlbumLink(this)">👁️ Xem</button>
+                    <input type="text" class="alb-input-link" placeholder="Dán link ảnh tiếp theo..." style="flex:1;" oninput="autoPreviewAlbum(this)">
+                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleAlbumLink(this)">👁️ Xem lại</button>
                     <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeAlbumRow(this)">❌</button>
                 `;
                 container.appendChild(newRow);
@@ -1549,17 +1462,7 @@
         function previewSingleAlbumLink(btn) {
             let row = btn.closest('.album-link-row');
             let input = row.querySelector('.alb-input-link');
-            let link = input.value.trim();
-            let previewBox = document.getElementById('albumLivePreviewBox');
-            if (!previewBox) return;
-
-            if (!link) {
-                alert("Vui lòng dán đường dẫn ảnh vào ô này trước khi xem!");
-                return;
-            }
-
-            let parsed = parseGoogleDriveLink(link);
-            previewBox.innerHTML = `<img src="${parsed}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parsed}')" title="Click để phóng to">`;
+            autoPreviewAlbum(input);
         }
 
         function removeAlbumRow(btn) {
@@ -1608,6 +1511,112 @@
             saveDataToFirebase();
             alert(`Đã đăng thành công ${linksArray.length} ảnh kỷ niệm vào hệ thống!`);
             switchView('album_list');
+        }
+
+        function handleBannerInput(inputElem) {
+            let row = inputElem.closest('.banner-link-row');
+            let container = document.getElementById('bannerLinksContainer');
+            let allRows = container.querySelectorAll('.banner-link-row');
+            let lastRow = allRows[allRows.length - 1];
+
+            if (row === lastRow && inputElem.value.trim().length > 0) {
+                let newRow = document.createElement('div');
+                newRow.className = 'banner-link-row';
+                newRow.style.cssText = 'display:flex; gap:6px; align-items:center;';
+                newRow.innerHTML = `
+                    <input type="text" class="banner-input-link" placeholder="Dán link ảnh banner tiếp theo..." style="flex:1;" oninput="autoPreviewBanner(this)">
+                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleBannerLink(this)">👁️ Xem lại</button>
+                    <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeBannerRow(this)">❌</button>
+                `;
+                container.appendChild(newRow);
+            }
+        }
+
+        function previewSingleBannerLink(btn) {
+            let row = btn.closest('.banner-link-row');
+            let input = row.querySelector('.banner-input-link');
+            autoPreviewBanner(input);
+        }
+
+        function removeBannerRow(btn) {
+            let row = btn.closest('.banner-link-row');
+            let container = document.getElementById('bannerLinksContainer');
+            let allRows = container.querySelectorAll('.banner-link-row');
+
+            if (allRows.length > 1) {
+                row.remove();
+            } else {
+                row.querySelector('.banner-input-link').value = '';
+                document.getElementById('bannerLivePreviewBox').innerHTML = `<span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>`;
+            }
+        }
+
+        function previewBannerFileLive() {
+            let fileInput = document.getElementById('bannerFileInput');
+            let previewBox = document.getElementById('bannerLivePreviewBox');
+            if (fileInput.files && fileInput.files[0]) {
+                let reader = new FileReader();
+                reader.onload = (e) => {
+                    previewBox.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${e.target.result}')" title="Click để phóng to">`;
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+
+        function initBannerInputs() {
+            let container = document.getElementById('bannerLinksContainer');
+            if (!container) return;
+            if (banners.length > 0) {
+                container.innerHTML = '';
+                banners.forEach((src) => {
+                    let row = document.createElement('div');
+                    row.className = 'banner-link-row';
+                    row.style.cssText = 'display:flex; gap:6px; align-items:center;';
+                    row.innerHTML = `
+                        <input type="text" class="banner-input-link" value="${src.startsWith('http') || src.startsWith('data:') ? src : ''}" placeholder="Dán link ảnh banner..." style="flex:1;" oninput="autoPreviewBanner(this)">
+                        <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleBannerLink(this)">👁️ Xem lại</button>
+                        <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeBannerRow(this)">❌</button>
+                    `;
+                    container.appendChild(row);
+                });
+                let emptyRow = document.createElement('div');
+                emptyRow.className = 'banner-link-row';
+                emptyRow.style.cssText = 'display:flex; gap:6px; align-items:center;';
+                emptyRow.innerHTML = `
+                    <input type="text" class="banner-input-link" placeholder="Dán link ảnh banner tiếp theo..." style="flex:1;" oninput="autoPreviewBanner(this)">
+                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleBannerLink(this)">👁️ Xem lại</button>
+                    <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeBannerRow(this)">❌</button>
+                `;
+                container.appendChild(emptyRow);
+            }
+        }
+
+        function saveDynamicBanners() {
+            let fileInput = document.getElementById('bannerFileInput');
+            let inputElems = document.querySelectorAll('.banner-input-link');
+            let newBanners = [];
+
+            inputElems.forEach(inp => {
+                let val = inp.value.trim();
+                if (val) newBanners.push(parseGoogleDriveLink(val));
+            });
+
+            if (fileInput.files && fileInput.files[0]) {
+                let reader = new FileReader();
+                reader.onload = (e) => {
+                    newBanners.unshift(e.target.result);
+                    banners = newBanners;
+                    saveDataToFirebase();
+                    alert("Đã lưu danh sách banner thành công!");
+                    renderBannerSlideshow();
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                banners = newBanners;
+                saveDataToFirebase();
+                alert("Đã lưu danh sách banner thành công!");
+                renderBannerSlideshow();
+            }
         }
 
         function saveSchedule() {
