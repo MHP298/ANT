@@ -526,22 +526,22 @@
         let homeworkPageOffset = 0;
         let albumIndex = 0;
         let editingNotiId = null;
+        let editingAlbumId = null;
         let tempMultiNotiLinks = "";
 
         let menuState = {
             adminAccSub: false,
-            adminNotiSub: false
+            adminNotiSub: false,
+            adminMediaSub: false
         };
 
         let lastCreatedAccountInfo = "Chưa có thông tin tài khoản được tạo...";
 
-        // --- HÀM SIÊU CHUẨN HÓA MỌI ĐỊNH DẠNG LINK GOOGLE DRIVE THÀNH LINK ẢNH TRỰC TIẾP ---
         function parseGoogleDriveLink(url) {
             if (!url) return "";
             url = url.trim();
             if (url.startsWith('data:')) return url;
 
-            // Bắt mọi định dạng ID của Google Drive (/file/d/ID hoặc open?id=ID hoặc uc?id=ID)
             let match = url.match(/(?:\/d\/|id=)([a-zA-Z0-9_-]+)/);
             if (match && match[1]) {
                 return `https://lh3.googleusercontent.com/d/${match[1]}`;
@@ -619,14 +619,20 @@
             } else if (currentUser.role === 'admin') {
                 let accSubDisplay = menuState.adminAccSub ? 'flex' : 'none';
                 let notiSubDisplay = menuState.adminNotiSub ? 'flex' : 'none';
+                let mediaSubDisplay = menuState.adminMediaSub ? 'flex' : 'none';
 
                 html = `
                     <div style="font-size:0.75rem; padding:4px; background:#e0fbfc; border-radius:5px; font-weight:bold; color:#1d3557;">👑 ${currentUser.name}</div>
                     <button class="menu-btn" onclick="switchView('admin_post')">✍️ Đăng thông báo mới</button>
                     <button class="menu-btn" onclick="switchView('admin_homework')">📖 Đăng báo bài mới</button>
                     <button class="menu-btn" onclick="switchView('admin_schedule')">📅 Đăng TKB</button>
-                    <button class="menu-btn" onclick="switchView('admin_album')">📷 Đăng ảnh/clip kỷ niệm</button>
-                    <button class="menu-btn" onclick="switchView('admin_banner')">✨ Quản lý ảnh banner</button>
+
+                    <button class="menu-btn" onclick="toggleSubMenu('adminMediaSub')">✨ Quản lý ảnh</button>
+                    <div id="adminMediaSub" class="sub-menu" style="display:${mediaSubDisplay};">
+                        <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_album')">📷 Đăng ảnh/clip kỷ niệm</button>
+                        <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_banner')">✨ Đăng ảnh banner</button>
+                        <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_manage_album')">📁 Danh sách album</button>
+                    </div>
                     
                     <button class="menu-btn" onclick="toggleSubMenu('adminAccSub')">👥 Quản lý tài khoản</button>
                     <div id="adminAccSub" class="sub-menu" style="display:${accSubDisplay};">
@@ -660,21 +666,34 @@
             if (id === 'adminAccSub') {
                 menuState.adminAccSub = !menuState.adminAccSub;
                 menuState.adminNotiSub = false;
+                menuState.adminMediaSub = false;
             } else if (id === 'adminNotiSub') {
                 menuState.adminNotiSub = !menuState.adminNotiSub;
                 menuState.adminAccSub = false;
+                menuState.adminMediaSub = false;
+            } else if (id === 'adminMediaSub') {
+                menuState.adminMediaSub = !menuState.adminMediaSub;
+                menuState.adminAccSub = false;
+                menuState.adminNotiSub = false;
             }
             renderSidebarA();
         }
 
         function switchView(view) {
-            if (view !== 'admin_create_acc' && view !== 'admin_del_acc' && view !== 'admin_manage_noti' && view !== 'trash_noti') {
+            if (view !== 'admin_create_acc' && view !== 'admin_del_acc' && view !== 'admin_manage_noti' && view !== 'trash_noti' && view !== 'admin_album' && view !== 'admin_banner' && view !== 'admin_manage_album') {
                 menuState.adminAccSub = false;
                 menuState.adminNotiSub = false;
+                menuState.adminMediaSub = false;
             }
             currentView = view;
             notiPageOffset = 0;
             homeworkPageOffset = 0;
+            if (view !== 'admin_post' && view !== 'sub_post') {
+                editingNotiId = null;
+            }
+            if (view !== 'admin_album' && view !== 'sub_album') {
+                editingAlbumId = null;
+            }
             renderApp();
         }
 
@@ -945,8 +964,8 @@
                         <button type="button" class="menu-btn" style="background:#2a9d8f; margin-top:16px; padding:6px 10px; font-size:0.75rem; white-space:nowrap;" onclick="switchView('admin_multi_noti')">🖼️ Đăng nhiều ảnh</button>
                     </div>
                     <div class="form-group">
-                        <label>Hoặc dán Link URL / Link Google Drive:</label>
-                        <input type="text" id="postMediaLink" value="${editLink}" placeholder="Dán link trực tiếp...">
+                        <label>Hoặc dán Link URL / Link Google Drive (nhiều link phân tách bằng xuống dòng):</label>
+                        <textarea id="postMediaLink" rows="3" placeholder="Dán các link ảnh, mỗi link một dòng...">${editLink.split('\n').join('\n')}</textarea>
                     </div>
                     <div style="display:flex; justify-content:center; gap:12px; margin-top:6px;">
                         <button class="menu-btn" style="width:140px; justify-content:center; background:#2a9d8f;" onclick="submitNotification()">${isEditing ? 'Lưu Thay Đổi' : 'Đăng Ngay'}</button>
@@ -991,102 +1010,67 @@
                         </div>
                     </div>
                 `;
-            }
-            else if (currentView === 'admin_homework') {
-                let computedHwTitle = getCalculatedHomeworkTitle();
-                b.innerHTML = `
-                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">📖 Đăng Báo Bài Mới</h3>
-                    <div class="form-group">
-                        <label>Tiêu đề (Tự động hiển thị):</label>
-                        <input type="text" id="hwTitle" value="${computedHwTitle}" readonly style="background:#f1f1f1; font-weight:bold; color:var(--primary);">
-                    </div>
-                    <div class="form-group">
-                        <label>Nội dung báo bài:</label>
-                        <div class="editor-toolbar">
-                            <button type="button" onclick="formatDoc('bold')"><b>B</b></button>
-                            <button type="button" onclick="formatDoc('italic')"><i>I</i></button>
-                            <button type="button" onclick="formatDoc('underline')"><u>U</u></button>
-                            <button type="button" onclick="formatDoc('justifyLeft')">Canh trái</button>
-                            <button type="button" onclick="formatDoc('justifyCenter')">Canh giữa</button>
-                            <button type="button" onclick="formatDoc('justifyRight')">Canh phải</button>
-                            <button type="button" onclick="formatDoc('justifyFull')">Canh đều</button>
-                        </div>
-                        <div id="hwContent" class="rich-editor" contenteditable="true"></div>
-                    </div>
-                    <div class="form-group" style="display:flex; flex-direction:row; align-items:center; gap:8px;">
-                        <div style="flex:1; display:flex; flex-direction:column; gap:3px;">
-                            <label>Tải lên từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Các ảnh chỉ hiển thị trong 7 ngày, muốn lưu lâu hơn hãy tải lên Google Drive)</span>:</label>
-                            <input type="file" id="hwMediaFile" accept="image/*,video/mp4" multiple onchange="checkFileLimitWarning(this)">
-                        </div>
-                        <button type="button" class="menu-btn" style="background:#2a9d8f; margin-top:16px; padding:6px 10px; font-size:0.75rem; white-space:nowrap;" onclick="switchView('admin_multi_hw')">🖼️ Đăng nhiều ảnh</button>
-                    </div>
-                    <div class="form-group">
-                        <label>Hoặc dán Link URL / Link Google Drive:</label>
-                        <input type="text" id="hwMediaLink" placeholder="Dán link trực tiếp...">
-                    </div>
-                    <div style="display:flex; justify-content:center; gap:12px; margin-top:6px;">
-                        <button class="menu-btn" style="width:140px; justify-content:center; background:#2a9d8f;" onclick="submitHomework()">Đăng</button>
-                        <button class="menu-btn" style="width:140px; justify-content:center; background:#6c757d;" onclick="switchView('home')">Hủy</button>
-                    </div>
-                `;
-            }
-            // --- GIAO DIỆN ĐĂNG NHIỀU ẢNH BÁO BÀI ---
-            else if (currentView === 'admin_multi_hw') {
-                b.innerHTML = `
-                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">Đăng nhiều ảnh báo bài</h3>
-                    <div style="display:flex; flex:1; gap:12px; overflow:hidden; min-height:0;">
-                        <!-- CỘT TRÁI: Nhập danh sách link động -->
-                        <div style="flex:1.2; display:flex; flex-direction:column; background:white; padding:12px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03); overflow-y:auto; gap:8px;">
-                            <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
-                                <label>Danh sách đường dẫn ảnh báo bài:</label>
-                                <div id="multiHwLinksContainer" style="display:flex; flex-direction:column; gap:6px; max-height:250px; overflow-y:auto; padding-right:4px;">
-                                    <div class="multi-hw-row" style="display:flex; gap:6px; align-items:center;">
-                                        <input type="text" class="multi-hw-input" placeholder="Dán link ảnh vào đây..." style="flex:1;" oninput="autoPreviewMultiHw(this)">
-                                        <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiHwLink(this)">👁️ Xem lại</button>
-                                        <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeMultiHwRow(this)">❌</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="display:flex; justify-content:center; gap:8px; margin-top:4px;">
-                                <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="submitMultiHwImages()">🚀 Xong & Quay Lại</button>
-                                <button class="menu-btn" style="flex:1; justify-content:center; background:#6c757d;" onclick="switchView('admin_homework')">Quay lại</button>
-                            </div>
-                        </div>
-
-                        <!-- CỘT PHẢI: Khung Preview -->
-                        <div style="flex:1; border-radius:8px; border:1px solid #ced4da; background:#f8f9fa; display:flex; flex-direction:column; overflow:hidden;">
-                            <div style="background:#e9ecef; padding:5px 8px; font-size:0.75rem; font-weight:bold; color:var(--primary); border-bottom:1px solid #ced4da;">🖼️ Khung Preview (Click để phóng to)</div>
-                            <div id="multiHwPreviewBox" style="flex:1; width:100%; display:flex; align-items:center; justify-content:center; padding:8px; overflow:hidden; text-align:center;">
-                                <span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                // Nếu đang có link sẵn, nạp vào các hàng tương ứng
+                if (tempMultiNotiLinks) {
+                    let container = document.getElementById('multiNotiLinksContainer');
+                    let existingLinks = tempMultiNotiLinks.split('\n').filter(l => l.trim().length > 0);
+                    if (existingLinks.length > 0) {
+                        container.innerHTML = '';
+                        existingLinks.forEach(link => {
+                            let row = document.createElement('div');
+                            row.className = 'multi-link-row';
+                            row.style.cssText = 'display:flex; gap:6px; align-items:center;';
+                            row.innerHTML = `
+                                <input type="text" class="multi-input-link" value="${link}" placeholder="Dán link ảnh vào đây..." style="flex:1;" oninput="autoPreviewMultiNoti(this)">
+                                <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiNotiLink(this)">👁️ Xem lại</button>
+                                <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeMultiNotiRow(this)">❌</button>
+                            `;
+                            container.appendChild(row);
+                        });
+                        // Thêm 1 dòng trống cuối
+                        let emptyRow = document.createElement('div');
+                        emptyRow.className = 'multi-link-row';
+                        emptyRow.style.cssText = 'display:flex; gap:6px; align-items:center;';
+                        emptyRow.innerHTML = `
+                            <input type="text" class="multi-input-link" placeholder="Dán link ảnh tiếp theo..." style="flex:1;" oninput="autoPreviewMultiNoti(this)">
+                            <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiNotiLink(this)">👁️ Xem lại</button>
+                            <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeMultiNotiRow(this)">❌</button>
+                        `;
+                        container.appendChild(emptyRow);
+                    }
+                }
             }
             // --- GIAO DIỆN ĐĂNG ẢNH KỶ NIỆM ---
             else if (currentView === 'admin_album' || currentView === 'sub_album') {
+                let isAlbEditing = editingAlbumId !== null;
+                let albTitleVal = ''; let albLinkVal = '';
+                if (isAlbEditing) {
+                    let albItem = albums.find(a => a.id === editingAlbumId);
+                    if (albItem) { albTitleVal = albItem.title.replace(/\s\(\d+\/\d+\)$/, ''); albLinkVal = albItem.mediaUrl || ''; }
+                }
+
                 b.innerHTML = `
-                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">📷 Đăng Ảnh/Clip Kỷ Niệm</h3>
+                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">📷 ${isAlbEditing ? 'Chỉnh Sửa Album' : 'Đăng Ảnh/Clip Kỷ Niệm'}</h3>
                     <div style="display:flex; flex:1; gap:12px; overflow:hidden; min-height:0;">
                         <!-- CỘT TRÁI: Nhập tiêu đề và danh sách link động -->
                         <div style="flex:1.2; display:flex; flex-direction:column; background:white; padding:12px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03); overflow-y:auto; gap:8px;">
                             <div class="form-group">
                                 <label>Tiêu đề chung cho bộ ảnh:</label>
-                                <input type="text" id="albumBatchTitle" placeholder="Ví dụ: Hoạt động dã ngoại lớp, Lễ khai giảng...">
+                                <input type="text" id="albumBatchTitle" value="${albTitleVal}" placeholder="Ví dụ: Hoạt động dã ngoại lớp, Lễ khai giảng...">
                             </div>
                             <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
                                 <label>Danh sách đường dẫn ảnh:</label>
                                 <div id="albumLinksContainer" style="display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto; padding-right:4px;">
                                     <div class="album-link-row" style="display:flex; gap:6px; align-items:center;">
-                                        <input type="text" class="alb-input-link" placeholder="Dán link ảnh vào đây..." style="flex:1;" oninput="autoPreviewAlbum(this)">
+                                        <input type="text" class="alb-input-link" value="${albLinkVal}" placeholder="Dán link ảnh vào đây..." style="flex:1;" oninput="autoPreviewAlbum(this)">
                                         <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleAlbumLink(this)">👁️ Xem lại</button>
                                         <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeAlbumRow(this)">❌</button>
                                     </div>
                                 </div>
                             </div>
                             <div style="display:flex; justify-content:center; gap:8px; margin-top:4px;">
-                                <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="submitDynamicBatchAlbum()">🚀 Đăng Tất Cả</button>
-                                <button class="menu-btn" style="flex:1; justify-content:center; background:#6c757d;" onclick="switchView('home')">Hủy</button>
+                                <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="submitDynamicBatchAlbum()">${isAlbEditing ? '💾 Lưu Thay Đổi' : '🚀 Đăng Tất Cả'}</button>
+                                <button class="menu-btn" style="flex:1; justify-content:center; background:#6c757d;" onclick="switchView('admin_manage_album')">Hủy</button>
                             </div>
                         </div>
 
@@ -1094,21 +1078,20 @@
                         <div style="flex:1; border-radius:8px; border:1px solid #ced4da; background:#f8f9fa; display:flex; flex-direction:column; overflow:hidden;">
                             <div style="background:#e9ecef; padding:5px 8px; font-size:0.75rem; font-weight:bold; color:var(--primary); border-bottom:1px solid #ced4da;">🖼️ Khung Preview (Click để phóng to)</div>
                             <div id="albumLivePreviewBox" style="flex:1; width:100%; display:flex; align-items:center; justify-content:center; padding:8px; overflow:hidden; text-align:center;">
-                                <span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>
+                                ${albLinkVal ? `<img src="${parseGoogleDriveLink(albLinkVal)}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parseGoogleDriveLink(albLinkVal)}')">` : '<span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>'}
                             </div>
                         </div>
                     </div>
                 `;
             }
-            // --- GIAO DIỆN QUẢN LÝ BANNER ---
+            // --- GIAO DIỆN ĐĂNG ẢNH BANNER (TỰ ĐỘNG GẮN TÊN "Album banner") ---
             else if (currentView === 'admin_banner') {
                 b.innerHTML = `
-                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">✨ Quản Lý Ảnh Banner</h3>
+                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">✨ Đăng Ảnh Banner</h3>
                     <div style="display:flex; flex:1; gap:12px; overflow:hidden; min-height:0;">
-                        <!-- CỘT TRÁI: Danh sách link banner động & Tải file từ máy -->
                         <div style="flex:1.2; display:flex; flex-direction:column; background:white; padding:12px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03); overflow-y:auto; gap:8px;">
                             <div class="form-group">
-                                <label>Hoặc tải ảnh banner từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Các ảnh chỉ hiển thị trong 7 ngày)</span>:</label>
+                                <label>Hoặc tải ảnh banner từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Chỉ hiển thị trong 7 ngày)</span>:</label>
                                 <input type="file" id="bannerFileInput" accept="image/*" onchange="previewBannerFileLiveWithWarning()">
                             </div>
                             <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
@@ -1127,17 +1110,37 @@
                                 <button class="menu-btn" style="flex:0.8; justify-content:center; background:#6c757d;" onclick="switchView('home')">Hủy</button>
                             </div>
                         </div>
-
-                        <!-- CỘT PHẢI: Khung Preview Banner -->
                         <div style="flex:1; border-radius:8px; border:1px solid #ced4da; background:#f8f9fa; display:flex; flex-direction:column; overflow:hidden;">
                             <div style="background:#e9ecef; padding:5px 8px; font-size:0.75rem; font-weight:bold; color:var(--primary); border-bottom:1px solid #ced4da;">🖼️ Khung Preview (Click để phóng to)</div>
                             <div id="bannerLivePreviewBox" style="flex:1; width:100%; display:flex; align-items:center; justify-content:center; padding:8px; overflow:hidden; text-align:center;">
-                                ${banners.length > 0 ? `<img src="${parseGoogleDriveLink(banners[0])}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parseGoogleDriveLink(banners[0])}')" title="Click để phóng to">` : '<span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>'}
+                                ${banners.length > 0 ? `<img src="${parseGoogleDriveLink(banners[0])}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parseGoogleDriveLink(banners[0])}')">` : '<span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>'}
                             </div>
                         </div>
                     </div>
                 `;
                 initBannerInputs();
+            }
+            // --- GIAO DIỆN DANH SÁCH ALBUM ---
+            else if (currentView === 'admin_manage_album') {
+                b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">📁 Danh Sách Album (Kỷ Niệm & Banner)</h3>`;
+                if (albums.length === 0) {
+                    b.innerHTML += '<p style="color:#6c757d;">Chưa có album nào.</p>';
+                } else {
+                    albums.forEach((alb, idx) => {
+                        b.innerHTML += `
+                            <div class="card-item">
+                                <div class="card-info" style="flex:1; cursor:pointer;" onclick="startEditAlbum(${alb.id})">
+                                    <h4>[Album ${idx + 1}] ${alb.title}</h4>
+                                    <span>✍️ Đăng bởi: ${alb.author}</span>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:5px;">
+                                    <button class="menu-btn btn-edit" onclick="startEditAlbum(${alb.id})">Sửa</button>
+                                    <button class="menu-btn btn-del" onclick="deleteAlbumItem(${alb.id})">Xóa</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
             }
             else if (currentView === 'admin_create_acc') {
                 b.innerHTML = `
@@ -1541,20 +1544,42 @@
                 return;
             }
 
-            linksArray.forEach((link, index) => {
-                let maxId = albums.length > 0 ? Math.max(...albums.map(a => a.id || 0)) : 0;
-                albums.push({
-                    id: maxId + 1,
-                    title: `${title} (${index + 1}/${linksArray.length})`,
-                    mediaUrl: link,
-                    type: 'image',
-                    author: currentUser.name
+            if (editingAlbumId !== null) {
+                let albItem = albums.find(a => a.id === editingAlbumId);
+                if (albItem) {
+                    albItem.title = title;
+                    albItem.mediaUrl = linksArray[0];
+                }
+                alert("Đã cập nhật album thành công!");
+            } else {
+                linksArray.forEach((link, index) => {
+                    let maxId = albums.length > 0 ? Math.max(...albums.map(a => a.id || 0)) : 0;
+                    albums.push({
+                        id: maxId + 1,
+                        title: `${title} (${index + 1}/${linksArray.length})`,
+                        mediaUrl: link,
+                        type: 'image',
+                        author: currentUser.name
+                    });
                 });
-            });
+                alert(`Đã đăng thành công ${linksArray.length} ảnh kỷ niệm vào hệ thống!`);
+            }
 
             saveDataToFirebase();
-            alert(`Đã đăng thành công ${linksArray.length} ảnh kỷ niệm vào hệ thống!`);
-            switchView('album_list');
+            editingAlbumId = null;
+            switchView('admin_manage_album');
+        }
+
+        function startEditAlbum(id) {
+            editingAlbumId = id;
+            switchView(currentUser.role === 'admin' ? 'admin_album' : 'sub_album');
+        }
+
+        function deleteAlbumItem(id) {
+            if (confirm("Bạn có chắc chắn muốn xóa album này?")) {
+                albums = albums.filter(a => a.id !== id);
+                saveDataToFirebase();
+            }
         }
 
         function handleBannerInput(inputElem) {
@@ -1649,6 +1674,23 @@
                 alert("Đã lưu danh sách banner thành công!");
                 renderBannerSlideshow();
             }
+
+            // Đồng thời tự động tạo/cập nhật album banner vào danh sách Album với tên "Album banner"
+            if (newBanners.length > 0) {
+                let albBanner = albums.find(a => a.title.includes("Album banner"));
+                if (albBanner) {
+                    albBanner.mediaUrl = newBanners[0];
+                } else {
+                    let maxId = albums.length > 0 ? Math.max(...albums.map(a => a.id || 0)) : 0;
+                    albums.push({
+                        id: maxId + 1,
+                        title: "Album banner",
+                        mediaUrl: newBanners[0],
+                        type: 'image',
+                        author: currentUser.name
+                    });
+                }
+            }
         }
 
         function saveSchedule() {
@@ -1660,14 +1702,14 @@
                 reader.onload = (e) => {
                     scheduleUrl = e.target.result;
                     saveDataToFirebase();
-                    alert("Đã đăng Thời Khóa Biểu thành công!");
+                    alert("Đăng Thời Khóa Biểu thành công!");
                     renderContentB();
                 };
                 reader.readAsDataURL(fileInput.files[0]);
             } else if (linkInput) {
                 scheduleUrl = parseGoogleDriveLink(linkInput);
                 saveDataToFirebase();
-                alert("Đã đăng Thời Khóa Biểu thành công!");
+                alert("Đăng Thời Khóa Biểu thành công!");
                 renderContentB();
             } else {
                 alert("Vui lòng dán link hoặc chọn file ảnh Thời Khóa Biểu!");
