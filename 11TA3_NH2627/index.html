@@ -28,20 +28,17 @@
             padding: 0;
         }
 
-        /* Tối ưu hóa cho phép cuộn mượt mà trên mọi thiết bị, kể cả khi xoay ngang */
-        html {
+        html, body {
             height: 100%;
+            overflow: hidden;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: var(--text-main);
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
             position: relative;
-            overflow-x: hidden;
-            overflow-y: auto;
         }
 
         #bgCanvas {
@@ -51,6 +48,7 @@
             background: var(--bg-gradient);
         }
 
+        /* PHẦN C (HEADER) LUÔN CỐ ĐỊNH Ở TRÊN CÙNG */
         header {
             padding: 6px 15px;
             background: rgba(13, 27, 42, 0.9);
@@ -62,6 +60,7 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            height: 60px;
         }
 
         header h1 {
@@ -106,11 +105,13 @@
             display: grid;
             grid-template-columns: 22% 78%;
             flex: 1;
+            overflow: hidden;
             padding: 10px;
             gap: 10px;
-            min-height: calc(100vh - 60px);
+            height: calc(100vh - 60px);
         }
 
+        /* PHẦN A (SIDEBAR) CÓ THANH CUỘN ĐỘC LẬP */
         .sidebar-a {
             background: var(--card-bg);
             backdrop-filter: blur(10px);
@@ -120,9 +121,9 @@
             flex-direction: column;
             gap: 5px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-            max-height: 82vh;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            height: 100%;
         }
 
         .sidebar-a h3 {
@@ -164,6 +165,7 @@
             margin: 2px 0;
         }
 
+        /* PHẦN B (CONTENT) CÓ KHUNG CUỘN ĐỘC LẬP */
         .content-b {
             background: var(--card-bg);
             backdrop-filter: blur(10px);
@@ -172,8 +174,8 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
-            max-height: 82vh;
             overflow: hidden;
+            height: 100%;
         }
 
         .content-scroll {
@@ -184,6 +186,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            min-height: 0;
         }
 
         .card-item {
@@ -519,10 +522,24 @@
         }
 
         @media screen and (max-width: 768px) {
-            body { height: auto; min-height: 100vh; overflow-y: auto; }
-            .main-container { display: flex; flex-direction: column; height: auto; overflow: visible; min-height: auto; }
-            .sidebar-a { max-height: 250px; flex-shrink: 0; overflow-y: auto; }
-            .content-b { min-height: 450px; flex-shrink: 0; max-height: none; }
+            html, body {
+                height: auto;
+                overflow: auto;
+            }
+            .main-container { 
+                display: flex; 
+                flex-direction: column; 
+                height: auto; 
+                overflow: visible; 
+            }
+            .sidebar-a { 
+                max-height: 250px; 
+                height: auto;
+            }
+            .content-b { 
+                min-height: 450px; 
+                height: auto;
+            }
             .pdf-iframe { height: 350px; }
             .welcome-greeting-text { font-size: 2.2rem; }
         }
