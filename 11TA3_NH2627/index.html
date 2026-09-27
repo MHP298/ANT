@@ -526,6 +526,7 @@
         let homeworkPageOffset = 0;
         let albumIndex = 0;
         let editingNotiId = null;
+        let tempMultiNotiLinks = ""; // Biến lưu tạm danh sách nhiều link thông báo
 
         let menuState = {
             adminAccSub: false,
@@ -537,7 +538,6 @@
         function parseGoogleDriveLink(url) {
             if (!url) return "";
             url = url.trim();
-            // Nếu là dữ liệu base64 (tải từ máy) thì giữ nguyên
             if (url.startsWith('data:')) return url;
 
             let match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
@@ -563,15 +563,11 @@
                     trashBin = data.trashBin || [];
                     scheduleUrl = data.scheduleUrl || "";
 
-                    // TÍNH NĂNG TỰ ĐỘNG XÓA DỮ LIỆU SAU 7 NGÀY (NẾU CÓ THỜI GIAN HẠN)
                     let now = Date.now();
                     let sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-                    let hasExpired = false;
-
                     notifications.forEach(n => {
                         if (n.isTemporary && n.timestamp && (now - n.timestamp > sevenDaysMs)) {
-                            n.mediaUrl = ""; // Xóa ảnh sau 7 ngày
-                            hasExpired = false; // Có thể lưu lại nếu cần
+                            n.mediaUrl = ""; 
                         }
                     });
                 } else {
@@ -767,7 +763,7 @@
                                 <input type="text" id="scheduleLinkInput" placeholder="Dán link ảnh TKB vào đây..." value="${scheduleUrl.startsWith('http') ? scheduleUrl : ''}" oninput="previewScheduleLink()">
                             </div>
                             <div class="form-group" style="margin-top:6px;">
-                                <label>Hoặc tải ảnh TKB từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Chỉ hiển thị trong 7 ngày)</span>:</label>
+                                <label>Hoặc tải ảnh TKB từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Các ảnh chỉ hiển thị trong 7 ngày)</span>:</label>
                                 <input type="file" id="scheduleFileInput" accept="image/*" onchange="previewScheduleFileWithWarning()">
                             </div>
                             <div style="display:flex; justify-content:center; gap:8px; margin-top:14px;">
@@ -953,7 +949,7 @@
                     </div>
                     <div class="form-group">
                         <label>Hoặc dán Link URL / Link Google Drive:</label>
-                        <input type="text" id="postMediaLink" value="${editLink.startsWith('http') ? editLink : ''}" placeholder="Dán link trực tiếp...">
+                        <input type="text" id="postMediaLink" value="${editLink.startsWith('http') ? editLink : editLink}" placeholder="Dán link trực tiếp...">
                     </div>
                     <div style="display:flex; justify-content:center; gap:12px; margin-top:6px;">
                         <button class="menu-btn" style="width:140px; justify-content:center; background:#2a9d8f;" onclick="submitNotification()">${isEditing ? 'Lưu Thay Đổi' : 'Đăng Ngay'}</button>
@@ -961,6 +957,11 @@
                         ${isEditing ? `<button class="menu-btn" style="width:140px; background:#6c757d; justify-content:center;" onclick="cancelEdit()">Hủy chỉnh sửa</button>` : ''}
                     </div>
                 `;
+                // Gán lại chuỗi link tạm nếu người dùng vừa chọn Đăng nhiều ảnh
+                if (tempMultiNotiLinks) {
+                    let linkField = document.getElementById('postMediaLink');
+                    if (linkField) linkField.value = tempMultiNotiLinks;
+                }
             }
             // --- GIAO DIỆN ĐĂNG NHIỀU ẢNH THÔNG BÁO ---
             else if (currentView === 'admin_multi_noti') {
@@ -1111,7 +1112,7 @@
                         <!-- CỘT TRÁI: Danh sách link banner động & Tải file từ máy -->
                         <div style="flex:1.2; display:flex; flex-direction:column; background:white; padding:12px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03); overflow-y:auto; gap:8px;">
                             <div class="form-group">
-                                <label>Hoặc tải ảnh banner từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Chỉ hiển thị trong 7 ngày)</span>:</label>
+                                <label>Hoặc tải ảnh banner từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Các ảnh chỉ hiển thị trong 7 ngày)</span>:</label>
                                 <input type="file" id="bannerFileInput" accept="image/*" onchange="previewBannerFileLiveWithWarning()">
                             </div>
                             <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
@@ -1259,7 +1260,7 @@
             }
         }
 
-        // --- HÀM CẢNH BÁO KHI TẢI FILE TỪ MÁY ---
+        // --- CÁC HÀM XEM TRƯỚC TỰ ĐỘNG & CẢNH BÁO ---
         function checkFileLimitWarning(input) {
             if (input.files && input.files.length > 0) {
                 alert("⚠️ CẢNH BÁO: Các ảnh tải lên trực tiếp từ máy chỉ hiển thị trong 7 ngày!\nNếu muốn lưu giữ lâu dài, bạn hãy tải lên Google Drive và dán link vào ô bên dưới nhé.");
@@ -1292,7 +1293,6 @@
             }
         }
 
-        // --- CÁC HÀM XEM TRƯỚC TỰ ĐỘNG ---
         function previewScheduleLink() {
             let link = document.getElementById('scheduleLinkInput').value.trim();
             let box = document.getElementById('schedulePreviewArea');
@@ -1421,12 +1421,7 @@
                 return;
             }
 
-            let combinedLinksStr = linksArray.join('\n');
-            let linkField = document.getElementById('postMediaLink');
-            if (linkField) {
-                linkField.value = combinedLinksStr;
-            }
-
+            tempMultiNotiLinks = linksArray.join('\n');
             alert(`Đã nhận ${linksArray.length} ảnh thông báo! Đang quay lại trang đăng...`);
             switchView('admin_post');
         }
@@ -1601,18 +1596,6 @@
             } else {
                 row.querySelector('.banner-input-link').value = '';
                 document.getElementById('bannerLivePreviewBox').innerHTML = `<span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>`;
-            }
-        }
-
-        function previewBannerFileLive() {
-            let fileInput = document.getElementById('bannerFileInput');
-            let previewBox = document.getElementById('bannerLivePreviewBox');
-            if (fileInput.files && fileInput.files[0]) {
-                let reader = new FileReader();
-                reader.onload = (e) => {
-                    previewBox.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${e.target.result}')" title="Click để phóng to">`;
-                };
-                reader.readAsDataURL(fileInput.files[0]);
             }
         }
 
@@ -2013,6 +1996,7 @@
 
                 saveDataToFirebase();
                 editingNotiId = null;
+                tempMultiNotiLinks = ""; // Xóa bộ nhớ đệm sau khi lưu xong
                 switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti');
             };
 
