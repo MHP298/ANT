@@ -28,15 +28,20 @@
             padding: 0;
         }
 
+        /* Tối ưu hóa cho phép cuộn mượt mà trên mọi thiết bị, kể cả khi xoay ngang */
+        html {
+            height: 100%;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: var(--text-main);
             min-height: 100vh;
-            height: 100vh;
             display: flex;
             flex-direction: column;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         #bgCanvas {
@@ -101,9 +106,9 @@
             display: grid;
             grid-template-columns: 22% 78%;
             flex: 1;
-            overflow: hidden;
             padding: 10px;
             gap: 10px;
+            min-height: calc(100vh - 60px);
         }
 
         .sidebar-a {
@@ -115,6 +120,7 @@
             flex-direction: column;
             gap: 5px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            max-height: 82vh;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
         }
@@ -166,6 +172,7 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
+            max-height: 82vh;
             overflow: hidden;
         }
 
@@ -177,7 +184,6 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            min-height: 0;
         }
 
         .card-item {
@@ -514,9 +520,9 @@
 
         @media screen and (max-width: 768px) {
             body { height: auto; min-height: 100vh; overflow-y: auto; }
-            .main-container { display: flex; flex-direction: column; height: auto; overflow: visible; }
-            .sidebar-a { max-height: 220px; flex-shrink: 0; }
-            .content-b { min-height: 450px; flex-shrink: 0; }
+            .main-container { display: flex; flex-direction: column; height: auto; overflow: visible; min-height: auto; }
+            .sidebar-a { max-height: 250px; flex-shrink: 0; overflow-y: auto; }
+            .content-b { min-height: 450px; flex-shrink: 0; max-height: none; }
             .pdf-iframe { height: 350px; }
             .welcome-greeting-text { font-size: 2.2rem; }
         }
@@ -2260,7 +2266,6 @@
             if (item.isHomework || (item.title && item.title.startsWith("BÁO BÀI"))) {
                 window.currentHwId = item.id;
                 currentView = 'homework_detail';
-                // Tạm thời hiển thị trong view chi tiết báo bài
                 let tempIdx = homeworks.findIndex(h => h.id === item.id);
                 if (tempIdx === -1) homeworks.push(item);
                 renderContentB();
