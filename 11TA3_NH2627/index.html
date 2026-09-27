@@ -535,18 +535,16 @@
 
         let lastCreatedAccountInfo = "Chưa có thông tin tài khoản được tạo...";
 
+        // --- HÀM SIÊU CHUẨN HÓA MỌI ĐỊNH DẠNG LINK GOOGLE DRIVE THÀNH LINK ẢNH TRỰC TIẾP ---
         function parseGoogleDriveLink(url) {
             if (!url) return "";
             url = url.trim();
             if (url.startsWith('data:')) return url;
 
-            let match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            // Bắt mọi định dạng ID của Google Drive (/file/d/ID hoặc open?id=ID hoặc uc?id=ID)
+            let match = url.match(/(?:\/d\/|id=)([a-zA-Z0-9_-]+)/);
             if (match && match[1]) {
                 return `https://lh3.googleusercontent.com/d/${match[1]}`;
-            }
-            let matchId = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-            if (matchId && matchId[1]) {
-                return `https://lh3.googleusercontent.com/d/${matchId[1]}`;
             }
             return url;
         }
@@ -677,10 +675,6 @@
             currentView = view;
             notiPageOffset = 0;
             homeworkPageOffset = 0;
-            // Chỉ reset editingNotiId nếu không phải chuyển sang màn hình đăng nhiều ảnh
-            if (view !== 'admin_multi_noti') {
-                // Giữ lại editingNotiId nếu đang chỉnh sửa
-            }
             renderApp();
         }
 
@@ -984,7 +978,7 @@
                             </div>
                             <div style="display:flex; justify-content:center; gap:8px; margin-top:4px;">
                                 <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="submitMultiNotiImages()">🚀 Xong & Quay Lại</button>
-                                <button class="menu-btn" style="flex:1; justify-content:center; background:#6c757d;" onclick="switchView(editingNotiId ? 'admin_post' : 'admin_post')">Quay lại</button>
+                                <button class="menu-btn" style="flex:1; justify-content:center; background:#6c757d;" onclick="switchView('admin_post')">Quay lại</button>
                             </div>
                         </div>
 
@@ -1962,7 +1956,7 @@
 
         function startEdit(id) { 
             editingNotiId = id; 
-            tempMultiNotiLinks = ""; // Reset tạm
+            tempMultiNotiLinks = ""; 
             let item = notifications.find(n => n.id === id);
             if (item) {
                 tempMultiNotiLinks = item.mediaUrl || "";
