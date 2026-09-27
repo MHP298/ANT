@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Trang Thông Tin Lớp 11TA3 - 2026-2027</title>
     <!-- Thư viện Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -28,9 +28,13 @@
             padding: 0;
         }
 
+        /* KHÓA CỨNG TOÀN BỘ KHUNG NGOÀI ĐỂ KHÔNG BAO GIỜ BỊ CUỘN TRÔI TRANG */
         html, body {
             height: 100%;
-            overflow-x: hidden;
+            height: 100dvh; /* Chuẩn viewport di động chống nhảy layout */
+            width: 100%;
+            overflow: hidden;
+            position: fixed; /* Khóa hoàn toàn body trên iOS & Android */
         }
 
         body {
@@ -38,9 +42,6 @@
             color: var(--text-main);
             display: flex;
             flex-direction: column;
-            position: relative;
-            min-height: 100vh;
-            overflow-y: auto;
         }
 
         #bgCanvas {
@@ -50,22 +51,19 @@
             background: var(--bg-gradient);
         }
 
-        /* PHẦN C (HEADER) GHIM CỐ ĐỊNH HOẶC STICKY TRÊN MỌI THIẾT BỊ */
+        /* PHẦN C (HEADER) CỐ ĐỊNH HOÀN TOÀN, ĐỦ ĐỘ RỘNG KHÔNG MẤT CHỮ */
         header {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            padding: 10px 15px;
-            background: rgba(13, 27, 42, 0.95);
+            padding: 8px 15px;
+            background: rgba(13, 27, 42, 0.96);
             backdrop-filter: blur(12px);
             color: white;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.15);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
-            min-height: 75px;
+            flex-shrink: 0; /* Không bao giờ bị ép nhỏ */
+            z-index: 100;
         }
 
         header h1 {
@@ -77,7 +75,8 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 800;
-            line-height: 1.3;
+            line-height: 1.35;
+            padding-top: 2px;
         }
 
         header .gvcn {
@@ -89,7 +88,7 @@
 
         #dynamicBannerContainer {
             width: 100%;
-            height: 80px;
+            height: 75px;
             background: #000;
             overflow: hidden;
             position: relative;
@@ -107,16 +106,18 @@
         }
         #dynamicBannerContainer img.active { opacity: 1; }
 
+        /* KHUNG CHỨA A VÀ B CHIẾM TOÀN BỘ PHẦN CÒN LẠI DƯỚI HEADER */
         .main-container {
             display: grid;
-            grid-template-columns: 22% 78%;
+            grid-template-columns: 24% 76%;
             flex: 1;
-            padding: 10px;
+            min-height: 0; /* Bắt buộc để thanh cuộn con kích hoạt */
+            overflow: hidden;
+            padding: 8px 10px 10px 10px;
             gap: 10px;
-            min-height: calc(100vh - 75px);
         }
 
-        /* PHẦN A (SIDEBAR) TRÊN MÁY TÍNH VÀ DI ĐỘNG */
+        /* PHẦN A (SIDEBAR) CUỘN ĐỘC LẬP */
         .sidebar-a {
             background: var(--card-bg);
             backdrop-filter: blur(10px);
@@ -126,9 +127,10 @@
             flex-direction: column;
             gap: 5px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-            max-height: calc(100vh - 95px);
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            min-height: 0;
+            height: 100%;
         }
 
         .sidebar-a h3 {
@@ -154,6 +156,7 @@
             align-items: center;
             gap: 6px;
             white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .menu-btn:hover {
@@ -170,7 +173,7 @@
             margin: 2px 0;
         }
 
-        /* PHẦN B (CONTENT) TRÊN MÁY TÍNH VÀ DI ĐỘNG */
+        /* PHẦN B (CONTENT) CUỘN ĐỘC LẬP */
         .content-b {
             background: var(--card-bg);
             backdrop-filter: blur(10px);
@@ -179,8 +182,9 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
-            max-height: calc(100vh - 95px);
             overflow: hidden;
+            min-height: 0;
+            height: 100%;
         }
 
         .content-scroll {
@@ -191,6 +195,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            min-height: 0;
         }
 
         .card-item {
@@ -428,6 +433,7 @@
             justify-content: center;
             gap: 8px;
             margin-top: 8px;
+            padding-bottom: 6px;
         }
 
         .btn-download {
@@ -505,15 +511,15 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 40px 20px;
+            padding: 30px 20px;
             border-radius: 14px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.03);
             animation: fadeIn 0.8s ease-in-out;
         }
         .welcome-greeting-text {
             font-family: 'Dancing Script', cursive;
-            font-size: 3.1rem;
-            line-height: 1.5;
+            font-size: 2.85rem;
+            line-height: 1.45;
             letter-spacing: 0.5px;
             margin: 0;
             padding: 0 15px;
@@ -525,29 +531,86 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        @media screen and (max-width: 768px) {
-            html, body {
-                height: 100%;
+        /* ========================================================
+           RESPONSIVE CHUYÊN SÂU: ĐẢM BẢO CỐ ĐỊNH PHẦN C VÀ CUỘN A, B
+           ======================================================== */
+
+        /* 1. Màn hình điện thoại DỌC (Portrait) */
+        @media screen and (max-width: 768px) and (orientation: portrait) {
+            header {
+                padding: 8px 10px;
+                min-height: 65px;
+            }
+            header h1 {
+                font-size: 1rem;
+            }
+            header .gvcn {
+                font-size: 0.72rem;
+            }
+            .main-container {
+                display: flex;
+                flex-direction: column;
+                padding: 6px;
+                gap: 8px;
+                height: calc(100dvh - 65px);
                 overflow: hidden;
             }
-            .main-container { 
-                display: flex; 
-                flex-direction: column; 
-                height: calc(100vh - 75px);
-                overflow: hidden; 
+            .sidebar-a {
+                max-height: 36%;
+                flex-shrink: 0;
+                overflow-y: auto;
             }
-            .sidebar-a { 
-                max-height: 220px; 
-                height: auto;
-            }
-            .content-b { 
+            .content-b {
                 flex: 1;
                 min-height: 0;
-                height: auto;
-                max-height: none;
+                overflow: hidden;
             }
-            .pdf-iframe { height: 350px; }
+            .pdf-iframe { height: 260px; }
             .welcome-greeting-text { font-size: 2.1rem; }
+        }
+
+        /* 2. Màn hình điện thoại XOAY NGANG (Landscape) */
+        @media screen and (max-height: 520px) and (orientation: landscape) {
+            header {
+                padding: 4px 10px;
+                min-height: 50px;
+            }
+            header h1 {
+                font-size: 0.92rem;
+                line-height: 1.2;
+            }
+            header .gvcn {
+                font-size: 0.68rem;
+            }
+            .main-container {
+                grid-template-columns: 32% 68%;
+                padding: 5px;
+                gap: 6px;
+                height: calc(100dvh - 50px);
+                overflow: hidden;
+            }
+            .sidebar-a {
+                height: 100%;
+                max-height: 100%;
+                overflow-y: auto;
+                padding: 6px;
+                gap: 4px;
+            }
+            .menu-btn {
+                padding: 5px 8px;
+                font-size: 0.75rem;
+            }
+            .content-b {
+                height: 100%;
+                max-height: 100%;
+                overflow: hidden;
+                padding: 8px;
+            }
+            .content-scroll {
+                padding-right: 3px;
+            }
+            .pdf-iframe { height: 220px; }
+            .welcome-greeting-text { font-size: 1.85rem; }
         }
     </style>
 </head>
@@ -555,13 +618,17 @@
 
     <canvas id="bgCanvas"></canvas>
 
+    <!-- PHẦN C: HEADER GHIM CHẮC CHẮN -->
     <header>
         <h1>Trang thông tin của lớp 11TA3<br><span style="font-size: 0.85rem;">Niên khóa 2026-2027</span></h1>
         <div class="gvcn">GVCN: Trung Hiếu (Mr.Z)</div>
     </header>
 
+    <!-- KHUNG CHỨA CHÍNH: CHỨA A VÀ B -->
     <div class="main-container">
+        <!-- PHẦN A: MENU BÊN TRÁI -->
         <div class="sidebar-a" id="sidebarA"></div>
+        <!-- PHẦN B: NỘI DUNG CHÍNH -->
         <div class="content-b">
             <div id="dynamicBannerContainer"></div>
             <div class="content-scroll" id="contentB"></div>
@@ -650,7 +717,7 @@
         let homeworks = [];
         let albums = [];
         let banners = [];
-        let formsList = []; // Mảng lưu trữ danh sách biểu mẫu
+        let formsList = []; 
         let subAccounts = [];
         let trashBin = [];
         let scheduleUrl = "";
@@ -723,7 +790,7 @@
                     homeworks = data.homeworks || [];
                     albums = data.albums || [];
                     banners = data.banners || [];
-                    formsList = data.formsList || []; // Tải danh sách biểu mẫu từ Firebase
+                    formsList = data.formsList || []; 
                     subAccounts = data.subAccounts || [];
                     trashBin = data.trashBin || [];
                     scheduleUrl = data.scheduleUrl || "";
@@ -910,7 +977,7 @@
             let b = document.getElementById('contentB');
             b.innerHTML = '';
 
-            // --- GIAO DIỆN CHÀO MỪNG ĐĂNG NHẬP (KHÔNG CÓ NÚT) ---
+            // --- GIAO DIỆN CHÀO MỪNG ĐĂNG NHẬP ---
             if (currentView === 'welcome_dashboard') {
                 let hour = new Date().getHours();
                 let isTeacher = (currentUser && (currentUser.role === 'admin' || currentUser.name === 'GVCN' || currentUser.name.includes('admin')));
@@ -967,7 +1034,7 @@
                 }
 
                 b.innerHTML += `
-                    <div style="background:${visitorBg}; color:${visitorColor}; padding:10px 16px; border-radius:8px; margin-bottom:8px; font-family:'Dancing Script', cursive; font-size:1.45rem; font-weight:700; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.04); letter-spacing:0.3px;">
+                    <div style="background:${visitorBg}; color:${visitorColor}; padding:8px 14px; border-radius:8px; margin-bottom:8px; font-family:'Dancing Script', cursive; font-size:1.35rem; font-weight:700; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.04); letter-spacing:0.3px;">
                         ✨ ${visitorGreeting}
                     </div>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
@@ -1436,7 +1503,6 @@
                 `;
                 initMultiHwRows();
             }
-            // --- GIAO DIỆN ĐĂNG ẢNH KỶ NIỆM (NHÚNG TRỰC TIẾP 2 CỘT GỌN GÀNG) ---
             else if (currentView === 'admin_album' || currentView === 'sub_album') {
                 let isAlbEditing = editingAlbumId !== null;
                 let albTitleVal = tempAlbumTitle; 
@@ -1455,12 +1521,10 @@
                         <input type="text" id="albumBatchTitle" value="${albTitleVal}" placeholder="Nhập tên album...">
                     </div>
                     <div style="display:flex; flex:1; gap:12px; overflow:hidden; min-height:0;">
-                        <!-- Cột trái: Nhập link động -->
                         <div style="flex:1.2; display:flex; flex-direction:column; background:white; padding:10px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03); overflow-y:auto; gap:6px;">
                             <label style="font-weight:600; font-size:0.75rem;">Danh sách đường dẫn ảnh kỷ niệm:</label>
                             <div id="multiAlbumLinksContainer" style="display:flex; flex-direction:column; gap:6px; flex:1; max-height:230px; overflow-y:auto; padding-right:4px;"></div>
                         </div>
-                        <!-- Cột phải: Preview -->
                         <div style="flex:1; border-radius:8px; border:1px solid #ced4da; background:#f8f9fa; display:flex; flex-direction:column; overflow:hidden;">
                             <div style="background:#e9ecef; padding:5px 8px; font-size:0.75rem; font-weight:bold; color:var(--primary); border-bottom:1px solid #ced4da;">🖼️ Khung Preview (Click để phóng to)</div>
                             <div id="multiAlbumPreviewBox" style="flex:1; width:100%; display:flex; align-items:center; justify-content:center; padding:8px; overflow:hidden; text-align:center;">
@@ -1476,7 +1540,6 @@
                 `;
                 initMultiAlbumRows();
             }
-            // --- GIAO DIỆN ĐĂNG ẢNH BANNER (NHÚNG TRỰC TIẾP 2 CỘT GỌN GÀNG) ---
             else if (currentView === 'admin_banner') {
                 b.innerHTML = `
                     <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">✨ Đăng Ảnh Banner</h3>
@@ -1485,12 +1548,10 @@
                         <input type="file" id="bannerFileInput" accept="image/*" onchange="previewBannerFileLiveWithWarning()">
                     </div>
                     <div style="display:flex; flex:1; gap:12px; overflow:hidden; min-height:0;">
-                        <!-- Cột trái: Nhập link động -->
                         <div style="flex:1.2; display:flex; flex-direction:column; background:white; padding:10px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03); overflow-y:auto; gap:6px;">
                             <label style="font-weight:600; font-size:0.75rem;">Danh sách đường dẫn ảnh banner:</label>
                             <div id="multiBannerLinksContainer" style="display:flex; flex-direction:column; gap:6px; flex:1; max-height:230px; overflow-y:auto; padding-right:4px;"></div>
                         </div>
-                        <!-- Cột phải: Preview -->
                         <div style="flex:1; border-radius:8px; border:1px solid #ced4da; background:#f8f9fa; display:flex; flex-direction:column; overflow:hidden;">
                             <div style="background:#e9ecef; padding:5px 8px; font-size:0.75rem; font-weight:bold; color:var(--primary); border-bottom:1px solid #ced4da;">🖼️ Khung Preview (Click để phóng to)</div>
                             <div id="multiBannerPreviewBox" style="flex:1; width:100%; display:flex; align-items:center; justify-content:center; padding:8px; overflow:hidden; text-align:center;">
@@ -1615,7 +1676,6 @@
                     });
                 }
             }
-            // --- GIAO DIỆN DANH SÁCH ĐÃ XÓA (HIỂN THỊ ĐỒNG NHẤT [📢 THÔNG BÁO SỐ X] HOẶC [📚 BÁO BÀI]) ---
             else if (currentView === 'trash_noti') {
                 b.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -1647,7 +1707,6 @@
             }
         }
 
-        // --- HÀM XỬ LÝ LƯU BIỂU MẪU MỚI TỪ ADMIN ---
         function submitNewForm() {
             let title = document.getElementById('formTitleInput').value.trim();
             let url = document.getElementById('formUrlInput').value.trim();
@@ -1696,7 +1755,6 @@
             });
         }
 
-        // --- KHỞI TẠO CÁC DÒNG LINK ĐỘNG (LUÔN CÓ 1 DÒNG TRỐNG SẴN ĐỂ GÕ TIẾP) ---
         function initMultiNotiRows() {
             let container = document.getElementById('multiNotiLinksContainer');
             if (!container) return;
