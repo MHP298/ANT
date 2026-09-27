@@ -8,7 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
-    <!-- Font chữ viết tay Dancing Script mềm mại, hỗ trợ tiếng Việt trọn vẹn -->
+    <!-- Font chữ nghệ thuật Dancing Script mềm mại, hỗ trợ tiếng Việt chuẩn -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
@@ -481,7 +481,7 @@
             border-radius: 6px;
         }
 
-        /* Giao diện Chào mừng (Welcome Card) trang trọng, mềm mại, không có nút */
+        /* Giao diện Chào mừng (Welcome Card) */
         .welcome-card-box {
             flex: 1;
             display: flex;
@@ -777,7 +777,7 @@
 
                     <button class="menu-btn" onclick="toggleSubMenu('adminNotiSub')">📋 Quản lý thông báo/báo bài</button>
                     <div id="adminNotiSub" class="sub-menu" style="display:${notiSubDisplay};">
-                        <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_manage_noti')">📜 Thông báo & Báo bài đã đăng</button>
+                        <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_manage_noti')">📜 Thông Báo & Báo Bài Đã Đăng</button>
                         <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('trash_noti')">📁 Danh sách đã xóa</button>
                     </div>
 
@@ -790,7 +790,7 @@
                     <button class="menu-btn" onclick="switchView('admin_homework')">📖 Đăng báo bài mới</button>
                     <button class="menu-btn" onclick="switchView('admin_schedule')">📅 Đăng TKB</button>
                     <button class="menu-btn" onclick="switchView('sub_album')">📷 Đăng ảnh/clip kỷ niệm</button>
-                    <button class="menu-btn" onclick="switchView('sub_manage_noti')">📋 Thông báo & Báo bài đã đăng</button>
+                    <button class="menu-btn" onclick="switchView('sub_manage_noti')">📋 Thông Báo & Báo Bài Đã Đăng</button>
                     <button class="menu-btn" onclick="logout()" style="background:#e63946; margin-top:4px;">🚪 Đăng xuất</button>
                 `;
             }
@@ -870,7 +870,7 @@
             let b = document.getElementById('contentB');
             b.innerHTML = '';
 
-            // --- GIAO DIỆN CHÀO MỪNG ĐĂNG NHẬP (KHÔNG CÓ NÚT, CHỈ DÙNG FONT VIẾT TAY DANCING SCRIPT) ---
+            // --- GIAO DIỆN CHÀO MỪNG ĐĂNG NHẬP (KHÔNG CÓ NÚT) ---
             if (currentView === 'welcome_dashboard') {
                 let hour = new Date().getHours();
                 let isTeacher = (currentUser && (currentUser.role === 'admin' || currentUser.name === 'GVCN' || currentUser.name.includes('admin')));
@@ -1419,6 +1419,7 @@
                 }
                 initMultiBannerRows();
             }
+            // --- GIAO DIỆN DANH SÁCH ALBUM ---
             else if (currentView === 'admin_manage_album') {
                 b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">📁 Danh Sách Album (Kỷ Niệm & Banner)</h3>`;
                 let pureAlbums = albums.filter(a => a.title && !a.title.includes("Thông báo"));
@@ -1525,6 +1526,7 @@
                     });
                 }
             }
+            // --- GIAO DIỆN DANH SÁCH ĐÃ XÓA (HIỂN THỊ ĐỒNG NHẤT [📢 THÔNG BÁO SỐ X] HOẶC [📚 BÁO BÀI]) ---
             else if (currentView === 'trash_noti') {
                 b.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
@@ -1536,12 +1538,15 @@
                     b.innerHTML += '<p style="color:#6c757d;">Thư mục xóa trống.</p>';
                 } else {
                     trashBin.forEach((item, idx) => {
+                        let isHw = (item.isHomework === true || (item.title && item.title.startsWith("BÁO BÀI")));
+                        let itemHeader = isHw ? `[📚 Báo bài] ${item.title}` : `[📢 Thông báo số ${item.id}] ${item.title}`;
+
                         b.innerHTML += `
                             <div class="card-item" style="border-left-color:#e63946;">
                                 <div style="display:flex; align-items:center; gap:8px; flex:1;">
                                     <input type="checkbox" class="trash-check" data-idx="${idx}">
-                                    <div class="card-info" style="cursor:pointer; flex:1;" onclick="showFullDetail(${item.id})">
-                                        <h4>[STT ${item.id}] ${item.title}</h4>
+                                    <div class="card-info" style="cursor:pointer; flex:1;" onclick="showTrashDetail(${idx})">
+                                        <h4>${itemHeader}</h4>
                                         <span>🗑️ Xóa bởi: ${item.deletedBy} lúc ${item.deletedAt}</span>
                                     </div>
                                 </div>
@@ -1994,7 +1999,7 @@
 
             if (currentHwMultiLinks.length > 0) {
                 processHwSave(currentHwMultiLinks);
-            } else if (fileInput.files && fileInput.files[0]) {
+            } else if (fileInput && fileInput.files && fileInput.files[0]) {
                 let reader = new FileReader();
                 reader.onload = (e) => {
                     processHwSave([e.target.result]);
@@ -2140,6 +2145,25 @@
             renderContentB();
         }
 
+        function showTrashDetail(idx) {
+            let item = trashBin[idx];
+            if (!item) return;
+            if (item.isHomework || (item.title && item.title.startsWith("BÁO BÀI"))) {
+                window.currentHwId = item.id;
+                currentView = 'homework_detail';
+                // Tạm thời hiển thị trong view chi tiết báo bài
+                let tempIdx = homeworks.findIndex(h => h.id === item.id);
+                if (tempIdx === -1) homeworks.push(item);
+                renderContentB();
+            } else {
+                window.currentDetailId = item.id;
+                currentView = 'full_detail';
+                let tempIdx = notifications.findIndex(n => n.id === item.id);
+                if (tempIdx === -1) notifications.push(item);
+                renderContentB();
+            }
+        }
+
         let bannerTimer = null;
         function renderBannerSlideshow() {
             let container = document.getElementById('dynamicBannerContainer');
@@ -2269,8 +2293,15 @@
 
         function restoreNotification(idx) {
             let item = trashBin.splice(idx, 1)[0];
-            delete item.deletedBy; delete item.deletedAt;
-            notifications.push(item);
+            delete item.deletedBy; 
+            delete item.deletedAt;
+            
+            // Phân loại khôi phục về đúng bảng Báo bài hoặc Thông báo
+            if (item.isHomework || (item.title && item.title.startsWith("BÁO BÀI"))) {
+                homeworks.push(item);
+            } else {
+                notifications.push(item);
+            }
             saveDataToFirebase();
         }
 
