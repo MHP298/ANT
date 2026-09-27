@@ -47,7 +47,7 @@
         }
 
         header {
-            padding: 8px 15px;
+            padding: 6px 15px;
             background: rgba(13, 27, 42, 0.9);
             backdrop-filter: blur(12px);
             color: white;
@@ -116,6 +116,7 @@
             gap: 5px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .sidebar-a h3 {
@@ -171,10 +172,12 @@
         .content-scroll {
             flex: 1;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             padding-right: 4px;
             display: flex;
             flex-direction: column;
             gap: 8px;
+            min-height: 0;
         }
 
         .card-item {
@@ -977,7 +980,7 @@
                     b.innerHTML += '<p style="color:#6c757d; text-align:center; margin-top:20px;">Chưa có biểu mẫu nào được đăng.</p>';
                 } else {
                     formsList.forEach(form => {
-                        let isWebForm = form.url.includes('.html') || form.url.includes('http') && !form.url.includes('drive.google.com/file') && !form.url.includes('uc?export=download');
+                        let isWebForm = form.url.includes('.html') || (form.url.includes('http') && !form.url.includes('drive.google.com/file') && !form.url.includes('uc?export=download'));
                         let btnHtml = '';
                         if (isWebForm) {
                             btnHtml = `<a href="${form.url}" target="_blank" class="menu-btn" style="background:#2a9d8f; padding:5px 12px; font-size:0.78rem; text-decoration:none;">👁️ Duyệt biểu mẫu</a>`;
@@ -2257,6 +2260,7 @@
             if (item.isHomework || (item.title && item.title.startsWith("BÁO BÀI"))) {
                 window.currentHwId = item.id;
                 currentView = 'homework_detail';
+                // Tạm thời hiển thị trong view chi tiết báo bài
                 let tempIdx = homeworks.findIndex(h => h.id === item.id);
                 if (tempIdx === -1) homeworks.push(item);
                 renderContentB();
