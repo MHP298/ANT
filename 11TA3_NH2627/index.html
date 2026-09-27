@@ -534,10 +534,12 @@
 
         let lastCreatedAccountInfo = "Chưa có thông tin tài khoản được tạo...";
 
-        // --- HÀM CHUẨN HÓA LINK GOOGLE DRIVE ---
         function parseGoogleDriveLink(url) {
             if (!url) return "";
             url = url.trim();
+            // Nếu là dữ liệu base64 (tải từ máy) thì giữ nguyên
+            if (url.startsWith('data:')) return url;
+
             let match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
             if (match && match[1]) {
                 return `https://lh3.googleusercontent.com/d/${match[1]}`;
@@ -560,6 +562,18 @@
                     subAccounts = data.subAccounts || [];
                     trashBin = data.trashBin || [];
                     scheduleUrl = data.scheduleUrl || "";
+
+                    // TÍNH NĂNG TỰ ĐỘNG XÓA DỮ LIỆU SAU 7 NGÀY (NẾU CÓ THỜI GIAN HẠN)
+                    let now = Date.now();
+                    let sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+                    let hasExpired = false;
+
+                    notifications.forEach(n => {
+                        if (n.isTemporary && n.timestamp && (now - n.timestamp > sevenDaysMs)) {
+                            n.mediaUrl = ""; // Xóa ảnh sau 7 ngày
+                            hasExpired = false; // Có thể lưu lại nếu cần
+                        }
+                    });
                 } else {
                     notifications = [{ id: 1, title: "Kế hoạch năm học mới", content: "Chào mừng các em đến với năm học 2026-2027.", timestamp: Date.now() - 3600000, date: "2026-09-01 08:00", author: "GVCN", mediaUrl: "", mediaType: "" }];
                     homeworks = [];
@@ -753,8 +767,8 @@
                                 <input type="text" id="scheduleLinkInput" placeholder="Dán link ảnh TKB vào đây..." value="${scheduleUrl.startsWith('http') ? scheduleUrl : ''}" oninput="previewScheduleLink()">
                             </div>
                             <div class="form-group" style="margin-top:6px;">
-                                <label>Hoặc tải ảnh TKB từ máy:</label>
-                                <input type="file" id="scheduleFileInput" accept="image/*" onchange="previewScheduleFile()">
+                                <label>Hoặc tải ảnh TKB từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Chỉ hiển thị trong 7 ngày)</span>:</label>
+                                <input type="file" id="scheduleFileInput" accept="image/*" onchange="previewScheduleFileWithWarning()">
                             </div>
                             <div style="display:flex; justify-content:center; gap:8px; margin-top:14px;">
                                 <button class="menu-btn" style="flex:1; justify-content:center; background:#6c757d;" onclick="switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti')">Hủy</button>
@@ -932,8 +946,8 @@
                     </div>
                     <div class="form-group" style="display:flex; flex-direction:row; align-items:center; gap:8px;">
                         <div style="flex:1; display:flex; flex-direction:column; gap:3px;">
-                            <label>Tải lên 1 file từ máy (Ảnh/Clip):</label>
-                            <input type="file" id="postMediaFile" accept="image/*,video/mp4">
+                            <label>Tải lên từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Các ảnh chỉ hiển thị trong 7 ngày, muốn lưu lâu hơn hãy tải lên Google Drive)</span>:</label>
+                            <input type="file" id="postMediaFile" accept="image/*,video/mp4" multiple onchange="checkFileLimitWarning(this)">
                         </div>
                         <button type="button" class="menu-btn" style="background:#2a9d8f; margin-top:16px; padding:6px 10px; font-size:0.75rem; white-space:nowrap;" onclick="switchView('admin_multi_noti')">🖼️ Đăng nhiều ảnh</button>
                     </div>
@@ -1004,8 +1018,8 @@
                     </div>
                     <div class="form-group" style="display:flex; flex-direction:row; align-items:center; gap:8px;">
                         <div style="flex:1; display:flex; flex-direction:column; gap:3px;">
-                            <label>Tải lên 1 file từ máy (Ảnh/Clip):</label>
-                            <input type="file" id="hwMediaFile" accept="image/*,video/mp4">
+                            <label>Tải lên từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Các ảnh chỉ hiển thị trong 7 ngày, muốn lưu lâu hơn hãy tải lên Google Drive)</span>:</label>
+                            <input type="file" id="hwMediaFile" accept="image/*,video/mp4" multiple onchange="checkFileLimitWarning(this)">
                         </div>
                         <button type="button" class="menu-btn" style="background:#2a9d8f; margin-top:16px; padding:6px 10px; font-size:0.75rem; white-space:nowrap;" onclick="switchView('admin_multi_hw')">🖼️ Đăng nhiều ảnh</button>
                     </div>
@@ -1097,8 +1111,8 @@
                         <!-- CỘT TRÁI: Danh sách link banner động & Tải file từ máy -->
                         <div style="flex:1.2; display:flex; flex-direction:column; background:white; padding:12px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03); overflow-y:auto; gap:8px;">
                             <div class="form-group">
-                                <label>Hoặc tải ảnh banner từ máy:</label>
-                                <input type="file" id="bannerFileInput" accept="image/*" onchange="previewBannerFileLive()">
+                                <label>Hoặc tải ảnh banner từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Chỉ hiển thị trong 7 ngày)</span>:</label>
+                                <input type="file" id="bannerFileInput" accept="image/*" onchange="previewBannerFileLiveWithWarning()">
                             </div>
                             <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
                                 <label>Danh sách đường dẫn ảnh Banner:</label>
@@ -1197,13 +1211,19 @@
                     b.innerHTML += '<p style="color:#6c757d;">Không có bài đăng nào.</p>';
                 } else {
                     combinedList.forEach(item => {
+                        let isAdminUser = (currentUser.role === 'admin' || currentUser.name === 'GVCN' || currentUser.name.includes('Admin'));
+                        let isOwner = (item.author === currentUser.name);
+                        let isWithin30Minutes = (!item.timestamp || (Date.now() - item.timestamp < 30 * 60 * 1000));
+                        let canEdit = !item.isHomework && (isAdminUser || (isOwner && isWithin30Minutes));
+
                         b.innerHTML += `
                             <div class="card-item">
                                 <div class="card-info" style="flex:1;">
                                     <h4>[${item.typeLabel}] ${item.title}</h4>
                                     <span>📅 ${item.date} | ✍️ ${item.author}</span>
                                 </div>
-                                <div style="display:flex; align-items:center;">
+                                <div style="display:flex; align-items:center; gap:5px;">
+                                    ${canEdit ? `<button class="menu-btn btn-edit" onclick="startEdit(${item.id})">Sửa</button>` : ''}
                                     <button class="menu-btn btn-del" onclick="${item.isHomework ? `deleteHomework(${item.id})` : `deleteNotification(${item.id})`}">Xóa</button>
                                 </div>
                             </div>
@@ -1236,6 +1256,39 @@
                         `;
                     });
                 }
+            }
+        }
+
+        // --- HÀM CẢNH BÁO KHI TẢI FILE TỪ MÁY ---
+        function checkFileLimitWarning(input) {
+            if (input.files && input.files.length > 0) {
+                alert("⚠️ CẢNH BÁO: Các ảnh tải lên trực tiếp từ máy chỉ hiển thị trong 7 ngày!\nNếu muốn lưu giữ lâu dài, bạn hãy tải lên Google Drive và dán link vào ô bên dưới nhé.");
+            }
+        }
+
+        function previewBannerFileLiveWithWarning() {
+            let fileInput = document.getElementById('bannerFileInput');
+            let previewBox = document.getElementById('bannerLivePreviewBox');
+            if (fileInput.files && fileInput.files[0]) {
+                alert("⚠️ CẢNH BÁO: Ảnh banner tải lên từ máy chỉ hiển thị trong 7 ngày!\nNếu muốn lưu giữ lâu dài, bạn hãy tải lên Google Drive và dán link trực tiếp.");
+                let reader = new FileReader();
+                reader.onload = (e) => {
+                    previewBox.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${e.target.result}')" title="Click để phóng to">`;
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        }
+
+        function previewScheduleFileWithWarning() {
+            let fileInput = document.getElementById('scheduleFileInput');
+            let box = document.getElementById('schedulePreviewArea');
+            if (fileInput.files && fileInput.files[0]) {
+                alert("⚠️ CẢNH BÁO: Ảnh TKB tải lên từ máy chỉ hiển thị trong 7 ngày!\nNếu muốn lưu giữ lâu dài, bạn hãy tải lên Google Drive và dán link trực tiếp.");
+                let reader = new FileReader();
+                reader.onload = (e) => {
+                    box.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${e.target.result}')" title="Click để phóng to">`;
+                };
+                reader.readAsDataURL(fileInput.files[0]);
             }
         }
 
@@ -1934,14 +1987,6 @@
             if (!title || !content || content === "<br>") { alert("Vui lòng nhập tiêu đề và nội dung!"); return; }
 
             let processSave = (mediaUrl, mediaType) => {
-                if (mediaUrl) {
-                    let urls = mediaUrl.split('\n').filter(u => u.trim().length > 0);
-                    urls.forEach(u => {
-                        let parsedU = parseGoogleDriveLink(u);
-                        content += `<br><img src="${parsedU}" style="display:block; margin:4px auto; max-width:100%;">`;
-                    });
-                }
-
                 if (editingNotiId !== null) {
                     let item = notifications.find(n => n.id === editingNotiId);
                     if (item) {
@@ -1961,7 +2006,7 @@
 
                     notifications.push({
                         id: newId, title, content, timestamp: Date.now(), date: dateStr,
-                        author: currentUser.name, mediaUrl: mediaUrl || "", mediaType: mediaType || ""
+                        author: currentUser.name, mediaUrl: mediaUrl || "", mediaType: mediaType || "", isTemporary: fileInput.files && fileInput.files.length > 0
                     });
                     alert("Đăng thông báo thành công!");
                 }
@@ -1972,15 +2017,13 @@
             };
 
             if (linkInput) {
-                processSave(parseGoogleDriveLink(linkInput), 'image');
+                processSave(linkInput, 'image');
             } else if (fileInput.files && fileInput.files[0]) {
-                let file = fileInput.files[0];
-                let isVideo = file.type.startsWith('video');
                 let reader = new FileReader();
                 reader.onload = (e) => {
-                    processSave(e.target.result, isVideo ? 'video' : 'image');
+                    processSave(e.target.result, 'image');
                 };
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(fileInput.files[0]);
             } else {
                 let existingMediaUrl = "";
                 let existingMediaType = "";
