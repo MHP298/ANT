@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đơn Xin Phép Nghỉ Học</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14pt;
+            background-color: #555;
+            margin: 0;
+            padding: 10px;
+            color: #000;
+        }
+        /* Thanh chứa nút tải luôn nổi cố định ở đầu màn hình khi cuộn */
+        .top-btn-container {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            width: 210mm;
+            margin: 0 auto 10px auto;
+            text-align: right;
+            box-sizing: border-box;
+            background-color: rgba(85, 85, 85, 0.95);
+            padding: 8px 15px;
+            border-radius: 4px;
+            backdrop-filter: blur(4px);
+        }
+        .top-btn-container button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            font-size: 11pt;
+            font-family: Arial, sans-serif;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-left: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background-color 0.2s;
+        }
+        .top-btn-container button:hover {
+            background-color: #0056b3;
+        }
+        .top-btn-container button.btn-jpg {
+            background-color: #28a745;
+        }
+        .top-btn-container button.btn-jpg:hover {
+            background-color: #218838;
+        }
+
+        .container {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto;
+            background: #fff;
+            padding: 18mm 20mm 18mm 25mm;
+            box-sizing: border-box;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .header {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        .editable {
+            border: none;
+            border-bottom: 1px dotted #555;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14pt;
+            padding: 0 4px;
+            outline: none;
+            background: transparent;
+            color: #000;
+            display: inline-block;
+        }
+        select.editable {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+            font-size: 12pt;
+            padding: 2px 4px;
+        }
+
+        /* Ô nhập lớp dạng inline chuẩn gõ văn bản, nằm sát ngay sau chữ lớp */
+        .class-input {
+            width: 70px;
+            text-align: center;
+            border: none;
+            border-bottom: 1px dotted #555;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14pt;
+            padding: 0 2px;
+            outline: none;
+            background: transparent;
+            color: #000;
+            display: inline;
+        }
+
+        /* Ép dòng vắng tiết và thời gian nằm gọn gàng trên 1 hàng ngang tuyệt đối */
+        .inline-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: nowrap;
+            gap: 4px;
+            white-space: nowrap;
+            width: 100%;
+        }
+        .date-box {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            border-bottom: 1px dotted #555;
+            padding-bottom: 2px;
+            min-width: 90px;
+        }
+        .date-display-text {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 13pt;
+            color: #555;
+            padding: 0 2px;
+            min-width: 80px;
+            display: inline-block;
+        }
+        input.hidden-date-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .calendar-icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 13pt;
+            padding: 0;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 6px 8px;
+            vertical-align: middle;
+            font-size: 13pt;
+        }
+        .signature-section {
+            margin-top: 25px;
+            float: right;
+            text-align: center;
+            width: 280px;
+        }
+
+        /* Responsive cho Điện thoại & Máy tính bảng */
+        @media screen and (max-width: 850px) {
+            body {
+                padding: 0;
+                background-color: #fff;
+            }
+            .top-btn-container {
+                width: 100%;
+                padding: 8px 15px;
+                background: rgba(248, 249, 250, 0.95);
+                text-align: center;
+                border-bottom: 1px solid #ddd;
+                margin-bottom: 0;
+            }
+            .top-btn-container button {
+                margin: 0 4px;
+            }
+            .container {
+                width: 100% !important;
+                min-height: auto !important;
+                padding: 15px !important;
+                box-shadow: none !important;
+            }
+            .signature-section {
+                float: none;
+                margin: 30px auto 0 auto;
+            }
+        }
+
+        /* Cấu hình khi In / Lưu PDF chuẩn A4 */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+            body {
+                background: none;
+                padding: 0;
+            }
+            .top-btn-container {
+                display: none !important;
+            }
+            .container {
+                width: 210mm;
+                height: 297mm;
+                max-height: 297mm;
+                margin: 0;
+                padding: 18mm 20mm 18mm 25mm;
+                box-shadow: none;
+                page-break-after: avoid;
+                page-break-inside: avoid;
+            }
+            .editable, .class-input {
+                border: none !important;
+                background: transparent !important;
+                color: #000 !important;
+            }
+            select.editable {
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                appearance: none;
+            }
+            .calendar-icon-btn {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-btn-container">
+        <button onclick="downloadPDF()">Tải / In PDF</button>
+        <button class="btn-jpg" onclick="downloadJPG()">Tải ảnh JPG</button>
+    </div>
+
+    <div class="container" id="pdf-content">
+        <div class="header">
+            <p style="margin: 0; font-size: 13pt;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
+            <p style="margin: 0; font-size: 13pt; margin-bottom: 8px;">Độc lập – Tự do – Hạnh phúc</p>
+            <h2 style="margin: 12px 0 8px 0; font-size: 15pt;">ĐƠN XIN PHÉP NGHỈ HỌC / VẮNG TIẾT</h2>
+        </div>
+
+        <div class="form-group">
+            <strong>Kính gửi:</strong><br>
+            Ban Giám hiệu Trường THPT Võ Thị Sáu<br>
+            Thầy giáo chủ nhiệm và Giáo viên bộ môn lớp <input type="text" id="classNameHeader" class="class-input" placeholder="">
+        </div>
+
+        <div class="form-group">
+            Tôi tên là: <input type="text" id="parentName" class="editable" placeholder="" style="width: 65%;">
+        </div>
+
+        <div class="form-group">
+            Là phụ huynh của em: <input type="text" id="studentName" class="editable" placeholder="" style="width: 42%;">, học sinh lớp <input type="text" id="classNameStudent" class="class-input" placeholder="">.
+        </div>
+
+        <div class="form-group">
+            Nay tôi làm đơn này xin phép cho em được nghỉ học / vắng tiết theo chi tiết dưới đây:
+        </div>
+
+        <table>
+            <tr>
+                <th style="width: 46%; text-align: center;">Nội dung xin nghỉ / vắng tiết</th>
+                <th style="width: 54%; text-align: center;">Thời gian</th>
+            </tr>
+            <!-- Dòng Nghỉ học -->
+            <tr id="rowNghiHoc">
+                <td>
+                    <div class="inline-row">
+                        <span>Nghỉ học</span>
+                        <select id="nghiBuoi" class="editable" onchange="handleToggleRow('nghi')" style="flex-grow: 1;">
+                            <option value=""></option>
+                            <option value="buổi sáng">Buổi sáng</option>
+                            <option value="buổi chiều">Buổi chiều</option>
+                            <option value="cả ngày">Cả ngày</option>
+                        </select>
+                    </div>
+                </td>
+                <td>
+                    <div class="inline-row">
+                        <span>từ</span>
+                        <div class="date-box">
+                            <span class="date-display-text" id="text_tuNgay">&nbsp;</span>
+                            <input type="date" class="hidden-date-input" onchange="updateDate('tuNgay', this)">
+                        </div>
+                        <button type="button" class="calendar-icon-btn" onclick="triggerPicker(this)">📅</button>
+
+                        <span>đến</span>
+                        <div class="date-box">
+                            <span class="date-display-text" id="text_denNgay">&nbsp;</span>
+                            <input type="date" class="hidden-date-input" onchange="updateDate('denNgay', this)">
+                        </div>
+                        <button type="button" class="calendar-icon-btn" onclick="triggerPicker(this)">📅</button>
+                    </div>
+                </td>
+            </tr>
+            <!-- Dòng Vắng tiết -->
+            <tr id="rowVangTiet">
+                <td>
+                    <div class="inline-row">
+                        <span>Vắng tiết</span>
+                        <select id="tietThu" class="editable" onchange="handleToggleRow('vang')" style="width: 42px;">
+                            <option value=""></option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select> 
+                        <span>buổi</span>
+                        <select id="vangBuoi" class="editable" onchange="handleToggleRow('vang')" style="flex-grow: 1;">
+                            <option value=""></option>
+                            <option value="buổi sáng">Sáng</option>
+                            <option value="buổi chiều">Chiều</option>
+                        </select>
+                    </div>
+                </td>
+                <td>
+                    <div class="inline-row">
+                        <span>ngày</span>
+                        <div class="date-box">
+                            <span class="date-display-text" id="text_ngayVang">&nbsp;</span>
+                            <input type="date" class="hidden-date-input" onchange="updateDate('ngayVang', this)">
+                        </div>
+                        <button type="button" class="calendar-icon-btn" onclick="triggerPicker(this)">📅</button>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <div class="form-group">
+            Lý do xin nghỉ / vắng: <input type="text" id="lyDo" class="editable" placeholder="" style="width: 100%;">
+            <input type="text" class="editable" placeholder="" style="width: 100%; margin-top: 4px;">
+        </div>
+
+        <div class="form-group">
+            Gia đình cam đoan sẽ nhắc nhở cháu chép bài, học bài đầy đủ và thực hiện đúng quy định của nhà trường.
+        </div>
+
+        <div class="form-group">
+            Tôi xin chân thành cảm ơn!
+        </div>
+
+        <div class="signature-section">
+            <p style="margin: 0; white-space: nowrap;">Tp.HCM, ngày <input type="text" id="ngayLamDon" class="editable" style="width: 25px; text-align: center;" placeholder=""/> tháng <input type="text" id="thangLamDon" class="editable" style="width: 25px; text-align: center;" placeholder=""/> năm 20<input type="text" id="namLamDon" class="editable" style="width: 25px; text-align: center; padding: 0;" placeholder=""/></p>
+            <p style="margin: 4px 0 0 0; font-weight: bold;">Phụ huynh</p>
+            <p style="margin: 0; font-size: 12pt; font-style: italic;">(Ký và ghi rõ họ tên)</p>
+            <br><br>
+        </div>
+        <div style="clear: both;"></div>
+    </div>
+
+    <script>
+        // Đồng bộ tự động giữa hai ô nhập tên lớp
+        const classHeader = document.getElementById('classNameHeader');
+        const classStudent = document.getElementById('classNameStudent');
+
+        classHeader.addEventListener('input', function() {
+            classStudent.value = this.value;
+        });
+        classStudent.addEventListener('input', function() {
+            classHeader.value = this.value;
+        });
+
+        function triggerPicker(btn) {
+            const dateInput = btn.previousElementSibling.querySelector('input[type="date"]');
+            if (dateInput) {
+                if (typeof dateInput.showPicker === 'function') {
+                    dateInput.showPicker();
+                } else {
+                    dateInput.click();
+                }
+            }
+        }
+
+        function updateDate(elementId, input) {
+            const displaySpan = document.getElementById('text_' + elementId);
+            if (input.value) {
+                const parts = input.value.split('-'); 
+                if (parts.length === 3) {
+                    displaySpan.textContent = `${parts[2]}/${parts[1]}/${parts[0]}`; 
+                    displaySpan.style.color = '#000';
+                }
+            } else {
+                displaySpan.textContent = "";
+            }
+        }
+
+        function handleToggleRow(type) {
+            const nghiBuoi = document.getElementById('nghiBuoi').value;
+            const tietThu = document.getElementById('tietThu').value;
+            const vangBuoi = document.getElementById('vangBuoi').value;
+
+            const rowNghiHoc = document.getElementById('rowNghiHoc');
+            const rowVangTiet = document.getElementById('rowVangTiet');
+
+            if (type === 'nghi') {
+                if (nghiBuoi !== "") {
+                    rowVangTiet.style.display = 'none';
+                } else {
+                    rowVangTiet.style.display = '';
+                }
+            } else if (type === 'vang') {
+                if (tietThu !== "" || vangBuoi !== "") {
+                    rowNghiHoc.style.display = 'none';
+                } else {
+                    rowNghiHoc.style.display = '';
+                }
+            }
+        }
+
+        function downloadPDF() {
+            window.print();
+        }
+
+        function downloadJPG() {
+            const element = document.getElementById('pdf-content');
+            
+            const inputs = element.querySelectorAll('.editable, .class-input');
+            inputs.forEach(input => {
+                input.style.border = 'none';
+                if(input.tagName === 'SELECT') {
+                    input.style.border = 'none';
+                    input.style.appearance = 'none';
+                    if(!input.value) {
+                        input.style.color = 'transparent';
+                    }
+                }
+            });
+
+            const icons = element.querySelectorAll('.calendar-icon-btn');
+            icons.forEach(icon => icon.style.display = 'none');
+
+            html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Don_xin_nghi_hoc.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 0.98);
+                link.click();
+                location.reload();
+            });
+        }
+    </script>
+
+</body>
+</html>
