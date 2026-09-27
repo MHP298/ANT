@@ -8,10 +8,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
-    <!-- Font chữ nghệ thuật cho lời chào -->
+    <!-- Font chữ viết tay Dancing Script mềm mại, hỗ trợ tiếng Việt trọn vẹn -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -481,7 +481,7 @@
             border-radius: 6px;
         }
 
-        /* Giao diện Chào mừng (Welcome Card) */
+        /* Giao diện Chào mừng (Welcome Card) trang trọng, mềm mại, không có nút */
         .welcome-card-box {
             flex: 1;
             display: flex;
@@ -489,23 +489,19 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 30px 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            padding: 40px 20px;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
             animation: fadeIn 0.8s ease-in-out;
         }
         .welcome-greeting-text {
-            font-family: 'Caveat', 'Patrick Hand', cursive;
-            font-size: 2.6rem;
-            line-height: 1.4;
+            font-family: 'Dancing Script', cursive;
+            font-size: 3.1rem;
+            line-height: 1.5;
             letter-spacing: 0.5px;
-            margin-bottom: 12px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.08);
-        }
-        .welcome-sub-desc {
-            font-size: 0.95rem;
-            opacity: 0.85;
-            max-width: 600px;
+            margin: 0;
+            padding: 0 15px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.05);
         }
 
         @keyframes fadeIn {
@@ -519,7 +515,7 @@
             .sidebar-a { max-height: 220px; flex-shrink: 0; }
             .content-b { min-height: 450px; flex-shrink: 0; }
             .pdf-iframe { height: 350px; }
-            .welcome-greeting-text { font-size: 2rem; }
+            .welcome-greeting-text { font-size: 2.2rem; }
         }
     </style>
 </head>
@@ -874,7 +870,7 @@
             let b = document.getElementById('contentB');
             b.innerHTML = '';
 
-            // --- GIAO DIỆN CHÀO MỪNG KHI VỪA ĐĂNG NHẬP ---
+            // --- GIAO DIỆN CHÀO MỪNG ĐĂNG NHẬP (KHÔNG CÓ NÚT, CHỈ DÙNG FONT VIẾT TAY DANCING SCRIPT) ---
             if (currentView === 'welcome_dashboard') {
                 let hour = new Date().getHours();
                 let isTeacher = (currentUser && (currentUser.role === 'admin' || currentUser.name === 'GVCN' || currentUser.name.includes('admin')));
@@ -882,36 +878,25 @@
                 let y = '';
                 let bgStyle = '';
                 let textColor = '';
-                let descText = '';
 
                 if (hour < 12) {
                     y = 'ngày tràn đầy năng lượng và vui vẻ!';
                     bgStyle = 'linear-gradient(135deg, #fff9db 0%, #ffe8cc 50%, #d8f5a2 100%)';
-                    textColor = '#e8590c';
-                    descText = 'Chúc một buổi sáng làm việc và học tập thật hiệu quả, ngập tràn niềm vui!';
+                    textColor = '#d9480f';
                 } else if (hour < 18) {
                     y = 'buổi chiều đầy phấn khởi, tươi vui!';
                     bgStyle = 'linear-gradient(135deg, #e3fafc 0%, #c5f6fa 50%, #d0ebff 100%)';
                     textColor = '#0c8599';
-                    descText = 'Tiếp tục giữ vững nhiệt huyết để hoàn thành thật tốt công việc buổi chiều nhé!';
                 } else {
                     y = 'buổi tối bình an và một giấc ngủ ngon!';
                     bgStyle = 'linear-gradient(135deg, #f3f0ff 0%, #e5dbff 50%, #dbe4ff 100%)';
                     textColor = '#5f3dc4';
-                    descText = 'Hãy dành thời gian thư giãn, nghỉ ngơi thật thoải mái sau một ngày dài nỗ lực.';
                 }
 
                 b.innerHTML = `
                     <div class="welcome-card-box" style="background:${bgStyle};">
                         <div class="welcome-greeting-text" style="color:${textColor};">
                             Xin chào ${x}, chúc ${x} một ${y}
-                        </div>
-                        <div class="welcome-sub-desc" style="color:${textColor}; font-weight:600;">
-                            ${descText}
-                        </div>
-                        <div style="margin-top:24px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
-                            <button class="menu-btn" style="background:#1d3557; padding:8px 16px; font-size:0.85rem;" onclick="switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti')">📋 Quản lý bài đăng</button>
-                            <button class="menu-btn" style="background:#457b9d; padding:8px 16px; font-size:0.85rem;" onclick="switchView('noti_list')">📢 Xem thông báo chung</button>
                         </div>
                     </div>
                 `;
@@ -922,7 +907,30 @@
                 let sorted = [...notifications].sort((a,b) => b.id - a.id);
                 let sliceNotis = sorted.slice(notiPageOffset, notiPageOffset + 5);
 
+                // LỜI CHÚC DÀNH CHO KHÁCH, PHỤ HUYNH, HỌC SINH GHÉ THĂM TRANG CHỦ
+                let currentHour = new Date().getHours();
+                let visitorGreeting = "";
+                let visitorBg = "";
+                let visitorColor = "";
+
+                if (currentHour < 12) {
+                    visitorGreeting = "Chào buổi sáng! Chúc bạn và gia đình một ngày mới ngập tràn niềm vui, năng lượng tích cực và thật nhiều may mắn!";
+                    visitorBg = "linear-gradient(135deg, #fff9db 0%, #ffe8cc 100%)";
+                    visitorColor = "#d9480f";
+                } else if (currentHour < 18) {
+                    visitorGreeting = "Chúc bạn một buổi chiều ấm áp, công việc thuận lợi và luôn giữ trọn nụ cười rạng rỡ trên môi!";
+                    visitorBg = "linear-gradient(135deg, #e3fafc 0%, #c5f6fa 100%)";
+                    visitorColor = "#0c8599";
+                } else {
+                    visitorGreeting = "Chúc bạn một buổi tối an lành, thảnh thơi bên người thân yêu và có một giấc ngủ thật ngon lành!";
+                    visitorBg = "linear-gradient(135deg, #f3f0ff 0%, #e5dbff 100%)";
+                    visitorColor = "#5f3dc4";
+                }
+
                 b.innerHTML += `
+                    <div style="background:${visitorBg}; color:${visitorColor}; padding:10px 16px; border-radius:8px; margin-bottom:8px; font-family:'Dancing Script', cursive; font-size:1.45rem; font-weight:700; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.04); letter-spacing:0.3px;">
+                        ✨ ${visitorGreeting}
+                    </div>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                         <h3 style="color:var(--primary); font-size: 0.95rem;">📢 Danh sách thông báo</h3>
                         <button class="menu-btn" style="padding:4px 8px; font-size:0.75rem;" onclick="openSearchModal()">🔍 Tìm kiếm</button>
@@ -1411,7 +1419,6 @@
                 }
                 initMultiBannerRows();
             }
-            // --- GIAO DIỆN DANH SÁCH ALBUM ---
             else if (currentView === 'admin_manage_album') {
                 b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">📁 Danh Sách Album (Kỷ Niệm & Banner)</h3>`;
                 let pureAlbums = albums.filter(a => a.title && !a.title.includes("Thông báo"));
@@ -2411,6 +2418,7 @@
             navigator.clipboard.writeText(infoBox.value).then(() => alert("Đã copy thông tin tài khoản!"));
         }
 
+        // --- CÁC HÀM XỬ LÝ THANH CÔNG CỤ SOẠN THẢO ---
         function toggleFormat(btn, cmd) {
             document.execCommand(cmd, false, null);
             btn.classList.toggle('active');
