@@ -527,7 +527,11 @@
         let albumIndex = 0;
         let editingNotiId = null;
         let editingAlbumId = null;
-        let currentMultiLinks = []; // Mảng lưu các link ảnh độc lập
+        let currentMultiLinks = []; // Mảng độc lập lưu các link ảnh thông báo đang nhập
+
+        // Biến lưu tạm dữ liệu form đăng thông báo để không bị mất khi qua lại trang phụ
+        let tempPostTitle = "";
+        let tempPostContent = "";
 
         let menuState = {
             adminAccSub: false,
@@ -680,6 +684,14 @@
         }
 
         function switchView(view) {
+            // Lưu lại tạm thời tiêu đề và nội dung nếu đang ở form đăng thông báo trước khi chuyển sang xem trước nhiều ảnh
+            if (currentView === 'admin_post' || currentView === 'sub_post') {
+                let tElem = document.getElementById('postTitle');
+                let cElem = document.getElementById('postContent');
+                if (tElem) tempPostTitle = tElem.value;
+                if (cElem) tempPostContent = cElem.innerHTML;
+            }
+
             if (view !== 'admin_create_acc' && view !== 'admin_del_acc' && view !== 'admin_manage_noti' && view !== 'trash_noti' && view !== 'admin_album' && view !== 'admin_banner' && view !== 'admin_manage_album') {
                 menuState.adminAccSub = false;
                 menuState.adminNotiSub = false;
@@ -688,8 +700,11 @@
             currentView = view;
             notiPageOffset = 0;
             homeworkPageOffset = 0;
-            if (view !== 'admin_post' && view !== 'sub_post') {
+            if (view !== 'admin_post' && view !== 'sub_post' && view !== 'admin_multi_noti') {
                 editingNotiId = null;
+                tempPostTitle = "";
+                tempPostContent = "";
+                currentMultiLinks = [];
             }
             if (view !== 'admin_album' && view !== 'sub_album') {
                 editingAlbumId = null;
@@ -937,10 +952,10 @@
             }
             else if (currentView === 'admin_post' || currentView === 'sub_post') {
                 let isEditing = editingNotiId !== null;
-                let editTitle = ''; let editContent = ''; 
-                currentMultiLinks = []; // Reset mảng link khi mở form mới hoặc sửa
+                let editTitle = tempPostTitle; 
+                let editContent = tempPostContent; 
 
-                if (isEditing) {
+                if (isEditing && !tempPostTitle && !tempPostContent) {
                     let item = notifications.find(n => n.id === editingNotiId);
                     if (item) { 
                         editTitle = item.title; 
@@ -1167,10 +1182,10 @@
                 `;
                 initBannerInputs();
             }
-            // --- GIAO DIỆN DANH SÁCH ALBUM (CHỈ HIỆN ALBUM KỶ NIỆM & BANNER) ---
+            // --- GIAO DIỆN DANH SÁCH ALBUM (CHỈ LỌC ALBUM THỰC THỤ, KHÔNG LẤY THÔNG BÁO) ---
             else if (currentView === 'admin_manage_album') {
                 b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">📁 Danh Sách Album (Kỷ Niệm & Banner)</h3>`;
-                let pureAlbums = albums.filter(a => a.title);
+                let pureAlbums = albums.filter(a => a.title && !a.title.includes("Thông báo"));
                 if (pureAlbums.length === 0) {
                     b.innerHTML += '<p style="color:#6c757d;">Chưa có album nào.</p>';
                 } else {
@@ -1487,7 +1502,7 @@
                 return;
             }
 
-            currentMultiLinks = linksArray; // Lưu thành mảng độc lập
+            currentMultiLinks = linksArray; // Lưu mảng độc lập
             alert(`Đã nhận ${linksArray.length} ảnh thông báo! Đang quay lại trang đăng...`);
             switchView('admin_post');
         }
@@ -2067,6 +2082,8 @@
             currentMultiLinks = []; 
             let item = notifications.find(n => n.id === id);
             if (item) {
+                tempPostTitle = item.title;
+                tempPostContent = item.content;
                 if (Array.isArray(item.mediaUrl)) {
                     currentMultiLinks = [...item.mediaUrl];
                 } else if (typeof item.mediaUrl === 'string' && item.mediaUrl.trim().length > 0) {
@@ -2079,12 +2096,16 @@
         function cancelEdit() { 
             editingNotiId = null; 
             currentMultiLinks = [];
+            tempPostTitle = "";
+            tempPostContent = "";
             switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti'); 
         }
 
         function submitNotification() {
-            let title = document.getElementById('postTitle').value.trim();
-            let content = document.getElementById('postContent').innerHTML.trim();
+            let titleElem = document.getElementById('postTitle');
+            let contentElem = document.getElementById('postContent');
+            let title = titleElem ? titleElem.value.trim() : tempPostTitle;
+            let content = contentElem ? contentElem.innerHTML.trim() : tempPostContent;
             let fileInput = document.getElementById('postMediaFile');
 
             if (!title || !content || content === "<br>") { alert("Vui lòng nhập tiêu đề và nội dung!"); return; }
@@ -2096,7 +2117,7 @@
                         item.title = title;
                         item.content = content;
                         if (mediaArray.length > 0) {
-                            item.mediaUrl = mediaArray; // Lưu dưới dạng Mảng (Array) độc lập
+                            item.mediaUrl = mediaArray; // Lưu dưới dạng Mảng độc lập
                             item.mediaType = mediaType;
                         }
                     }
@@ -2109,7 +2130,7 @@
 
                     notifications.push({
                         id: newId, title, content, timestamp: Date.now(), date: dateStr,
-                        author: currentUser.name, mediaUrl: mediaArray, mediaType: mediaType || "", isTemporary: fileInput.files && fileInput.files.length > 0
+                        author: currentUser.name, mediaUrl: mediaArray, mediaType: mediaType || "", isTemporary: fileInput && fileInput.files && fileInput.files.length > 0
                     });
                     alert("Đăng thông báo thành công!");
                 }
@@ -2117,12 +2138,14 @@
                 saveDataToFirebase();
                 editingNotiId = null;
                 currentMultiLinks = [];
+                tempPostTitle = "";
+                tempPostContent = "";
                 switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti');
             };
 
             if (currentMultiLinks.length > 0) {
                 processSave(currentMultiLinks, 'image');
-            } else if (fileInput.files && fileInput.files[0]) {
+            } else if (fileInput && fileInput.files && fileInput.files[0]) {
                 let reader = new FileReader();
                 reader.onload = (e) => {
                     processSave([e.target.result], 'image');
