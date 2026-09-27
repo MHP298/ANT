@@ -394,6 +394,43 @@
         }
         .btn-download:hover { background: #21867a; }
 
+        /* Khung hiển thị ảnh từng trang tối ưu tỷ lệ to nhất của phần B */
+        .doc-page-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+            margin-top: 12px;
+        }
+        .doc-page-item {
+            width: 100%;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .doc-page-img {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+            border-radius: 6px;
+            cursor: pointer;
+            display: block;
+        }
+        .doc-page-footer {
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0 4px;
+        }
+
         @media screen and (max-width: 768px) {
             body {
                 height: auto;
@@ -706,7 +743,7 @@
                 if (aElem) tempAlbumTitle = aElem.value;
             }
 
-            if (view !== 'admin_create_acc' && view !== 'admin_del_acc' && view !== 'admin_manage_noti' && view !== 'trash_noti' && view !== 'admin_album' && view !== 'admin_banner' && view !== 'admin_manage_album' && view !== 'admin_multi_album' && view !== 'admin_multi_banner') {
+            if (view !== 'admin_create_acc' && view !== 'admin_del_acc' && view !== 'admin_manage_noti' && view !== 'trash_noti' && view !== 'admin_album' && view !== 'admin_banner' && view !== 'admin_manage_album' && view !== 'admin_multi_album' && view !== 'admin_multi_banner' && view !== 'admin_multi_hw') {
                 menuState.adminAccSub = false;
                 menuState.adminNotiSub = false;
                 menuState.adminMediaSub = false;
@@ -873,8 +910,8 @@
                         <button class="menu-btn" style="padding:5px 10px; font-size:0.8rem;" onclick="switchView('homework_list')">⬅️ Quay lại danh sách</button>
                         <span style="font-size:0.75rem; color:#6c757d;">📅 ${item.date}</span>
                     </div>
-                    <div style="background:white; padding:14px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.05);">
-                        <h3 style="color:var(--primary); margin-bottom:4px; font-size:1rem;">${item.title}</h3>
+                    <div style="background:white; padding:14px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.05); display:flex; flex-direction:column;">
+                        <h3 style="color:var(--primary); margin-bottom:4px; font-size:1.05rem;">${item.title}</h3>
                         <p style="font-size:0.78rem; color:#457b9d; margin-bottom:10px;">Đăng bởi: <b>${item.author}</b></p>
                         <hr style="border:0; border-top:1px solid #eee; margin-bottom:10px;">
                         <div style="font-size:0.9rem; line-height:1.5;">${item.content}</div>
@@ -885,8 +922,6 @@
                 let item = notifications.find(n => n.id === window.currentDetailId);
                 if (!item) { switchView('noti_list'); return; }
 
-                let mediaHtml = '';
-                let downloadHtml = '';
                 let urls = [];
                 if (Array.isArray(item.mediaUrl)) {
                     urls = item.mediaUrl;
@@ -894,19 +929,22 @@
                     urls = item.mediaUrl.split('\n').filter(u => u.trim().length > 0);
                 }
 
+                let pagesHtml = '';
                 if (urls.length > 0) {
-                    if (urls.length > 1) {
-                        mediaHtml = `<div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">`;
-                        urls.forEach(u => {
-                            let parsedU = parseGoogleDriveLink(u.trim());
-                            mediaHtml += `<img src="${parsedU}" style="max-width:120px; max-height:120px; object-fit:cover; border-radius:6px; cursor:pointer;" onclick="openZoomModal('${parsedU}')">`;
-                        });
-                        mediaHtml += `</div>`;
-                    } else {
-                        let parsedU = parseGoogleDriveLink(urls[0]);
-                        mediaHtml = `<img src="${parsedU}" style="max-width:100%; max-height:260px; border-radius:6px; margin-top:8px; cursor:pointer;" onclick="openZoomModal('${parsedU}')" title="Click để phóng to ảnh">`;
-                    }
-                    downloadHtml = `<a href="${parseGoogleDriveLink(urls[0].trim())}" download="anh_thongbao_${item.id}.png" class="btn-download" target="_blank">📥 Download Ảnh</a>`;
+                    pagesHtml = `<div class="doc-page-container">`;
+                    urls.forEach((u, idx) => {
+                        let parsedU = parseGoogleDriveLink(u.trim());
+                        pagesHtml += `
+                            <div class="doc-page-item">
+                                <img src="${parsedU}" class="doc-page-img" onclick="openZoomModal('${parsedU}')" title="Click để phóng to ảnh trang ${idx + 1}">
+                                <div class="doc-page-footer">
+                                    <span style="font-size:0.75rem; font-weight:bold; color:var(--primary);">Trang ${idx + 1} / ${urls.length}</span>
+                                    <a href="${parsedU}" download="anh_${item.id}_trang_${idx + 1}.png" class="btn-download" target="_blank">📥 Download Trang ${idx + 1}</a>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    pagesHtml += `</div>`;
                 }
 
                 b.innerHTML = `
@@ -914,41 +952,42 @@
                         <button class="menu-btn" style="padding:5px 10px; font-size:0.8rem;" onclick="switchView('noti_list')">⬅️ Quay lại danh sách</button>
                         <span style="font-size:0.75rem; color:#6c757d;">📅 ${item.date}</span>
                     </div>
-                    <div style="background:white; padding:14px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.05);">
-                        <h3 style="color:var(--primary); margin-bottom:4px; font-size:1rem;">Thông báo số ${item.id}: ${item.title}</h3>
+                    <div style="background:white; padding:14px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.05); display:flex; flex-direction:column;">
+                        <h3 style="color:var(--primary); margin-bottom:4px; font-size:1.05rem;">Thông báo số ${item.id}: ${item.title}</h3>
                         <p style="font-size:0.78rem; color:#457b9d; margin-bottom:10px;">Đăng bởi: <b>${item.author}</b></p>
                         <hr style="border:0; border-top:1px solid #eee; margin-bottom:10px;">
-                        <div style="font-size:0.9rem; line-height:1.5;">${item.content}</div>
-                        ${mediaHtml}
-                        <div style="margin-top:10px;">${downloadHtml}</div>
+                        ${item.content && item.content !== "<br>" ? `<div style="font-size:0.92rem; line-height:1.6; margin-bottom:8px;">${item.content}</div>` : ''}
+                        ${pagesHtml}
                     </div>
                 `;
             }
             else if (currentView === 'album_list') {
                 b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">🖼️ Góc Kỷ Niệm</h3>`;
-                if (albums.length === 0) {
+                let pureAlbums = albums.filter(a => a.title && !a.title.includes("Thông báo"));
+                if (pureAlbums.length === 0) {
                     b.innerHTML += '<p style="color:#6c757d;">Chưa có nội dung nào được đăng.</p>';
                 } else {
-                    let alb = albums[albumIndex];
+                    if (albumIndex >= pureAlbums.length) albumIndex = 0;
+                    let alb = pureAlbums[albumIndex];
                     let mediaRender = '';
                     let parsedAlbumUrl = parseGoogleDriveLink(alb.mediaUrl);
                     if (alb.type === 'video' || (alb.mediaUrl && alb.mediaUrl.endsWith('.mp4'))) {
-                        mediaRender = `<video controls style="max-width:100%; max-height:260px; border-radius:6px;"><source src="${parsedAlbumUrl}" type="video/mp4">Trình duyệt không hỗ trợ video.</video>`;
+                        mediaRender = `<video controls style="width:100%; max-height:480px; border-radius:6px; object-fit:contain;"><source src="${parsedAlbumUrl}" type="video/mp4">Trình duyệt không hỗ trợ video.</video>`;
                     } else {
-                        mediaRender = `<img src="${parsedAlbumUrl}" alt="Ảnh kỷ niệm" style="max-width:100%; max-height:260px; object-fit:contain; border-radius:6px; cursor:pointer;" onclick="openZoomModal('${parsedAlbumUrl}')" title="Click để phóng to ảnh">`;
+                        mediaRender = `<img src="${parsedAlbumUrl}" alt="Ảnh kỷ niệm" style="width:100%; max-height:480px; object-fit:contain; border-radius:6px; cursor:pointer;" onclick="openZoomModal('${parsedAlbumUrl}')" title="Click để phóng to ảnh">`;
                     }
 
                     b.innerHTML += `
                         <div style="background:white; padding:12px; border-radius:8px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.04); display:flex; flex-direction:column; align-items:center;">
                             <h4 style="color:var(--primary); margin-bottom:4px; font-size:0.95rem;">${alb.title}</h4>
-                            <p style="font-size:0.75rem; color:#6c757d; margin-bottom:8px;">Đăng bởi: ${alb.author} (Ảnh ${albumIndex + 1} / ${albums.length})</p>
-                            <div style="flex:1; display:flex; align-items:center; justify-content:center; max-height:270px; overflow:hidden;">
+                            <p style="font-size:0.75rem; color:#6c757d; margin-bottom:8px;">Đăng bởi: ${alb.author} (Ảnh ${albumIndex + 1} / ${pureAlbums.length})</p>
+                            <div style="width:100%; display:flex; align-items:center; justify-content:center; overflow:hidden;">
                                 ${mediaRender}
                             </div>
                         </div>
                         <div class="pagination-bar" style="margin-top:8px;">
-                            <button class="menu-btn" style="padding:5px 12px; font-size:0.78rem;" onclick="changeAlbum(-1)" ${albumIndex === 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>⬅️ Ảnh trước</button>
-                            <button class="menu-btn" style="padding:5px 12px; font-size:0.78rem;" onclick="changeAlbum(1)" ${albumIndex === albums.length - 1 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>Ảnh sau ➡️</button>
+                            <button class="menu-btn" style="padding:6px 14px; font-size:0.82rem;" onclick="changeAlbum(-1)" ${albumIndex === 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>⬅️ Ảnh trước</button>
+                            <button class="menu-btn" style="padding:6px 14px; font-size:0.82rem;" onclick="changeAlbum(1)" ${albumIndex === pureAlbums.length - 1 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>Ảnh sau ➡️</button>
                         </div>
                     `;
                 }
@@ -1013,7 +1052,7 @@
                     </div>
                     <div class="form-group" style="display:flex; flex-direction:row; align-items:center; gap:8px;">
                         <div style="flex:1; display:flex; flex-direction:column; gap:3px;">
-                            <label>Tải lên từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Các ảnh tải từ máy nếu từ 2 ảnh trở lên sẽ tự động chừa lại ảnh đầu tiên sau 7 ngày; Dán link Drive/URL lưu vĩnh viễn)</span>:</label>
+                            <label>Tải lên từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Nếu tải từ 2 ảnh trở lên từ máy, hệ thống sẽ chừa lại 1 ảnh đầu tiên sau 7 ngày; nếu dán link Drive/URL lưu vĩnh viễn)</span>:</label>
                             <input type="file" id="postMediaFile" accept="image/*,video/mp4" multiple onchange="checkFileLimitWarning(this)">
                         </div>
                         <button type="button" class="menu-btn" style="background:#2a9d8f; margin-top:16px; padding:6px 10px; font-size:0.75rem; white-space:nowrap;" onclick="switchView('admin_multi_noti')">🖼️ Đăng nhiều ảnh</button>
@@ -1036,8 +1075,7 @@
                         <div style="flex:1.2; display:flex; flex-direction:column; background:white; padding:12px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03); overflow-y:auto; gap:8px;">
                             <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
                                 <label>Danh sách đường dẫn ảnh thông báo:</label>
-                                <div id="multiNotiLinksContainer" style="display:flex; flex-direction:column; gap:6px; max-height:250px; overflow-y:auto; padding-right:4px;">
-                                </div>
+                                <div id="multiNotiLinksContainer" style="display:flex; flex-direction:column; gap:6px; max-height:250px; overflow-y:auto; padding-right:4px;"></div>
                             </div>
                             <div style="display:flex; justify-content:center; gap:8px; margin-top:4px;">
                                 <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="submitMultiNotiImages()">🚀 Xong & Quay Lại</button>
@@ -1102,8 +1140,7 @@
                         <div style="flex:1.2; display:flex; flex-direction:column; background:white; padding:12px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03); overflow-y:auto; gap:8px;">
                             <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
                                 <label>Danh sách đường dẫn ảnh báo bài:</label>
-                                <div id="multiHwLinksContainer" style="display:flex; flex-direction:column; gap:6px; max-height:250px; overflow-y:auto; padding-right:4px;">
-                                </div>
+                                <div id="multiHwLinksContainer" style="display:flex; flex-direction:column; gap:6px; max-height:250px; overflow-y:auto; padding-right:4px;"></div>
                             </div>
                             <div style="display:flex; justify-content:center; gap:8px; margin-top:4px;">
                                 <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="submitMultiHwImages()">🚀 Xong & Quay Lại</button>
@@ -1156,8 +1193,7 @@
                         <div style="flex:1.2; display:flex; flex-direction:column; background:white; padding:12px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03); overflow-y:auto; gap:8px;">
                             <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
                                 <label>Danh sách đường dẫn ảnh kỷ niệm:</label>
-                                <div id="multiAlbumLinksContainer" style="display:flex; flex-direction:column; gap:6px; max-height:250px; overflow-y:auto; padding-right:4px;">
-                                </div>
+                                <div id="multiAlbumLinksContainer" style="display:flex; flex-direction:column; gap:6px; max-height:250px; overflow-y:auto; padding-right:4px;"></div>
                             </div>
                             <div style="display:flex; justify-content:center; gap:8px; margin-top:4px;">
                                 <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="submitMultiAlbumImages()">🚀 Xong & Quay Lại</button>
@@ -1200,8 +1236,7 @@
                         <div style="flex:1.2; display:flex; flex-direction:column; background:white; padding:12px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03); overflow-y:auto; gap:8px;">
                             <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
                                 <label>Danh sách đường dẫn ảnh banner:</label>
-                                <div id="multiBannerLinksContainer" style="display:flex; flex-direction:column; gap:6px; max-height:250px; overflow-y:auto; padding-right:4px;">
-                                </div>
+                                <div id="multiBannerLinksContainer" style="display:flex; flex-direction:column; gap:6px; max-height:250px; overflow-y:auto; padding-right:4px;"></div>
                             </div>
                             <div style="display:flex; justify-content:center; gap:8px; margin-top:4px;">
                                 <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="submitMultiBannerImages()">🚀 Xong & Quay Lại</button>
@@ -1244,22 +1279,18 @@
                 b.innerHTML = `
                     <div style="max-width:380px; margin: 10px auto; width:100%; display:flex; flex-direction:column; gap:8px;">
                         <h3 style="color:var(--primary); text-align:center; font-size: 1rem; margin-bottom:2px;">➕ Tạo tài khoản/pass mới</h3>
-                        
                         <div class="form-group">
                             <label>Họ tên tài khoản đầy đủ:</label>
                             <input type="text" id="newStudentName" placeholder="Nhập họ tên đầy đủ...">
                         </div>
-
                         <div class="form-group">
                             <label>Tên tài khoản:</label>
                             <input type="text" id="newAccName" placeholder="Nhập tên tài khoản...">
                         </div>
-
                         <div style="display:flex; justify-content:center; gap:12px; margin-top:4px;">
                             <button class="menu-btn" style="width:140px; justify-content:center; background:#2a9d8f;" onclick="saveOrUpdateAccount()">Tạo mới</button>
                             <button class="menu-btn" style="width:140px; justify-content:center; background:#6c757d;" onclick="switchView('admin_manage_noti')">Hủy</button>
                         </div>
-
                         <div style="margin-top:6px;">
                             <label style="font-weight:600; font-size:0.75rem; color:var(--primary);">Thông tin tài khoản:</label>
                             <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
@@ -1272,9 +1303,7 @@
             }
             else if (currentView === 'admin_del_acc') {
                 b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">🗑️ Danh Sách Tài Khoản</h3>`;
-                
                 let filteredAccounts = subAccounts.filter(acc => acc.name.toLowerCase() !== 'admin');
-
                 if (filteredAccounts.length === 0) {
                     b.innerHTML += '<p style="color:#6c757d;">Chưa có tài khoản nào khác.</p>';
                 } else {
@@ -1357,7 +1386,7 @@
             }
         }
 
-        // --- KHỞI TẠO CÁC DÒNG LINK ĐỘNG (LUÔN CÓ SẴN 1 Ô TRỐNG CUỐI) ---
+        // --- KHỞI TẠO CÁC DÒNG LINK ĐỘNG (LUÔN CÓ 1 DÒNG TRỐNG SẴN ĐỂ GÕ TIẾP) ---
         function initMultiNotiRows() {
             let container = document.getElementById('multiNotiLinksContainer');
             if (!container) return;
@@ -1405,7 +1434,7 @@
                 row.style.cssText = 'display:flex; gap:6px; align-items:center;';
                 row.innerHTML = `
                     <input type="text" class="multi-album-input" value="${link}" placeholder="Dán link ảnh kỷ niệm..." style="flex:1;" oninput="autoPreviewMultiAlbum(this)">
-                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiAlbumLink(this)">👁️ Xem lại</button>
+                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleAlbumLink(this)">👁️ Xem lại</button>
                     <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeMultiAlbumRow(this)">❌</button>
                 `;
                 container.appendChild(row);
@@ -1423,7 +1452,7 @@
                 row.style.cssText = 'display:flex; gap:6px; align-items:center;';
                 row.innerHTML = `
                     <input type="text" class="multi-banner-input" value="${link}" placeholder="Dán link ảnh banner..." style="flex:1;" oninput="autoPreviewMultiBanner(this)">
-                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiBannerLink(this)">👁️ Xem lại</button>
+                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleBannerLink(this)">👁️ Xem lại</button>
                     <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeMultiBannerRow(this)">❌</button>
                 `;
                 container.appendChild(row);
@@ -1556,60 +1585,51 @@
 
         function previewMultiNotiLink(btn) {
             let row = btn.closest('.multi-link-row');
-            let input = row.querySelector('.multi-input-link');
-            autoPreviewMultiNoti(input);
+            autoPreviewMultiNoti(row.querySelector('.multi-input-link'));
         }
 
         function previewMultiHwLink(btn) {
             let row = btn.closest('.multi-hw-row');
-            let input = row.querySelector('.multi-hw-input');
-            autoPreviewMultiHw(input);
+            autoPreviewMultiHw(row.querySelector('.multi-hw-input'));
         }
 
         function previewSingleAlbumLink(btn) {
             let row = btn.closest('.multi-album-row');
-            let input = row.querySelector('.multi-album-input');
-            autoPreviewMultiAlbum(input);
+            autoPreviewMultiAlbum(row.querySelector('.multi-album-input'));
         }
 
         function previewSingleBannerLink(btn) {
             let row = btn.closest('.multi-banner-row');
-            let input = row.querySelector('.multi-banner-input');
-            autoPreviewMultiBanner(input);
+            autoPreviewMultiBanner(row.querySelector('.multi-banner-input'));
         }
 
         function removeMultiNotiRow(btn) {
             let row = btn.closest('.multi-link-row');
             let container = document.getElementById('multiNotiLinksContainer');
-            let allRows = container.querySelectorAll('.multi-link-row');
-            if (allRows.length > 1) { row.remove(); } else { row.querySelector('.multi-input-link').value = ''; }
+            if (container.querySelectorAll('.multi-link-row').length > 1) row.remove(); else row.querySelector('.multi-input-link').value = '';
         }
 
         function removeMultiHwRow(btn) {
             let row = btn.closest('.multi-hw-row');
             let container = document.getElementById('multiHwLinksContainer');
-            let allRows = container.querySelectorAll('.multi-hw-row');
-            if (allRows.length > 1) { row.remove(); } else { row.querySelector('.multi-hw-input').value = ''; }
+            if (container.querySelectorAll('.multi-hw-row').length > 1) row.remove(); else row.querySelector('.multi-hw-input').value = '';
         }
 
         function removeMultiAlbumRow(btn) {
             let row = btn.closest('.multi-album-row');
             let container = document.getElementById('multiAlbumLinksContainer');
-            let allRows = container.querySelectorAll('.multi-album-row');
-            if (allRows.length > 1) { row.remove(); } else { row.querySelector('.multi-album-input').value = ''; }
+            if (container.querySelectorAll('.multi-album-row').length > 1) row.remove(); else row.querySelector('.multi-album-input').value = '';
         }
 
         function removeMultiBannerRow(btn) {
             let row = btn.closest('.multi-banner-row');
             let container = document.getElementById('multiBannerLinksContainer');
-            let allRows = container.querySelectorAll('.multi-banner-row');
-            if (allRows.length > 1) { row.remove(); } else { row.querySelector('.multi-banner-input').value = ''; }
+            if (container.querySelectorAll('.multi-banner-row').length > 1) row.remove(); else row.querySelector('.multi-banner-input').value = '';
         }
 
         function submitMultiNotiImages() {
-            let inputElems = document.querySelectorAll('.multi-input-link');
             let linksArray = [];
-            inputElems.forEach(inp => {
+            document.querySelectorAll('.multi-input-link').forEach(inp => {
                 let val = inp.value.trim();
                 if (val) linksArray.push(parseGoogleDriveLink(val));
             });
@@ -1619,9 +1639,8 @@
         }
 
         function submitMultiHwImages() {
-            let inputElems = document.querySelectorAll('.multi-hw-input');
             let linksArray = [];
-            inputElems.forEach(inp => {
+            document.querySelectorAll('.multi-hw-input').forEach(inp => {
                 let val = inp.value.trim();
                 if (val) linksArray.push(parseGoogleDriveLink(val));
             });
@@ -1665,14 +1684,8 @@
 
         function previewScheduleFileWithWarning() {
             let fileInput = document.getElementById('scheduleFileInput');
-            let box = document.getElementById('schedulePreviewArea');
             if (fileInput.files && fileInput.files[0]) {
                 alert("⚠️ CẢNH BÁO: Ảnh TKB tải lên từ máy chỉ hiển thị trong 7 ngày!");
-                let reader = new FileReader();
-                reader.onload = (e) => {
-                    box.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${e.target.result}')" title="Click để phóng to">`;
-                };
-                reader.readAsDataURL(fileInput.files[0]);
             }
         }
 
@@ -1682,7 +1695,7 @@
             if (!box) return;
             if (link) {
                 let parsed = parseGoogleDriveLink(link);
-                box.innerHTML = `<img src="${parsed}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parsed}')" title="Click để phóng to">`;
+                box.innerHTML = `<img src="${parsed}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parsed}')">`;
             } else {
                 box.innerHTML = scheduleUrl ? `<img src="${scheduleUrl}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${scheduleUrl}')">` : '<span style="color:#6c757d; font-size:0.8rem;">Chưa có ảnh TKB.</span>';
             }
@@ -1694,7 +1707,7 @@
             if (fileInput.files && fileInput.files[0]) {
                 let reader = new FileReader();
                 reader.onload = (e) => {
-                    box.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${e.target.result}')" title="Click để phóng to">`;
+                    box.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${e.target.result}')">`;
                 };
                 reader.readAsDataURL(fileInput.files[0]);
             }
@@ -1779,7 +1792,7 @@
                 if (mediaUrls && mediaUrls.length > 0) {
                     mediaUrls.forEach(u => {
                         let parsedU = parseGoogleDriveLink(u);
-                        content += `<br><img src="${parsedU}" style="display:block; margin:4px auto; max-width:100%;">`;
+                        content += `<br><div style="width:100%; margin-top:8px;"><img src="${parsedU}" style="width:100%; max-width:100%; height:auto; border-radius:6px; cursor:pointer;" onclick="openZoomModal('${parsedU}')"></div>`;
                     });
                 }
 
@@ -1806,7 +1819,7 @@
 
             if (currentHwMultiLinks.length > 0) {
                 processHwSave(currentHwMultiLinks);
-            } else if (fileInput.files && fileInput.files[0]) {
+            } else if (fileInput && fileInput.files && fileInput.files[0]) {
                 let reader = new FileReader();
                 reader.onload = (e) => {
                     processHwSave([e.target.result]);
@@ -1970,14 +1983,15 @@
             if (confirm("Xóa toàn bộ banner?")) { 
                 banners = []; 
                 saveDataToFirebase(); 
-                renderBannerManagementUI(); 
+                renderBannerSlideshow(); 
             } 
         }
 
         function changeAlbum(step) {
+            let pureAlbums = albums.filter(a => a.title && !a.title.includes("Thông báo"));
             albumIndex += step;
             if (albumIndex < 0) albumIndex = 0;
-            if (albumIndex >= albums.length) albumIndex = albums.length - 1;
+            if (albumIndex >= pureAlbums.length) albumIndex = pureAlbums.length - 1;
             renderContentB();
         }
 
@@ -2186,7 +2200,6 @@
             if (confirm("Xóa TKB này?")) {
                 scheduleUrl = "";
                 saveDataToFirebase();
-                alert("Đã xóa Thời Khóa Biểu!");
                 renderContentB();
             }
         }
