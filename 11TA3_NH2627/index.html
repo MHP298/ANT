@@ -253,9 +253,10 @@
         .editor-toolbar {
             display: flex;
             flex-wrap: wrap;
-            gap: 3px;
+            align-items: center;
+            gap: 4px;
             background: #e9ecef;
-            padding: 3px;
+            padding: 4px 6px;
             border-top-left-radius: 6px;
             border-top-right-radius: 6px;
             border: 1px solid #ced4da;
@@ -264,14 +265,46 @@
         .editor-toolbar button {
             background: white;
             border: 1px solid #ced4da;
-            padding: 2px 6px;
+            padding: 3px 7px;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 0.75rem;
+            font-size: 0.78rem;
             color: var(--primary);
+            transition: all 0.15s ease-in-out;
         }
         .editor-toolbar button:hover { background: #dee2e6; }
+        .editor-toolbar button.active {
+            background: var(--primary) !important;
+            color: #ffffff !important;
+            border-color: var(--primary) !important;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.25);
+        }
+
+        .color-picker-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: white;
+            border: 1px solid #ced4da;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.78rem;
+            font-weight: bold;
+            color: var(--primary);
+            user-select: none;
+        }
+        .color-picker-label:hover { background: #dee2e6; }
+        .color-picker-label input[type="color"] {
+            cursor: pointer;
+            border: none;
+            width: 18px;
+            height: 18px;
+            padding: 0;
+            background: none;
+            outline: none;
+        }
 
         .rich-editor {
             min-height: 80px;
@@ -284,11 +317,6 @@
             background: white;
             font-size: 0.82rem;
             outline: none;
-        }
-        .rich-editor img {
-            display: block;
-            margin: 0 auto;
-            max-width: 100%;
         }
 
         .password-wrapper {
@@ -390,11 +418,10 @@
             font-weight: bold;
             font-size: 0.82rem;
             display: inline-block;
-            margin-top: 8px;
+            margin-top: 4px;
         }
         .btn-download:hover { background: #21867a; }
 
-        /* Khung hiển thị ảnh từng trang tối ưu tỷ lệ to nhất của phần B */
         .doc-page-container {
             display: flex;
             flex-direction: column;
@@ -431,26 +458,30 @@
             padding: 0 4px;
         }
 
+        .pdf-viewer-container {
+            width: 100%;
+            margin-top: 14px;
+            background: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .pdf-iframe {
+            width: 100%;
+            height: 550px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+        }
+
         @media screen and (max-width: 768px) {
-            body {
-                height: auto;
-                min-height: 100vh;
-                overflow-y: auto;
-            }
-            .main-container {
-                display: flex;
-                flex-direction: column;
-                height: auto;
-                overflow: visible;
-            }
-            .sidebar-a {
-                max-height: 220px;
-                flex-shrink: 0;
-            }
-            .content-b {
-                min-height: 450px;
-                flex-shrink: 0;
-            }
+            body { height: auto; min-height: 100vh; overflow-y: auto; }
+            .main-container { display: flex; flex-direction: column; height: auto; overflow: visible; }
+            .sidebar-a { max-height: 220px; flex-shrink: 0; }
+            .content-b { min-height: 450px; flex-shrink: 0; }
+            .pdf-iframe { height: 350px; }
         }
     </style>
 </head>
@@ -572,7 +603,9 @@
 
         let tempPostTitle = "";
         let tempPostContent = "";
+        let tempPostPdf = "";
         let tempHwContent = "";
+        let tempHwPdf = "";
         let tempAlbumTitle = "";
 
         let menuState = {
@@ -591,6 +624,26 @@
             let match = url.match(/(?:\/d\/|id=)([a-zA-Z0-9_-]+)/);
             if (match && match[1]) {
                 return `https://lh3.googleusercontent.com/d/${match[1]}`;
+            }
+            return url;
+        }
+
+        function parseGoogleDrivePdfEmbed(url) {
+            if (!url) return "";
+            url = url.trim();
+            let match = url.match(/(?:\/d\/|id=)([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                return `https://drive.google.com/file/d/${match[1]}/preview`;
+            }
+            return url;
+        }
+
+        function parseGoogleDrivePdfDownload(url) {
+            if (!url) return "";
+            url = url.trim();
+            let match = url.match(/(?:\/d\/|id=)([a-zA-Z0-9_-]+)/);
+            if (match && match[1]) {
+                return `https://drive.google.com/uc?export=download&id=${match[1]}`;
             }
             return url;
         }
@@ -617,7 +670,7 @@
                         }
                     });
                 } else {
-                    notifications = [{ id: 1, title: "Kế hoạch năm học mới", content: "Chào mừng các em đến với năm học 2026-2027.", timestamp: Date.now() - 3600000, date: "2026-09-01 08:00", author: "GVCN", mediaUrl: [], mediaType: "" }];
+                    notifications = [{ id: 1, title: "Kế hoạch năm học mới", content: "Chào mừng các em đến với năm học 2026-2027.", timestamp: Date.now() - 3600000, date: "2026-09-01 08:00", author: "GVCN", mediaUrl: [], pdfUrl: "", mediaType: "" }];
                     homeworks = [];
                     albums = [];
                     banners = [];
@@ -731,19 +784,23 @@
             if (currentView === 'admin_post' || currentView === 'sub_post') {
                 let tElem = document.getElementById('postTitle');
                 let cElem = document.getElementById('postContent');
+                let pElem = document.getElementById('postPdfInput');
                 if (tElem) tempPostTitle = tElem.value;
                 if (cElem) tempPostContent = cElem.innerHTML;
+                if (pElem) tempPostPdf = pElem.value;
             }
             if (currentView === 'admin_homework') {
                 let hElem = document.getElementById('hwContent');
+                let pElem = document.getElementById('hwPdfInput');
                 if (hElem) tempHwContent = hElem.innerHTML;
+                if (pElem) tempHwPdf = pElem.value;
             }
             if (currentView === 'admin_album' || currentView === 'sub_album') {
                 let aElem = document.getElementById('albumBatchTitle');
                 if (aElem) tempAlbumTitle = aElem.value;
             }
 
-            if (view !== 'admin_create_acc' && view !== 'admin_del_acc' && view !== 'admin_manage_noti' && view !== 'trash_noti' && view !== 'admin_album' && view !== 'admin_banner' && view !== 'admin_manage_album' && view !== 'admin_multi_album' && view !== 'admin_multi_banner' && view !== 'admin_multi_hw') {
+            if (view !== 'admin_create_acc' && view !== 'admin_del_acc' && view !== 'admin_manage_noti' && view !== 'trash_noti' && view !== 'admin_album' && view !== 'admin_banner' && view !== 'admin_manage_album' && view !== 'admin_multi_album' && view !== 'admin_multi_banner' && view !== 'admin_multi_hw' && view !== 'sub_album') {
                 menuState.adminAccSub = false;
                 menuState.adminNotiSub = false;
                 menuState.adminMediaSub = false;
@@ -756,10 +813,12 @@
                 editingNotiId = null;
                 tempPostTitle = "";
                 tempPostContent = "";
+                tempPostPdf = "";
                 currentMultiLinks = [];
             }
             if (view !== 'admin_homework' && view !== 'admin_multi_hw') {
                 tempHwContent = "";
+                tempHwPdf = "";
                 currentHwMultiLinks = [];
             }
             if (view !== 'admin_album' && view !== 'sub_album' && view !== 'admin_multi_album') {
@@ -905,6 +964,21 @@
                 let item = homeworks.find(h => h.id === window.currentHwId);
                 if (!item) { switchView('homework_list'); return; }
 
+                let pdfSection = '';
+                if (item.pdfUrl) {
+                    let pdfPreview = parseGoogleDrivePdfEmbed(item.pdfUrl);
+                    let pdfDownload = parseGoogleDrivePdfDownload(item.pdfUrl);
+                    pdfSection = `
+                        <div class="pdf-viewer-container">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-weight:bold; font-size:0.85rem; color:var(--primary);">📄 Tài liệu PDF đính kèm:</span>
+                                <a href="${pdfDownload}" target="_blank" class="btn-download">📥 Tải về file PDF</a>
+                            </div>
+                            <iframe src="${pdfPreview}" class="pdf-iframe" allow="autoplay"></iframe>
+                        </div>
+                    `;
+                }
+
                 b.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <button class="menu-btn" style="padding:5px 10px; font-size:0.8rem;" onclick="switchView('homework_list')">⬅️ Quay lại danh sách</button>
@@ -915,6 +989,7 @@
                         <p style="font-size:0.78rem; color:#457b9d; margin-bottom:10px;">Đăng bởi: <b>${item.author}</b></p>
                         <hr style="border:0; border-top:1px solid #eee; margin-bottom:10px;">
                         <div style="font-size:0.9rem; line-height:1.5;">${item.content}</div>
+                        ${pdfSection}
                     </div>
                 `;
             }
@@ -947,6 +1022,21 @@
                     pagesHtml += `</div>`;
                 }
 
+                let pdfSection = '';
+                if (item.pdfUrl) {
+                    let pdfPreview = parseGoogleDrivePdfEmbed(item.pdfUrl);
+                    let pdfDownload = parseGoogleDrivePdfDownload(item.pdfUrl);
+                    pdfSection = `
+                        <div class="pdf-viewer-container">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-weight:bold; font-size:0.85rem; color:var(--primary);">📄 Tài liệu PDF đính kèm:</span>
+                                <a href="${pdfDownload}" target="_blank" class="btn-download">📥 Tải về file PDF</a>
+                            </div>
+                            <iframe src="${pdfPreview}" class="pdf-iframe" allow="autoplay"></iframe>
+                        </div>
+                    `;
+                }
+
                 b.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                         <button class="menu-btn" style="padding:5px 10px; font-size:0.8rem;" onclick="switchView('noti_list')">⬅️ Quay lại danh sách</button>
@@ -958,6 +1048,7 @@
                         <hr style="border:0; border-top:1px solid #eee; margin-bottom:10px;">
                         ${item.content && item.content !== "<br>" ? `<div style="font-size:0.92rem; line-height:1.6; margin-bottom:8px;">${item.content}</div>` : ''}
                         ${pagesHtml}
+                        ${pdfSection}
                     </div>
                 `;
             }
@@ -1015,12 +1106,14 @@
                 let isEditing = editingNotiId !== null;
                 let editTitle = tempPostTitle; 
                 let editContent = tempPostContent; 
+                let editPdf = tempPostPdf;
 
                 if (isEditing && !tempPostTitle && !tempPostContent) {
                     let item = notifications.find(n => n.id === editingNotiId);
                     if (item) { 
                         editTitle = item.title; 
                         editContent = item.content; 
+                        editPdf = item.pdfUrl || "";
                         if (Array.isArray(item.mediaUrl)) {
                             currentMultiLinks = [...item.mediaUrl];
                         } else if (typeof item.mediaUrl === 'string' && item.mediaUrl.trim().length > 0) {
@@ -1028,8 +1121,6 @@
                         }
                     }
                 }
-
-                let linkDisplayTxt = currentMultiLinks.length > 0 ? `Tổng ${currentMultiLinks.length} link ảnh đính kèm` : "";
 
                 b.innerHTML = `
                     <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">${isEditing ? '✏️ Chỉnh Sửa Thông Báo' : '✍️ Đăng Thông Báo Mới'}</h3>
@@ -1040,13 +1131,17 @@
                     <div class="form-group">
                         <label>Nội dung thông báo:</label>
                         <div class="editor-toolbar">
-                            <button type="button" onclick="formatDoc('bold')"><b>B</b></button>
-                            <button type="button" onclick="formatDoc('italic')"><i>I</i></button>
-                            <button type="button" onclick="formatDoc('underline')"><u>U</u></button>
-                            <button type="button" onclick="formatDoc('justifyLeft')">Canh trái</button>
-                            <button type="button" onclick="formatDoc('justifyCenter')">Canh giữa</button>
-                            <button type="button" onclick="formatDoc('justifyRight')">Canh phải</button>
-                            <button type="button" onclick="formatDoc('justifyFull')">Canh đều</button>
+                            <button type="button" data-cmd="bold" onclick="toggleFormat(this, 'bold')"><b>B</b></button>
+                            <button type="button" data-cmd="italic" onclick="toggleFormat(this, 'italic')"><i>I</i></button>
+                            <button type="button" data-cmd="underline" onclick="toggleFormat(this, 'underline')"><u>U</u></button>
+                            <button type="button" data-align="left" onclick="toggleAlign(this, 'justifyLeft')">Canh trái</button>
+                            <button type="button" data-align="center" onclick="toggleAlign(this, 'justifyCenter')">Canh giữa</button>
+                            <button type="button" data-align="right" onclick="toggleAlign(this, 'justifyRight')">Canh phải</button>
+                            <button type="button" data-align="full" onclick="toggleAlign(this, 'justifyFull')">Canh đều</button>
+                            <label class="color-picker-label" title="Chọn màu chữ">
+                                🎨 Màu chữ:
+                                <input type="color" onchange="changeTextColor(this.value)" value="#1d3557">
+                            </label>
                         </div>
                         <div id="postContent" class="rich-editor" contenteditable="true">${editContent}</div>
                     </div>
@@ -1055,11 +1150,11 @@
                             <label>Tải lên từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Nếu tải từ 2 ảnh trở lên từ máy, hệ thống sẽ chừa lại 1 ảnh đầu tiên sau 7 ngày; nếu dán link Drive/URL lưu vĩnh viễn)</span>:</label>
                             <input type="file" id="postMediaFile" accept="image/*,video/mp4" multiple onchange="checkFileLimitWarning(this)">
                         </div>
-                        <button type="button" class="menu-btn" style="background:#2a9d8f; margin-top:16px; padding:6px 10px; font-size:0.75rem; white-space:nowrap;" onclick="switchView('admin_multi_noti')">🖼️ Đăng nhiều ảnh</button>
+                        <button type="button" class="menu-btn" style="background:#2a9d8f; margin-top:16px; padding:6px 10px; font-size:0.75rem; white-space:nowrap;" onclick="switchView('admin_multi_noti')">🖼️ Đăng link drive/URL của ảnh</button>
                     </div>
                     <div class="form-group">
-                        <label>Đường dẫn ảnh (Lưu vĩnh viễn không giới hạn):</label>
-                        <input type="text" id="postMediaLinkDisplay" readonly value="${linkDisplayTxt}" placeholder="Chưa có link ảnh đính kèm..." style="background:#f8f9fa; font-weight:bold; color:var(--primary); cursor:pointer;" onclick="switchView('admin_multi_noti')" title="Click để xem/sửa danh sách link">
+                        <label>Đường dẫn drive của file pdf:</label>
+                        <input type="text" id="postPdfInput" value="${editPdf}" placeholder="Dán link Google Drive file PDF vào đây...">
                     </div>
                     <div style="display:flex; justify-content:center; gap:12px; margin-top:6px;">
                         <button class="menu-btn" style="width:140px; justify-content:center; background:#2a9d8f;" onclick="submitNotification()">${isEditing ? 'Lưu Thay Đổi' : 'Đăng Ngay'}</button>
@@ -1070,16 +1165,16 @@
             }
             else if (currentView === 'admin_multi_noti') {
                 b.innerHTML = `
-                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">Đăng nhiều ảnh thông báo</h3>
+                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">Đăng link drive/URL của ảnh (Thông báo)</h3>
                     <div style="display:flex; flex:1; gap:12px; overflow:hidden; min-height:0;">
                         <div style="flex:1.2; display:flex; flex-direction:column; background:white; padding:12px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03); overflow-y:auto; gap:8px;">
                             <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
-                                <label>Danh sách đường dẫn ảnh thông báo:</label>
+                                <label>Danh sách đường dẫn ảnh:</label>
                                 <div id="multiNotiLinksContainer" style="display:flex; flex-direction:column; gap:6px; max-height:250px; overflow-y:auto; padding-right:4px;"></div>
                             </div>
                             <div style="display:flex; justify-content:center; gap:8px; margin-top:4px;">
                                 <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="submitMultiNotiImages()">🚀 Xong & Quay Lại</button>
-                                <button class="menu-btn" style="flex:1; justify-content:center; background:#6c757d;" onclick="switchView('admin_post')">Quay lại</button>
+                                <button class="menu-btn" style="flex:1; justify-content:center; background:#6c757d;" onclick="switchView(currentUser.role === 'admin' ? 'admin_post' : 'sub_post')">Quay lại</button>
                             </div>
                         </div>
                         <div style="flex:1; border-radius:8px; border:1px solid #ced4da; background:#f8f9fa; display:flex; flex-direction:column; overflow:hidden;">
@@ -1095,7 +1190,7 @@
             else if (currentView === 'admin_homework') {
                 let computedHwTitle = getCalculatedHomeworkTitle();
                 let hwContentVal = tempHwContent;
-                let linkDisplayTxt = currentHwMultiLinks.length > 0 ? `Tổng ${currentHwMultiLinks.length} link ảnh đính kèm` : "";
+                let hwPdfVal = tempHwPdf;
 
                 b.innerHTML = `
                     <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">📖 Đăng Báo Bài Mới</h3>
@@ -1106,26 +1201,30 @@
                     <div class="form-group">
                         <label>Nội dung báo bài:</label>
                         <div class="editor-toolbar">
-                            <button type="button" onclick="formatDoc('bold')"><b>B</b></button>
-                            <button type="button" onclick="formatDoc('italic')"><i>I</i></button>
-                            <button type="button" onclick="formatDoc('underline')"><u>U</u></button>
-                            <button type="button" onclick="formatDoc('justifyLeft')">Canh trái</button>
-                            <button type="button" onclick="formatDoc('justifyCenter')">Canh giữa</button>
-                            <button type="button" onclick="formatDoc('justifyRight')">Canh phải</button>
-                            <button type="button" onclick="formatDoc('justifyFull')">Canh đều</button>
+                            <button type="button" data-cmd="bold" onclick="toggleFormat(this, 'bold')"><b>B</b></button>
+                            <button type="button" data-cmd="italic" onclick="toggleFormat(this, 'italic')"><i>I</i></button>
+                            <button type="button" data-cmd="underline" onclick="toggleFormat(this, 'underline')"><u>U</u></button>
+                            <button type="button" data-align="left" onclick="toggleAlign(this, 'justifyLeft')">Canh trái</button>
+                            <button type="button" data-align="center" onclick="toggleAlign(this, 'justifyCenter')">Canh giữa</button>
+                            <button type="button" data-align="right" onclick="toggleAlign(this, 'justifyRight')">Canh phải</button>
+                            <button type="button" data-align="full" onclick="toggleAlign(this, 'justifyFull')">Canh đều</button>
+                            <label class="color-picker-label" title="Chọn màu chữ">
+                                🎨 Màu chữ:
+                                <input type="color" onchange="changeTextColor(this.value)" value="#1d3557">
+                            </label>
                         </div>
                         <div id="hwContent" class="rich-editor" contenteditable="true">${hwContentVal}</div>
                     </div>
                     <div class="form-group" style="display:flex; flex-direction:row; align-items:center; gap:8px;">
                         <div style="flex:1; display:flex; flex-direction:column; gap:3px;">
-                            <label>Tải lên từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Nếu tải từ 2 ảnh trở lên, hệ thống chừa lại ảnh đầu tiên sau 7 ngày)</span>:</label>
+                            <label>Tải lên từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Nếu tải từ 2 ảnh trở lên từ máy, hệ thống sẽ chừa lại 1 ảnh đầu tiên sau 7 ngày; nếu dán link Drive/URL lưu vĩnh viễn)</span>:</label>
                             <input type="file" id="hwMediaFile" accept="image/*,video/mp4" multiple onchange="checkFileLimitWarning(this)">
                         </div>
-                        <button type="button" class="menu-btn" style="background:#2a9d8f; margin-top:16px; padding:6px 10px; font-size:0.75rem; white-space:nowrap;" onclick="switchView('admin_multi_hw')">🖼️ Đăng nhiều ảnh</button>
+                        <button type="button" class="menu-btn" style="background:#2a9d8f; margin-top:16px; padding:6px 10px; font-size:0.75rem; white-space:nowrap;" onclick="switchView('admin_multi_hw')">🖼️ Đăng link drive/URL của ảnh</button>
                     </div>
                     <div class="form-group">
-                        <label>Đường dẫn ảnh báo bài:</label>
-                        <input type="text" id="hwMediaLinkDisplay" readonly value="${linkDisplayTxt}" placeholder="Chưa có link ảnh đính kèm..." style="background:#f8f9fa; font-weight:bold; color:var(--primary); cursor:pointer;" onclick="switchView('admin_multi_hw')" title="Click để xem/sửa danh sách link">
+                        <label>Đường dẫn drive của file pdf:</label>
+                        <input type="text" id="hwPdfInput" value="${hwPdfVal}" placeholder="Dán link Google Drive file PDF vào đây...">
                     </div>
                     <div style="display:flex; justify-content:center; gap:12px; margin-top:6px;">
                         <button class="menu-btn" style="width:140px; justify-content:center; background:#2a9d8f;" onclick="submitHomework()">Đăng</button>
@@ -1135,11 +1234,11 @@
             }
             else if (currentView === 'admin_multi_hw') {
                 b.innerHTML = `
-                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">Đăng nhiều ảnh báo bài</h3>
+                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">Đăng link drive/URL của ảnh (Báo bài)</h3>
                     <div style="display:flex; flex:1; gap:12px; overflow:hidden; min-height:0;">
                         <div style="flex:1.2; display:flex; flex-direction:column; background:white; padding:12px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03); overflow-y:auto; gap:8px;">
                             <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
-                                <label>Danh sách đường dẫn ảnh báo bài:</label>
+                                <label>Danh sách đường dẫn ảnh:</label>
                                 <div id="multiHwLinksContainer" style="display:flex; flex-direction:column; gap:6px; max-height:250px; overflow-y:auto; padding-right:4px;"></div>
                             </div>
                             <div style="display:flex; justify-content:center; gap:8px; margin-top:4px;">
@@ -1171,24 +1270,24 @@
                 let linkDisplayTxt = currentAlbumLinks.length > 0 ? `Tổng ${currentAlbumLinks.length} link ảnh đính kèm` : "";
 
                 b.innerHTML = `
-                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">📷 ${isAlbEditing ? 'Chỉnh Sửa Album' : 'Đăng Ảnh/Clip Kỷ Niệm'}</h3>
+                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">📷 ${isAlbEditing ? 'Chỉnh Sửa Album Kỷ Niệm' : 'Đăng Ảnh/Clip Kỷ Niệm'}</h3>
                     <div class="form-group">
-                        <label>Tiêu đề chung cho bộ ảnh:</label>
-                        <input type="text" id="albumBatchTitle" value="${albTitleVal}" placeholder="Ví dụ: Hoạt động dã ngoại lớp, Lễ khai giảng...">
+                        <label>Tên Album:</label>
+                        <input type="text" id="albumBatchTitle" value="${albTitleVal}" placeholder="Nhập tên album...">
                     </div>
-                    <div class="form-group">
-                        <label>Đường dẫn ảnh:</label>
-                        <input type="text" id="albumMediaLinkDisplay" readonly value="${linkDisplayTxt}" placeholder="Chưa có link ảnh đính kèm..." style="background:#f8f9fa; font-weight:bold; color:var(--primary); cursor:pointer;" onclick="switchView('admin_multi_album')" title="Click để xem/sửa danh sách link">
+                    <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                        <span style="font-size:0.8rem; font-weight:bold; color:var(--primary);">${linkDisplayTxt || 'Chưa có link ảnh đính kèm...'}</span>
+                        <button type="button" class="menu-btn" style="background:#2a9d8f; padding:6px 12px; font-size:0.78rem;" onclick="switchView('admin_multi_album')">🖼️ Đăng link drive/URL của ảnh</button>
                     </div>
-                    <div style="display:flex; justify-content:center; gap:12px; margin-top:10px;">
-                        <button class="menu-btn" style="width:140px; justify-content:center; background:#2a9d8f;" onclick="submitDynamicBatchAlbum()">${isAlbEditing ? '💾 Lưu Thay Đổi' : '🚀 Đăng Tất Cả'}</button>
-                        <button class="menu-btn" style="width:140px; justify-content:center; background:#6c757d;" onclick="switchView('admin_manage_album')">Hủy</button>
+                    <div style="display:flex; justify-content:center; gap:12px; margin-top:14px;">
+                        <button class="menu-btn" style="width:140px; justify-content:center; background:#2a9d8f;" onclick="submitDynamicBatchAlbum()">${isAlbEditing ? '💾 Lưu Thay Đổi' : '🚀 Đăng Album'}</button>
+                        <button class="menu-btn" style="width:140px; justify-content:center; background:#6c757d;" onclick="switchView(currentUser.role === 'admin' ? 'admin_manage_album' : 'home')">Hủy</button>
                     </div>
                 `;
             }
             else if (currentView === 'admin_multi_album') {
                 b.innerHTML = `
-                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">Đăng nhiều ảnh kỷ niệm</h3>
+                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">Đăng link drive/URL của ảnh (Album kỷ niệm)</h3>
                     <div style="display:flex; flex:1; gap:12px; overflow:hidden; min-height:0;">
                         <div style="flex:1.2; display:flex; flex-direction:column; background:white; padding:12px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03); overflow-y:auto; gap:8px;">
                             <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
@@ -1197,7 +1296,7 @@
                             </div>
                             <div style="display:flex; justify-content:center; gap:8px; margin-top:4px;">
                                 <button class="menu-btn" style="flex:1; justify-content:center; background:#2a9d8f;" onclick="submitMultiAlbumImages()">🚀 Xong & Quay Lại</button>
-                                <button class="menu-btn" style="flex:1; justify-content:center; background:#6c757d;" onclick="switchView('admin_album')">Quay lại</button>
+                                <button class="menu-btn" style="flex:1; justify-content:center; background:#6c757d;" onclick="switchView(currentUser.role === 'admin' ? 'admin_album' : 'sub_album')">Quay lại</button>
                             </div>
                         </div>
                         <div style="flex:1; border-radius:8px; border:1px solid #ced4da; background:#f8f9fa; display:flex; flex-direction:column; overflow:hidden;">
@@ -1218,11 +1317,11 @@
                         <label>Hoặc tải ảnh banner từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Chỉ hiển thị trong 7 ngày)</span>:</label>
                         <input type="file" id="bannerFileInput" accept="image/*" onchange="previewBannerFileLiveWithWarning()">
                     </div>
-                    <div class="form-group">
-                        <label>Đường dẫn ảnh Banner:</label>
-                        <input type="text" id="bannerMediaLinkDisplay" readonly value="${linkDisplayTxt}" placeholder="Chưa có link ảnh đính kèm..." style="background:#f8f9fa; font-weight:bold; color:var(--primary); cursor:pointer;" onclick="switchView('admin_multi_banner')" title="Click để xem/sửa danh sách link">
+                    <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+                        <span style="font-size:0.8rem; font-weight:bold; color:var(--primary);">${linkDisplayTxt || 'Chưa có link ảnh đính kèm...'}</span>
+                        <button type="button" class="menu-btn" style="background:#2a9d8f; padding:6px 12px; font-size:0.78rem;" onclick="switchView('admin_multi_banner')">🖼️ Đăng link drive/URL của ảnh</button>
                     </div>
-                    <div style="display:flex; justify-content:center; gap:12px; margin-top:10px;">
+                    <div style="display:flex; justify-content:center; gap:12px; margin-top:14px;">
                         <button class="menu-btn" style="width:140px; justify-content:center; background:#2a9d8f;" onclick="saveDynamicBanners()">🚀 Lưu Danh Sách Banner</button>
                         <button class="menu-btn" style="width:140px; justify-content:center; background:#e63946;" onclick="clearBanners()">Xóa Tất Cả</button>
                         <button class="menu-btn" style="width:140px; justify-content:center; background:#6c757d;" onclick="switchView('home')">Hủy</button>
@@ -1231,7 +1330,7 @@
             }
             else if (currentView === 'admin_multi_banner') {
                 b.innerHTML = `
-                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">Đăng nhiều ảnh banner</h3>
+                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">Đăng link drive/URL của ảnh (Banner)</h3>
                     <div style="display:flex; flex:1; gap:12px; overflow:hidden; min-height:0;">
                         <div style="flex:1.2; display:flex; flex-direction:column; background:white; padding:12px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03); overflow-y:auto; gap:8px;">
                             <div class="form-group" style="flex:1; display:flex; flex-direction:column;">
@@ -1260,14 +1359,15 @@
                     b.innerHTML += '<p style="color:#6c757d;">Chưa có album nào.</p>';
                 } else {
                     pureAlbums.forEach((alb, idx) => {
+                        let isBannerAlbum = (alb.title === "Album banner");
                         b.innerHTML += `
                             <div class="card-item">
-                                <div class="card-info" style="flex:1; cursor:pointer;" onclick="startEditAlbum(${alb.id})">
+                                <div class="card-info" style="flex:1;">
                                     <h4>[Album ${idx + 1}] ${alb.title}</h4>
                                     <span>✍️ Đăng bởi: ${alb.author}</span>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:5px;">
-                                    <button class="menu-btn btn-edit" onclick="startEditAlbum(${alb.id})">Sửa</button>
+                                    <button class="menu-btn btn-edit" onclick="startEditAlbum(${alb.id}, ${isBannerAlbum})">Sửa</button>
                                     <button class="menu-btn btn-del" onclick="deleteAlbumItem(${alb.id})">Xóa</button>
                                 </div>
                             </div>
@@ -1330,8 +1430,8 @@
                 b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">📋 Quản Lý Bài Đăng (Thông Báo & Báo Bài)</h3>`;
                 
                 let combinedList = [
-                    ...notiList.map(item => ({ ...item, typeLabel: '📢 Thông báo', uniqueKey: 'n_' + item.id, isHomework: false })),
-                    ...hwList.map(item => ({ ...item, typeLabel: '📚 Báo bài', uniqueKey: 'h_' + item.id, isHomework: true }))
+                    ...notiList.map(item => ({ ...item, displayHeader: `[📢 Thông báo số ${item.id}] ${item.title}`, uniqueKey: 'n_' + item.id, isHomework: false })),
+                    ...hwList.map(item => ({ ...item, displayHeader: `[📚 Báo bài] ${item.title}`, uniqueKey: 'h_' + item.id, isHomework: true }))
                 ];
 
                 if (combinedList.length === 0) {
@@ -1346,7 +1446,7 @@
                         b.innerHTML += `
                             <div class="card-item">
                                 <div class="card-info" style="flex:1;">
-                                    <h4>[${item.typeLabel}] ${item.title}</h4>
+                                    <h4>${item.displayHeader}</h4>
                                     <span>📅 ${item.date} | ✍️ ${item.author}</span>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:5px;">
@@ -1635,7 +1735,7 @@
             });
             currentMultiLinks = linksArray; 
             alert(`Đã nhận ${linksArray.length} ảnh thông báo! Đang quay lại trang đăng...`);
-            switchView('admin_post');
+            switchView(currentUser.role === 'admin' ? 'admin_post' : 'sub_post');
         }
 
         function submitMultiHwImages() {
@@ -1656,7 +1756,7 @@
                 if (val) linksArray.push(parseGoogleDriveLink(val));
             });
             currentAlbumLinks = linksArray;
-            switchView('admin_album');
+            switchView(currentUser.role === 'admin' ? 'admin_album' : 'sub_album');
         }
 
         function submitMultiBannerImages() {
@@ -1686,6 +1786,12 @@
             let fileInput = document.getElementById('scheduleFileInput');
             if (fileInput.files && fileInput.files[0]) {
                 alert("⚠️ CẢNH BÁO: Ảnh TKB tải lên từ máy chỉ hiển thị trong 7 ngày!");
+                let reader = new FileReader();
+                reader.onload = (e) => {
+                    let box = document.getElementById('schedulePreviewArea');
+                    box.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${e.target.result}')" title="Click để phóng to">`;
+                };
+                reader.readAsDataURL(fileInput.files[0]);
             }
         }
 
@@ -1701,26 +1807,16 @@
             }
         }
 
-        function previewScheduleFile() {
-            let fileInput = document.getElementById('scheduleFileInput');
-            let box = document.getElementById('schedulePreviewArea');
-            if (fileInput.files && fileInput.files[0]) {
-                let reader = new FileReader();
-                reader.onload = (e) => {
-                    box.innerHTML = `<img src="${e.target.result}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${e.target.result}')">`;
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-            }
-        }
-
         function submitNotification() {
             let titleElem = document.getElementById('postTitle');
             let contentElem = document.getElementById('postContent');
+            let pdfElem = document.getElementById('postPdfInput');
             let title = titleElem ? titleElem.value.trim() : tempPostTitle;
             let content = contentElem ? contentElem.innerHTML.trim() : tempPostContent;
+            let pdfUrl = pdfElem ? pdfElem.value.trim() : tempPostPdf;
             let fileInput = document.getElementById('postMediaFile');
 
-            if (!title || !content || content === "<br>") { alert("Vui lòng nhập tiêu đề và nội dung!"); return; }
+            if (!title) { alert("Vui lòng nhập tiêu đề!"); return; }
 
             let processSave = (mediaArray, mediaType) => {
                 if (editingNotiId !== null) {
@@ -1728,6 +1824,7 @@
                     if (item) {
                         item.title = title;
                         item.content = content;
+                        item.pdfUrl = pdfUrl;
                         if (mediaArray.length > 0) {
                             item.mediaUrl = mediaArray;
                             item.mediaType = mediaType;
@@ -1741,7 +1838,7 @@
                     let dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
                     notifications.push({
-                        id: newId, title, content, timestamp: Date.now(), date: dateStr,
+                        id: newId, title, content, pdfUrl, timestamp: Date.now(), date: dateStr,
                         author: currentUser.name, mediaUrl: mediaArray, mediaType: mediaType || "", isTemporary: fileInput && fileInput.files && fileInput.files.length > 0
                     });
                     alert("Đăng thông báo thành công!");
@@ -1752,6 +1849,7 @@
                 currentMultiLinks = [];
                 tempPostTitle = "";
                 tempPostContent = "";
+                tempPostPdf = "";
                 switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti');
             };
 
@@ -1780,7 +1878,9 @@
         function submitHomework() {
             let title = document.getElementById('hwTitle').value.trim();
             let contentElem = document.getElementById('hwContent');
+            let pdfElem = document.getElementById('hwPdfInput');
             let content = contentElem ? contentElem.innerHTML.trim() : tempHwContent;
+            let pdfUrl = pdfElem ? pdfElem.value.trim() : tempHwPdf;
             let fileInput = document.getElementById('hwMediaFile');
 
             if (!content || content === "<br>") {
@@ -1805,6 +1905,7 @@
                     id: newId,
                     title: title,
                     content: content,
+                    pdfUrl: pdfUrl,
                     timestamp: Date.now(),
                     date: dateStr,
                     author: currentUser.name
@@ -1814,12 +1915,13 @@
                 alert("Đăng báo bài thành công!");
                 currentHwMultiLinks = [];
                 tempHwContent = "";
+                tempHwPdf = "";
                 switchView('homework_list');
             };
 
             if (currentHwMultiLinks.length > 0) {
                 processHwSave(currentHwMultiLinks);
-            } else if (fileInput && fileInput.files && fileInput.files[0]) {
+            } else if (fileInput.files && fileInput.files[0]) {
                 let reader = new FileReader();
                 reader.onload = (e) => {
                     processHwSave([e.target.result]);
@@ -1835,11 +1937,11 @@
             let title = titleInput ? titleInput.value.trim() : tempAlbumTitle;
 
             if (!title) {
-                alert("Vui lòng nhập tiêu đề chung cho bộ ảnh!");
+                alert("Vui lòng nhập tên Album!");
                 return;
             }
             if (currentAlbumLinks.length === 0) {
-                alert("Vui lòng đính kèm ít nhất một đường dẫn ảnh hợp lệ!");
+                alert("Vui lòng đính kèm ít nhất một đường dẫn ảnh!");
                 return;
             }
 
@@ -1868,10 +1970,14 @@
             editingAlbumId = null;
             tempAlbumTitle = "";
             currentAlbumLinks = [];
-            switchView('admin_manage_album');
+            switchView(currentUser.role === 'admin' ? 'admin_manage_album' : 'home');
         }
 
-        function startEditAlbum(id) {
+        function startEditAlbum(id, isBanner = false) {
+            if (isBanner) {
+                switchView('admin_banner');
+                return;
+            }
             editingAlbumId = id;
             let albItem = albums.find(a => a.id === id);
             if (albItem) {
@@ -1983,7 +2089,7 @@
             if (confirm("Xóa toàn bộ banner?")) { 
                 banners = []; 
                 saveDataToFirebase(); 
-                renderBannerSlideshow(); 
+                renderBannerManagementUI(); 
             } 
         }
 
@@ -2013,7 +2119,7 @@
             let u = document.getElementById('loginUser').value.trim();
             let p = document.getElementById('loginPass').value.trim();
 
-            if (u === 'admin298' && p === 'ADMIN298') {
+            if (u === 'admin298' && p === 'ADM!n298') {
                 currentUser = { name: "GVCN", role: "admin" };
                 switchView('admin_manage_noti');
             } 
@@ -2058,6 +2164,7 @@
             if (item) {
                 tempPostTitle = item.title;
                 tempPostContent = item.content;
+                tempPostPdf = item.pdfUrl || "";
                 if (Array.isArray(item.mediaUrl)) {
                     currentMultiLinks = [...item.mediaUrl];
                 } else if (typeof item.mediaUrl === 'string' && item.mediaUrl.trim().length > 0) {
@@ -2072,6 +2179,7 @@
             currentMultiLinks = [];
             tempPostTitle = "";
             tempPostContent = "";
+            tempPostPdf = "";
             switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti'); 
         }
 
@@ -2200,6 +2308,7 @@
             if (confirm("Xóa TKB này?")) {
                 scheduleUrl = "";
                 saveDataToFirebase();
+                alert("Đã xóa Thời Khóa Biểu!");
                 renderContentB();
             }
         }
@@ -2234,7 +2343,29 @@
             navigator.clipboard.writeText(infoBox.value).then(() => alert("Đã copy thông tin tài khoản!"));
         }
 
-        function formatDoc(cmd, value = null) { document.execCommand(cmd, false, value); }
+        // --- CÁC HÀM XỬ LÝ THANH CÔNG CỤ SOẠN THẢO (ĐỔI MÀU NÚT KHI ĐANG CHỌN & CHỌN MÀU CHỮ) ---
+        function toggleFormat(btn, cmd) {
+            document.execCommand(cmd, false, null);
+            btn.classList.toggle('active');
+        }
+
+        function toggleAlign(btn, cmd) {
+            let toolbar = btn.closest('.editor-toolbar');
+            let alignBtns = toolbar.querySelectorAll('button[data-align]');
+            let wasActive = btn.classList.contains('active');
+            
+            alignBtns.forEach(b => b.classList.remove('active'));
+            if (!wasActive) {
+                document.execCommand(cmd, false, null);
+                btn.classList.add('active');
+            } else {
+                document.execCommand('justifyLeft', false, null);
+            }
+        }
+
+        function changeTextColor(color) {
+            document.execCommand('foreColor', false, color);
+        }
 
         function getCalculatedHomeworkTitle() {
             let targetDate = new Date();
