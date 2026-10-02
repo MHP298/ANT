@@ -54,11 +54,6 @@
       transform: translate(-50%, -50%);
     }
     .draggable-text-box:active { cursor: grabbing; }
-
-    .accordion-content {
-      transition: max-height 0.25s ease-out, opacity 0.2s ease-out;
-      overflow: hidden;
-    }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans select-none" onclick="closeAllFolderDropdowns(event)">
@@ -143,7 +138,7 @@
         </button>
       </div>
 
-      <!-- TAB 1: CẤU HÌNH GIAO DIỆN & MỞ KHÓA (ACCORDION MENU 4 MỤC) -->
+      <!-- TAB 1: CẤU HÌNH GIAO DIỆN & MỞ KHÓA (ACCORDION MENU) -->
       <div id="tab-panel-controls" class="flex-1 overflow-y-auto p-3 space-y-2.5">
         
         <!-- MỤC 1: CẤU HÌNH NỀN GIAO DIỆN -->
@@ -223,7 +218,7 @@
           </div>
         </div>
 
-        <!-- MỤC 3: MỞ KHÓA CẤP ĐỘ -->
+        <!-- MỤC 3: MỞ KHÓA CẤP ĐỘ (ĐÃ TINH GỌN HOÀN TOÀN) -->
         <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
           <button type="button" onclick="toggleAccordionSection('sec-cond')" class="w-full p-3 bg-slate-50 hover:bg-emerald-50/60 flex items-center justify-between transition cursor-pointer">
             <span class="text-xs font-black uppercase text-emerald-900 flex items-center gap-2">
@@ -238,57 +233,58 @@
               <label class="block text-[11px] text-slate-600 font-bold mb-1">Điều kiện mở cấp độ:</label>
               <div class="flex gap-1.5 items-center">
                 <select id="select-condition-main" onchange="handleConditionChange(this.value)" class="flex-1 px-2.5 py-1.5 text-xs rounded-xl border border-slate-300 font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                  <option value="">Chọn</option>
+                  <option value="">-- Chọn điều kiện --</option>
                   <optgroup label="Danh Sách Đã Thiết Lập" id="group-established-rules"></optgroup>
                   <option value="__NEW__" class="text-emerald-700 font-black">+ Thiết lập mới</option>
                 </select>
 
-                <button onclick="deleteCurrentCondition()" id="btn-delete-cond" title="Bỏ điều kiện" class="px-2.5 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold transition">
-                  <i class="fa-solid fa-trash-can"></i>
-                </button>
-
                 <button onclick="editCurrentCondition()" id="btn-edit-cond" title="Chỉnh sửa điều kiện" class="px-2.5 py-1.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-600 text-xs font-bold transition">
                   <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+
+                <button onclick="deleteCurrentCondition()" id="btn-delete-cond" title="Xóa điều kiện" class="px-2.5 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold transition">
+                  <i class="fa-solid fa-trash-can"></i>
                 </button>
               </div>
             </div>
 
-            <!-- Thư mục liên kết mở khóa (nhãn hiển thị) -->
-            <div id="linked-folder-wrapper" class="hidden">
-              <label class="block text-[11px] text-slate-600 font-bold mb-1">Thư mục liên kết mở khóa trong assets:</label>
-              <div id="linked-folder-display-box" class="min-h-[36px] p-2 bg-slate-50 rounded-xl border border-slate-300 flex flex-wrap gap-1.5 items-center"></div>
+            <!-- HIỂN THỊ CẤP ĐỘ ĐANG GÁN CỦA ĐIỀU KIỆN ĐANG CHỌN -->
+            <div id="box-current-cond-display" class="hidden p-3 bg-emerald-50/50 rounded-xl border border-emerald-200 space-y-1.5">
+              <div class="flex items-center justify-between text-xs font-bold">
+                <span class="text-slate-600">Áp dụng cho:</span>
+                <span id="lbl-display-cond-level" class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 font-black">Cấp độ 1</span>
+              </div>
+              <div class="text-[11px] text-slate-500 font-semibold" id="lbl-display-cond-type">Kiểu: Hạng 1 tuần</div>
             </div>
 
-            <!-- Khung chỉnh sửa hoặc thêm điều kiện mới -->
+            <!-- FORM TẠO MỚI / CHỈNH SỬA ĐIỀU KIỆN MỞ KHÓA -->
             <div id="new-condition-box" class="hidden p-3 bg-emerald-50/80 border border-emerald-300 rounded-xl space-y-2.5">
-              <span class="text-[11px] font-black uppercase text-emerald-900 block" id="lbl-form-mode">Nhập Điều Kiện Mới</span>
+              <span class="text-[11px] font-black uppercase text-emerald-900 block" id="lbl-form-mode">Thiết Lập Điều Kiện Mới</span>
               
               <div>
                 <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Tên Điều kiện (Hiển thị khi học sinh hover vào ổ khóa):</label>
-                <input type="text" id="input-new-cond-name" placeholder="VD: Đạt Hạng 1 thi đua tuần..." class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 font-semibold bg-white">
+                <input type="text" id="input-new-cond-name" placeholder="VD: Đạt Hạng 1 thi đua tuần..." class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
               </div>
 
               <div>
                 <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Kiểu kiểm tra thực thi:</label>
                 <select id="select-new-cond-type" class="w-full px-2 py-1 text-xs rounded-lg border border-slate-300 bg-white">
                   <option value="rank_top1">Xếp Hạng: Đạt Hạng 1 của tuần</option>
-                  <option value="quest_done">Nhiệm Vụ: Hoàn thành nhập từ khóa ngày</option>
+                  <option value="quest_done">Nhiệm Vụ: Hoàn thành nhiệm vụ/từ khóa ngày</option>
                   <option value="always_open">Tự Do: Luôn luôn mở</option>
                 </select>
               </div>
 
-              <div class="relative folder-dropdown-container">
-                <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Chọn Thư mục Assets cần mở khóa:</label>
-                <button type="button" onclick="toggleDropdownFolder('dropdown-cond-folders', event)" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white flex items-center justify-between font-bold text-slate-700">
-                  <span id="lbl-cond-folders-selected" class="truncate">Chọn các thư mục...</span>
-                  <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
-                </button>
-                <div id="dropdown-cond-folders" class="hidden folder-dropdown-menu absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-2 space-y-1 max-h-48 overflow-y-auto"></div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Mở cho Cấp độ nào:</label>
+                <select id="select-new-cond-target-level" class="w-full px-2 py-1 text-xs rounded-lg border border-slate-300 bg-white font-bold text-amber-800">
+                  <!-- Tự động load từ các cấp độ đã đặt bên cấu hình nút -->
+                </select>
               </div>
 
               <div class="flex gap-2 pt-1">
                 <button onclick="saveNewCondition()" class="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-xs transition">
-                  <i class="fa-solid fa-check"></i> Lưu Thiết Lập Mới
+                  <i class="fa-solid fa-check"></i> Lưu Điều Kiện
                 </button>
                 <button onclick="cancelNewCondition()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-lg transition">
                   Hủy
@@ -298,7 +294,7 @@
           </div>
         </div>
 
-        <!-- MỤC 4: CẤU HÌNH ÂM THANH (MỚI BỔ SUNG) -->
+        <!-- MỤC 4: CẤU HÌNH ÂM THANH -->
         <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
           <button type="button" onclick="toggleAccordionSection('sec-audio')" class="w-full p-3 bg-slate-50 hover:bg-emerald-50/60 flex items-center justify-between transition cursor-pointer">
             <span class="text-xs font-black uppercase text-indigo-900 flex items-center gap-2">
@@ -377,7 +373,7 @@
 
     </aside>
 
-    <!-- PHẦN B (2/3 BÊN PHẢI): HIỂN THỊ KHO ẢNH / CẤU HÌNH ÂM THANH -->
+    <!-- PHẦN B (2/3 BÊN PHẢI): HIỂN THỊ KHO ẢNH / CẤU HÌNH KHÓA & SCALE -->
     <main class="w-full md:w-2/3 flex flex-col h-full bg-slate-50 overflow-hidden">
       
       <!-- THANH CÔNG CỤ TRÊN CÙNG PHẦN B -->
@@ -394,12 +390,38 @@
           <button onclick="selectAllVisibleImages(false)" class="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 transition flex items-center gap-1">
             <i class="fa-regular fa-square"></i> Bỏ chọn
           </button>
+
+          <!-- NÚT MỞ BỘ ĐIỀU KHIỂN KHÓA CẤP ĐỘ -->
+          <button onclick="toggleLockLevelSubBar()" id="btn-toggle-lock-bar" class="px-3 py-1 text-xs font-bold rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 transition flex items-center gap-1 shadow-2xs">
+            <i class="fa-solid fa-lock text-amber-600"></i> Khóa Cấp Độ
+          </button>
+
           <span class="text-xs font-bold text-emerald-700 border-l pl-2 border-slate-200" id="lbl-selected-img-count">Đã chọn: 0</span>
         </div>
       </div>
 
+      <!-- BẢNG ĐIỀU KHIỂN GÁN CẤP ĐỘ KHÓA CHO CÁC ẢNH ĐƯỢC CHECK GÓC PHẢI -->
+      <div id="lock-assigner-panel" class="bg-amber-50/90 border-b border-amber-200 p-2.5 px-5 flex flex-wrap items-center justify-between gap-3 shrink-0" style="display: none;">
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-black uppercase text-amber-950 flex items-center gap-1.5">
+            <i class="fa-solid fa-key text-amber-600"></i> Gán Cấp Độ Khóa:
+          </span>
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs text-amber-900 font-bold">Cấp:</span>
+            <input type="number" id="input-assign-lock-level" min="1" max="10" value="1" class="w-14 px-2 py-1 text-xs font-black text-center rounded-lg border border-amber-300 bg-white">
+          </div>
+          <button onclick="applyBatchLockLevel()" class="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center gap-1">
+            <i class="fa-solid fa-check"></i> Gán
+          </button>
+          <button onclick="clearBatchLockLevel()" class="px-3 py-1 bg-slate-200 hover:bg-rose-100 text-slate-700 hover:text-rose-700 text-xs font-bold rounded-lg border border-slate-300 transition flex items-center gap-1">
+            <i class="fa-solid fa-lock-open"></i> Bỏ Gán Toàn Bộ
+          </button>
+        </div>
+        <span class="text-[11px] text-amber-800 font-medium">💡 Tick vào <b>ô khóa góc phải</b> của ảnh cần gán rồi bấm <b>Gán</b>.</span>
+      </div>
+
       <!-- THANH ĐIỀU CHỈNH TỈ LỆ SCALE (%) & Ô REVIEW MÔ PHỎNG SÂN GẠCH PHẦN A -->
-      <div id="scale-controller-panel" class="bg-emerald-50/80 border-b border-emerald-200 p-3 px-5 flex flex-wrap items-center justify-between gap-4 shrink-0 transition" style="display: none;">
+      <div id="scale-controller-panel" class="bg-emerald-50/80 border-b border-emerald-200 p-2.5 px-5 flex flex-wrap items-center justify-between gap-4 shrink-0 transition" style="display: none;">
         <div class="flex items-center gap-3">
           <span class="text-xs font-black uppercase text-emerald-950 flex items-center gap-1.5">
             <i class="fa-solid fa-arrows-up-down-left-right text-emerald-700"></i> Tỉ lệ hiển thị trên sân (%):
@@ -414,18 +436,18 @@
           </button>
         </div>
 
-        <div class="flex items-center gap-3 bg-white p-1.5 px-3 rounded-xl border border-emerald-300 shadow-xs">
+        <div class="flex items-center gap-3 bg-white p-1 px-3 rounded-xl border border-emerald-300 shadow-xs">
           <div class="text-right">
             <span class="text-[10px] font-black uppercase text-slate-500 block leading-tight">Review thực tế:</span>
             <span class="text-[9px] text-slate-400 font-semibold" id="lbl-preview-name">Chưa chọn ảnh</span>
           </div>
-          <div class="w-24 h-16 rounded-lg overflow-hidden border border-amber-300 relative flex items-center justify-center bg-cover bg-center" style="background-image: url('assets/nengame/vuonlop.jpg');">
+          <div class="w-24 h-14 rounded-lg overflow-hidden border border-amber-300 relative flex items-center justify-center bg-cover bg-center" style="background-image: url('assets/nengame/vuonlop.jpg');">
             <img id="img-preview-target" src="" class="max-h-full max-w-full object-contain filter drop-shadow transition-all duration-150" style="transform: scale(0.4);">
           </div>
         </div>
       </div>
 
-      <!-- VÙNG HIỂN THỊ CHÍNH PHẦN B (CHỨA KHO ẢNH HOẶC KHUNG ÂM THANH) -->
+      <!-- VÙNG HIỂN THỊ CHÍNH PHẦN B -->
       <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6" id="multi-folder-display-area"></div>
 
     </main>
@@ -482,13 +504,13 @@
         bgA: 'assets/nengame/vuonlop.jpg',
         bgB: 'assets/nengame/nenungdung.jpg',
         buttonMappings: {
-          'nuthoa.png': { label: 'HOA', targetFolders: ['hoacap1'], selectedImages: [] },
-          'nutnu.png': { label: 'NỤ', targetFolders: ['nucap1'], selectedImages: [] },
-          'nutchunhat.png': { label: 'ĐẤT', targetFolders: ['nengame'], selectedImages: [] },
-          'nutxeng.png': { label: 'CÔNG CỤ', targetFolders: ['congcu'], selectedImages: [] }
+          'nuthoa.png': { label: 'HOA', targetFolders: ['hoacap1'], selectedImages: [], itemLockLevels: {} },
+          'nutnu.png': { label: 'NỤ', targetFolders: ['nucap1'], selectedImages: [], itemLockLevels: {} },
+          'nutchunhat.png': { label: 'ĐẤT', targetFolders: ['nengame'], selectedImages: [], itemLockLevels: {} },
+          'nutxeng.png': { label: 'CÔNG CỤ', targetFolders: ['congcu'], selectedImages: [], itemLockLevels: {} }
         },
         unlockConditions: {
-          'cond_top1': { id: 'cond_top1', name: 'Đạt Hạng 1 thi đua tuần', type: 'rank_top1', folders: ['hoacap2'], selectedImages: [] }
+          'cond_top1': { id: 'cond_top1', name: 'Đạt Hạng 1 thi đua tuần', type: 'rank_top1', targetLevel: 1 }
         },
         plotSlots: [
           {
@@ -498,14 +520,8 @@
         ],
         textOverlays: [],
         assetScales: {},
-        // CẤU HÌNH ÂM THANH MẶC ĐỊNH
         audioSettings: {
-          bgm: {
-            url: '',
-            selectedFile: '',
-            volume: 50,
-            autoPlay: true
-          },
+          bgm: { url: '', selectedFile: '', volume: 50, autoPlay: true },
           sfx: [
             { id: 'plant_pop', name: 'Cắm hoa / Đặt đất', url: '', selectedFile: '' },
             { id: 'tab_click', name: 'Chuyển mục khay', url: '', selectedFile: '' },
@@ -529,8 +545,9 @@
       tempEditorSlots: [],
       tempTextOverlays: [],
       currentBgToneStyle: null,
-      currentAudioTab: 'bgm', // 'bgm' | 'sfx'
-      previewAudioInstance: null
+      currentAudioTab: 'bgm',
+      previewAudioInstance: null,
+      selectedLockImagesForBatch: [] // Danh sách file đang được tick ô khóa góc phải để chuẩn bị bấm Gán
     };
 
     // ================= XỬ LÝ ACCORDION MENU CHO PHẦN A =================
@@ -546,7 +563,6 @@
           if (isCurrentlyHidden) {
             contentEl.classList.remove('hidden');
             iconEl.classList.replace('fa-chevron-right', 'fa-chevron-down');
-            // Nếu bấm mở mục Âm thanh, mở ngay cấu hình âm thanh ở Phần B
             if (secKey === 'sec-audio') {
               switchAudioConfigTab(state.currentAudioTab);
             }
@@ -621,9 +637,11 @@
         try { 
           const parsed = JSON.parse(saved);
           Object.values(parsed).forEach(c => {
-            if (!c.config.audioSettings) {
-              c.config.audioSettings = DEFAULT_CLASS_TEMPLATE(c.name).config.audioSettings;
-            }
+            if (!c.config.audioSettings) c.config.audioSettings = DEFAULT_CLASS_TEMPLATE(c.name).config.audioSettings;
+            if (!c.config.buttonMappings) c.config.buttonMappings = {};
+            Object.values(c.config.buttonMappings).forEach(btn => {
+              if (!btn.itemLockLevels) btn.itemLockLevels = {};
+            });
           });
           state.classesData = parsed;
         } catch (e) {}
@@ -650,6 +668,7 @@
       state.currentSelectedConditionId = '';
       state.currentActiveButtonIcon = '';
       state.activeViewData = { type: 'none', folders: [], singleImage: null, contextType: 'button', contextKey: '' };
+      state.selectedLockImagesForBatch = [];
       saveStateToLocal();
       loadActiveClassConfig();
       renderPartBEmptyState();
@@ -739,6 +758,7 @@
       document.getElementById('section-b-title').innerText = title;
       document.getElementById('toolbar-actions').style.display = 'none';
       document.getElementById('scale-controller-panel').style.display = 'none';
+      document.getElementById('lock-assigner-panel').style.display = 'none';
       document.getElementById('total-visible-images-count').innerText = '(1 ảnh)';
 
       const fullUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${imagePath}`;
@@ -800,7 +820,7 @@
 
       if (!cls.config.buttonMappings[icon]) {
         let autoLabel = icon.replace(/\.[^/.]+$/, "").replace('nut', '').toUpperCase() || 'NÚT';
-        cls.config.buttonMappings[icon] = { label: autoLabel, targetFolders: [], selectedImages: [] };
+        cls.config.buttonMappings[icon] = { label: autoLabel, targetFolders: [], selectedImages: [], itemLockLevels: {} };
       }
 
       const mapping = cls.config.buttonMappings[icon];
@@ -866,7 +886,21 @@
       el.innerText = mapping.targetFolders.length === 0 ? 'Chưa chọn thư mục' : mapping.targetFolders.join(', ');
     }
 
-    // ================= MỞ KHÓA CẤP ĐỘ =================
+    // ================= MỞ KHÓA CẤP ĐỘ (ÁNH XẠ ĐIỀU KIỆN - CẤP ĐỘ TINH GỌN) =================
+    // Thu thập danh sách tất cả các Cấp độ khóa đang được gán trên các nút
+    function getAllConfiguredLockLevels() {
+      const cls = state.classesData[state.activeClass];
+      const levelsSet = new Set([1]); // Mặc định luôn có ít nhất cấp 1
+      const mappings = cls.config.buttonMappings || {};
+      Object.values(mappings).forEach(m => {
+        const locks = m.itemLockLevels || {};
+        Object.values(locks).forEach(lvl => {
+          if (lvl > 0) levelsSet.add(parseInt(lvl));
+        });
+      });
+      return Array.from(levelsSet).sort((a, b) => a - b);
+    }
+
     function renderConditionsMenu() {
       const cls = state.classesData[state.activeClass];
       const group = document.getElementById('group-established-rules');
@@ -876,7 +910,7 @@
 
       group.innerHTML = condKeys.map(k => `<option value="${k}">${conditions[k].name}</option>`).join('');
       document.getElementById('select-condition-main').value = state.currentSelectedConditionId || '';
-      updateLinkedFolderBox();
+      updateConditionDisplayBox();
     }
 
     function handleConditionChange(val) {
@@ -885,39 +919,26 @@
       } else {
         state.currentSelectedConditionId = val;
         document.getElementById('new-condition-box').classList.add('hidden');
-        updateLinkedFolderBox();
-
-        const cls = state.classesData[state.activeClass];
-        const cond = cls.config.unlockConditions[val];
-        if (cond && cond.folders && cond.folders.length > 0) {
-          setPartBActiveFolders(cond.folders, `Thư mục liên kết mở khóa: [${cond.name}]`, 'condition', val);
-        } else {
-          renderPartBEmptyState();
-        }
+        updateConditionDisplayBox();
       }
     }
 
-    function updateLinkedFolderBox(customFolders = null) {
+    function updateConditionDisplayBox() {
       const cls = state.classesData[state.activeClass];
-      const wrapper = document.getElementById('linked-folder-wrapper');
-      const box = document.getElementById('linked-folder-display-box');
+      const box = document.getElementById('box-current-cond-display');
       const cond = cls.config.unlockConditions[state.currentSelectedConditionId];
 
-      const folderList = customFolders || (cond ? (cond.folders || [cond.folder || 'hoacap2']) : []);
-
-      if (folderList.length === 0) {
-        wrapper.classList.add('hidden');
-        box.innerHTML = '';
+      if (!cond) {
+        box.classList.add('hidden');
         return;
       }
 
-      wrapper.classList.remove('hidden');
-      box.innerHTML = folderList.map(f => `
-        <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-mono font-bold flex items-center gap-1.5 shadow-2xs">
-          <i class="fa-solid fa-folder-open text-emerald-600"></i> ${f}
-          <span class="text-[9px] bg-emerald-200 text-emerald-900 px-1 rounded font-sans uppercase">RANK_TOP1</span>
-        </span>
-      `).join('');
+      box.classList.remove('hidden');
+      document.getElementById('lbl-display-cond-level').innerText = `Cấp độ ${cond.targetLevel || 1}`;
+      let typeText = 'Kiểu: Đạt Hạng 1 tuần';
+      if (cond.type === 'quest_done') typeText = 'Kiểu: Hoàn thành nhiệm vụ/từ khóa';
+      if (cond.type === 'always_open') typeText = 'Kiểu: Tự do luôn mở';
+      document.getElementById('lbl-display-cond-type').innerText = typeText;
     }
 
     function openNewConditionForm(editId = null) {
@@ -926,80 +947,41 @@
       const title = document.getElementById('lbl-form-mode');
       box.classList.remove('hidden');
 
+      const levels = getAllConfiguredLockLevels();
+      const levelSelect = document.getElementById('select-new-cond-target-level');
+      levelSelect.innerHTML = levels.map(lvl => `<option value="${lvl}">Cấp độ ${lvl}</option>`).join('');
+
       const cls = state.classesData[state.activeClass];
       if (editId && cls.config.unlockConditions[editId]) {
         title.innerText = 'Chỉnh Sửa Điều Kiện';
         const cond = cls.config.unlockConditions[editId];
         document.getElementById('input-new-cond-name').value = cond.name;
         document.getElementById('select-new-cond-type').value = cond.type;
-        state.tempNewConditionFolders = [...(cond.folders || [cond.folder || 'hoacap2'])];
+        levelSelect.value = cond.targetLevel || 1;
       } else {
-        title.innerText = 'Nhập Điều Kiện Mới';
+        title.innerText = 'Thiết Lập Điều Kiện Mới';
         document.getElementById('input-new-cond-name').value = '';
         document.getElementById('select-new-cond-type').value = 'rank_top1';
-        state.tempNewConditionFolders = ['hoacap2'];
+        levelSelect.value = levels[0] || 1;
       }
-      
-      renderCondFolderDropdownList();
-      updateLinkedFolderBox(state.tempNewConditionFolders);
-      setPartBActiveFolders(state.tempNewConditionFolders, `Đang cấu hình: ${document.getElementById('input-new-cond-name').value || 'Điều kiện mới'}`, 'condition', editId || '__NEW__');
-    }
-
-    function renderCondFolderDropdownList() {
-      const menu = document.getElementById('dropdown-cond-folders');
-      menu.innerHTML = ALL_FOLDERS.filter(f => f !== 'amthanh').map(f => {
-        const isChecked = state.tempNewConditionFolders.includes(f);
-        return `
-          <label class="flex items-center justify-between px-2 py-1 rounded hover:bg-emerald-50 cursor-pointer text-xs font-bold text-slate-700" onclick="event.stopPropagation()">
-            <span class="flex items-center gap-1.5">
-              <i class="fa-solid fa-folder text-emerald-600 text-[10px]"></i>
-              ${f}
-            </span>
-            <input type="checkbox" value="${f}" ${isChecked ? 'checked' : ''} onchange="toggleCondFolderCheck('${f}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5">
-          </label>
-        `;
-      }).join('');
-      updateCondFolderLabel();
-    }
-
-    function toggleCondFolderCheck(folder, isChecked) {
-      if (isChecked) {
-        if (!state.tempNewConditionFolders.includes(folder)) state.tempNewConditionFolders.push(folder);
-      } else {
-        state.tempNewConditionFolders = state.tempNewConditionFolders.filter(f => f !== folder);
-      }
-      updateCondFolderLabel();
-      updateLinkedFolderBox(state.tempNewConditionFolders);
-
-      const condName = document.getElementById('input-new-cond-name').value || 'Điều kiện mở khóa';
-      setPartBActiveFolders(state.tempNewConditionFolders, `Thư mục liên kết mở khóa: [${condName}]`, 'condition', state.editingConditionId || '__NEW__');
-    }
-
-    function updateCondFolderLabel() {
-      const el = document.getElementById('lbl-cond-folders-selected');
-      if (el) el.innerText = state.tempNewConditionFolders.length === 0 ? 'Chưa chọn thư mục' : state.tempNewConditionFolders.join(', ');
     }
 
     function cancelNewCondition() {
       document.getElementById('new-condition-box').classList.add('hidden');
       document.getElementById('select-condition-main').value = state.currentSelectedConditionId || '';
-      updateLinkedFolderBox();
+      updateConditionDisplayBox();
     }
 
     function saveNewCondition() {
       const cls = state.classesData[state.activeClass];
       const name = document.getElementById('input-new-cond-name').value.trim();
       const type = document.getElementById('select-new-cond-type').value;
+      const targetLevel = parseInt(document.getElementById('select-new-cond-target-level').value) || 1;
 
       if (!name) return alert('Vui lòng nhập tên điều kiện!');
-      if (state.tempNewConditionFolders.length === 0) return alert('Vui lòng chọn ít nhất 1 thư mục liên kết!');
 
       const id = state.editingConditionId || ('cond_' + Date.now().toString(36));
-      cls.config.unlockConditions[id] = { 
-        id, name, type, 
-        folders: [...state.tempNewConditionFolders],
-        selectedImages: cls.config.unlockConditions[id]?.selectedImages || []
-      };
+      cls.config.unlockConditions[id] = { id, name, type, targetLevel };
 
       state.currentSelectedConditionId = id;
       state.editingConditionId = null;
@@ -1007,8 +989,7 @@
       document.getElementById('new-condition-box').classList.add('hidden');
       renderConditionsMenu();
       saveStateToLocal();
-      setPartBActiveFolders(cls.config.unlockConditions[id].folders, `Thư mục liên kết mở khóa: [${name}]`, 'condition', id);
-      alert('Đã lưu điều kiện mở khóa cho lớp!');
+      alert(`Đã lưu điều kiện mở khóa cho Cấp độ ${targetLevel}!`);
     }
 
     function editCurrentCondition() {
@@ -1020,28 +1001,28 @@
       if (!state.currentSelectedConditionId) return alert('Chưa chọn điều kiện nào để xóa!');
       const cls = state.classesData[state.activeClass];
       const cond = cls.config.unlockConditions[state.currentSelectedConditionId];
-      if (confirm(`Xóa điều kiện [${cond.name}]? Các thư mục liên kết cũng sẽ xóa theo.`)) {
+      if (confirm(`Xóa điều kiện [${cond.name}]?`)) {
         delete cls.config.unlockConditions[state.currentSelectedConditionId];
         state.currentSelectedConditionId = '';
         renderConditionsMenu();
         saveStateToLocal();
-        renderPartBEmptyState();
       }
     }
 
-    // ================= HIỂN THỊ PHẦN B: KHO ẢNH & SCALE REVIEW =================
+    // ================= HIỂN THỊ PHẦN B: CHECKBOX KHÓA GÓC PHẢI & GÁN CẤP ĐỘ =================
     function renderPartBEmptyState() {
       state.activeViewData = { type: 'none', folders: [], singleImage: null, contextType: 'none', contextKey: '' };
       document.getElementById('section-b-title').innerText = 'Kho Ảnh Assets Đang Hiển Thị';
       document.getElementById('total-visible-images-count').innerText = '(0 ảnh)';
       document.getElementById('toolbar-actions').style.display = 'none';
       document.getElementById('scale-controller-panel').style.display = 'none';
+      document.getElementById('lock-assigner-panel').style.display = 'none';
 
       document.getElementById('multi-folder-display-area').innerHTML = `
         <div class="py-24 text-center text-slate-400 bg-white rounded-2xl border border-dashed border-slate-300">
           <i class="fa-regular fa-hand-pointer text-3xl mb-2 text-slate-300"></i>
           <p class="text-xs font-bold text-slate-500">Chưa có lựa chọn nào từ Phần A</p>
-          <p class="text-[11px] text-slate-400 mt-0.5">Chọn một nút, xem ảnh nền, mở khóa hoặc âm thanh để hiển thị cấu hình tương ứng.</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">Chọn một nút để thiết lập ảnh, gán cấp độ khóa và tỉ lệ hiển thị.</p>
         </div>
       `;
     }
@@ -1053,10 +1034,17 @@
       }
 
       state.activeViewData = { type: 'folders', folders: [...folders], singleImage: null, contextType, contextKey };
+      state.selectedLockImagesForBatch = [];
       document.getElementById('section-b-title').innerText = customTitle || 'Kho Ảnh Assets Đang Hiển Thị';
       document.getElementById('toolbar-actions').style.display = 'flex';
       document.getElementById('scale-controller-panel').style.display = 'flex';
       renderMultiFolderView();
+    }
+
+    function toggleLockLevelSubBar() {
+      const panel = document.getElementById('lock-assigner-panel');
+      const isHidden = panel.style.display === 'none';
+      panel.style.display = isHidden ? 'flex' : 'none';
     }
 
     function getContextSelectedImages() {
@@ -1064,9 +1052,6 @@
       const { contextType, contextKey } = state.activeViewData;
       if (contextType === 'button' && cls.config.buttonMappings[contextKey]) {
         return cls.config.buttonMappings[contextKey].selectedImages || [];
-      }
-      if (contextType === 'condition' && cls.config.unlockConditions[contextKey]) {
-        return cls.config.unlockConditions[contextKey].selectedImages || [];
       }
       return [];
     }
@@ -1076,9 +1061,6 @@
       const { contextType, contextKey } = state.activeViewData;
       if (contextType === 'button' && cls.config.buttonMappings[contextKey]) {
         cls.config.buttonMappings[contextKey].selectedImages = newArray;
-      }
-      if (contextType === 'condition' && cls.config.unlockConditions[contextKey]) {
-        cls.config.unlockConditions[contextKey].selectedImages = newArray;
       }
       saveStateToLocal();
       updateSelectedImageCount();
@@ -1090,9 +1072,11 @@
       const area = document.getElementById('multi-folder-display-area');
       const folders = state.activeViewData.folders;
       const selectedImgList = getContextSelectedImages();
-      const isConditionMode = state.activeViewData.contextType === 'condition';
       const cls = state.classesData[state.activeClass];
       if (!cls.config.assetScales) cls.config.assetScales = {};
+
+      const currentBtnMapping = cls.config.buttonMappings[state.currentActiveButtonIcon] || { itemLockLevels: {} };
+      const currentLocks = currentBtnMapping.itemLockLevels || {};
 
       let totalCount = 0;
       area.innerHTML = folders.map(f => {
@@ -1104,7 +1088,7 @@
           <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs space-y-3">
             <div class="flex items-center justify-between border-b border-slate-100 pb-2">
               <div class="flex items-center gap-2">
-                <input type="checkbox" ${isFolderAllChecked ? 'checked' : ''} onchange="toggleSelectAllInFolder('${f}', this.checked)" class="rounded text-emerald-600 w-4 h-4 cursor-pointer" title="Chọn toàn bộ ảnh thư mục này">
+                <input type="checkbox" ${isFolderAllChecked ? 'checked' : ''} onchange="toggleSelectAllInFolder('${f}', this.checked)" class="rounded text-emerald-600 w-4 h-4 cursor-pointer" title="Chọn toàn bộ ảnh thư mục này hiển thị cho nút">
                 <b class="text-xs uppercase text-slate-800 tracking-wide font-mono flex items-center gap-1.5">
                   <i class="fa-solid fa-folder text-emerald-600"></i> ${f}
                 </b>
@@ -1114,24 +1098,29 @@
 
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
               ${items.map(item => {
-                const isChecked = selectedImgList.includes(item.fileName);
+                const isCheckedDisplay = selectedImgList.includes(item.fileName);
                 const scaleVal = cls.config.assetScales[item.fileName] || 40;
+                const lockLvl = currentLocks[item.fileName] || 0;
+                const isLockChecked = lockLvl > 0 || state.selectedLockImagesForBatch.includes(item.fileName);
 
                 return `
                   <div onclick="selectImageForScaleReview('${item.fileName}', '${item.rawUrl}')" 
-                       class="relative bg-white rounded-xl border ${isChecked ? (isConditionMode ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-emerald-500 ring-2 ring-emerald-500/20') : 'border-slate-200'} p-2 flex flex-col justify-between group hover:shadow-xs transition cursor-pointer">
+                       class="relative bg-white rounded-xl border ${lockLvl > 0 ? 'border-amber-400 ring-2 ring-amber-400/20' : (isCheckedDisplay ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-200')} p-2 flex flex-col justify-between group hover:shadow-xs transition cursor-pointer">
                     
+                    <!-- Ô CHECK GÓC TRÁI: CHỌN HIỂN THỊ NÚT -->
                     <div class="absolute top-1.5 left-1.5 z-10" onclick="event.stopPropagation()">
-                      <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSingleImageCheck('${item.fileName}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5 cursor-pointer">
+                      <input type="checkbox" ${isCheckedDisplay ? 'checked' : ''} onchange="toggleSingleImageCheck('${item.fileName}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5 cursor-pointer" title="Hiển thị ảnh này cho nút">
                     </div>
 
-                    ${isConditionMode && isChecked ? `
-                      <div class="absolute top-1.5 right-1.5 z-10 w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] shadow-sm" title="Ảnh này đang bị gắn điều kiện khóa cấp độ">
-                        <i class="fa-solid fa-lock"></i>
-                      </div>
-                    ` : ''}
+                    <!-- Ô CHECK GÓC PHẢI: CHỌN ĐỂ GÁN KHÓA CẤP ĐỘ -->
+                    <div class="absolute top-1.5 right-1.5 z-10 flex items-center gap-0.5 bg-white/90 rounded-md px-1 py-0.5 shadow-2xs border border-amber-200" onclick="event.stopPropagation()">
+                      <input type="checkbox" ${isLockChecked ? 'checked' : ''} onchange="toggleItemLockCheckbox('${item.fileName}', this.checked)" class="rounded text-amber-600 w-3.5 h-3.5 cursor-pointer">
+                      <span class="text-[9px] font-black ${lockLvl > 0 ? 'text-amber-800' : 'text-slate-400'} flex items-center gap-0.5">
+                        <i class="fa-solid fa-lock text-[8px]"></i> ${lockLvl > 0 ? lockLvl : ''}
+                      </span>
+                    </div>
 
-                    <div class="h-20 w-full bg-trans-grid rounded-lg flex items-center justify-center p-1">
+                    <div class="h-20 w-full bg-trans-grid rounded-lg flex items-center justify-center p-1 mt-1">
                       <img src="${item.rawUrl}" class="max-h-full max-w-full object-contain filter drop-shadow">
                     </div>
 
@@ -1155,6 +1144,66 @@
         const allItems = [].concat(...Object.values(state.cachedAssets));
         const match = allItems.find(i => i.fileName === firstFile);
         if (match) selectImageForScaleReview(match.fileName, match.rawUrl);
+      }
+    }
+
+    // CHECK / BỎ CHECK Ô KHÓA GÓC PHẢI TRÊN TỪNG ẢNH
+    function toggleItemLockCheckbox(fileName, isChecked) {
+      const cls = state.classesData[state.activeClass];
+      const mapping = cls.config.buttonMappings[state.currentActiveButtonIcon];
+      if (!mapping) return;
+
+      if (isChecked) {
+        // Thêm vào danh sách chờ gán hàng loạt nếu chưa có cấp độ
+        if (!state.selectedLockImagesForBatch.includes(fileName)) {
+          state.selectedLockImagesForBatch.push(fileName);
+        }
+      } else {
+        // BỎ CHECK KHÓA: LẬP TỨC TRẢ ẢNH ĐÓ VỀ TỰ DO (BỎ KHÓA CHO ẢNH NÀY)
+        state.selectedLockImagesForBatch = state.selectedLockImagesForBatch.filter(f => f !== fileName);
+        if (mapping.itemLockLevels && mapping.itemLockLevels[fileName]) {
+          delete mapping.itemLockLevels[fileName];
+          saveStateToLocal();
+        }
+      }
+      renderMultiFolderView();
+    }
+
+    // NÚT "GÁN": GÁN CẤP ĐỘ CHO TOÀN BỘ ẢNH ĐƯỢC CHECK GÓC PHẢI
+    function applyBatchLockLevel() {
+      const cls = state.classesData[state.activeClass];
+      const mapping = cls.config.buttonMappings[state.currentActiveButtonIcon];
+      if (!mapping) return alert('Chưa chọn nút để gán!');
+
+      if (!mapping.itemLockLevels) mapping.itemLockLevels = {};
+      const lvl = parseInt(document.getElementById('input-assign-lock-level').value) || 1;
+
+      if (state.selectedLockImagesForBatch.length === 0) {
+        return alert('Vui lòng tick chọn ít nhất 1 ô khóa (góc phải trên ảnh) trước khi bấm Gán!');
+      }
+
+      state.selectedLockImagesForBatch.forEach(f => {
+        mapping.itemLockLevels[f] = lvl;
+      });
+
+      state.selectedLockImagesForBatch = [];
+      saveStateToLocal();
+      renderMultiFolderView();
+      alert(`Đã gán Cấp độ khóa ${lvl} thành công cho các ảnh được chọn!`);
+    }
+
+    // NÚT "BỎ GÁN": GỠ BỎ KHÓA TOÀN BỘ CHO CÁC ẢNH ĐANG HIỂN THỊ TRONG PHẦN B
+    function clearBatchLockLevel() {
+      const cls = state.classesData[state.activeClass];
+      const mapping = cls.config.buttonMappings[state.currentActiveButtonIcon];
+      if (!mapping) return;
+
+      if (confirm('Bỏ gán khóa cho toàn bộ ảnh trong mục này?')) {
+        mapping.itemLockLevels = {};
+        state.selectedLockImagesForBatch = [];
+        saveStateToLocal();
+        renderMultiFolderView();
+        alert('Đã gỡ bỏ toàn bộ khóa cấp độ cho mục này!');
       }
     }
 
@@ -1242,9 +1291,7 @@
       document.getElementById('lbl-selected-img-count').innerText = `Đã chọn: ${selectedCount}`;
     }
 
-    // =========================================================================
-    // CẤU HÌNH ÂM THANH: NHẠC NỀN & HIỆU ỨNG TƯƠNG TÁC THEO HÀNH ĐỘNG
-    // =========================================================================
+    // ================= CẤU HÌNH ÂM THANH =================
     function switchAudioConfigTab(tabKey) {
       state.currentAudioTab = tabKey;
       const btnBgm = document.getElementById('btn-audio-tab-bgm');
@@ -1261,13 +1308,13 @@
       }
     }
 
-    // GIAO DIỆN PHẦN B: ÂM THANH NỀN (BGM)
     function renderBackgroundMusicPanel() {
       state.activeViewData = { type: 'audio', folders: [], singleImage: null, contextType: 'audio', contextKey: 'bgm' };
       document.getElementById('section-b-title').innerText = 'Cấu Hình Âm Thanh Nền (BGM)';
       document.getElementById('total-visible-images-count').innerText = '';
       document.getElementById('toolbar-actions').style.display = 'none';
       document.getElementById('scale-controller-panel').style.display = 'none';
+      document.getElementById('lock-assigner-panel').style.display = 'none';
 
       const cls = state.classesData[state.activeClass];
       const bgmCfg = cls.config.audioSettings.bgm;
@@ -1291,7 +1338,6 @@
           </div>
 
           <div class="space-y-4">
-            <!-- Nguồn 1: Chọn từ assets/amthanh/ -->
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">1. Chọn file nhạc từ thư mục assets/amthanh/:</label>
               <select onchange="updateBgmSetting('selectedFile', this.value)" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-mono bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">
@@ -1300,13 +1346,11 @@
               </select>
             </div>
 
-            <!-- Nguồn 2: Dán link Drive / URL trực tiếp -->
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">2. Hoặc dán link Google Drive / URL mp3 trực tiếp:</label>
               <input type="text" value="${bgmCfg.url || ''}" onchange="updateBgmSetting('url', this.value)" placeholder="VD: https://drive.google.com/file/d/... hoặc link audio mp3" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500">
             </div>
 
-            <!-- Điều chỉnh âm lượng & Nghe thử -->
             <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex flex-wrap items-center justify-between gap-4">
               <div class="flex items-center gap-3">
                 <span class="text-xs font-bold text-slate-700">Âm lượng:</span>
@@ -1321,7 +1365,6 @@
               </div>
             </div>
 
-            <!-- Tùy chọn Tự động phát -->
             <div class="flex items-center justify-between p-3 bg-indigo-50/50 rounded-2xl border border-indigo-100">
               <span class="text-xs font-bold text-indigo-950">Tự động phát nhạc khi học sinh vào game:</span>
               <input type="checkbox" ${bgmCfg.autoPlay ? 'checked' : ''} onchange="updateBgmSetting('autoPlay', this.checked)" class="w-4 h-4 rounded text-indigo-600 cursor-pointer">
@@ -1346,13 +1389,13 @@
       saveStateToLocal();
     }
 
-    // GIAO DIỆN PHẦN B: ÂM THANH HIỆU ỨNG (SFX) THEO HÀNH ĐỘNG
     function renderSoundEffectsPanel() {
       state.activeViewData = { type: 'audio', folders: [], singleImage: null, contextType: 'audio', contextKey: 'sfx' };
       document.getElementById('section-b-title').innerText = 'Cấu Hình Âm Thanh Hiệu Ứng (SFX)';
       document.getElementById('total-visible-images-count').innerText = '';
       document.getElementById('toolbar-actions').style.display = 'none';
       document.getElementById('scale-controller-panel').style.display = 'none';
+      document.getElementById('lock-assigner-panel').style.display = 'none';
 
       const cls = state.classesData[state.activeClass];
       const sfxList = cls.config.audioSettings.sfx || [];
@@ -1395,7 +1438,6 @@
                   </div>
 
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                    <!-- Dropdown chọn file repo -->
                     <div>
                       <label class="block text-[10px] font-bold text-slate-500 mb-1">Chọn từ assets/amthanh/:</label>
                       <select onchange="updateSfxSetting(${idx}, 'selectedFile', this.value)" class="w-full px-2.5 py-1.5 text-xs rounded-xl border border-slate-300 bg-slate-50 font-mono">
@@ -1404,7 +1446,6 @@
                       </select>
                     </div>
 
-                    <!-- Ô dán link Drive / URL trực tiếp -->
                     <div>
                       <label class="block text-[10px] font-bold text-slate-500 mb-1">Hoặc dán Link Drive / URL mp3:</label>
                       <input type="text" value="${sfx.url || ''}" onchange="updateSfxSetting(${idx}, 'url', this.value)" placeholder="Dán link audio..." class="w-full px-2.5 py-1.5 text-xs rounded-xl border border-slate-300 font-mono">
@@ -1445,7 +1486,6 @@
       }
     }
 
-    // NGHE THỬ ÂM THANH TRỰC TIẾP TẠI ADMIN
     function testPlayAudio(type, sfxIdx = null) {
       if (state.previewAudioInstance) {
         state.previewAudioInstance.pause();
@@ -1463,7 +1503,6 @@
         targetUrl = sfx.url || (sfx.selectedFile ? `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${sfx.selectedFile}` : '');
       }
 
-      // Xử lý link Google Drive sang link nghe trực tiếp
       if (targetUrl.includes('drive.google.com/file/d/')) {
         const idMatch = targetUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
         if (idMatch) targetUrl = `https://drive.google.com/uc?export=download&id=${idMatch[1]}`;
@@ -1623,12 +1662,12 @@
           const centerY = (slot.corners[0].y + slot.corners[1].y + slot.corners[2].y + slot.corners[3].y) / 4;
           return `
             <div id="controls-slot-${sIdx}" class="absolute inset-0 pointer-events-none">
-              <div style="left: ${centerX}%; top:${centerY}%; transform: translate(-50%, -50%);" 
+              <div style="left: ${centerX}%; top: ${centerY}%; transform: translate(-50%, -50%);" 
                    class="absolute px-3 py-1 bg-amber-950/90 text-amber-200 border border-amber-600/60 rounded-full font-black text-xs shadow-lg pointer-events-none flex items-center gap-1">
                 <span>🌾</span> ${slot.name}
               </div>
 
-              <div style="left: ${slot.corners[0].x}%; top:${slot.corners[0].y}%; transform: translate(-110%, -125%);"
+              <div style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%; transform: translate(-110%, -125%);"
                    class="absolute flex items-center gap-1.5 pointer-events-auto z-50">
                 <button onclick="copyPlotSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center shadow-lg hover:scale-125 transition" title="Copy ô đất này">
                   <i class="fa-solid fa-copy"></i>
@@ -1638,10 +1677,10 @@
                 </button>
               </div>
 
-              <div id="handle-${sIdx}-0" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[0].x}%; top:${slot.corners[0].y}%;"></div>
-              <div id="handle-${sIdx}-1" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[1].x}%; top:${slot.corners[1].y}%;"></div>
-              <div id="handle-${sIdx}-2" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[2].x}\%; top:${slot.corners[2].y}%;"></div>
-              <div id="handle-${sIdx}-3" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[3].x}\%; top:${slot.corners[3].y}%;"></div>
+              <div id="handle-${sIdx}-0" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%;"></div>
+              <div id="handle-${sIdx}-1" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[1].x}%; top: ${slot.corners[1].y}%;"></div>
+              <div id="handle-${sIdx}-2" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[2].x}%; top:${slot.corners[2].y}%;"></div>
+              <div id="handle-${sIdx}-3" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[3].x}%; top:${slot.corners[3].y}%;"></div>
             </div>
           `;
         }).join('')}
@@ -1800,24 +1839,14 @@
           
           const roleRaw = cols[3] ? cols[3].trim().toUpperCase() : 'MEMBER';
           let role = 'MEMBER';
-          if (roleRaw.startsWith('TT')) {
-            role = roleRaw;
-          } else if (roleRaw.startsWith('TL')) {
-            role = roleRaw;
-          }
+          if (roleRaw.startsWith('TT')) role = roleRaw;
+          else if (roleRaw.startsWith('TL')) role = roleRaw;
 
           const username = `${className}stt${stt}_To${to}`;
           const password = generatePasswordFromNameAndSTT(hoTen, stt);
 
           state.classesData[className].students[username] = {
-            username, 
-            name: hoTen, 
-            stt, 
-            team: to, 
-            class: className, 
-            password, 
-            role: role,
-            isQuestDone: false
+            username, name: hoTen, stt, team: to, class: className, password, role, isQuestDone: false
           };
           count++;
         }
@@ -1877,7 +1906,7 @@
 
     function saveAndApplyCurrentClass() {
       saveStateToLocal();
-      alert(`ĐÃ LƯU THÀNH CÔNG CHO LỚP ${state.activeClass}!\nToàn bộ cài đặt nền, scale ảnh, khóa cấp độ, âm thanh, phân quyền chức vụ, ô đất và chữ nền đã đồng bộ.`);
+      alert(`ĐÃ LƯU THÀNH CÔNG CHO LỚP ${state.activeClass}!\nToàn bộ cài đặt nền, scale ảnh, cấp độ khóa theo từng ảnh, âm thanh, phân quyền chức vụ, ô đất và chữ nền đã đồng bộ sang index.html.`);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
