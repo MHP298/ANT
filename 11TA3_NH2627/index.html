@@ -533,11 +533,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ========================================================
-           RESPONSIVE CHUYÊN SÂU: CẬP NHẬT TỶ LỆ DỌC ĐỦ NÚT CHỨC NĂNG
-           ======================================================== */
-
-        /* 1. Màn hình điện thoại DỌC (Portrait) - Tinh chỉnh Phần A vừa vặn các nút */
+        /* RESPONSIVE DỌC: Phần A hiện đủ tất cả các nút chức năng */
         @media screen and (max-width: 768px) and (orientation: portrait) {
             header {
                 padding: 6px 10px;
@@ -557,7 +553,6 @@
                 height: calc(100dvh - 60px);
                 overflow: hidden;
             }
-            /* Thiết lập chiều cao Phần A linh hoạt từ 32% - 35% để hiện đủ các nút chức năng */
             .sidebar-a {
                 max-height: 34%;
                 flex-shrink: 0;
@@ -585,7 +580,7 @@
             .welcome-greeting-text { font-size: 2.1rem; }
         }
 
-        /* 2. Màn hình điện thoại XOAY NGANG (Landscape) */
+        /* RESPONSIVE NGANG */
         @media screen and (max-height: 520px) and (orientation: landscape) {
             header {
                 padding: 4px 10px;
@@ -798,128 +793,107 @@
             return url;
         }
 
-        // --- CẤU TRÚC LẮNG NGHE REALTIME THEO CÁC COLLECTION RIÊNG BIỆT ---
+        // --- CẤU TRÚC KẾT NỐI REALTIME BẢO VỆ DỮ LIỆU CŨ VÀ MỚI ĐỒNG BỘ 100% ---
         function initRealtimeDatabase() {
+            // 1. Lắng nghe Thông Báo theo Collections độc lập
             db.collection("notifications").onSnapshot(snapshot => {
-                notifications = [];
-                snapshot.forEach(doc => {
-                    notifications.push({ ...doc.data(), docId: doc.id });
-                });
-                renderApp();
-            }, err => console.error("Lỗi realtime notifications: ", err));
+                if (!snapshot.empty) {
+                    notifications = [];
+                    snapshot.forEach(doc => {
+                        notifications.push({ ...doc.data(), docId: doc.id });
+                    });
+                    renderApp();
+                }
+            }, err => console.log("Lỗi snapshot notifications: ", err));
 
+            // 2. Lắng nghe Báo Bài
             db.collection("homeworks").onSnapshot(snapshot => {
-                homeworks = [];
-                snapshot.forEach(doc => {
-                    homeworks.push({ ...doc.data(), docId: doc.id });
-                });
-                renderApp();
-            }, err => console.error("Lỗi realtime homeworks: ", err));
+                if (!snapshot.empty) {
+                    homeworks = [];
+                    snapshot.forEach(doc => {
+                        homeworks.push({ ...doc.data(), docId: doc.id });
+                    });
+                    renderApp();
+                }
+            }, err => console.log("Lỗi snapshot homeworks: ", err));
 
+            // 3. Lắng nghe Albums
             db.collection("albums").onSnapshot(snapshot => {
-                albums = [];
-                snapshot.forEach(doc => {
-                    albums.push({ ...doc.data(), docId: doc.id });
-                });
-                renderApp();
-            }, err => console.error("Lỗi realtime albums: ", err));
+                if (!snapshot.empty) {
+                    albums = [];
+                    snapshot.forEach(doc => {
+                        albums.push({ ...doc.data(), docId: doc.id });
+                    });
+                    renderApp();
+                }
+            }, err => console.log("Lỗi snapshot albums: ", err));
 
+            // 4. Lắng nghe Thùng Rác
             db.collection("trashBin").onSnapshot(snapshot => {
                 trashBin = [];
                 snapshot.forEach(doc => {
                     trashBin.push({ ...doc.data(), docId: doc.id });
                 });
                 renderApp();
-            }, err => console.error("Lỗi realtime trashBin: ", err));
+            }, err => console.log("Lỗi snapshot trashBin: ", err));
 
+            // 5. Lắng nghe Tài Khoản Phụ
             db.collection("subAccounts").onSnapshot(snapshot => {
-                subAccounts = [];
-                snapshot.forEach(doc => {
-                    subAccounts.push({ ...doc.data(), docId: doc.id });
-                });
-                let hasAdminSub = subAccounts.find(acc => acc.name === "admin");
-                if (!hasAdminSub) {
-                    db.collection("subAccounts").doc("acc_admin").set({
-                        name: "admin", pass: "ad1234", studentName: "Quản Trị Viên Phụ", isAdmin: true
+                if (!snapshot.empty) {
+                    subAccounts = [];
+                    snapshot.forEach(doc => {
+                        subAccounts.push({ ...doc.data(), docId: doc.id });
                     });
                 }
+                let hasAdminSub = subAccounts.find(acc => acc.name === "admin");
+                if (!hasAdminSub) {
+                    subAccounts.push({ name: "admin", pass: "ad1234", studentName: "Quản Trị Viên Phụ", isAdmin: true });
+                }
                 renderApp();
-            }, err => console.error("Lỗi realtime subAccounts: ", err));
+            }, err => console.log("Lỗi snapshot subAccounts: ", err));
 
+            // 6. KHÔI PHỤC VÀ LẮNG NGHE TKB, BIỂU MẪU VÀ BANNER TỪ KHO GỐC CLASS_DATA/MAIN_STORE
+            db.collection("class_data").doc("main_store").onSnapshot(doc => {
+                if (doc.exists) {
+                    let data = doc.data();
+                    if (data.scheduleUrl) scheduleUrl = data.scheduleUrl;
+                    if (data.formsList && data.formsList.length > 0) formsList = data.formsList;
+                    if (data.banners && data.banners.length > 0) banners = data.banners;
+                    
+                    // Nếu các collection mới chưa có thông báo/báo bài, nạp từ kho gốc sang
+                    if (notifications.length === 0 && data.notifications) {
+                        notifications = data.notifications;
+                    }
+                    if (homeworks.length === 0 && data.homeworks) {
+                        homeworks = data.homeworks;
+                    }
+                    if (albums.length === 0 && data.albums) {
+                        albums = data.albums;
+                    }
+                    if (subAccounts.length <= 1 && data.subAccounts) {
+                        subAccounts = data.subAccounts;
+                    }
+                    renderApp();
+                }
+            }, err => console.log("Lỗi snapshot main_store: ", err));
+
+            // Lắng nghe thêm document settings/general phòng trường hợp thầy cập nhật sau này
             db.collection("settings").doc("general").onSnapshot(doc => {
                 if (doc.exists) {
                     let data = doc.data();
-                    banners = data.banners || [];
-                    formsList = data.formsList || [];
-                    scheduleUrl = data.scheduleUrl || "";
-                } else {
-                    db.collection("settings").doc("general").set({
-                        banners: [], formsList: [], scheduleUrl: ""
-                    });
+                    if (data.scheduleUrl) scheduleUrl = data.scheduleUrl;
+                    if (data.formsList && data.formsList.length > 0) formsList = data.formsList;
+                    if (data.banners && data.banners.length > 0) banners = data.banners;
+                    renderApp();
                 }
-                renderApp();
-            }, err => console.error("Lỗi realtime settings: ", err));
-
-            autoMigrateFromOldStore();
+            }, err => console.log("Lỗi snapshot settings/general: ", err));
         }
 
-        async function autoMigrateFromOldStore() {
-            try {
-                let oldDoc = await db.collection("class_data").doc("main_store").get();
-                if (oldDoc.exists) {
-                    let oldData = oldDoc.data();
-                    let batch = db.batch();
-
-                    if (oldData.notifications && oldData.notifications.length > 0) {
-                        oldData.notifications.forEach(n => {
-                            let ref = db.collection("notifications").doc("noti_" + n.id);
-                            batch.set(ref, n);
-                        });
-                    }
-                    if (oldData.homeworks && oldData.homeworks.length > 0) {
-                        oldData.homeworks.forEach(h => {
-                            let ref = db.collection("homeworks").doc("hw_" + h.id);
-                            batch.set(ref, h);
-                        });
-                    }
-                    if (oldData.albums && oldData.albums.length > 0) {
-                        oldData.albums.forEach(a => {
-                            let ref = db.collection("albums").doc("alb_" + (a.id || Date.now()));
-                            batch.set(ref, a);
-                        });
-                    }
-                    if (oldData.subAccounts && oldData.subAccounts.length > 0) {
-                        oldData.subAccounts.forEach(acc => {
-                            let ref = db.collection("subAccounts").doc("acc_" + acc.name);
-                            batch.set(ref, acc);
-                        });
-                    }
-                    if (oldData.trashBin && oldData.trashBin.length > 0) {
-                        oldData.trashBin.forEach((t, idx) => {
-                            let ref = db.collection("trashBin").doc("trash_" + (t.id || idx));
-                            batch.set(ref, t);
-                        });
-                    }
-                    let settingsRef = db.collection("settings").doc("general");
-                    batch.set(settingsRef, {
-                        banners: oldData.banners || [],
-                        formsList: oldData.formsList || [],
-                        scheduleUrl: oldData.scheduleUrl || ""
-                    }, { merge: true });
-
-                    await batch.commit();
-                    await db.collection("class_data").doc("main_store").delete();
-                    console.log("Đã chuyển đổi kho dữ liệu sang Collections độc lập!");
-                }
-            } catch (e) {
-                console.log("Dữ liệu đã phân tách hoàn chỉnh.");
-            }
-        }
-
+        // Lưu cài đặt chung: Lưu đồng thời vào cả kho gốc `class_data/main_store` và `settings/general` để đảm bảo 100% không bao giờ mất liên kết
         function saveSettingsToFirebase() {
-            db.collection("settings").doc("general").set({
-                banners, formsList, scheduleUrl
-            }, { merge: true }).catch(err => alert("Lỗi lưu cấu hình: " + err.message));
+            let payload = { banners, formsList, scheduleUrl };
+            db.collection("class_data").doc("main_store").set(payload, { merge: true });
+            db.collection("settings").doc("general").set(payload, { merge: true });
         }
 
         function checkDirectFileSizeLimit(input) {
@@ -974,7 +948,7 @@
                     <button class="menu-btn" onclick="toggleSubMenu('adminAccSub')">👥 Quản lý tài khoản</button>
                     <div id="adminAccSub" class="sub-menu" style="display:${accSubDisplay};">
                         <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_create_acc')">➕ Tạo tài khoản/pass mới</button>
-                        <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_del_acc')">🗑️ Danh sách tài khoản</button>
+                        <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_del_acc')">🗑️️ Danh sách tài khoản</button>
                     </div>
 
                     <button class="menu-btn" onclick="toggleSubMenu('adminNotiSub')">📋 Quản lý thông báo/báo bài</button>
@@ -1169,7 +1143,7 @@
             }
             else if (currentView === 'forms_user_list') {
                 b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">📂 Danh Sách Biểu Mẫu</h3>`;
-                if (formsList.length === 0) {
+                if (!formsList || formsList.length === 0) {
                     b.innerHTML += '<p style="color:#6c757d; text-align:center; margin-top:20px;">Chưa có biểu mẫu nào được đăng.</p>';
                 } else {
                     formsList.forEach(form => {
@@ -1521,7 +1495,7 @@
                             </div>
                         </div>
                         <div style="flex:1; border-radius:8px; border:1px solid #ced4da; background:#f8f9fa; display:flex; flex-direction:column; overflow:hidden;">
-                            <div style="background:#e9ecef; padding:5px 8px; font-size:0.75rem; font-weight:bold; color:var(--primary); border-bottom:1px solid #ced4da;">🖼️️ Khung Preview (Click để phóng to)</div>
+                            <div style="background:#e9ecef; padding:5px 8px; font-size:0.75rem; font-weight:bold; color:var(--primary); border-bottom:1px solid #ced4da;">🖼️ Khung Preview (Click để phóng to)</div>
                             <div id="multiNotiPreviewBox" style="flex:1; width:100%; display:flex; align-items:center; justify-content:center; padding:8px; overflow:hidden; text-align:center;">
                                 <span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>
                             </div>
@@ -1880,7 +1854,7 @@
                 row.style.cssText = 'display:flex; gap:6px; align-items:center;';
                 row.innerHTML = `
                     <input type="text" class="multi-hw-input" value="${link}" placeholder="Dán link ảnh báo bài..." style="flex:1;" oninput="autoPreviewMultiHw(this)">
-                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiHwLink(this)">👁️ Xem lại</button>
+                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiHwLink(this)">👁️️ Xem lại</button>
                     <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeMultiHwRow(this)">❌</button>
                 `;
                 container.appendChild(row);
@@ -1934,7 +1908,7 @@
                 newRow.style.cssText = 'display:flex; gap:6px; align-items:center;';
                 newRow.innerHTML = `
                     <input type="text" class="multi-input-link" placeholder="Dán link ảnh tiếp theo..." style="flex:1;" oninput="autoPreviewMultiNoti(this)">
-                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiNotiLink(this)">👁️ Xem lại</button>
+                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiNotiLink(this)">👁️️ Xem lại</button>
                     <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeMultiNotiRow(this)">❌</button>
                 `;
                 container.appendChild(newRow);
@@ -1988,7 +1962,7 @@
                 newRow.style.cssText = 'display:flex; gap:6px; align-items:center;';
                 newRow.innerHTML = `
                     <input type="text" class="multi-banner-input" placeholder="Dán link ảnh banner tiếp theo..." style="flex:1;" oninput="autoPreviewMultiBanner(this)">
-                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleBannerLink(this)">👁️ Xem lại</button>
+                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleBannerLink(this)">👁️️ Xem lại</button>
                     <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeMultiBannerRow(this)">❌</button>
                 `;
                 container.appendChild(newRow);
