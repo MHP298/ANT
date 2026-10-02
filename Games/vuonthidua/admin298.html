@@ -3,361 +3,377 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vườn Thi Đua Trồng Hoa - Sân Chơi Lớp Học</title>
+  <title>Admin298 - Quản Trị Hệ Thống Trồng Hoa</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* BỘ LỌC VIỀN NÂU ĐẬM BÁM SÁT ĐƯỜNG NÉT HOA TRONG SUỐT */
-    .flower-outline {
-      filter: drop-shadow(0 0 1.2px #451a03) 
-              drop-shadow(0 0 2px #78350f) 
-              drop-shadow(0 4px 6px rgba(41, 15, 2, 0.7));
-      transition: transform 0.2s ease, filter 0.2s ease;
+    .bg-trans-grid {
+      background-color: #ffffff;
+      background-image: linear-gradient(45deg, #f1f5f9 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f1f5f9 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f1f5f9 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f1f5f9 75%);
+      background-size: 14px 14px;
+      background-position: 0 0, 0 7px, 7px -7px, -7px 0px;
     }
-    .flower-outline:hover {
-      transform: scale(1.12);
-      filter: drop-shadow(0 0 2px #b45309) 
-              drop-shadow(0 0 4px #f59e0b) 
-              drop-shadow(0 6px 8px rgba(41, 15, 2, 0.8));
-    }
-
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
-    ::-webkit-scrollbar-thumb { background: rgba(120, 53, 15, 0.5); border-radius: 4px; }
-    
-    .garden-placed-item {
-      position: absolute;
-      touch-action: none;
-      user-select: none;
-      cursor: grab;
-    }
-    .garden-placed-item:active { cursor: grabbing; }
   </style>
 </head>
-<body id="game-wrapper" class="bg-cover bg-center h-screen w-screen overflow-hidden flex flex-col font-sans select-none" style="background-image: url('assets/nengame/nenungdung.jpg');">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans">
 
-  <!-- THANH HEADER GỌN GÀNG -->
-  <header class="h-11 bg-white/90 backdrop-blur-md border-b border-black/10 px-4 flex items-center justify-between z-30 shrink-0 shadow-sm">
-    <div class="flex items-center gap-2">
-      <span class="text-xl">🌸</span>
-      <h1 class="font-extrabold text-sm text-emerald-950 uppercase tracking-wide">Vườn Thi Đua Trồng Hoa</h1>
-      <span class="text-[11px] px-2 py-0.5 bg-emerald-100 text-emerald-900 rounded-full font-bold ml-2">Lớp 10A1</span>
-    </div>
-    <div class="flex items-center gap-2">
-      <button onclick="clearPlacedItems()" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition flex items-center gap-1 border border-rose-200">
-        <i class="fa-solid fa-trash-can"></i> Dọn Sân
-      </button>
-      <div class="text-xs text-slate-700 font-semibold border-l pl-3 border-slate-300">
-        Tài khoản: <b class="text-emerald-800">hocsinh (Tổ 1 - Hạng 1 ★)</b>
+  <!-- POPUP ĐĂNG NHẬP -->
+  <div id="login-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-200">
+      <div class="text-center mb-5">
+        <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto text-2xl mb-2">🌸</div>
+        <h2 class="text-xl font-bold text-slate-800">Admin298 Management</h2>
+        <p class="text-xs text-slate-500">Điều khiển giao diện & Quy tắc mở khóa</p>
       </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Tài khoản</label>
+          <input type="text" id="login-user" autocomplete="off" class="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-300">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Mật khẩu</label>
+          <div class="relative">
+            <input type="password" id="login-pass" autocomplete="off" class="w-full px-3.5 py-2 pr-10 text-sm rounded-xl border border-slate-300">
+            <button type="button" onclick="togglePasswordVisibility('login-pass', 'eye-icon-login')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400">
+              <i id="eye-icon-login" class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div id="login-error" class="hidden text-rose-500 text-xs font-semibold text-center"></div>
+        <button onclick="handleLogin()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-md transition">
+          Đăng Nhập
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="bg-white border-b border-slate-200 px-6 py-3 sticky top-0 z-30 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl text-emerald-600"><i class="fa-solid fa-sliders"></i></span>
+      <div>
+        <h1 class="font-bold text-base text-slate-800 leading-tight">Admin298 - Game Controller</h1>
+        <p class="text-[11px] text-slate-500 font-mono">Repo: MHP298/ANT (Games/vuonthidua/assets)</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="syncAllFromGitHub()" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-rotate text-emerald-600" id="sync-icon"></i> Quét Lại GitHub
+      </button>
+      <button onclick="saveAndApplyToGame()" class="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition">
+        <i class="fa-solid fa-floppy-disk"></i> Lưu & Đồng Bộ Sang Game
+      </button>
+      <button onclick="handleLogout()" class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold">
+        Đăng Xuất
+      </button>
     </div>
   </header>
 
   <!-- BỐ CỤC CHÍNH 2 PHẦN -->
-  <div class="flex-1 flex flex-row h-[calc(100vh-44px)] overflow-hidden">
+  <div id="admin-app" class="hidden flex-1 flex flex-col md:flex-row h-[calc(100vh-57px)] overflow-hidden">
     
-    <!-- PHẦN A: BÊN TRÁI (SÂN CHƠI NỀN GAME) -->
-    <section id="section-a" class="flex-1 relative bg-slate-950 overflow-hidden flex items-center justify-center border-r-4 border-black/20" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
-      <img id="game-bg-image" src="assets/nengame/vuonlop.jpg" alt="Nền Game" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/vuonlop.jpg'" class="absolute inset-0 w-full h-full object-fill pointer-events-none transition-all duration-300">
-      <div id="drop-container" class="absolute inset-0 w-full h-full z-10 pointer-events-auto"></div>
-      <div id="empty-hint" class="absolute bottom-4 left-4 z-20 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-white text-xs pointer-events-none flex items-center gap-2">
-        <i class="fa-solid fa-hand-pointer text-amber-400"></i>
-        <span>Kéo các vật phẩm từ <b>Phần B</b> thả vào đây!</span>
-      </div>
-    </section>
-
-    <!-- PHẦN B: BÊN PHẢI (NỀN GỖ RIÊNG BIỆT) -->
-    <aside id="section-b" class="w-80 md:w-96 lg:w-[400px] bg-cover bg-center flex flex-col h-full shadow-2xl shrink-0 border-l border-black/20" style="background-image: url('assets/nengame/nenungdung.jpg');">
+    <!-- PHẦN A (1/3 TRÁI): CẤU HÌNH GIAO DIỆN & QUY TẮC MỞ KHÓA -->
+    <aside class="w-full md:w-1/3 border-r border-slate-200 bg-white flex flex-col h-full shadow-sm overflow-y-auto p-4 space-y-4">
       
-      <!-- B1: 4 NÚT ĐƯỢC ADMIN GÁN THƯ MỤC -->
-      <div class="p-3 bg-black/20 backdrop-blur-xs border-b border-black/10 shadow-sm space-y-2 shrink-0">
-        <div class="text-[10px] font-black uppercase text-amber-100 drop-shadow tracking-wide">CHỌN THƯ MỤC VẬT PHẨM:</div>
-        <div class="grid grid-cols-4 gap-2" id="dynamic-button-bar"></div>
+      <!-- CẤU HÌNH HÌNH NỀN -->
+      <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5">
+        <h4 class="text-xs font-black uppercase text-emerald-800 flex items-center gap-1.5">
+          <i class="fa-regular fa-image"></i> Cấu Hình Nền Giao Diện
+        </h4>
+        <div>
+          <label class="block text-[11px] text-slate-600 font-bold mb-0.5">Nền Toàn Game:</label>
+          <input type="text" id="cfg-bg-global" value="assets/nengame/nenungdung.jpg" class="w-full px-2.5 py-1 text-xs rounded-lg border font-mono">
+        </div>
+        <div>
+          <label class="block text-[11px] text-slate-600 font-bold mb-0.5">Nền Sân Vườn (Phần A):</label>
+          <input type="text" id="cfg-bg-a" value="assets/nengame/vuonlop.jpg" class="w-full px-2.5 py-1 text-xs rounded-lg border font-mono">
+        </div>
+        <div>
+          <label class="block text-[11px] text-slate-600 font-bold mb-0.5">Nền Cột Khay Công Cụ (Phần B):</label>
+          <input type="text" id="cfg-bg-b" value="assets/nengame/nenungdung.jpg" class="w-full px-2.5 py-1 text-xs rounded-lg border font-mono">
+        </div>
       </div>
 
-      <!-- B2: KHAY HIỂN THỊ CÁC ẢNH (KHÔNG HIỆN CHỮ, CHỈ CÓ VIỀN ĐẬM BÁM NÉT) -->
-      <div class="flex-1 overflow-y-auto p-3.5 flex flex-col bg-black/15 backdrop-blur-[2px]">
-        <div class="flex items-center justify-between mb-2">
-          <span id="category-title" class="text-xs font-black uppercase text-amber-100 drop-shadow tracking-wider">VẬT PHẨM</span>
-          <span class="text-[10px] text-amber-200/80 font-bold">Kéo hoặc bấm để đặt</span>
-        </div>
-        
-        <!-- Lưới ảnh vật phẩm không chữ -->
-        <div id="tray-grid" class="grid grid-cols-2 gap-3"></div>
+      <!-- CẤU HÌNH GÁN THƯ MỤC CHO 4 NÚT -->
+      <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5">
+        <h4 class="text-xs font-black uppercase text-emerald-800 flex items-center gap-1.5">
+          <i class="fa-solid fa-shapes"></i> Gán Thư Mục Cho 4 Nút Bấm
+        </h4>
+        <div id="buttons-config-container" class="space-y-2"></div>
+      </div>
+
+      <!-- BẢNG ĐIỀU KHIỂN QUY TẮC MỞ KHÓA -->
+      <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5">
+        <h4 class="text-xs font-black uppercase text-emerald-800 flex items-center gap-1.5">
+          <i class="fa-solid fa-lock-open text-amber-500"></i> Điều Kiện Mở Khóa Thư Mục
+        </h4>
+        <div id="unlock-rules-container" class="space-y-2"></div>
       </div>
 
     </aside>
 
+    <!-- PHẦN B (2/3 PHẢI): XEM DANH MỤC ASSETS ĐÃ TỰ ĐỘNG QUÉT -->
+    <main class="w-full md:w-2/3 flex flex-col h-full bg-slate-50">
+      <div class="bg-white border-b border-slate-200 p-3 flex flex-wrap items-center justify-between gap-2 shadow-xs">
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1" id="folder-tabs-bar"></div>
+        <span id="scan-status" class="text-xs text-emerald-700 font-bold hidden">
+          <i class="fa-solid fa-spinner fa-spin"></i> Đang quét...
+        </span>
+      </div>
+
+      <!-- Lưới ảnh xem trước -->
+      <div class="flex-1 overflow-y-auto p-4 md:p-6">
+        <div id="assets-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5"></div>
+      </div>
+    </main>
+
   </div>
 
   <script>
-    const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/';
+    const GITHUB_OWNER = 'MHP298';
+    const GITHUB_REPO = 'ANT';
+    const ASSETS_PATH = 'Games/vuonthidua/assets';
+    const FOLDERS = ['hoacap1', 'hoacap2', 'nucap1', 'nucap2', 'congcu', 'nengame', 'nutgame'];
 
-    // CẤU HÌNH HỆ THỐNG
-    let config = {
-      bgGlobal: 'assets/nengame/nenungdung.jpg',
-      bgA: 'assets/nengame/vuonlop.jpg',
-      bgB: 'assets/nengame/nenungdung.jpg',
-      buttons: {
-        btn1: { label: 'HOA', icon: 'assets/nutgame/nuthoa.png', targetFolder: 'hoacap1' },
-        btn2: { label: 'NỤ', icon: 'assets/nutgame/nutnu.png', targetFolder: 'nucap1' },
-        btn3: { label: 'ĐẤT', icon: 'assets/nutgame/nutchunhat.png', targetFolder: 'nengame' },
-        btn4: { label: 'CÔNG CỤ', icon: 'assets/nutgame/nutxeng.png', targetFolder: 'congcu' }
-      },
-      unlockRules: {
-        hoacap1: { rule: 'always', forceOpen: true },
-        nucap1:  { rule: 'always', forceOpen: true },
-        hoacap2: { rule: 'rank_top1', forceOpen: false },
-        nucap2:  { rule: 'rank_top1', forceOpen: false },
-        congcu:  { rule: 'quest_done', forceOpen: false },
-        nengame: { rule: 'always', forceOpen: true }
+    let state = {
+      currentFolder: 'hoacap1',
+      cachedAssets: {},
+      gameConfig: {
+        bgGlobal: 'assets/nengame/nenungdung.jpg',
+        bgA: 'assets/nengame/vuonlop.jpg',
+        bgB: 'assets/nengame/nenungdung.jpg',
+        buttons: {
+          btn1: { label: 'HOA', icon: 'assets/nutgame/nuthoa.png', targetFolder: 'hoacap1' },
+          btn2: { label: 'NỤ', icon: 'assets/nutgame/nutnu.png', targetFolder: 'nucap1' },
+          btn3: { label: 'ĐẤT', icon: 'assets/nutgame/nutchunhat.png', targetFolder: 'nengame' },
+          btn4: { label: 'CÔNG CỤ', icon: 'assets/nutgame/nutxeng.png', targetFolder: 'congcu' }
+        },
+        // Quy tắc mở khóa cho từng thư mục
+        unlockRules: {
+          hoacap1: { rule: 'always', forceOpen: true },
+          nucap1:  { rule: 'always', forceOpen: true },
+          hoacap2: { rule: 'rank_top1', forceOpen: false },
+          nucap2:  { rule: 'rank_top1', forceOpen: false },
+          congcu:  { rule: 'quest_done', forceOpen: false },
+          nengame: { rule: 'always', forceOpen: true }
+        }
       }
     };
 
-    // THÔNG TIN HỌC SINH ĐANG ĐĂNG NHẬP
-    let currentStudent = {
-      name: 'Học Sinh Thử Nghiệm',
-      team: 1,
-      teamRank: 1,           // Tổ 1 đang đạt Hạng 1 tuần
-      isQuestDoneToday: true  // Đã hoàn thành nhiệm vụ ngày
-    };
-
-    let allAssets = {};
-    let activeFolder = 'hoacap1';
-    let draggedItemData = null;
-
-    function initGame() {
-      // 1. Đọc cấu hình từ Admin
-      const savedConfig = localStorage.getItem('garden_system_config_v3');
-      if (savedConfig) {
-        try { config = { ...config, ...JSON.parse(savedConfig) }; } catch (e) {}
-      }
-
-      // 2. Nạp ảnh nền 3 vùng
-      document.getElementById('game-wrapper').style.backgroundImage = `url('${config.bgGlobal}')`;
-      document.getElementById('game-bg-image').src = config.bgA;
-      document.getElementById('section-b').style.backgroundImage = `url('${config.bgB}')`;
-
-      // 3. Đọc kho ảnh đã quét tự động từ admin
-      const scanned = localStorage.getItem('garden_auto_scanned_assets');
-      if (scanned) {
-        try { allAssets = JSON.parse(scanned); } catch (e) {}
-      }
-
-      // 4. Nếu chưa có ảnh trong cache, tự động quét fallback từ GitHub API
-      if (!allAssets || Object.keys(allAssets).length === 0) {
-        fetchFallbackAssets();
+    function togglePasswordVisibility(id, iconId) {
+      const el = document.getElementById(id);
+      const icon = document.getElementById(iconId);
+      if (el.type === 'password') {
+        el.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
       } else {
-        renderUI();
+        el.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
       }
     }
 
-    async function fetchFallbackAssets() {
-      const folders = ['hoacap1', 'hoacap2', 'nucap1', 'nucap2', 'congcu', 'nengame', 'nutgame'];
-      for (const f of folders) {
-        try {
-          const res = await fetch(`https://api.github.com/repos/MHP298/ANT/contents/Games/vuonthidua/assets/${f}`);
-          if (res.ok) {
-            const data = await res.json();
-            allAssets[f] = data.filter(i => /\.(png|jpe?g|webp|svg)$/i.test(i.name)).map(i => ({
-              fileName: i.name,
-              localPath: `assets/${f}/${i.name}`,
-              rawUrl: `${GITHUB_RAW_BASE}assets/${f}/${i.name}`
-            }));
-          }
-        } catch (e) {}
+    function handleLogin() {
+      const u = document.getElementById('login-user').value.trim();
+      const p = document.getElementById('login-pass').value.trim();
+      if (u === 'admin298' && p === '@dmjn298') {
+        sessionStorage.setItem('current_admin_user', u);
+        document.getElementById('login-modal').classList.add('hidden');
+        document.getElementById('admin-app').classList.remove('hidden');
+        initAdmin();
+      } else {
+        document.getElementById('login-error').innerText = 'Sai tài khoản hoặc mật khẩu!';
+        document.getElementById('login-error').classList.remove('hidden');
       }
-      renderUI();
     }
 
-    function renderUI() {
-      renderDynamicButtons();
-      switchFolder(config.buttons.btn1.targetFolder);
+    function handleLogout() {
+      sessionStorage.removeItem('current_admin_user');
+      location.reload();
     }
 
-    function renderDynamicButtons() {
-      const bar = document.getElementById('dynamic-button-bar');
-      bar.innerHTML = [1, 2, 3, 4].map(i => {
-        const btn = config.buttons[`btn${i}`];
+    function initAdmin() {
+      loadSavedConfig();
+      renderFolderTabs();
+      renderButtonsConfigForm();
+      renderUnlockRulesManager();
+      syncAllFromGitHub();
+    }
+
+    function loadSavedConfig() {
+      const saved = localStorage.getItem('garden_system_config_v3');
+      if (saved) {
+        try { state.gameConfig = { ...state.gameConfig, ...JSON.parse(saved) }; } catch (e) {}
+      }
+      document.getElementById('cfg-bg-global').value = state.gameConfig.bgGlobal;
+      document.getElementById('cfg-bg-a').value = state.gameConfig.bgA;
+      document.getElementById('cfg-bg-b').value = state.gameConfig.bgB;
+    }
+
+    function renderButtonsConfigForm() {
+      const container = document.getElementById('buttons-config-container');
+      container.innerHTML = [1, 2, 3, 4].map(i => {
+        const btn = state.gameConfig.buttons[`btn${i}`];
         return `
-          <button onclick="switchFolder('${btn.targetFolder}')" id="btn-folder-${btn.targetFolder}" class="group relative rounded-xl border border-white/20 bg-white/80 hover:bg-white p-1 transition flex flex-col items-center justify-center">
-            <img src="${btn.icon}" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/nut_hoa.png'" class="w-10 h-10 object-contain drop-shadow">
-            <span class="text-[10px] font-bold text-slate-800 mt-0.5">${btn.label}</span>
-          </button>
-        `;
-      }).join('');
-    }
-
-    function switchFolder(folderName) {
-      activeFolder = folderName;
-      const allButtons = document.querySelectorAll('#dynamic-button-bar button');
-      allButtons.forEach(b => {
-        b.className = "group relative rounded-xl border border-white/20 bg-white/80 hover:bg-white p-1 transition flex flex-col items-center justify-center";
-      });
-      const activeBtn = document.getElementById(`btn-folder-${folderName}`);
-      if (activeBtn) {
-        activeBtn.className = "group relative rounded-xl border-2 border-emerald-600 bg-white p-1 shadow-md transition flex flex-col items-center justify-center scale-105";
-      }
-
-      document.getElementById('category-title').innerText = `THƯ MỤC: ${folderName.toUpperCase()}`;
-      renderTrayItems();
-    }
-
-    // KIỂM TRA ĐIỀU KIỆN MỞ KHÓA THƯ MỤC
-    function isFolderLocked(folderName) {
-      const ruleObj = config.unlockRules[folderName];
-      if (!ruleObj) return false;
-      if (ruleObj.forceOpen) return false; // Nút gạt "Mở ngay" từ Admin
-
-      if (ruleObj.rule === 'always') return false;
-      if (ruleObj.rule === 'locked') return true;
-
-      // Điều kiện đạt Hạng 1 tuần
-      if (ruleObj.rule === 'rank_top1') {
-        return currentStudent.teamRank !== 1;
-      }
-
-      // Điều kiện hoàn thành nhiệm vụ ngày
-      if (ruleObj.rule === 'quest_done') {
-        return !currentStudent.isQuestDoneToday;
-      }
-
-      return false;
-    }
-
-    // HIỂN THỊ CÁC ẢNH TRONG KHAY (KHÔNG CHỮ, VIỀN NÂU NỔI KHỐI)
-    function renderTrayItems() {
-      const tray = document.getElementById('tray-grid');
-      const items = allAssets[activeFolder] || [];
-      const locked = isFolderLocked(activeFolder);
-
-      if (items.length === 0) {
-        tray.innerHTML = `<div class="col-span-2 text-center text-amber-100/60 text-xs py-10">Thư mục chưa có file ảnh nào.</div>`;
-        return;
-      }
-
-      tray.innerHTML = items.map((item, idx) => {
-        if (locked) {
-          // GIAO DIỆN BỊ KHÓA: MỜ + Ổ KHÓA (KHÔNG HIỆN CHỮ TÊN FILE)
-          return `
-            <div class="relative rounded-2xl border border-black/20 bg-black/20 p-3 flex items-center justify-center h-28 overflow-hidden select-none cursor-not-allowed">
-              <img src="${item.rawUrl}" class="max-h-full max-w-full object-contain opacity-25 filter grayscale">
-              <div class="absolute inset-0 flex flex-col items-center justify-center text-white">
-                <div class="w-8 h-8 rounded-full bg-slate-950/80 flex items-center justify-center shadow-lg border border-amber-400">
-                  <i class="fa-solid fa-lock text-amber-400 text-sm"></i>
-                </div>
-                <span class="text-[9px] font-black text-amber-300 mt-1 uppercase tracking-wider">Đang Khóa</span>
+          <div class="p-2.5 bg-white rounded-xl border border-slate-200 text-xs space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-700">Nút ${i}:</span>
+              <input type="text" id="cfg-btn${i}-label" value="${btn.label}" class="w-16 px-1 text-center border rounded font-bold">
+            </div>
+            <div class="grid grid-cols-2 gap-1.5 text-[11px]">
+              <div>
+                <span class="text-slate-400">Icon ảnh:</span>
+                <input type="text" id="cfg-btn${i}-icon" value="${btn.icon}" class="w-full p-1 border rounded text-[10px] font-mono">
+              </div>
+              <div>
+                <span class="text-slate-400">Mở thư mục:</span>
+                <select id="cfg-btn${i}-folder" class="w-full p-1 border rounded text-[10px] bg-slate-50 font-bold">
+                  ${FOLDERS.map(f => `<option value="${f}" ${btn.targetFolder === f ? 'selected' : ''}>${f}</option>`).join('')}
+                </select>
               </div>
             </div>
-          `;
-        }
-
-        // GIAO DIỆN MỞ: ẢNH TRONG SUỐT VỚI LỚP VIỀN NÂU ĐẬM BÁM NÉT
-        return `
-          <div draggable="true" 
-               ondragstart="handleDragStart(event, '${activeFolder}', ${idx})"
-               onclick="placeItemInCenter('${activeFolder}', ${idx})"
-               class="group relative rounded-2xl border border-white/10 hover:border-amber-400/60 bg-white/10 hover:bg-white/20 p-2.5 flex items-center justify-center h-28 transition cursor-grab active:cursor-grabbing">
-            
-            <!-- ẢNH KHÔNG CÒN CHỮ, CHỈ ĐỔ VIỀN NÂU SẮC NÉT THEO TỪNG CÁNH HOA -->
-            <img src="${item.rawUrl}" class="max-h-full max-w-full object-contain flower-outline pointer-events-none">
-
-            <!-- Icon gợi ý di chuyển nhỏ góc phải -->
-            <i class="fa-solid fa-up-down-left-right text-[10px] text-amber-200/40 absolute top-2 right-2 group-hover:text-amber-300"></i>
           </div>
         `;
       }).join('');
     }
 
-    // XỬ LÝ DRAG & DROP SANG PHẦN A
-    function handleDragStart(e, folder, index) {
-      draggedItemData = allAssets[folder][index];
-      e.dataTransfer.setData('text/plain', '');
-    }
-    function handleDragOver(e) { e.preventDefault(); }
-    function handleDrop(e) {
-      e.preventDefault();
-      const rect = document.getElementById('section-a').getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      if (draggedItemData) spawnItemOnCanvas(draggedItemData, x, y);
-    }
-
-    function placeItemInCenter(folder, index) {
-      const item = allAssets[folder][index];
-      if (!item) return;
-      const canvas = document.getElementById('section-a');
-      spawnItemOnCanvas(item, canvas.clientWidth / 2, canvas.clientHeight / 2);
-    }
-
-    let placedItemCount = 0;
-    function spawnItemOnCanvas(item, posX, posY) {
-      document.getElementById('empty-hint').style.display = 'none';
-      const container = document.getElementById('drop-container');
-      placedItemCount++;
-      const uniqueId = 'placed_' + placedItemCount;
-
-      const isGround = item.fileName.includes('dat') || item.fileName.includes('nau');
-      const defaultSize = isGround ? 'w-56 h-48' : 'w-24 h-28';
-
-      const el = document.createElement('div');
-      el.id = uniqueId;
-      el.className = `garden-placed-item ${defaultSize} flex items-center justify-center`;
-      el.style.left = `${posX - 40}px`;
-      el.style.top = `${posY - 40}px`;
-      el.innerHTML = `
-        <div class="relative w-full h-full group flex items-center justify-center">
-          <img src="${item.rawUrl}" class="max-h-full max-w-full object-contain flower-outline pointer-events-none">
-          <button onclick="removePlacedItem('${uniqueId}', event)" class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[10px] font-bold shadow hidden group-hover:flex items-center justify-center">✕</button>
-        </div>
-      `;
-      makeDraggable(el);
-      container.appendChild(el);
+    function renderUnlockRulesManager() {
+      const container = document.getElementById('unlock-rules-container');
+      const targetList = ['hoacap2', 'nucap2', 'congcu'];
+      container.innerHTML = targetList.map(folder => {
+        const rule = state.gameConfig.unlockRules[folder] || { rule: 'rank_top1', forceOpen: false };
+        return `
+          <div class="p-2.5 bg-white rounded-xl border border-slate-200 text-xs space-y-1.5">
+            <div class="flex items-center justify-between">
+              <b class="text-emerald-800 font-mono">[${folder}]</b>
+              <label class="flex items-center gap-1 text-[10px] cursor-pointer text-slate-600 font-bold select-none">
+                <input type="checkbox" id="force-${folder}" ${rule.forceOpen ? 'checked' : ''} class="w-3.5 h-3.5 rounded text-emerald-600">
+                <span>Mở ngay</span>
+              </label>
+            </div>
+            <select id="rule-${folder}" class="w-full p-1 border rounded text-[11px] bg-slate-50">
+              <option value="always" ${rule.rule === 'always' ? 'selected' : ''}>Luôn mở tự do</option>
+              <option value="rank_top1" ${rule.rule === 'rank_top1' ? 'selected' : ''}>Chỉ mở khi Tổ đạt Hạng 1 tuần</option>
+              <option value="quest_done" ${rule.rule === 'quest_done' ? 'selected' : ''}>Chỉ mở khi hoàn thành Nhiệm vụ ngày</option>
+              <option value="locked" ${rule.rule === 'locked' ? 'selected' : ''}>Khóa hoàn toàn</option>
+            </select>
+          </div>
+        `;
+      }).join('');
     }
 
-    function makeDraggable(element) {
-      let isDragging = false;
-      let startX, startY, initialLeft, initialTop;
-
-      element.addEventListener('mousedown', (e) => {
-        if (e.target.tagName === 'BUTTON') return;
-        isDragging = true;
-        startX = e.clientX;
-        startY = e.clientY;
-        initialLeft = element.offsetLeft;
-        initialTop = element.offsetTop;
-        element.style.zIndex = 100;
-      });
-
-      window.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        element.style.left = `${initialLeft + (e.clientX - startX)}px`;
-        element.style.top = `${initialTop + (e.clientY - startY)}px`;
-      });
-
-      window.addEventListener('mouseup', () => {
-        if (isDragging) {
-          isDragging = false;
-          element.style.zIndex = 10;
-        }
-      });
+    function renderFolderTabs() {
+      const container = document.getElementById('folder-tabs-bar');
+      container.innerHTML = FOLDERS.map(f => {
+        const isActive = f === state.currentFolder;
+        const total = (state.cachedAssets[f] || []).length;
+        return `
+          <button onclick="switchFolder('${f}')" class="px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap ${
+            isActive ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+          }">
+            <i class="fa-solid fa-folder"></i> ${f}
+            <span class="text-[10px] px-1.5 rounded-full ${isActive ? 'bg-emerald-700 text-white' : 'bg-slate-200 text-slate-600'}">${total}</span>
+          </button>
+        `;
+      }).join('');
     }
 
-    function removePlacedItem(id, event) {
-      event.stopPropagation();
-      const el = document.getElementById(id);
-      if (el) el.remove();
+    function switchFolder(folder) {
+      state.currentFolder = folder;
+      renderFolderTabs();
+      renderAssetsGrid();
     }
 
-    function clearPlacedItems() {
-      if (confirm('Dọn sạch các vật phẩm trên sân?')) {
-        document.getElementById('drop-container').innerHTML = '';
-        document.getElementById('empty-hint').style.display = 'flex';
+    // TỰ ĐỘNG QUÉT TOÀN BỘ FILE TỪ GITHUB API
+    async function syncAllFromGitHub() {
+      const status = document.getElementById('scan-status');
+      const icon = document.getElementById('sync-icon');
+      status.classList.remove('hidden');
+      icon.classList.add('fa-spin');
+
+      for (const folder of FOLDERS) {
+        try {
+          const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${ASSETS_PATH}/${folder}`);
+          if (res.ok) {
+            const data = await res.json();
+            state.cachedAssets[folder] = data.filter(item => 
+              item.type === 'file' && /\.(png|jpe?g|webp|svg)$/i.test(item.name)
+            ).map(item => ({
+              fileName: item.name,
+              localPath: `assets/${folder}/${item.name}`,
+              rawUrl: `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${item.path}`
+            }));
+          }
+        } catch (e) { console.error(e); }
       }
+
+      status.classList.add('hidden');
+      icon.classList.remove('fa-spin');
+      renderFolderTabs();
+      renderAssetsGrid();
+      // Lưu kho asset đã quét vào bộ nhớ dùng chung
+      localStorage.setItem('garden_auto_scanned_assets', JSON.stringify(state.cachedAssets));
+    }
+
+    function renderAssetsGrid() {
+      const grid = document.getElementById('assets-grid');
+      const list = state.cachedAssets[state.currentFolder] || [];
+
+      if (list.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-16 text-center text-slate-400 bg-white rounded-2xl border border-dashed border-slate-300">
+            <i class="fa-regular fa-image text-3xl mb-1"></i>
+            <p class="text-xs font-bold">Thư mục [${state.currentFolder}] chưa có file nào trên GitHub.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = list.map(item => `
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md p-2 flex flex-col justify-between transition">
+          <div class="h-24 w-full bg-trans-grid rounded-xl flex items-center justify-center p-1.5 relative">
+            <img src="${item.rawUrl}" class="max-h-full max-w-full object-contain filter drop-shadow">
+          </div>
+          <span class="text-[10px] font-mono text-slate-500 truncate block mt-1.5 text-center">${item.fileName}</span>
+        </div>
+      `).join('');
+    }
+
+    function saveAndApplyToGame() {
+      state.gameConfig.bgGlobal = document.getElementById('cfg-bg-global').value.trim();
+      state.gameConfig.bgA = document.getElementById('cfg-bg-a').value.trim();
+      state.gameConfig.bgB = document.getElementById('cfg-bg-b').value.trim();
+
+      [1, 2, 3, 4].forEach(i => {
+        state.gameConfig.buttons[`btn${i}`] = {
+          label: document.getElementById(`cfg-btn${i}-label`).value.trim(),
+          icon: document.getElementById(`cfg-btn${i}-icon`).value.trim(),
+          targetFolder: document.getElementById(`cfg-btn${i}-folder`).value
+        };
+      });
+
+      ['hoacap2', 'nucap2', 'congcu'].forEach(f => {
+        state.gameConfig.unlockRules[f] = {
+          rule: document.getElementById(`rule-${f}`).value,
+          forceOpen: document.getElementById(`force-${f}`).checked
+        };
+      });
+
+      localStorage.setItem('garden_system_config_v3', JSON.stringify(state.gameConfig));
+      alert('ĐÃ LƯU THÀNH CÔNG!\nTrang Game (index.html) sẽ nhận toàn bộ cấu hình mới và tự động mở khóa theo đúng luật.');
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      initGame();
+      const user = sessionStorage.getItem('current_admin_user');
+      if (user === 'admin298') {
+        document.getElementById('login-modal').classList.add('hidden');
+        document.getElementById('admin-app').classList.remove('hidden');
+        initAdmin();
+      }
     });
   </script>
 </body>
