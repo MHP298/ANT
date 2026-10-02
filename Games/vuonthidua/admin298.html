@@ -20,7 +20,6 @@
     ::-webkit-scrollbar-track { background: #f8fafc; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
-    /* CÁC ĐIỂM NEO KÉO PHỐI CẢNH 3D */
     .perspective-handle {
       position: absolute;
       width: 22px;
@@ -39,17 +38,13 @@
       background: #f59e0b;
     }
 
-    /* ĐA GIÁC ĐẤT TRONG SVG ĐỂ DI CHUYỂN */
     .plot-polygon-shape {
       cursor: grab;
       touch-action: none;
       user-select: none;
     }
-    .plot-polygon-shape:active {
-      cursor: grabbing;
-    }
+    .plot-polygon-shape:active { cursor: grabbing; }
 
-    /* VÙNG CHỮ DI CHUYỂN TRÊN NỀN */
     .draggable-text-box {
       position: absolute;
       touch-action: none;
@@ -58,9 +53,7 @@
       z-index: 45;
       transform: translate(-50%, -50%);
     }
-    .draggable-text-box:active {
-      cursor: grabbing;
-    }
+    .draggable-text-box:active { cursor: grabbing; }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans select-none" onclick="closeAllFolderDropdowns(event)">
@@ -120,7 +113,7 @@
   <!-- BỐ CỤC CHÍNH 2 PHẦN -->
   <div id="admin-app" class="hidden flex-1 flex flex-col md:flex-row h-[calc(100vh-53px)] overflow-hidden">
     
-    <!-- PHẦN A (1/3 BÊN TRÁI): BẢNG ĐIỀU KHIỂN & CẤU HÌNH -->
+    <!-- PHẦN A (1/3 BÊN TRÁI): BẢNG ĐIỀU KHIỂN -->
     <aside class="w-full md:w-1/3 border-r border-slate-200 bg-white flex flex-col h-full shadow-sm">
       
       <!-- BỘ CHỌN & QUẢN LÝ LỚP HỌC -->
@@ -371,24 +364,21 @@
 
   </div>
 
-  <!-- ================= TRÌNH BIÊN TẬP VÙNG ĐẤT PHỐI CẢNH 3D & CHỮ NỀN TOÀN MÀN HÌNH ================= -->
+  <!-- MODAL TOÀN MÀN HÌNH -->
   <div id="fullscreen-editor-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col">
-    
     <div class="h-14 bg-slate-900 border-b border-slate-800 px-6 flex items-center justify-between shrink-0 shadow-lg">
       <div class="flex items-center gap-3">
         <span class="text-xl">📐</span>
         <div>
           <h3 class="font-extrabold text-sm text-white uppercase tracking-wide">Trình Thiết Kế Sân Vườn & Vùng Đất 3D</h3>
-          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Kéo thân để dời vị trí • Bấm 📋 để nhân bản ô đất • Kéo 4 góc tròn để uốn phối cảnh</p>
+          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Kéo thân để dời • Bấm 📋 để Copy ô đất • Kéo 4 góc tròn để uốn phối cảnh</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2.5">
-        <!-- NÚT THÊM VÙNG CHỮ MỚI -->
         <button onclick="addNewTextOverlay()" class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition">
           <i class="fa-solid fa-font"></i> + Thêm Vùng Chữ
         </button>
-        <!-- NÚT LƯU THIẾT KẾ -->
         <button onclick="saveAndCloseFullscreenEditor()" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition">
           <i class="fa-solid fa-floppy-disk"></i> Lưu Thiết Kế
         </button>
@@ -398,24 +388,17 @@
       </div>
     </div>
 
-    <!-- KHUNG CHỨA SÂN NỀN TOÀN MÀN HÌNH -->
     <div class="flex-1 overflow-hidden p-4 flex items-center justify-center relative">
       <div id="editor-canvas-box" class="relative max-w-full max-h-full aspect-[3/2] w-full rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-800 bg-black flex items-center justify-center">
-        
         <img id="editor-canvas-bg" src="" class="w-full h-full object-fill pointer-events-none select-none">
-
-        <!-- LỚP CHỨA CÁC VÙNG ĐẤT VÀ CHỮ -->
         <div id="editor-slots-layer" class="absolute inset-0 w-full h-full z-10 pointer-events-auto"></div>
-
       </div>
     </div>
 
-    <!-- HƯỚNG DẪN DƯỚI CÙNG -->
     <div class="h-10 bg-slate-900 border-t border-slate-800 px-6 flex items-center justify-between text-xs text-slate-400 shrink-0">
-      <span>💡 <b>Hướng dẫn:</b> Nhấn nút <b>📋 Copy</b> ở góc ô đất để nhân bản ô đất so le cùng kích thước. Nhấn <b>✕</b> để xóa và tự động đôn số thứ tự.</span>
-      <span id="lbl-total-slots-count" class="font-bold text-emerald-400">Đã bố trí: 1 vùng đất • 0 vùng chữ</span>
+      <span>💡 <b>Hướng dẫn:</b> Nhấn nút <b>📋 Copy</b> ở góc ô đất để nhân bản ô đất so le. Nhấn <b>✕</b> để xóa và đôn số thứ tự liên tục.</span>
+      <span id="lbl-total-slots-count" class="font-bold text-emerald-400">Đã bố trí: 1 vùng đất</span>
     </div>
-
   </div>
 
   <script>
@@ -431,15 +414,13 @@
         bgA: 'assets/nengame/vuonlop.jpg',
         bgB: 'assets/nengame/nenungdung.jpg',
         buttonMappings: {
-          'nuthoa.png': { label: 'HOA', targetFolders: ['hoacap1'] },
-          'nutnu.png': { label: 'NỤ', targetFolders: ['nucap1'] },
-          'nutchunhat.png': { label: 'ĐẤT', targetFolders: ['nengame'] },
-          'nutxeng.png': { label: 'CÔNG CỤ', targetFolders: ['congcu'] }
+          'nuthoa.png': { label: 'HOA', targetFolders: ['hoacap1'], selectedImages: [] },
+          'nutnu.png': { label: 'NỤ', targetFolders: ['nucap1'], selectedImages: [] },
+          'nutchunhat.png': { label: 'ĐẤT', targetFolders: ['nengame'], selectedImages: [] },
+          'nutxeng.png': { label: 'CÔNG CỤ', targetFolders: ['congcu'], selectedImages: [] }
         },
         unlockConditions: {
-          'cond_top1': { id: 'cond_top1', name: 'Đạt Hạng 1 thi đua tuần', type: 'rank_top1', folders: ['hoacap2'] },
-          'cond_top1_nu': { id: 'cond_top1_nu', name: 'Đạt Hạng 1 (Mở nụ VIP)', type: 'rank_top1', folders: ['nucap2'] },
-          'cond_quest': { id: 'cond_quest', name: 'Hoàn thành nhiệm vụ ngày', type: 'quest_done', folders: ['congcu'] }
+          'cond_top1': { id: 'cond_top1', name: 'Đạt Hạng 1 thi đua tuần', type: 'rank_top1', folders: ['hoacap2'], selectedImages: [] }
         },
         plotSlots: [
           {
@@ -455,20 +436,11 @@
 
     let state = {
       activeClass: '10A1',
-      classesData: {
-        '10A1': DEFAULT_CLASS_TEMPLATE('10A1')
-      },
+      classesData: { '10A1': DEFAULT_CLASS_TEMPLATE('10A1') },
       cachedAssets: {},
-      checkedImages: new Set(),
-      currentSelectedConditionId: '',
-      editingConditionId: null,
-      tempNewConditionFolders: ['hoacap2'],
       currentActiveButtonIcon: '',
-      activeViewData: {
-        type: 'none',
-        folders: [],
-        singleImage: null
-      },
+      currentSelectedConditionId: '',
+      activeViewData: { type: 'none', folders: [], singleImage: null, contextType: 'button', contextKey: '' },
       tempEditorSlots: [],
       tempTextOverlays: [],
       currentBgToneStyle: null
@@ -479,12 +451,10 @@
       const icon = document.getElementById(iconId);
       if (el.type === 'password') {
         el.type = 'text';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
       } else {
         el.type = 'password';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
       }
     }
 
@@ -531,28 +501,19 @@
     }
 
     function loadSavedData() {
-      const saved = localStorage.getItem('garden_system_classes_v13');
+      const saved = localStorage.getItem('garden_system_classes_v14');
       if (saved) {
-        try { 
-          const parsed = JSON.parse(saved);
-          Object.values(parsed).forEach(c => {
-            if (!c.config.plotSlots || c.config.plotSlots.length === 0 || !c.config.plotSlots[0].corners) {
-              c.config.plotSlots = DEFAULT_CLASS_TEMPLATE(c.name).config.plotSlots;
-            }
-            if (!c.config.textOverlays) c.config.textOverlays = [];
-          });
-          state.classesData = parsed;
-        } catch (e) {}
+        try { state.classesData = JSON.parse(saved); } catch (e) {}
       }
-      const savedActive = localStorage.getItem('garden_active_class_v13');
+      const savedActive = localStorage.getItem('garden_active_class_v14');
       if (savedActive && state.classesData[savedActive]) {
         state.activeClass = savedActive;
       }
     }
 
     function saveStateToLocal() {
-      localStorage.setItem('garden_system_classes_v13', JSON.stringify(state.classesData));
-      localStorage.setItem('garden_active_class_v13', state.activeClass);
+      localStorage.setItem('garden_system_classes_v14', JSON.stringify(state.classesData));
+      localStorage.setItem('garden_active_class_v14', state.activeClass);
     }
 
     function renderClassDropdown() {
@@ -565,7 +526,7 @@
       state.activeClass = className;
       state.currentSelectedConditionId = '';
       state.currentActiveButtonIcon = '';
-      state.activeViewData = { type: 'none', folders: [], singleImage: null };
+      state.activeViewData = { type: 'none', folders: [], singleImage: null, contextType: 'button', contextKey: '' };
       saveStateToLocal();
       loadActiveClassConfig();
       renderPartBEmptyState();
@@ -581,7 +542,7 @@
       state.classesData[clean] = DEFAULT_CLASS_TEMPLATE(clean);
       state.activeClass = clean;
       state.currentActiveButtonIcon = '';
-      state.activeViewData = { type: 'none', folders: [], singleImage: null };
+      state.activeViewData = { type: 'none', folders: [], singleImage: null, contextType: 'button', contextKey: '' };
       saveStateToLocal();
       renderClassDropdown();
       loadActiveClassConfig();
@@ -651,7 +612,7 @@
     }
 
     function displaySingleImagePreview(imagePath, title) {
-      state.activeViewData = { type: 'single_preview', folders: [], singleImage: imagePath };
+      state.activeViewData = { type: 'single_preview', folders: [], singleImage: imagePath, contextType: 'none', contextKey: '' };
       document.getElementById('section-b-title').innerText = title;
       document.getElementById('toolbar-actions').style.display = 'none';
       document.getElementById('total-visible-images-count').innerText = '(1 ảnh)';
@@ -676,415 +637,7 @@
       `;
     }
 
-    function detectBackgroundTone(imagePath) {
-      const lower = imagePath.toLowerCase();
-      if (lower.includes('vuonlop') || lower.includes('go') || lower.includes('nau')) {
-        return {
-          textColor: '#451a03',
-          textShadow: '0 1px 2px rgba(254, 243, 199, 0.9)',
-          bgColor: 'rgba(254, 243, 199, 0.75)',
-          borderColor: '#b45309'
-        };
-      }
-      if (lower.includes('dem') || lower.includes('dark') || lower.includes('ungdung')) {
-        return {
-          textColor: '#fef3c7',
-          textShadow: '0 2px 4px rgba(0, 0, 0, 0.9)',
-          bgColor: 'rgba(0, 0, 0, 0.65)',
-          borderColor: '#f59e0b'
-        };
-      }
-      return {
-        textColor: '#064e3b',
-        textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)',
-        bgColor: 'rgba(255, 255, 255, 0.7)',
-        borderColor: '#10b981'
-      };
-    }
-
-    // =========================================================================
-    // TRÌNH BIÊN TẬP VÙNG ĐẤT 3D (COPY SO LE + XÓA ĐÔN SỐ)
-    // =========================================================================
-    function openFullscreenEditor(imagePath) {
-      const cls = state.classesData[state.activeClass];
-      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Kéo thân để dời • Bấm 📋 để Copy ô đất • Kéo 4 góc để uốn dáng`;
-      
-      const fullUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${imagePath}`;
-      document.getElementById('editor-canvas-bg').src = fullUrl;
-
-      state.currentBgToneStyle = detectBackgroundTone(imagePath);
-
-      let existingSlots = cls.config.plotSlots || [];
-      if (!existingSlots || existingSlots.length === 0) {
-        existingSlots = [
-          {
-            id: 'slot_1', name: 'Khu đất 1', teamId: 1,
-            corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }]
-          }
-        ];
-      }
-      state.tempEditorSlots = JSON.parse(JSON.stringify(existingSlots));
-      reIndexPlotSlots();
-
-      state.tempTextOverlays = JSON.parse(JSON.stringify(cls.config.textOverlays || []));
-
-      document.getElementById('fullscreen-editor-modal').classList.remove('hidden');
-      
-      requestAnimationFrame(() => {
-        renderPerspectiveSlotsAndTexts();
-      });
-    }
-
-    function closeFullscreenEditor() {
-      document.getElementById('fullscreen-editor-modal').classList.add('hidden');
-    }
-
-    function saveAndCloseFullscreenEditor() {
-      const cls = state.classesData[state.activeClass];
-      reIndexPlotSlots();
-      cls.config.plotSlots = JSON.parse(JSON.stringify(state.tempEditorSlots));
-      cls.config.textOverlays = JSON.parse(JSON.stringify(state.tempTextOverlays));
-      saveStateToLocal();
-      closeFullscreenEditor();
-      alert(`Đã lưu thành công ${cls.config.plotSlots.length} vùng đất và ${cls.config.textOverlays.length} vùng chữ cho Lớp ${state.activeClass}!`);
-    }
-
-    function reIndexPlotSlots() {
-      state.tempEditorSlots.forEach((slot, index) => {
-        const orderNum = index + 1;
-        slot.teamId = orderNum;
-        slot.name = `Khu đất ${orderNum}`;
-        slot.id = `slot_${orderNum}`;
-      });
-    }
-
-    // =========================================================================
-    // TÍNH NĂNG COPY VÙNG ĐẤT NGUYÊN BẢN & ĐẶT SO LE THÔNG MINH
-    // =========================================================================
-    function copyPlotSlot(sourceIndex, event) {
-      if (event) event.stopPropagation();
-      const sourceSlot = state.tempEditorSlots[sourceIndex];
-      if (!sourceSlot) return;
-
-      const nextNum = state.tempEditorSlots.length + 1;
-
-      // Xác định khoảng lệch so le để không đè khít lên ô nguồn
-      let shiftX = 10;
-      let shiftY = 6;
-
-      // Kiểm tra nếu ô nguồn nằm quá sát mép phải (> 85%), đảo chiều lệch sang trái
-      const maxCurrentX = Math.max(...sourceSlot.corners.map(c => c.x));
-      if (maxCurrentX + shiftX > 96) {
-        shiftX = -12;
-        shiftY = 14; // Xuống hàng tiếp theo
-      }
-
-      // Nhân bản tọa độ 4 góc y hệt ô nguồn và cộng độ dời so le
-      const clonedCorners = sourceSlot.corners.map(corner => {
-        let newX = parseFloat((corner.x + shiftX).toFixed(2));
-        let newY = parseFloat((corner.y + shiftY).toFixed(2));
-        // Giữ an toàn trong khung sân (3% đến 97%)
-        newX = Math.max(3, Math.min(97, newX));
-        newY = Math.max(3, Math.min(97, newY));
-        return { x: newX, y: newY };
-      });
-
-      const newSlot = {
-        id: `slot_${nextNum}`,
-        name: `Khu đất ${nextNum}`,
-        teamId: nextNum,
-        corners: clonedCorners
-      };
-
-      state.tempEditorSlots.push(newSlot);
-      reIndexPlotSlots();
-      renderPerspectiveSlotsAndTexts();
-    }
-
-    // XÓA VÙNG ĐẤT VÀ TỰ ĐỘNG ĐÔN SỐ
-    function removePerspectiveSlot(sIdx, event) {
-      if (event) event.stopPropagation();
-      state.tempEditorSlots.splice(sIdx, 1);
-      
-      // Nếu xóa hết sạch thì tự tạo lại 1 ô mặc định số 1
-      if (state.tempEditorSlots.length === 0) {
-        state.tempEditorSlots = [
-          {
-            id: 'slot_1', name: 'Khu đất 1', teamId: 1,
-            corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }]
-          }
-        ];
-      }
-
-      reIndexPlotSlots();
-      renderPerspectiveSlotsAndTexts();
-    }
-
-    // =========================================================================
-    // QUẢN LÝ VÙNG CHỮ TỰ ĐỔI MÀU
-    // =========================================================================
-    function addNewTextOverlay() {
-      const newText = {
-        id: 'txt_' + Date.now().toString(36),
-        content: `Vườn Thi Đua Lớp ${state.activeClass}`,
-        x: 50,
-        y: 18,
-        fontSize: 16
-      };
-      state.tempTextOverlays.push(newText);
-      renderPerspectiveSlotsAndTexts();
-    }
-
-    function removeTextOverlay(tIdx, event) {
-      if (event) event.stopPropagation();
-      state.tempTextOverlays.splice(tIdx, 1);
-      renderPerspectiveSlotsAndTexts();
-    }
-
-    function editTextContent(tIdx) {
-      const current = state.tempTextOverlays[tIdx].content;
-      const updated = prompt('Nhập nội dung chữ hiển thị:', current);
-      if (updated !== null && updated.trim().length > 0) {
-        state.tempTextOverlays[tIdx].content = updated.trim();
-        renderPerspectiveSlotsAndTexts();
-      }
-    }
-
-    // =========================================================================
-    // RENDER ĐA GIÁC ĐẤT, NÚT COPY / XÓA & 4 CHẤM NEO
-    // =========================================================================
-    function renderPerspectiveSlotsAndTexts() {
-      const container = document.getElementById('editor-slots-layer');
-      const canvas = document.getElementById('editor-canvas-box');
-      const cW = canvas.clientWidth || 900;
-      const cH = canvas.clientHeight || 600;
-
-      document.getElementById('lbl-total-slots-count').innerText = 
-        `Đã bố trí: ${state.tempEditorSlots.length} vùng đất • ${state.tempTextOverlays.length} vùng chữ`;
-
-      const tone = state.currentBgToneStyle || detectBackgroundTone('');
-
-      container.innerHTML = `
-        <!-- LỚP 1: SVG VẼ ĐA GIÁC ĐẤT VỚI MẢNG MÀU MỜ SẮC NÉT (TÍNH THEO PIXEL THẬT) -->
-        <svg class="absolute inset-0 w-full h-full pointer-events-auto" style="overflow: visible;" viewBox="0 0 ${cW} ${cH}">
-          ${state.tempEditorSlots.map((slot, sIdx) => {
-            const ptsPixel = slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ');
-
-            return `
-              <g id="svg-group-${sIdx}">
-                <!-- MẢNG MÀU MỜ CỦA KHU ĐẤT: KÉO ĐỂ DI CHUYỂN TOÀN BỘ -->
-                <polygon points="${ptsPixel}" 
-                         id="polygon-body-${sIdx}"
-                         class="plot-polygon-shape"
-                         fill="rgba(16, 185, 129, 0.35)" 
-                         stroke="#059669" 
-                         stroke-width="3" 
-                         stroke-dasharray="8,6">
-                  <title>Nhấp giữ và kéo để di chuyển ${slot.name}</title>
-                </polygon>
-              </g>
-            `;
-          }).join('')}
-        </svg>
-
-        <!-- LỚP 2: NHÃN TÊN, NÚT COPY, NÚT XÓA & 4 CHẤM NEO -->
-        ${state.tempEditorSlots.map((slot, sIdx) => {
-          const centerX = (slot.corners[0].x + slot.corners[1].x + slot.corners[2].x + slot.corners[3].x) / 4;
-          const centerY = (slot.corners[0].y + slot.corners[1].y + slot.corners[2].y + slot.corners[3].y) / 4;
-
-          return `
-            <div id="controls-slot-${sIdx}" class="absolute inset-0 pointer-events-none">
-              
-              <!-- Nhãn tên ô đất ở tâm -->
-              <div style="left: ${centerX}%; top: ${centerY}%; transform: translate(-50%, -50%);" 
-                   class="absolute px-3 py-1 bg-amber-950/90 text-amber-200 border border-amber-600/60 rounded-full font-black text-xs shadow-lg pointer-events-none flex items-center gap-1">
-                <span>🌾</span> ${slot.name}
-              </div>
-
-              <!-- CỤM NÚT THAO TÁC (COPY + XÓA) TẠI GÓC TRÊN-TRÁI CỦA Ô ĐẤT -->
-              <div style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%; transform: translate(-110%, -125%);"
-                   class="absolute flex items-center gap-1.5 pointer-events-auto z-50">
-                
-                <!-- NÚT COPY VÙNG ĐẤT: NHÂN BẢN KÍCH THƯỚC & GÓC NGHIÊNG Y HỆT -->
-                <button onclick="copyPlotSlot(${sIdx}, event)" 
-                        class="w-6 h-6 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center shadow-lg hover:scale-125 transition"
-                        title="Copy vùng đất này (tạo thêm ô đất có dáng y hệt)">
-                  <i class="fa-solid fa-copy"></i>
-                </button>
-
-                <!-- NÚT XÓA VÙNG ĐẤT: ĐÔN LẠI SỐ THỨ TỰ LIÊN TỤC -->
-                <button onclick="removePerspectiveSlot(${sIdx}, event)" 
-                        class="w-6 h-6 rounded-full bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center justify-center shadow-lg hover:scale-125 transition"
-                        title="Xóa vùng đất này (các vùng sau tự động đôn số)">
-                  ✕
-                </button>
-
-              </div>
-
-              <!-- 4 NÚT NEO TRÒN Ở 4 GÓC -->
-              <div id="handle-${sIdx}-0" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%;" title="Kéo góc 1"></div>
-              <div id="handle-${sIdx}-1" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[1].x}%; top: ${slot.corners[1].y}%;" title="Kéo góc 2"></div>
-              <div id="handle-${sIdx}-2" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[2].x}%; top: ${slot.corners[2].y}%;" title="Kéo góc 3"></div>
-              <div id="handle-${sIdx}-3" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[3].x}%; top: ${slot.corners[3].y}%;" title="Kéo góc 4"></div>
-
-            </div>
-          `;
-        }).join('')}
-
-        <!-- LỚP 3: CÁC VÙNG CHỮ TỰ ĐỘNG ĐỔI MÀU THEO NỀN -->
-        ${state.tempTextOverlays.map((txt, tIdx) => `
-          <div id="text-overlay-${tIdx}" 
-               style="left: ${txt.x}%; top: ${txt.y}%;" 
-               class="draggable-text-box group pointer-events-auto">
-            <div ondblclick="editTextContent(${tIdx})" 
-                 style="color: ${tone.textColor}; text-shadow: ${tone.textShadow}; background: ${tone.bgColor}; border: 1.5px dashed ${tone.borderColor}; font-size: ${txt.fontSize}px;"
-                 class="px-3.5 py-1.5 rounded-xl font-extrabold tracking-wide flex items-center gap-2 shadow-md">
-              <span class="truncate">${txt.content}</span>
-              <button onclick="removeTextOverlay(${tIdx}, event)" class="w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-700 text-white text-[9px] font-bold opacity-0 group-hover:opacity-100 transition flex items-center justify-center">✕</button>
-            </div>
-          </div>
-        `).join('')}
-      `;
-
-      // GẮN SỰ KIỆN KÉO THẢ VÙNG ĐẤT
-      state.tempEditorSlots.forEach((slot, sIdx) => {
-        const polyEl = document.getElementById(`polygon-body-${sIdx}`);
-        if (polyEl) makePlotPolygonDraggable(polyEl, sIdx);
-
-        for (let cIdx = 0; cIdx < 4; cIdx++) {
-          const handleEl = document.getElementById(`handle-${sIdx}-${cIdx}`);
-          if (handleEl) makeCornerHandleDraggable(handleEl, sIdx, cIdx);
-        }
-      });
-
-      // GẮN SỰ KIỆN KÉO THẢ VÙNG CHỮ
-      state.tempTextOverlays.forEach((txt, tIdx) => {
-        const txtEl = document.getElementById(`text-overlay-${tIdx}`);
-        if (txtEl) makeTextOverlayDraggable(txtEl, tIdx);
-      });
-    }
-
-    // KÉO DI CHUYỂN NGUYÊN KHỐI VÙNG ĐẤT
-    function makePlotPolygonDraggable(polyEl, slotIndex) {
-      let isDragging = false;
-      let startMouseX = 0, startMouseY = 0;
-      let originalCorners = [];
-
-      polyEl.addEventListener('mousedown', (e) => {
-        if (e.button !== 0) return;
-        isDragging = true;
-        startMouseX = e.clientX;
-        startMouseY = e.clientY;
-        originalCorners = JSON.parse(JSON.stringify(state.tempEditorSlots[slotIndex].corners));
-        e.stopPropagation();
-      });
-
-      window.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        const canvas = document.getElementById('editor-canvas-box');
-        const rect = canvas.getBoundingClientRect();
-
-        const deltaXPercent = ((e.clientX - startMouseX) / rect.width) * 100;
-        const deltaYPercent = ((e.clientY - startMouseY) / rect.height) * 100;
-
-        let minX = Math.min(...originalCorners.map(c => c.x));
-        let maxX = Math.max(...originalCorners.map(c => c.x));
-        let minY = Math.min(...originalCorners.map(c => c.y));
-        let maxY = Math.max(...originalCorners.map(c => c.y));
-
-        let clampedDeltaX = deltaXPercent;
-        let clampedDeltaY = deltaYPercent;
-
-        if (minX + clampedDeltaX < 2) clampedDeltaX = 2 - minX;
-        if (maxX + clampedDeltaX > 98) clampedDeltaX = 98 - maxX;
-        if (minY + clampedDeltaY < 2) clampedDeltaY = 2 - minY;
-        if (maxY + clampedDeltaY > 98) clampedDeltaY = 98 - maxY;
-
-        for (let i = 0; i < 4; i++) {
-          state.tempEditorSlots[slotIndex].corners[i].x = parseFloat((originalCorners[i].x + clampedDeltaX).toFixed(2));
-          state.tempEditorSlots[slotIndex].corners[i].y = parseFloat((originalCorners[i].y + clampedDeltaY).toFixed(2));
-        }
-
-        renderPerspectiveSlotsAndTexts();
-      });
-
-      window.addEventListener('mouseup', () => {
-        if (isDragging) isDragging = false;
-      });
-    }
-
-    // KÉO 4 CHẤM NEO Ở GÓC
-    function makeCornerHandleDraggable(handleEl, slotIndex, cornerIndex) {
-      let isDragging = false;
-
-      handleEl.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        e.stopPropagation();
-      });
-
-      window.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        const canvas = document.getElementById('editor-canvas-box');
-        const rect = canvas.getBoundingClientRect();
-
-        let posX = e.clientX - rect.left;
-        let posY = e.clientY - rect.top;
-
-        posX = Math.max(0, Math.min(rect.width, posX));
-        posY = Math.max(0, Math.min(rect.height, posY));
-
-        const pX = parseFloat(((posX / rect.width) * 100).toFixed(2));
-        const pY = parseFloat(((posY / rect.height) * 100).toFixed(2));
-
-        state.tempEditorSlots[slotIndex].corners[cornerIndex] = { x: pX, y: pY };
-        renderPerspectiveSlotsAndTexts();
-      });
-
-      window.addEventListener('mouseup', () => {
-        if (isDragging) isDragging = false;
-      });
-    }
-
-    // KÉO DI CHUYỂN VÙNG CHỮ
-    function makeTextOverlayDraggable(txtEl, tIdx) {
-      let isDragging = false;
-      let startMouseX = 0, startMouseY = 0;
-      let origX = 0, origY = 0;
-
-      txtEl.addEventListener('mousedown', (e) => {
-        if (e.target.tagName === 'BUTTON') return;
-        isDragging = true;
-        startMouseX = e.clientX;
-        startMouseY = e.clientY;
-        origX = state.tempTextOverlays[tIdx].x;
-        origY = state.tempTextOverlays[tIdx].y;
-        e.stopPropagation();
-      });
-
-      window.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        const canvas = document.getElementById('editor-canvas-box');
-        const rect = canvas.getBoundingClientRect();
-
-        const dxPercent = ((e.clientX - startMouseX) / rect.width) * 100;
-        const dyPercent = ((e.clientY - startMouseY) / rect.height) * 100;
-
-        let newX = Math.max(5, Math.min(95, origX + dxPercent));
-        let newY = Math.max(5, Math.min(95, origY + dyPercent));
-
-        state.tempTextOverlays[tIdx].x = parseFloat(newX.toFixed(2));
-        state.tempTextOverlays[tIdx].y = parseFloat(newY.toFixed(2));
-
-        txtEl.style.left = `${newX}%`;
-        txtEl.style.top = `${newY}%`;
-      });
-
-      window.addEventListener('mouseup', () => {
-        if (isDragging) isDragging = false;
-      });
-    }
-
-    // ================= 3. GÁN TÍNH NĂNG NÚT =================
+    // ================= GÁN TÍNH NĂNG NÚT =================
     function populateButtonIconsList() {
       const select = document.getElementById('select-active-button-icon');
       const nutImages = state.cachedAssets['nutgame'] || [];
@@ -1118,22 +671,20 @@
       }
 
       detailBox.classList.remove('hidden');
-
       const cls = state.classesData[state.activeClass];
       if (!cls.config.buttonMappings) cls.config.buttonMappings = {};
 
       if (!cls.config.buttonMappings[icon]) {
         let autoLabel = icon.replace(/\.[^/.]+$/, "").replace('nut', '').toUpperCase() || 'NÚT';
-        cls.config.buttonMappings[icon] = { label: autoLabel, targetFolders: [] };
+        cls.config.buttonMappings[icon] = { label: autoLabel, targetFolders: [], selectedImages: [] };
       }
 
       const mapping = cls.config.buttonMappings[icon];
       document.getElementById('input-active-button-label').value = mapping.label;
-
       renderAssignedFolderDropdownCheckboxes();
-      
+
       if (mapping.targetFolders && mapping.targetFolders.length > 0) {
-        setPartBActiveFolders(mapping.targetFolders, `Các thư mục gán cho nút [${icon}]`);
+        setPartBActiveFolders(mapping.targetFolders, `Các thư mục gán cho nút [${icon}]`, 'button', icon);
       } else {
         renderPartBEmptyState();
       }
@@ -1181,7 +732,7 @@
 
       updateAssignedFoldersLabel();
       saveStateToLocal();
-      setPartBActiveFolders(mapping.targetFolders, `Các thư mục gán cho nút [${state.currentActiveButtonIcon}]`);
+      setPartBActiveFolders(mapping.targetFolders, `Các thư mục gán cho nút [${state.currentActiveButtonIcon}]`, 'button', state.currentActiveButtonIcon);
     }
 
     function updateAssignedFoldersLabel() {
@@ -1191,7 +742,7 @@
       el.innerText = mapping.targetFolders.length === 0 ? 'Chưa chọn thư mục' : mapping.targetFolders.join(', ');
     }
 
-    // ================= 4. MỞ KHÓA CẤP ĐỘ =================
+    // ================= MỞ KHÓA CẤP ĐỘ =================
     function renderConditionsMenu() {
       const cls = state.classesData[state.activeClass];
       const group = document.getElementById('group-established-rules');
@@ -1215,7 +766,7 @@
         const cls = state.classesData[state.activeClass];
         const cond = cls.config.unlockConditions[val];
         if (cond && cond.folders && cond.folders.length > 0) {
-          setPartBActiveFolders(cond.folders, `Thư mục liên kết mở khóa: [${cond.name}]`);
+          setPartBActiveFolders(cond.folders, `Thư mục liên kết mở khóa: [${cond.name}]`, 'condition', val);
         } else {
           renderPartBEmptyState();
         }
@@ -1242,6 +793,28 @@
           <span class="text-[9px] bg-emerald-200 text-emerald-900 px-1 rounded font-sans uppercase">${cond.type}</span>
         </span>
       `).join('');
+    }
+
+    function openNewConditionForm(editId = null) {
+      state.editingConditionId = editId;
+      const box = document.getElementById('new-condition-box');
+      const title = document.getElementById('lbl-form-mode');
+      box.classList.remove('hidden');
+
+      const cls = state.classesData[state.activeClass];
+      if (editId && cls.config.unlockConditions[editId]) {
+        title.innerText = 'Chỉnh Sửa Điều Kiện';
+        const cond = cls.config.unlockConditions[editId];
+        document.getElementById('input-new-cond-name').value = cond.name;
+        document.getElementById('select-new-cond-type').value = cond.type;
+        state.tempNewConditionFolders = [...(cond.folders || [cond.folder || 'hoacap2'])];
+      } else {
+        title.innerText = 'Nhập Điều Kiện Mới';
+        document.getElementById('input-new-cond-name').value = '';
+        document.getElementById('select-new-cond-type').value = 'rank_top1';
+        state.tempNewConditionFolders = ['hoacap2'];
+      }
+      renderCondFolderDropdownList();
     }
 
     function renderCondFolderDropdownList() {
@@ -1272,31 +845,7 @@
 
     function updateCondFolderLabel() {
       const el = document.getElementById('lbl-cond-folders-selected');
-      if (el) {
-        el.innerText = state.tempNewConditionFolders.length === 0 ? 'Chưa chọn thư mục' : state.tempNewConditionFolders.join(', ');
-      }
-    }
-
-    function openNewConditionForm(editId = null) {
-      state.editingConditionId = editId;
-      const box = document.getElementById('new-condition-box');
-      const title = document.getElementById('lbl-form-mode');
-      box.classList.remove('hidden');
-
-      const cls = state.classesData[state.activeClass];
-      if (editId && cls.config.unlockConditions[editId]) {
-        title.innerText = 'Chỉnh Sửa Điều Kiện';
-        const cond = cls.config.unlockConditions[editId];
-        document.getElementById('input-new-cond-name').value = cond.name;
-        document.getElementById('select-new-cond-type').value = cond.type;
-        state.tempNewConditionFolders = [...(cond.folders || [cond.folder || 'hoacap2'])];
-      } else {
-        title.innerText = 'Nhập Điều Kiện Mới';
-        document.getElementById('input-new-cond-name').value = '';
-        document.getElementById('select-new-cond-type').value = 'rank_top1';
-        state.tempNewConditionFolders = ['hoacap2'];
-      }
-      renderCondFolderDropdownList();
+      if (el) el.innerText = state.tempNewConditionFolders.length === 0 ? 'Chưa chọn thư mục' : state.tempNewConditionFolders.join(', ');
     }
 
     function cancelNewCondition() {
@@ -1314,10 +863,9 @@
 
       const id = state.editingConditionId || ('cond_' + Date.now().toString(36));
       cls.config.unlockConditions[id] = { 
-        id, 
-        name, 
-        type, 
-        folders: [...state.tempNewConditionFolders] 
+        id, name, type, 
+        folders: [...state.tempNewConditionFolders],
+        selectedImages: cls.config.unlockConditions[id]?.selectedImages || []
       };
 
       state.currentSelectedConditionId = id;
@@ -1326,7 +874,7 @@
       document.getElementById('new-condition-box').classList.add('hidden');
       renderConditionsMenu();
       saveStateToLocal();
-      setPartBActiveFolders(cls.config.unlockConditions[id].folders, `Thư mục liên kết mở khóa: [${name}]`);
+      setPartBActiveFolders(cls.config.unlockConditions[id].folders, `Thư mục liên kết mở khóa: [${name}]`, 'condition', id);
       alert('Đã lưu điều kiện mở khóa cho lớp!');
     }
 
@@ -1348,9 +896,9 @@
       }
     }
 
-    // ================= 5. HIỂN THỊ PHẦN B =================
+    // ================= HIỂN THỊ PHẦN B & LƯU DANH SÁCH ẢNH ĐÃ CHECK =================
     function renderPartBEmptyState() {
-      state.activeViewData = { type: 'none', folders: [], singleImage: null };
+      state.activeViewData = { type: 'none', folders: [], singleImage: null, contextType: 'none', contextKey: '' };
       document.getElementById('section-b-title').innerText = 'Kho Ảnh Assets Đang Hiển Thị';
       document.getElementById('total-visible-images-count').innerText = '(0 ảnh)';
       document.getElementById('toolbar-actions').style.display = 'none';
@@ -1359,21 +907,46 @@
         <div class="py-24 text-center text-slate-400 bg-white rounded-2xl border border-dashed border-slate-300">
           <i class="fa-regular fa-hand-pointer text-3xl mb-2 text-slate-300"></i>
           <p class="text-xs font-bold text-slate-500">Chưa có lựa chọn nào từ Phần A</p>
-          <p class="text-[11px] text-slate-400 mt-0.5">Chọn một nút, xem ảnh nền hoặc chọn điều kiện để hiển thị các ảnh tương ứng tại đây.</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">Chọn một nút, xem ảnh nền hoặc chọn điều kiện để hiển thị và tích chọn các ảnh tương ứng.</p>
         </div>
       `;
     }
 
-    function setPartBActiveFolders(folders, customTitle) {
+    function setPartBActiveFolders(folders, customTitle, contextType = 'button', contextKey = '') {
       if (!folders || folders.length === 0) {
         renderPartBEmptyState();
         return;
       }
 
-      state.activeViewData = { type: 'folders', folders: [...folders], singleImage: null };
+      state.activeViewData = { type: 'folders', folders: [...folders], singleImage: null, contextType, contextKey };
       document.getElementById('section-b-title').innerText = customTitle || 'Kho Ảnh Assets Đang Hiển Thị';
       document.getElementById('toolbar-actions').style.display = 'flex';
       renderMultiFolderView();
+    }
+
+    function getContextSelectedImages() {
+      const cls = state.classesData[state.activeClass];
+      const { contextType, contextKey } = state.activeViewData;
+      if (contextType === 'button' && cls.config.buttonMappings[contextKey]) {
+        return cls.config.buttonMappings[contextKey].selectedImages || [];
+      }
+      if (contextType === 'condition' && cls.config.unlockConditions[contextKey]) {
+        return cls.config.unlockConditions[contextKey].selectedImages || [];
+      }
+      return [];
+    }
+
+    function setContextSelectedImages(newArray) {
+      const cls = state.classesData[state.activeClass];
+      const { contextType, contextKey } = state.activeViewData;
+      if (contextType === 'button' && cls.config.buttonMappings[contextKey]) {
+        cls.config.buttonMappings[contextKey].selectedImages = newArray;
+      }
+      if (contextType === 'condition' && cls.config.unlockConditions[contextKey]) {
+        cls.config.unlockConditions[contextKey].selectedImages = newArray;
+      }
+      saveStateToLocal();
+      updateSelectedImageCount();
     }
 
     function renderMultiFolderView() {
@@ -1381,12 +954,13 @@
 
       const area = document.getElementById('multi-folder-display-area');
       const folders = state.activeViewData.folders;
+      const selectedImgList = getContextSelectedImages();
 
       let totalCount = 0;
       area.innerHTML = folders.map(f => {
         const items = state.cachedAssets[f] || [];
         totalCount += items.length;
-        const isFolderAllChecked = items.length > 0 && items.every(i => state.checkedImages.has(i.rawUrl));
+        const isFolderAllChecked = items.length > 0 && items.every(i => selectedImgList.includes(i.fileName));
 
         return `
           <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs space-y-3">
@@ -1402,11 +976,11 @@
 
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
               ${items.map(item => {
-                const isChecked = state.checkedImages.has(item.rawUrl);
+                const isChecked = selectedImgList.includes(item.fileName);
                 return `
                   <div class="relative bg-white rounded-xl border ${isChecked ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-200'} p-2 flex flex-col justify-between group hover:shadow-xs transition">
                     <div class="absolute top-1.5 left-1.5 z-10">
-                      <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSingleImageCheck('${item.rawUrl}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5 cursor-pointer">
+                      <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSingleImageCheck('${item.fileName}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5 cursor-pointer">
                     </div>
                     <div class="h-20 w-full bg-trans-grid rounded-lg flex items-center justify-center p-1">
                       <img src="${item.rawUrl}" class="max-h-full max-w-full object-contain filter drop-shadow">
@@ -1424,73 +998,343 @@
       updateSelectedImageCount();
     }
 
-    function toggleSingleImageCheck(rawUrl, isChecked) {
-      if (isChecked) state.checkedImages.add(rawUrl);
-      else state.checkedImages.delete(rawUrl);
-      updateSelectedImageCount();
+    function toggleSingleImageCheck(fileName, isChecked) {
+      let currentList = [...getContextSelectedImages()];
+      if (isChecked) {
+        if (!currentList.includes(fileName)) currentList.push(fileName);
+      } else {
+        currentList = currentList.filter(name => name !== fileName);
+      }
+      setContextSelectedImages(currentList);
       renderMultiFolderView();
     }
 
     function toggleSelectAllInFolder(folder, isChecked) {
       const items = state.cachedAssets[folder] || [];
+      let currentList = [...getContextSelectedImages()];
       items.forEach(i => {
-        if (isChecked) state.checkedImages.add(i.rawUrl);
-        else state.checkedImages.delete(i.rawUrl);
+        if (isChecked) {
+          if (!currentList.includes(i.fileName)) currentList.push(i.fileName);
+        } else {
+          currentList = currentList.filter(name => name !== i.fileName);
+        }
       });
-      updateSelectedImageCount();
+      setContextSelectedImages(currentList);
       renderMultiFolderView();
     }
 
     function selectAllVisibleImages(isChecked) {
       if (state.activeViewData.type !== 'folders') return;
+      let currentList = [...getContextSelectedImages()];
+
       state.activeViewData.folders.forEach(f => {
         const items = state.cachedAssets[f] || [];
         items.forEach(i => {
-          if (isChecked) state.checkedImages.add(i.rawUrl);
-          else state.checkedImages.delete(i.rawUrl);
+          if (isChecked) {
+            if (!currentList.includes(i.fileName)) currentList.push(i.fileName);
+          } else {
+            currentList = currentList.filter(name => name !== i.fileName);
+          }
         });
       });
-      updateSelectedImageCount();
+
+      setContextSelectedImages(currentList);
       renderMultiFolderView();
     }
 
     function updateSelectedImageCount() {
-      document.getElementById('lbl-selected-img-count').innerText = `Đã chọn: ${state.checkedImages.size}`;
+      const selectedCount = getContextSelectedImages().length;
+      document.getElementById('lbl-selected-img-count').innerText = `Đã chọn: ${selectedCount}`;
     }
 
-    // ================= 6. QUÉT ASSETS TỪ GITHUB API =================
+    // ================= TRÌNH BIÊN TẬP VÙNG ĐẤT & CHỮ =================
+    function detectBackgroundTone(imagePath) {
+      const lower = imagePath.toLowerCase();
+      if (lower.includes('vuonlop') || lower.includes('go') || lower.includes('nau')) {
+        return { textColor: '#451a03', textShadow: '0 1px 2px rgba(254, 243, 199, 0.9)', bgColor: 'rgba(254, 243, 199, 0.75)', borderColor: '#b45309' };
+      }
+      if (lower.includes('dem') || lower.includes('dark') || lower.includes('ungdung')) {
+        return { textColor: '#fef3c7', textShadow: '0 2px 4px rgba(0, 0, 0, 0.9)', bgColor: 'rgba(0, 0, 0, 0.65)', borderColor: '#f59e0b' };
+      }
+      return { textColor: '#064e3b', textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)', bgColor: 'rgba(255, 255, 255, 0.7)', borderColor: '#10b981' };
+    }
+
+    function openFullscreenEditor(imagePath) {
+      const cls = state.classesData[state.activeClass];
+      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Kéo thân để dời • Bấm 📋 để Copy ô đất • Kéo 4 góc để uốn dáng`;
+      
+      const fullUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${imagePath}`;
+      document.getElementById('editor-canvas-bg').src = fullUrl;
+      state.currentBgToneStyle = detectBackgroundTone(imagePath);
+
+      let existingSlots = cls.config.plotSlots || [];
+      if (!existingSlots || existingSlots.length === 0) {
+        existingSlots = [{ id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }] }];
+      }
+      state.tempEditorSlots = JSON.parse(JSON.stringify(existingSlots));
+      reIndexPlotSlots();
+
+      state.tempTextOverlays = JSON.parse(JSON.stringify(cls.config.textOverlays || []));
+      document.getElementById('fullscreen-editor-modal').classList.remove('hidden');
+      
+      requestAnimationFrame(() => renderPerspectiveSlotsAndTexts());
+    }
+
+    function closeFullscreenEditor() {
+      document.getElementById('fullscreen-editor-modal').classList.add('hidden');
+    }
+
+    function saveAndCloseFullscreenEditor() {
+      const cls = state.classesData[state.activeClass];
+      reIndexPlotSlots();
+      cls.config.plotSlots = JSON.parse(JSON.stringify(state.tempEditorSlots));
+      cls.config.textOverlays = JSON.parse(JSON.stringify(state.tempTextOverlays));
+      saveStateToLocal();
+      closeFullscreenEditor();
+      alert(`Đã lưu thành công ${cls.config.plotSlots.length} vùng đất và ${cls.config.textOverlays.length} vùng chữ cho Lớp ${state.activeClass}!`);
+    }
+
+    function reIndexPlotSlots() {
+      state.tempEditorSlots.forEach((slot, index) => {
+        const orderNum = index + 1;
+        slot.teamId = orderNum;
+        slot.name = `Khu đất ${orderNum}`;
+        slot.id = `slot_${orderNum}`;
+      });
+    }
+
+    function copyPlotSlot(sourceIndex, event) {
+      if (event) event.stopPropagation();
+      const sourceSlot = state.tempEditorSlots[sourceIndex];
+      if (!sourceSlot) return;
+
+      const nextNum = state.tempEditorSlots.length + 1;
+      let shiftX = 10, shiftY = 6;
+      const maxCurrentX = Math.max(...sourceSlot.corners.map(c => c.x));
+      if (maxCurrentX + shiftX > 96) { shiftX = -12; shiftY = 14; }
+
+      const clonedCorners = sourceSlot.corners.map(c => ({
+        x: Math.max(3, Math.min(97, parseFloat((c.x + shiftX).toFixed(2)))),
+        y: Math.max(3, Math.min(97, parseFloat((c.y + shiftY).toFixed(2))))
+      }));
+
+      state.tempEditorSlots.push({ id: `slot_${nextNum}`, name: `Khu đất ${nextNum}`, teamId: nextNum, corners: clonedCorners });
+      reIndexPlotSlots();
+      renderPerspectiveSlotsAndTexts();
+    }
+
+    function removePerspectiveSlot(sIdx, event) {
+      if (event) event.stopPropagation();
+      state.tempEditorSlots.splice(sIdx, 1);
+      if (state.tempEditorSlots.length === 0) {
+        state.tempEditorSlots = [{ id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }] }];
+      }
+      reIndexPlotSlots();
+      renderPerspectiveSlotsAndTexts();
+    }
+
+    function addNewTextOverlay() {
+      state.tempTextOverlays.push({
+        id: 'txt_' + Date.now().toString(36),
+        content: `Vườn Thi Đua Lớp ${state.activeClass}`,
+        x: 50, y: 18, fontSize: 16
+      });
+      renderPerspectiveSlotsAndTexts();
+    }
+
+    function removeTextOverlay(tIdx, event) {
+      if (event) event.stopPropagation();
+      state.tempTextOverlays.splice(tIdx, 1);
+      renderPerspectiveSlotsAndTexts();
+    }
+
+    function editTextContent(tIdx) {
+      const current = state.tempTextOverlays[tIdx].content;
+      const updated = prompt('Nhập nội dung chữ hiển thị:', current);
+      if (updated !== null && updated.trim().length > 0) {
+        state.tempTextOverlays[tIdx].content = updated.trim();
+        renderPerspectiveSlotsAndTexts();
+      }
+    }
+
+    function renderPerspectiveSlotsAndTexts() {
+      const container = document.getElementById('editor-slots-layer');
+      const canvas = document.getElementById('editor-canvas-box');
+      const cW = canvas.clientWidth || 900;
+      const cH = canvas.clientHeight || 600;
+
+      document.getElementById('lbl-total-slots-count').innerText = 
+        `Đã bố trí: ${state.tempEditorSlots.length} vùng đất • ${state.tempTextOverlays.length} vùng chữ`;
+
+      const tone = state.currentBgToneStyle || detectBackgroundTone('');
+
+      container.innerHTML = `
+        <svg class="absolute inset-0 w-full h-full pointer-events-auto" style="overflow: visible;" viewBox="0 0 ${cW} ${cH}">
+          ${state.tempEditorSlots.map((slot, sIdx) => {
+            const ptsPixel = slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ');
+            return `
+              <g id="svg-group-${sIdx}">
+                <polygon points="${ptsPixel}" id="polygon-body-${sIdx}" class="plot-polygon-shape"
+                         fill="rgba(16, 185, 129, 0.35)" stroke="#059669" stroke-width="3" stroke-dasharray="8,6">
+                  <title>Nhấp giữ và kéo để di chuyển ${slot.name}</title>
+                </polygon>
+              </g>
+            `;
+          }).join('')}
+        </svg>
+
+        ${state.tempEditorSlots.map((slot, sIdx) => {
+          const centerX = (slot.corners[0].x + slot.corners[1].x + slot.corners[2].x + slot.corners[3].x) / 4;
+          const centerY = (slot.corners[0].y + slot.corners[1].y + slot.corners[2].y + slot.corners[3].y) / 4;
+          return `
+            <div id="controls-slot-${sIdx}" class="absolute inset-0 pointer-events-none">
+              <div style="left: ${centerX}\%; top:${centerY}%; transform: translate(-50%, -50%);" 
+                   class="absolute px-3 py-1 bg-amber-950/90 text-amber-200 border border-amber-600/60 rounded-full font-black text-xs shadow-lg pointer-events-none flex items-center gap-1">
+                <span>🌾</span> ${slot.name}
+              </div>
+
+              <div style="left: ${slot.corners[0].x}\%; top:${slot.corners[0].y}%; transform: translate(-110%, -125%);"
+                   class="absolute flex items-center gap-1.5 pointer-events-auto z-50">
+                <button onclick="copyPlotSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center shadow-lg hover:scale-125 transition" title="Copy ô đất này">
+                  <i class="fa-solid fa-copy"></i>
+                </button>
+                <button onclick="removePerspectiveSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center justify-center shadow-lg hover:scale-125 transition" title="Xóa ô đất">
+                  ✕
+                </button>
+              </div>
+
+              <div id="handle-${sIdx}-0" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[0].x}\%; top:${slot.corners[0].y}%;"></div>
+              <div id="handle-${sIdx}-1" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[1].x}\%; top:${slot.corners[1].y}%;"></div>
+              <div id="handle-${sIdx}-2" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[2].x}\%; top:${slot.corners[2].y}%;"></div>
+              <div id="handle-${sIdx}-3" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[3].x}\%; top:${slot.corners[3].y}%;"></div>
+            </div>
+          `;
+        }).join('')}
+
+        ${state.tempTextOverlays.map((txt, tIdx) => `
+          <div id="text-overlay-${tIdx}" style="left: ${txt.x}\%; top:${txt.y}%;" class="draggable-text-box group pointer-events-auto">
+            <div ondblclick="editTextContent(${tIdx})" style="color: ${tone.textColor}; text-shadow: ${tone.textShadow}; background:${tone.bgColor}; border: 1.5px dashed ${tone.borderColor}; font-size:${txt.fontSize}px;" class="px-3.5 py-1.5 rounded-xl font-extrabold tracking-wide flex items-center gap-2 shadow-md">
+              <span class="truncate">${txt.content}</span>
+              <button onclick="removeTextOverlay(${tIdx}, event)" class="w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-700 text-white text-[9px] font-bold opacity-0 group-hover:opacity-100 transition flex items-center justify-center">✕</button>
+            </div>
+          </div>
+        `).join('')}
+      `;
+
+      state.tempEditorSlots.forEach((slot, sIdx) => {
+        const polyEl = document.getElementById(`polygon-body-${sIdx}`);
+        if (polyEl) makePlotPolygonDraggable(polyEl, sIdx);
+        for (let cIdx = 0; cIdx < 4; cIdx++) {
+          const handleEl = document.getElementById(`handle-${sIdx}-${cIdx}`);
+          if (handleEl) makeCornerHandleDraggable(handleEl, sIdx, cIdx);
+        }
+      });
+
+      state.tempTextOverlays.forEach((txt, tIdx) => {
+        const txtEl = document.getElementById(`text-overlay-${tIdx}`);
+        if (txtEl) makeTextOverlayDraggable(txtEl, tIdx);
+      });
+    }
+
+    function makePlotPolygonDraggable(polyEl, slotIndex) {
+      let isDragging = false, startMouseX = 0, startMouseY = 0, originalCorners = [];
+      polyEl.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        isDragging = true;
+        startMouseX = e.clientX; startMouseY = e.clientY;
+        originalCorners = JSON.parse(JSON.stringify(state.tempEditorSlots[slotIndex].corners));
+        e.stopPropagation();
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const rect = document.getElementById('editor-canvas-box').getBoundingClientRect();
+        const deltaX = ((e.clientX - startMouseX) / rect.width) * 100;
+        const deltaY = ((e.clientY - startMouseY) / rect.height) * 100;
+
+        let minX = Math.min(...originalCorners.map(c => c.x)), maxX = Math.max(...originalCorners.map(c => c.x));
+        let minY = Math.min(...originalCorners.map(c => c.y)), maxY = Math.max(...originalCorners.map(c => c.y));
+        let clampedX = deltaX, clampedY = deltaY;
+
+        if (minX + clampedX < 2) clampedX = 2 - minX;
+        if (maxX + clampedX > 98) clampedX = 98 - maxX;
+        if (minY + clampedY < 2) clampedY = 2 - minY;
+        if (maxY + clampedY > 98) clampedY = 98 - maxY;
+
+        for (let i = 0; i < 4; i++) {
+          state.tempEditorSlots[slotIndex].corners[i].x = parseFloat((originalCorners[i].x + clampedX).toFixed(2));
+          state.tempEditorSlots[slotIndex].corners[i].y = parseFloat((originalCorners[i].y + clampedY).toFixed(2));
+        }
+        renderPerspectiveSlotsAndTexts();
+      });
+      window.addEventListener('mouseup', () => { if (isDragging) isDragging = false; });
+    }
+
+    function makeCornerHandleDraggable(handleEl, slotIndex, cornerIndex) {
+      let isDragging = false;
+      handleEl.addEventListener('mousedown', (e) => { isDragging = true; e.stopPropagation(); });
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const rect = document.getElementById('editor-canvas-box').getBoundingClientRect();
+        let posX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+        let posY = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
+        state.tempEditorSlots[slotIndex].corners[cornerIndex] = {
+          x: parseFloat(((posX / rect.width) * 100).toFixed(2)),
+          y: parseFloat(((posY / rect.height) * 100).toFixed(2))
+        };
+        renderPerspectiveSlotsAndTexts();
+      });
+      window.addEventListener('mouseup', () => { if (isDragging) isDragging = false; });
+    }
+
+    function makeTextOverlayDraggable(txtEl, tIdx) {
+      let isDragging = false, startMouseX = 0, startMouseY = 0, origX = 0, origY = 0;
+      txtEl.addEventListener('mousedown', (e) => {
+        if (e.target.tagName === 'BUTTON') return;
+        isDragging = true;
+        startMouseX = e.clientX; startMouseY = e.clientY;
+        origX = state.tempTextOverlays[tIdx].x; origY = state.tempTextOverlays[tIdx].y;
+        e.stopPropagation();
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const rect = document.getElementById('editor-canvas-box').getBoundingClientRect();
+        let newX = Math.max(5, Math.min(95, origX + ((e.clientX - startMouseX) / rect.width) * 100));
+        let newY = Math.max(5, Math.min(95, origY + ((e.clientY - startMouseY) / rect.height) * 100));
+        state.tempTextOverlays[tIdx].x = parseFloat(newX.toFixed(2));
+        state.tempTextOverlays[tIdx].y = parseFloat(newY.toFixed(2));
+        txtEl.style.left = `${newX}%`; txtEl.style.top = `${newY}%`;
+      });
+      window.addEventListener('mouseup', () => { if (isDragging) isDragging = false; });
+    }
+
+    // ================= QUÉT GITHUB & CSV =================
     async function syncAllFromGitHub() {
       const icon = document.getElementById('sync-icon');
       icon.classList.add('fa-spin');
-
       for (const folder of ALL_FOLDERS) {
         try {
           const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${ASSETS_PATH}/${folder}`);
           if (res.ok) {
             const data = await res.json();
-            state.cachedAssets[folder] = data.filter(item => 
-              item.type === 'file' && /\.(png|jpe?g|webp|svg)$/i.test(item.name)
-            ).map(item => ({
-              fileName: item.name,
-              displayName: item.name.replace(/\.[^/.]+$/, "").replace(/[_-]+/g, ' ').toUpperCase(),
-              localPath: `assets/${folder}/${item.name}`,
-              rawUrl: `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${item.path}`
-            }));
+            state.cachedAssets[folder] = data.filter(item => item.type === 'file' && /\.(png|jpe?g|webp|svg)$/i.test(item.name))
+              .map(item => ({
+                fileName: item.name,
+                displayName: item.name.replace(/\.[^/.]+$/, "").replace(/[_-]+/g, ' ').toUpperCase(),
+                localPath: `assets/${folder}/${item.name}`,
+                rawUrl: `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${item.path}`
+              }));
           }
         } catch (e) {}
       }
-
       icon.classList.remove('fa-spin');
       populateBackgroundDropdowns();
       populateButtonIconsList();
     }
 
-    // ================= 7. CSV & KẾT QUẢ THI ĐUA =================
     function generatePasswordFromNameAndSTT(fullName, stt) {
       if (!fullName) return `hs${stt}`;
       let clean = fullName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd');
-      const words = clean.trim().split(/\s+/);
-      const initials = words.map(w => w.charAt(0).toLowerCase()).join('');
+      const initials = clean.trim().split(/\s+/).map(w => w.charAt(0).toLowerCase()).join('');
       return `${initials}${stt}`;
     }
 
@@ -1506,20 +1350,17 @@
 
       try {
         const res = await fetch(url);
-        if (!res.ok) throw new Error('Không thể tải CSV. Vui lòng kiểm tra quyền chia sẻ!');
+        if (!res.ok) throw new Error('Không thể tải CSV.');
         const rawText = await res.text();
         const lines = rawText.split(/\r?\n/).filter(l => l.trim().length > 0);
-
         let count = 0;
+
         for (let i = 1; i < lines.length; i++) {
           const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
           if (cols.length < 3) continue;
-
-          const stt = cols[0];
-          const hoTen = cols[1];
+          const stt = cols[0], hoTen = cols[1];
           const toMatch = cols[2].match(/\d+/);
           const to = toMatch ? parseInt(toMatch[0]) : 1;
-
           const username = `${className}stt${stt}_To${to}`;
           const password = generatePasswordFromNameAndSTT(hoTen, stt);
 
@@ -1528,12 +1369,10 @@
           };
           count++;
         }
-
         saveStateToLocal();
         renderClassesList();
         alert(`Đã nạp thành công Lớp ${className} với ${count} học sinh!`);
         document.getElementById('csv-file-url').value = '';
-
       } catch (e) { alert('Lỗi: ' + e.message); }
     }
 
@@ -1580,14 +1419,13 @@
         3: parseInt(document.getElementById('rank-val-3').value),
         4: parseInt(document.getElementById('rank-val-4').value)
       };
-
       saveStateToLocal();
       alert(`Đã lưu kết quả thi đua tuần cho Lớp ${state.activeClass}!`);
     }
 
     function saveAndApplyCurrentClass() {
       saveStateToLocal();
-      alert(`ĐÃ LƯU THÀNH CÔNG CHO LỚP ${state.activeClass}!\nToàn bộ cài đặt nền, gán nút, điều kiện mở khóa, ô đất 3D và chữ nền đã được đồng bộ sang index.html.`);
+      alert(`ĐÃ LƯU THÀNH CÔNG CHO LỚP ${state.activeClass}!\nToàn bộ cài đặt nền, danh sách ảnh đã chọn, điều kiện mở khóa, ô đất và chữ nền đã đồng bộ sang index.html.`);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
