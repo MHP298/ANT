@@ -40,22 +40,27 @@
     ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
     ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.25); border-radius: 4px; }
 
+    /* HOA TRÊN SÂN: KÍCH THƯỚC ĐÃ THU NHỎ 40% */
     .garden-placed-flower {
       position: absolute;
       touch-action: none;
       user-select: none;
       cursor: grab;
       z-index: 30;
+      transform: translate(-50%, -50%);
     }
     .garden-placed-flower:active { cursor: grabbing; }
 
-    /* VÙNG ĐẤT SVG TƯƠNG TÁC THẢ VẬT PHẨM */
-    .plot-interactive-svg {
+    /* HIỆU ỨNG PHÓNG TO VÙNG ĐẤT KHI RÀ CHUỘT HOẶC CHẠM */
+    .plot-group-hover {
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: transform 0.22s ease-out, filter 0.22s ease-out;
       cursor: pointer;
-      transition: opacity 0.2s;
     }
-    .plot-interactive-svg:hover {
-      opacity: 0.95;
+    .plot-group-hover:hover, .plot-group-hover:active {
+      transform: scale(1.035);
+      filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35));
     }
   </style>
 </head>
@@ -87,7 +92,7 @@
       <div class="space-y-3 text-left">
         <div>
           <label class="block text-[11px] font-bold text-slate-600 mb-1">Tài khoản học sinh:</label>
-          <input type="text" id="input-student-user" placeholder="VD: 10A1stt15_To1" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          <input type="text" id="input-student-user" placeholder="VD: 11TA3stt15_To1" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
         </div>
         <div>
           <label class="block text-[11px] font-bold text-slate-600 mb-1">Mật khẩu:</label>
@@ -110,7 +115,7 @@
     <div class="flex items-center gap-2">
       <span class="text-lg">🌸</span>
       <h1 class="font-extrabold text-xs md:text-sm text-slate-800 uppercase tracking-wide">Vườn Thi Đua Trồng Hoa</h1>
-      <span class="text-[10px] md:text-[11px] px-2 py-0.5 bg-emerald-100 text-emerald-900 rounded-full font-bold ml-1" id="hdr-class-badge">Lớp 10A1</span>
+      <span class="text-[10px] md:text-[11px] px-2 py-0.5 bg-emerald-100 text-emerald-900 rounded-full font-bold ml-1" id="hdr-class-badge">Lớp 11TA3</span>
     </div>
 
     <div class="flex items-center gap-2.5">
@@ -133,16 +138,16 @@
   <!-- BỐ CỤC CHÍNH 2 PHẦN: PHẦN A (3/4) & PHẦN B (1/4) -->
   <div class="flex-1 flex flex-row h-[calc(100vh-40px)] overflow-hidden w-full">
     
-    <!-- PHẦN A: BÊN TRÁI CHIẾM ĐÚNG 3/4 (75% CHIỀU NGANG) -->
+    <!-- PHẦN A: BÊN TRÁI CHIẾM 3/4 (75% CHIỀU NGANG) -->
     <section id="section-a" class="w-3/4 h-full relative bg-slate-950 overflow-hidden flex items-center justify-center border-r-2 border-black/20" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
       
       <!-- Ảnh nền sân trường -->
       <img id="game-bg-image" src="assets/nengame/vuonlop.jpg" alt="Nền Game" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/vuonlop.jpg'" class="absolute inset-0 w-full h-full object-fill pointer-events-none select-none transition-all duration-300">
 
-      <!-- LỚP CHỨA CÁC VÙNG ĐẤT 3D CHUẨN XÁC NỐI TỌA ĐỘ BẰNG SVG -->
+      <!-- LỚP CHỨA CÁC VÙNG ĐẤT 3D CHUẨN XÁC NỐI TỌA ĐỘ BẰNG SVG (CÓ HIỆU ỨNG PHÓNG TO KHI HOVER) -->
       <div id="perspective-plots-layer" class="absolute inset-0 w-full h-full pointer-events-auto z-10"></div>
 
-      <!-- LỚP CHỨA CÁC VÙNG CHỮ TỰ ĐỘNG ĐỔI MÀU TỪ ADMIN -->
+      <!-- LỚP CHỨA CÁC VÙNG CHỮ TỰ NHIÊN HÒA HỢP VỚI BẢNG GỖ (TRONG SUỐT, KHÔNG VIỀN) -->
       <div id="text-overlays-layer" class="absolute inset-0 w-full h-full pointer-events-none z-15"></div>
 
       <!-- LỚP CHỨA CÁC CÂY HOA ĐƯỢC CẮM TRÊN SÂN -->
@@ -151,11 +156,11 @@
       <!-- Gợi ý hướng dẫn -->
       <div id="empty-hint" class="absolute bottom-3 left-3 z-30 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-white/20 text-white text-[11px] pointer-events-none flex items-center gap-1.5 shadow-lg">
         <i class="fa-solid fa-hand-pointer text-amber-400"></i>
-        <span>Kéo các vật phẩm từ <b>Phần B</b> thả vào ô đất của bạn!</span>
+        <span>Kéo đất thả vào ô của bạn • Kéo hoa cắm lên luống đất!</span>
       </div>
     </section>
 
-    <!-- PHẦN B: BÊN PHẢI CHIẾM ĐÚNG 1/4 (25% CHIỀU NGANG) -->
+    <!-- PHẦN B: BÊN PHẢI CHIẾM 1/4 (25% CHIỀU NGANG) -->
     <aside id="section-b" class="w-1/4 h-full bg-cover bg-center flex flex-col shadow-2xl shrink-0 border-l border-black/20" style="background-image: url('assets/nengame/nenungdung.jpg');">
       
       <!-- B1: CÁC NÚT TÍNH NĂNG ĐƯỢC GÁN TỪ ADMIN -->
@@ -184,7 +189,7 @@
     const GITHUB_RAW_BASE = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/`;
 
     const FALLBACK_CLASS_DATA = {
-      name: '10A1',
+      name: '11TA3',
       config: {
         bgGlobal: 'assets/nengame/nenungdung.jpg',
         bgA: 'assets/nengame/vuonlop.jpg',
@@ -199,28 +204,33 @@
           'cond_top1': { id: 'cond_top1', name: 'Đạt Hạng 1 thi đua tuần', type: 'rank_top1', folders: ['hoacap2'], selectedImages: [] }
         },
         plotSlots: [
-          { id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }] }
+          { id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 19, y: 31 }, { x: 35, y: 31 }, { x: 34, y: 50 }, { x: 18, y: 50 }], soilImage: null },
+          { id: 'slot_2', name: 'Khu đất 2', teamId: 2, corners: [{ x: 17, y: 52 }, { x: 34, y: 52 }, { x: 33, y: 73 }, { x: 16, y: 73 }], soilImage: null },
+          { id: 'slot_3', name: 'Khu đất 3', teamId: 3, corners: [{ x: 39, y: 31 }, { x: 55, y: 31 }, { x: 56, y: 50 }, { x: 40, y: 50 }], soilImage: null },
+          { id: 'slot_4', name: 'Khu đất 4', teamId: 4, corners: [{ x: 40, y: 52 }, { x: 56, y: 52 }, { x: 57, y: 73 }, { x: 40, y: 73 }], soilImage: null }
         ],
-        textOverlays: []
+        textOverlays: [{ id: 'txt_default', content: 'Lớp 11TA3', x: 48, y: 16, fontSize: 17 }]
       },
-      students: {},
+      students: {
+        '11TA3stt1_To1': { username: '11TA3stt1_To1', name: 'Học sinh 1', stt: '1', team: 1, class: '11TA3', password: 'hs1', isQuestDone: true }
+      },
       weeklyRanking: { 1: 1, 2: 2, 3: 3, 4: 4 }
     };
 
     let globalClassesData = {};
-    let activeClassName = '10A1';
+    let activeClassName = '11TA3';
     let currentClass = FALLBACK_CLASS_DATA;
 
     let currentStudent = {
-      username: '10A1stt1_To1',
+      username: '11TA3stt1_To1',
       name: 'Học Sinh Trải Nghiệm',
       team: 1,
-      class: '10A1',
+      class: '11TA3',
       isQuestDone: true
     };
 
     let cachedScannedAssets = {};
-    let currentActiveButtonKey = 'nuthoa.png';
+    let currentActiveButtonKey = 'nutchunhat.png';
     let draggedItemData = null;
 
     // ================= 1. NẠP DỮ LIỆU ĐỒNG BỘ THỜI GIAN THỰC TỪ ADMIN =================
@@ -349,11 +359,14 @@
       // Sinh các nút ở Phần B1
       renderDynamicButtonsFromAdmin();
 
-      const firstBtnIcon = Object.keys(cfg.buttonMappings || {})[0] || 'nuthoa.png';
-      switchButtonCategory(firstBtnIcon);
+      // Mặc định chọn nút ĐẤT hoặc nút đầu tiên
+      const initialKey = cfg.buttonMappings['nutchunhat.png'] ? 'nutchunhat.png' : (Object.keys(cfg.buttonMappings || {})[0] || 'nuthoa.png');
+      switchButtonCategory(initialKey);
     }
 
-    // DỰNG VÙNG ĐẤT BẰNG SVG CHUẨN XÁC 100%
+    // =========================================================================
+    // DỰNG VÙNG ĐẤT BẰNG SVG: ÔM KHÍT 4 GÓC NEO & PHÓNG TO KHI RÀ CHUỘT
+    // =========================================================================
     function renderPerspectivePlotsOnCanvas() {
       const container = document.getElementById('perspective-plots-layer');
       const slots = currentClass.config.plotSlots || [];
@@ -363,38 +376,77 @@
 
       container.innerHTML = `
         <svg class="absolute inset-0 w-full h-full pointer-events-auto" style="overflow: visible;" viewBox="0 0 ${cW} ${cH}">
+          <defs>
+            ${slots.map(slot => {
+              const pts = slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ');
+              return `
+                <clipPath id="clip-slot-${slot.id}">
+                  <polygon points="${pts}" />
+                </clipPath>
+              `;
+            }).join('')}
+          </defs>
+
           ${slots.map(slot => {
             const ptsPixel = slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ');
+            const xs = slot.corners.map(c => (c.x / 100) * cW);
+            const ys = slot.corners.map(c => (c.y / 100) * cH);
+            const minX = Math.min(...xs);
+            const maxX = Math.max(...xs);
+            const minY = Math.min(...ys);
+            const maxY = Math.max(...ys);
+            const boxW = maxX - minX;
+            const boxH = maxY - minY;
+
             const centerX = (slot.corners[0].x + slot.corners[1].x + slot.corners[2].x + slot.corners[3].x) / 4;
             const centerY = (slot.corners[0].y + slot.corners[1].y + slot.corners[2].y + slot.corners[3].y) / 4;
             const isMyTeamPlot = slot.teamId === currentStudent.team;
 
+            // Ảnh đất đã được gán cho ô này (nếu có)
+            const currentSoilImg = slot.soilImage || (isMyTeamPlot ? 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/khudatrieng_nau.png' : null);
+
             return `
-              <g id="plot-group-${slot.id}" class="plot-interactive-svg"
+              <g id="plot-group-${slot.id}" class="plot-group-hover"
                  ondragover="handleDragOver(event)" 
-                 ondrop="handleDropOnPlot(event, '${slot.id}', ${slot.teamId})">
+                 ondrop="handleDropOnPlot(event, '${slot.id}',${slot.teamId})">
                 
-                <!-- Đa giác ô đất ôm khít mặt sân theo đúng 4 góc Admin nắn -->
+                <!-- NỀN MÀU ĐA GIÁC ĐẤT ÔM KHÍT 4 GÓC -->
                 <polygon points="${ptsPixel}" 
-                         fill="${isMyTeamPlot ? 'rgba(120, 53, 15, 0.45)' : 'rgba(16, 185, 129, 0.25)'}" 
+                         fill="${isMyTeamPlot ? 'rgba(180, 83, 9, 0.3)' : 'rgba(16, 185, 129, 0.22)'}" 
                          stroke="${isMyTeamPlot ? '#f59e0b' : '#10b981'}" 
                          stroke-width="${isMyTeamPlot ? '3.5' : '2'}" 
                          stroke-dasharray="${isMyTeamPlot ? 'none' : '6,4'}">
-                  <title>${slot.name} ${isMyTeamPlot ? '(Khu đất của tổ bạn)' : ''}</title>
+                  <title>${slot.name}${isMyTeamPlot ? '(Khu đất của tổ bạn)' : ''}</title>
                 </polygon>
 
-                <!-- Nhãn tên tổ gắn giữa tâm ô đất -->
+                <!-- ẢNH ĐẤT ÔM KHÍT VỪA VẶN THEO ĐÚNG 4 GÓC ĐA GIÁC (CLIP-PATH THEO 4 ĐỈNH) -->
+                ${currentSoilImg ? `
+                  <image href="${currentSoilImg}" 
+                         x="${minX}" y="${minY}" width="${boxW}" height="${boxH}" 
+                         preserveAspectRatio="none"
+                         clip-path="url(#clip-slot-${slot.id})"
+                         opacity="0.95" />
+                ` : ''}
+
+                <!-- VIỀN NGOÀI SAU KHI CÓ ĐẤT -->
+                <polygon points="${ptsPixel}" 
+                         fill="none" 
+                         stroke="${isMyTeamPlot ? '#f59e0b' : '#10b981'}" 
+                         stroke-width="${isMyTeamPlot ? '3.5' : '2'}" 
+                         stroke-dasharray="${isMyTeamPlot ? 'none' : '6,4'}" />
+
+                <!-- NHÃN TÊN TỔ NẰM Ở TÂM Ô ĐẤT -->
                 <g style="pointer-events: none;">
                   <rect x="${(centerX / 100) * cW}" y="${(centerY / 100) * cH}" width="110" height="26" rx="13" 
                         transform="translate(-55, -13)" 
-                        fill="rgba(69, 26, 3, 0.9)" 
+                        fill="rgba(69, 26, 3, 0.88)" 
                         stroke="${isMyTeamPlot ? '#fbbf24' : '#b45309'}" 
                         stroke-width="1.5" />
                   <text x="${(centerX / 100) * cW}" y="${(centerY / 100) * cH}" 
                         text-anchor="middle" dominant-baseline="central" 
                         fill="${isMyTeamPlot ? '#fef08a' : '#fef3c7'}" 
                         font-size="11" font-weight="900" font-family="sans-serif">
-                    🌾 ${slot.name} ${isMyTeamPlot ? '★' : ''}
+                    🌾 ${slot.name}${isMyTeamPlot ? '★' : ''}
                   </text>
                 </g>
               </g>
@@ -404,31 +456,26 @@
       `;
     }
 
-    // DỰNG VÙNG CHỮ TỰ ĐỘNG ĐỔI MÀU TRÊN SÂN A
+    // =========================================================================
+    // DỰNG VÙNG CHỮ: NỀN TRONG SUỐT, KHÔNG VIỀN, HÀI HÒA VỚI BẢNG GỖ
+    // =========================================================================
     function renderTextOverlaysOnCanvas() {
       const container = document.getElementById('text-overlays-layer');
       const texts = currentClass.config.textOverlays || [];
-      const bgA = (currentClass.config.bgA || '').toLowerCase();
 
-      let textColor = '#451a03', bgColor = 'rgba(254, 243, 199, 0.75)', borderColor = '#b45309';
-      if (bgA.includes('dem') || bgA.includes('dark')) {
-        textColor = '#fef3c7'; bgColor = 'rgba(0, 0, 0, 0.65)'; borderColor = '#f59e0b';
-      } else if (bgA.includes('co') || bgA.includes('xanh')) {
-        textColor = '#064e3b'; bgColor = 'rgba(255, 255, 255, 0.7)'; borderColor = '#10b981';
-      }
-
+      // Chữ màu nâu gỗ đậm tự nhiên như nét vẽ chìm trên bảng gỗ, không viền, không khung
       container.innerHTML = texts.map(txt => `
         <div style="position: absolute; left: ${txt.x}%; top: ${txt.y}%; transform: translate(-50%, -50%);" 
              class="pointer-events-none z-15">
-          <div style="color: ${textColor}; background: ${bgColor}; border: 1.5px dashed ${borderColor}; font-size: ${txt.fontSize || 15}px;"
-               class="px-3.5 py-1.5 rounded-xl font-extrabold tracking-wide shadow-md">
+          <div style="color: #5c2c16; font-size: ${txt.fontSize || 16}px; text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6);"
+               class="font-black tracking-wider uppercase select-none">
             ${txt.content}
           </div>
         </div>
       `).join('');
     }
 
-    // 5. HIỂN THỊ CÁC NÚT PHẦN B1
+    // ================= 5. HIỂN THỊ CÁC NÚT PHẦN B1 =================
     function renderDynamicButtonsFromAdmin() {
       const bar = document.getElementById('dynamic-button-bar');
       const mappings = currentClass.config.buttonMappings || {};
@@ -468,7 +515,7 @@
       renderTrayItemsFromFolders(targetFolders);
     }
 
-    // 6. HIỂN THỊ VẬT PHẨM KHAY B2 (CHỈ NẠP ĐÚNG CÁC ẢNH ĐƯỢC CHECK BÊN ADMIN)
+    // ================= 6. HIỂN THỊ VẬT PHẨM KHAY B2 (CHUẨN HÓA TÊN FILE TIẾNG VIỆT ĐỦ 6 ẢNH) =================
     function checkFolderUnlocked(folderName) {
       const conditions = currentClass.config.unlockConditions || {};
 
@@ -494,9 +541,9 @@
       const tray = document.getElementById('tray-grid');
       let combinedItems = [];
 
-      // LẤY DANH SÁCH ẢNH ĐƯỢC CHECK CHO NÚT ĐANG CHỌN
       const currentMapping = currentClass.config.buttonMappings[currentActiveButtonKey];
-      const allowedImageNames = currentMapping?.selectedImages || [];
+      // Chuẩn hóa danh sách tên file đã check (giải mã URI để không lệch ký tự tiếng Việt)
+      const allowedImageNames = (currentMapping?.selectedImages || []).map(n => decodeURIComponent(n).trim().toLowerCase());
 
       folderList.forEach(folder => {
         const check = checkFolderUnlocked(folder);
@@ -504,15 +551,20 @@
         const itemsToUse = files.length > 0 ? files : getFallbackFilesForFolder(folder);
 
         itemsToUse.forEach(item => {
-          // CHỈ NẠP NẾU ẢNH ĐƯỢC ADMIN TÍCH CHỌN
-          const isSelectedByAdmin = allowedImageNames.length === 0 || allowedImageNames.includes(item.fileName);
+          const itemCleanName = decodeURIComponent(item.fileName || '').trim().toLowerCase();
+          
+          // So sánh an toàn: nếu chưa chọn thì hiện tất cả, nếu đã chọn thì so khớp chính xác
+          const isSelectedByAdmin = allowedImageNames.length === 0 || 
+                                    allowedImageNames.includes(itemCleanName) ||
+                                    allowedImageNames.some(aName => itemCleanName.includes(aName) || aName.includes(itemCleanName));
 
           if (isSelectedByAdmin) {
             combinedItems.push({
               ...item,
               folder: folder,
               isLocked: check.isLocked,
-              lockReason: check.reason
+              lockReason: check.reason,
+              isSoilItem: currentActiveButtonKey === 'nutchunhat.png' || folder === 'nengame'
             });
           }
         });
@@ -542,8 +594,8 @@
 
         return `
           <div draggable="true" 
-               ondragstart="handleDragStart(event, '${rawUrl}', '${item.fileName}')"
-               onclick="placeFlowerInCenter('${rawUrl}', '${item.fileName}')"
+               ondragstart="handleDragStart(event, '${rawUrl}', '${item.fileName}', ${item.isSoilItem})"
+               onclick="handleItemClickTray('${rawUrl}', '${item.fileName}', ${item.isSoilItem})"
                class="group relative rounded-xl border border-white/20 hover:border-emerald-400 bg-white/10 hover:bg-white/25 p-1.5 flex items-center justify-center h-16 md:h-20 transition cursor-grab active:cursor-grabbing">
             <img src="${rawUrl}" class="clean-transparent-asset max-h-full max-w-full object-contain pointer-events-none select-none">
             <i class="fa-solid fa-up-down-left-right text-[8px] text-white/30 absolute top-1 right-1 group-hover:text-emerald-300"></i>
@@ -558,12 +610,22 @@
       if (folder === 'nucap1') return [{ fileName: 'nu_tulip.png', localPath: 'assets/nucap1/tulip_nu_cam.png' }];
       if (folder === 'nucap2') return [{ fileName: 'nu_sen_vip.png', localPath: 'assets/nucap2/nu_sen.png' }];
       if (folder === 'congcu') return [{ fileName: 'xeng.png', localPath: 'assets/congcu/xeng.png' }];
+      if (folder === 'nengame') {
+        return [
+          { fileName: 'khudatrieng_cam.png', localPath: 'assets/nengame/khudatrieng_cam.png' },
+          { fileName: 'khudatrieng_dohong.png', localPath: 'assets/nengame/khudatrieng_dohong.png' },
+          { fileName: 'khudatrieng_tim.png', localPath: 'assets/nengame/khudatrieng_tim.png' },
+          { fileName: 'khudatrieng_trắng.png', localPath: 'assets/nengame/khudatrieng_trắng.png' },
+          { fileName: 'khudatrieng_xanhduong.png', localPath: 'assets/nengame/khudatrieng_xanhduong.png' },
+          { fileName: 'khudatrieng_xanhla.png', localPath: 'assets/nengame/khudatrieng_xanhla.png' }
+        ];
+      }
       return [];
     }
 
-    // 7. KÉO THẢ CẮM HOA VÀO VƯỜN
-    function handleDragStart(e, rawUrl, fileName) {
-      draggedItemData = { rawUrl, fileName };
+    // ================= 7. KÉO THẢ: TỰ ĐỘNG ÔM KHÍT Ô ĐẤT & HOA THU NHỎ 40% =================
+    function handleDragStart(e, rawUrl, fileName, isSoilItem) {
+      draggedItemData = { rawUrl, fileName, isSoilItem };
       e.dataTransfer.setData('text/plain', '');
     }
 
@@ -572,30 +634,59 @@
     function handleDrop(e) {
       e.preventDefault();
       if (!draggedItemData) return;
+      
+      // Nếu là ảnh đất nhưng thả ra ngoài sân chứ không trúng ô đất
+      if (draggedItemData.isSoilItem) {
+        alert('Vui lòng kéo mẫu đất thả trực tiếp vào ô đất của bạn!');
+        return;
+      }
+
       const rect = document.getElementById('section-a').getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       spawnFlowerOnCanvas(draggedItemData.rawUrl, x, y);
     }
 
+    // THẢ VẬT PHẨM TRỰC TIẾP LÊN Ô ĐẤT
     function handleDropOnPlot(e, plotId, teamId) {
       e.preventDefault();
       e.stopPropagation();
       if (!draggedItemData) return;
 
+      // NẾU LÀ ẢNH ĐẤT: Ô ĐẤT TỰ ĐỘNG THAY DÁNG ÔM VỪA KHÍT 100% THEO 4 GÓC NEO
+      if (draggedItemData.isSoilItem) {
+        applySoilToSlot(plotId, draggedItemData.rawUrl);
+        return;
+      }
+
+      // NẾU LÀ CÂY HOA/NỤ: CẮM LÊN Ô ĐẤT VỚI KÍCH THƯỚC ĐÃ THU NHỎ 40%
       const rect = document.getElementById('section-a').getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       spawnFlowerOnCanvas(draggedItemData.rawUrl, x, y);
     }
 
-    function placeFlowerInCenter(rawUrl, fileName) {
-      const sectionA = document.getElementById('section-a');
-      const centerX = sectionA.clientWidth / 2;
-      const centerY = sectionA.clientHeight / 2;
-      spawnFlowerOnCanvas(rawUrl, centerX, centerY);
+    function handleItemClickTray(rawUrl, fileName, isSoilItem) {
+      if (isSoilItem) {
+        // Tự động gán cho ô đất của học sinh hiện tại
+        const mySlot = currentClass.config.plotSlots.find(s => s.teamId === currentStudent.team) || currentClass.config.plotSlots[0];
+        if (mySlot) applySoilToSlot(mySlot.id, rawUrl);
+      } else {
+        const sectionA = document.getElementById('section-a');
+        spawnFlowerOnCanvas(rawUrl, sectionA.clientWidth / 2, sectionA.clientHeight / 2);
+      }
     }
 
+    // HÀM ÁP DỤNG ẢNH ĐẤT VỪA KHÍT VÀO KHUNG NEO 4 GÓC
+    function applySoilToSlot(plotId, soilUrl) {
+      const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
+      if (slot) {
+        slot.soilImage = soilUrl;
+        renderPerspectivePlotsOnCanvas();
+      }
+    }
+
+    // TẠO CÂY HOA CẮM TRÊN SÂN: KÍCH THƯỚC THU NHỎ 40% (SO VỚI GỐC)
     let placedFlowerCount = 0;
     function spawnFlowerOnCanvas(rawUrl, posX, posY) {
       document.getElementById('empty-hint').style.display = 'none';
@@ -605,14 +696,15 @@
 
       const el = document.createElement('div');
       el.id = uniqueId;
-      el.className = 'garden-placed-flower w-16 h-20 md:w-20 md:h-24 flex items-center justify-center';
-      el.style.left = `${posX - 35}px`;
-      el.style.top = `${posY - 35}px`;
+      // KÍCH THƯỚC HOA THU NHỎ CHỈ CÒN 40% (RỘNG ~34px, CAO ~48px)
+      el.className = 'garden-placed-flower w-8 h-12 md:w-9 md:h-12 flex items-center justify-center';
+      el.style.left = `${posX}px`;
+      el.style.top = `${posY}px`;
 
       el.innerHTML = `
         <div class="relative w-full h-full group flex items-center justify-center">
-          <img src="${rawUrl}" class="max-h-full max-w-full object-contain pointer-events-none select-none">
-          <button onclick="removePlacedFlower('${uniqueId}', event)" class="absolute -top-2 -right-2 w-4 h-4 md:w-5 md:h-5 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[9px] font-bold shadow hidden group-hover:flex items-center justify-center">
+          <img src="${rawUrl}" class="max-h-full max-w-full object-contain pointer-events-none select-none filter drop-shadow">
+          <button onclick="removePlacedFlower('${uniqueId}', event)" class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[8px] font-bold shadow hidden group-hover:flex items-center justify-center">
             ✕
           </button>
         </div>
