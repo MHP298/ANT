@@ -21,7 +21,7 @@
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans select-none">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans select-none" onclick="closeAllFolderDropdowns(event)">
 
   <!-- POPUP ĐĂNG NHẬP -->
   <div id="login-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -81,11 +81,11 @@
     <!-- PHẦN A (1/3 BÊN TRÁI): BẢNG ĐIỀU KHIỂN & CẤU HÌNH -->
     <aside class="w-full md:w-1/3 border-r border-slate-200 bg-white flex flex-col h-full shadow-sm">
       
-      <!-- BỘ CHỌN & QUẢN LÝ LỚP HỌC (PHÂN TẦNG DỮ LIỆU) -->
+      <!-- BỘ CHỌN & QUẢN LÝ LỚP HỌC -->
       <div class="p-3 bg-emerald-50/70 border-b border-emerald-200 flex items-center justify-between gap-2 shrink-0">
         <div class="flex items-center gap-1.5 flex-1">
           <i class="fa-solid fa-graduation-cap text-emerald-700 text-sm"></i>
-          <span class="text-xs font-black uppercase text-emerald-900">Lớp Đang Chọn:</span>
+          <span class="text-xs font-black uppercase text-emerald-900">Lớp:</span>
           <select id="select-active-class" onchange="switchActiveClass(this.value)" class="flex-1 px-2.5 py-1 text-xs rounded-lg border border-emerald-300 font-bold bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"></select>
         </div>
         <button onclick="openAddNewClassPrompt()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center gap-1">
@@ -103,22 +103,10 @@
         </button>
       </div>
 
-      <!-- TAB 1: CẤU HÌNH GIAO DIỆN & MỞ KHÓA (THEO LỚP ĐANG CHỌN) -->
+      <!-- TAB 1: CẤU HÌNH GIAO DIỆN & MỞ KHÓA -->
       <div id="tab-panel-controls" class="flex-1 overflow-y-auto p-4 space-y-4">
         
-        <!-- MENU CHỌN NHIỀU THƯ MỤC HIỂN THỊ Ở PHẦN B -->
-        <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5 relative">
-          <label class="block text-xs font-black uppercase text-slate-700">CHỌN THƯ MỤC HIỂN THỊ Ở PHẦN B:</label>
-          <div class="relative">
-            <button type="button" onclick="toggleMultiFolderDropdown()" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white flex items-center justify-between font-bold text-slate-700 shadow-2xs">
-              <span id="lbl-multiselect-status" class="truncate">Chọn các thư mục...</span>
-              <i class="fa-solid fa-chevron-down text-slate-400 text-xs"></i>
-            </button>
-            <div id="dropdown-folders-list" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-30 p-2 space-y-1 max-h-56 overflow-y-auto"></div>
-          </div>
-        </div>
-
-        <!-- MỤC 1: CẤU HÌNH NỀN GIAO DIỆN CHO LỚP -->
+        <!-- MỤC 1: CẤU HÌNH NỀN GIAO DIỆN -->
         <div class="p-3.5 bg-white rounded-2xl border border-slate-200 space-y-2.5 shadow-2xs">
           <h4 class="text-xs font-black uppercase text-emerald-800 flex items-center gap-1.5">
             <i class="fa-regular fa-image"></i> Cấu Hình Nền Giao Diện
@@ -137,7 +125,7 @@
           </div>
         </div>
 
-        <!-- MỤC 2: CẤU HÌNH NÚT BẤM CỦA LỚP + NÚT "THÊM NÚT" -->
+        <!-- MỤC 2: CẤU HÌNH NÚT BẤM (Ô MENU MỞ THƯ MỤC CÓ CHECK MULTI-SELECT) -->
         <div class="p-3.5 bg-white rounded-2xl border border-slate-200 space-y-2.5 shadow-2xs">
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-black uppercase text-emerald-800 flex items-center gap-1.5">
@@ -147,10 +135,10 @@
               <i class="fa-solid fa-plus"></i> Thêm Nút
             </button>
           </div>
-          <div id="buttons-config-container" class="space-y-2.5"></div>
+          <div id="buttons-config-container" class="space-y-3"></div>
         </div>
 
-        <!-- MỤC 3: MỞ KHÓA CẤP ĐỘ CỦA LỚP -->
+        <!-- MỤC 3: MỞ KHÓA CẤP ĐỘ -->
         <div class="p-3.5 bg-white rounded-2xl border-2 border-emerald-500/40 space-y-3 shadow-2xs">
           <div class="flex items-center justify-between border-b pb-1.5">
             <h4 class="text-xs font-black uppercase text-emerald-900 flex items-center gap-1.5">
@@ -178,11 +166,13 @@
             </div>
           </div>
 
+          <!-- Thư mục liên kết mở khóa (Chỉ xuất hiện khi đã chọn điều kiện) -->
           <div id="linked-folder-wrapper" class="hidden">
             <label class="block text-[11px] text-slate-600 font-bold mb-1">Thư mục liên kết mở khóa trong assets:</label>
-            <div id="linked-folder-display-box" class="min-h-[38px] p-2 bg-slate-50 rounded-xl border border-slate-300 flex flex-wrap gap-1 items-center"></div>
+            <div id="linked-folder-display-box" class="min-h-[38px] p-2 bg-slate-50 rounded-xl border border-slate-300 flex flex-wrap gap-1.5 items-center"></div>
           </div>
 
+          <!-- Khung Thiết lập mới / Chỉnh sửa -->
           <div id="new-condition-box" class="hidden p-3 bg-emerald-50/70 border border-emerald-300 rounded-xl space-y-2 mt-2">
             <span class="text-[11px] font-black uppercase text-emerald-900 block" id="lbl-form-mode">Nhập Điều Kiện Mới</span>
             
@@ -200,9 +190,14 @@
               </select>
             </div>
 
-            <div>
+            <!-- Menu mở thư mục dạng Multi-Check cho Điều kiện mới -->
+            <div class="relative">
               <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Chọn Thư mục Assets cần mở khóa:</label>
-              <select id="select-new-cond-folder" class="w-full px-2 py-1 text-xs rounded-lg border border-slate-300 bg-white font-bold"></select>
+              <button type="button" onclick="toggleDropdownFolder('dropdown-cond-folders', event)" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white flex items-center justify-between font-bold text-slate-700">
+                <span id="lbl-cond-folders-selected" class="truncate">Chọn các thư mục...</span>
+                <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
+              </button>
+              <div id="dropdown-cond-folders" class="hidden folder-dropdown-menu absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-2 space-y-1 max-h-48 overflow-y-auto"></div>
             </div>
 
             <div class="flex gap-2 pt-1">
@@ -276,7 +271,7 @@
       
       <div class="bg-white border-b border-slate-200 p-3 px-5 flex flex-wrap items-center justify-between gap-3 shadow-2xs shrink-0">
         <div class="flex items-center gap-2">
-          <b class="text-xs text-slate-800">Kho Ảnh Assets Hiển Thị</b>
+          <b class="text-xs text-slate-800">Kho Ảnh Assets Đang Hiển Thị</b>
           <span class="text-[11px] text-slate-400" id="total-visible-images-count">(0 ảnh)</span>
         </div>
 
@@ -311,15 +306,15 @@
         bgA: 'assets/nengame/vuonlop.jpg',
         bgB: 'assets/nengame/nenungdung.jpg',
         buttons: [
-          { id: 'btn_1', label: 'HOA', icon: 'assets/nutgame/nuthoa.png', targetFolder: 'hoacap1' },
-          { id: 'btn_2', label: 'NỤ', icon: 'assets/nutgame/nutnu.png', targetFolder: 'nucap1' },
-          { id: 'btn_3', label: 'ĐẤT', icon: 'assets/nutgame/nutchunhat.png', targetFolder: 'nengame' },
-          { id: 'btn_4', label: 'CÔNG CỤ', icon: 'assets/nutgame/nutxeng.png', targetFolder: 'congcu' }
+          { id: 'btn_1', label: 'HOA', icon: 'assets/nutgame/nuthoa.png', targetFolders: ['hoacap1'] },
+          { id: 'btn_2', label: 'NỤ', icon: 'assets/nutgame/nutnu.png', targetFolders: ['nucap1'] },
+          { id: 'btn_3', label: 'ĐẤT', icon: 'assets/nutgame/nutchunhat.png', targetFolders: ['nengame'] },
+          { id: 'btn_4', label: 'CÔNG CỤ', icon: 'assets/nutgame/nutxeng.png', targetFolders: ['congcu'] }
         ],
         unlockConditions: {
-          'cond_top1': { id: 'cond_top1', name: 'Đạt Hạng 1 thi đua tuần', type: 'rank_top1', folder: 'hoacap2' },
-          'cond_top1_nu': { id: 'cond_top1_nu', name: 'Đạt Hạng 1 (Mở nụ VIP)', type: 'rank_top1', folder: 'nucap2' },
-          'cond_quest': { id: 'cond_quest', name: 'Hoàn thành nhiệm vụ ngày', type: 'quest_done', folder: 'congcu' }
+          'cond_top1': { id: 'cond_top1', name: 'Đạt Hạng 1 thi đua tuần', type: 'rank_top1', folders: ['hoacap2'] },
+          'cond_top1_nu': { id: 'cond_top1_nu', name: 'Đạt Hạng 1 (Mở nụ VIP)', type: 'rank_top1', folders: ['nucap2'] },
+          'cond_quest': { id: 'cond_quest', name: 'Hoàn thành nhiệm vụ ngày', type: 'quest_done', folders: ['congcu'] }
         }
       },
       students: {},
@@ -331,11 +326,11 @@
       classesData: {
         '10A1': DEFAULT_CLASS_TEMPLATE('10A1')
       },
-      selectedFoldersForView: ['hoacap1', 'hoacap2'],
-      checkedImages: new Set(),
       cachedAssets: {},
+      checkedImages: new Set(),
       currentSelectedConditionId: '',
-      editingConditionId: null
+      editingConditionId: null,
+      tempNewConditionFolders: ['hoacap2']
     };
 
     function togglePasswordVisibility(id, iconId) {
@@ -389,18 +384,34 @@
       loadSavedData();
       renderClassDropdown();
       loadActiveClassConfig();
-      renderMultiFolderDropdownList();
-      populateConditionFolderDropdown();
       renderClassesList();
       syncAllFromGitHub();
     }
 
     function loadSavedData() {
-      const saved = localStorage.getItem('garden_system_classes_v6');
+      const saved = localStorage.getItem('garden_system_classes_v7');
       if (saved) {
-        try { state.classesData = JSON.parse(saved); } catch (e) {}
+        try { 
+          const parsed = JSON.parse(saved);
+          // Đảm bảo tương thích mảng targetFolders
+          Object.values(parsed).forEach(c => {
+            if (c.config && c.config.buttons) {
+              c.config.buttons.forEach(b => {
+                if (!b.targetFolders && b.targetFolder) b.targetFolders = [b.targetFolder];
+                if (!b.targetFolders) b.targetFolders = ['hoacap1'];
+              });
+            }
+            if (c.config && c.config.unlockConditions) {
+              Object.values(c.config.unlockConditions).forEach(u => {
+                if (!u.folders && u.folder) u.folders = [u.folder];
+                if (!u.folders) u.folders = ['hoacap2'];
+              });
+            }
+          });
+          state.classesData = parsed;
+        } catch (e) {}
       }
-      const savedActive = localStorage.getItem('garden_active_class_v6');
+      const savedActive = localStorage.getItem('garden_active_class_v7');
       if (savedActive && state.classesData[savedActive]) {
         state.activeClass = savedActive;
       } else {
@@ -410,11 +421,11 @@
     }
 
     function saveStateToLocal() {
-      localStorage.setItem('garden_system_classes_v6', JSON.stringify(state.classesData));
-      localStorage.setItem('garden_active_class_v6', state.activeClass);
+      localStorage.setItem('garden_system_classes_v7', JSON.stringify(state.classesData));
+      localStorage.setItem('garden_active_class_v7', state.activeClass);
     }
 
-    // ================= QUẢN LÝ DANH SÁCH LỚP =================
+    // ================= QUẢN LÝ LỚP HỌC =================
     function renderClassDropdown() {
       const select = document.getElementById('select-active-class');
       const classKeys = Object.keys(state.classesData);
@@ -450,53 +461,29 @@
       populateBackgroundDropdowns();
       renderButtonsConfigForm();
       renderConditionsMenu();
+      renderMultiFolderView();
 
-      // Cập nhật giá trị xếp hạng tuần
       [1, 2, 3, 4].forEach(t => {
         document.getElementById(`rank-val-${t}`).value = cls.weeklyRanking[t] || t;
       });
     }
 
-    // ================= 1. MENU CHỌN THƯ MỤC DROPDOWN CHECKBOX =================
-    function toggleMultiFolderDropdown() {
-      document.getElementById('dropdown-folders-list').classList.toggle('hidden');
-    }
-
-    function renderMultiFolderDropdownList() {
-      const container = document.getElementById('dropdown-folders-list');
-      container.innerHTML = ALL_FOLDERS.map(f => {
-        const isChecked = state.selectedFoldersForView.includes(f);
-        return `
-          <label class="flex items-center justify-between px-2.5 py-1.5 rounded-lg hover:bg-emerald-50 cursor-pointer text-xs font-bold text-slate-700">
-            <span class="flex items-center gap-2">
-              <i class="fa-solid fa-folder text-emerald-600 text-[11px]"></i>
-              ${f}
-            </span>
-            <input type="checkbox" value="${f}" ${isChecked ? 'checked' : ''} onchange="handleFolderCheckboxToggle('${f}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5">
-          </label>
-        `;
-      }).join('');
-      updateMultiFolderLabel();
-    }
-
-    function handleFolderCheckboxToggle(folder, isChecked) {
-      if (isChecked) {
-        if (!state.selectedFoldersForView.includes(folder)) state.selectedFoldersForView.push(folder);
-      } else {
-        state.selectedFoldersForView = state.selectedFoldersForView.filter(f => f !== folder);
+    // ================= ĐIỀU KHIỂN DROPDOWN MULTI-CHECK =================
+    function closeAllFolderDropdowns(e) {
+      if (!e.target.closest('.folder-dropdown-container') && !e.target.closest('.folder-dropdown-menu')) {
+        document.querySelectorAll('.folder-dropdown-menu').forEach(el => el.classList.add('hidden'));
       }
-      updateMultiFolderLabel();
-      renderMultiFolderView();
     }
 
-    function updateMultiFolderLabel() {
-      const count = state.selectedFoldersForView.length;
-      document.getElementById('lbl-multiselect-status').innerText = count === 0 
-        ? 'Chưa chọn thư mục nào' 
-        : `Đã chọn (${count}): ${state.selectedFoldersForView.join(', ')}`;
+    function toggleDropdownFolder(id, event) {
+      event.stopPropagation();
+      const menu = document.getElementById(id);
+      const isClosed = menu.classList.contains('hidden');
+      document.querySelectorAll('.folder-dropdown-menu').forEach(el => el.classList.add('hidden'));
+      if (isClosed) menu.classList.remove('hidden');
     }
 
-    // ================= 2. CẤU HÌNH NỀN GIAO DIỆN =================
+    // ================= 1. CẤU HÌNH NỀN =================
     function populateBackgroundDropdowns() {
       const cls = state.classesData[state.activeClass];
       const bgImages = state.cachedAssets['nengame'] || [];
@@ -512,46 +499,90 @@
       document.getElementById('select-bg-b').innerHTML = generateOptions(cls.config.bgB);
     }
 
-    // ================= 3. CẤU HÌNH NÚT BẤM =================
+    // ================= 2. CẤU HÌNH NÚT BẤM (Ô MENU MỞ THƯ MỤC CÓ CHECK MULTI-SELECT) =================
     function renderButtonsConfigForm() {
       const cls = state.classesData[state.activeClass];
       const container = document.getElementById('buttons-config-container');
       const nutImages = state.cachedAssets['nutgame'] || [];
 
-      container.innerHTML = cls.config.buttons.map((btn, index) => `
-        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1.5 relative group">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-700">Nút ${index + 1}:</span>
-            <div class="flex items-center gap-1.5">
-              <input type="text" value="${btn.label}" onchange="updateButtonProp(${index}, 'label', this.value)" class="w-20 px-1.5 py-0.5 text-center border rounded font-bold bg-white uppercase">
-              ${cls.config.buttons.length > 1 ? `
-                <button onclick="removeCustomButton(${index})" class="text-rose-500 hover:text-rose-700 p-1" title="Xóa nút này">
-                  <i class="fa-solid fa-trash-can text-[11px]"></i>
+      container.innerHTML = cls.config.buttons.map((btn, index) => {
+        const selectedList = btn.targetFolders || [];
+        const labelText = selectedList.length === 0 ? 'Chưa chọn thư mục' : selectedList.join(', ');
+
+        return `
+          <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1.5 relative group">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-700">Nút ${index + 1}:</span>
+              <div class="flex items-center gap-1.5">
+                <input type="text" value="${btn.label}" onchange="updateButtonProp(${index}, 'label', this.value)" class="w-20 px-1.5 py-0.5 text-center border rounded font-bold bg-white uppercase">
+                ${cls.config.buttons.length > 1 ? `
+                  <button onclick="removeCustomButton(${index})" class="text-rose-500 hover:text-rose-700 p-1" title="Xóa nút này">
+                    <i class="fa-solid fa-trash-can text-[11px]"></i>
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-[11px]">
+              <div>
+                <span class="text-slate-500 font-semibold block mb-0.5">Icon (nutgame/):</span>
+                <select onchange="updateButtonProp(${index}, 'icon', this.value)" class="w-full p-1 border rounded bg-white font-mono text-[10px]">
+                  ${nutImages.length > 0 
+                    ? nutImages.map(img => `<option value="${img.localPath}" ${img.localPath === btn.icon ? 'selected' : ''}>${img.fileName}</option>`).join('')
+                    : `<option value="${btn.icon}">${btn.icon}</option>`
+                  }
+                </select>
+              </div>
+
+              <!-- Ô MENU MỞ THƯ MỤC DẠNG DROPDOWN CHECKBOX -->
+              <div class="relative folder-dropdown-container">
+                <span class="text-slate-500 font-semibold block mb-0.5">Mở thư mục:</span>
+                <button type="button" onclick="toggleDropdownFolder('dropdown-btn-${index}', event)" class="w-full px-2 py-1 border rounded bg-white font-bold text-[10px] text-slate-700 flex items-center justify-between">
+                  <span class="truncate" id="lbl-btn-folder-${index}">${labelText}</span>
+                  <i class="fa-solid fa-chevron-down text-slate-400 text-[9px] ml-1"></i>
                 </button>
-              ` : ''}
+
+                <!-- Menu Dropdown chứa danh sách check -->
+                <div id="dropdown-btn-${index}" class="hidden folder-dropdown-menu absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-40 p-2 space-y-1 max-h-48 overflow-y-auto">
+                  ${ALL_FOLDERS.map(f => {
+                    const isChecked = selectedList.includes(f);
+                    return `
+                      <label class="flex items-center justify-between px-2 py-1 rounded hover:bg-emerald-50 cursor-pointer text-[10px] font-bold text-slate-700" onclick="event.stopPropagation()">
+                        <span class="flex items-center gap-1.5">
+                          <i class="fa-solid fa-folder text-emerald-600 text-[9px]"></i>
+                          ${f}
+                        </span>
+                        <input type="checkbox" value="${f}" ${isChecked ? 'checked' : ''} onchange="toggleButtonFolderCheck(${index}, '${f}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5">
+                      </label>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
             </div>
           </div>
+        `;
+      }).join('');
+    }
 
-          <div class="grid grid-cols-2 gap-2 text-[11px]">
-            <div>
-              <span class="text-slate-500 font-semibold block mb-0.5">Icon (nutgame/):</span>
-              <select onchange="updateButtonProp(${index}, 'icon', this.value)" class="w-full p-1 border rounded bg-white font-mono text-[10px]">
-                ${nutImages.length > 0 
-                  ? nutImages.map(img => `<option value="${img.localPath}" ${img.localPath === btn.icon ? 'selected' : ''}>${img.fileName}</option>`).join('')
-                  : `<option value="${btn.icon}">${btn.icon}</option>`
-                }
-              </select>
-            </div>
+    function toggleButtonFolderCheck(btnIndex, folder, isChecked) {
+      const cls = state.classesData[state.activeClass];
+      const btn = cls.config.buttons[btnIndex];
+      if (!btn.targetFolders) btn.targetFolders = [];
 
-            <div>
-              <span class="text-slate-500 font-semibold block mb-0.5">Mở thư mục:</span>
-              <select onchange="updateButtonProp(${index}, 'targetFolder', this.value)" class="w-full p-1 border rounded bg-white font-bold text-[10px]">
-                ${ALL_FOLDERS.map(f => `<option value="${f}" ${btn.targetFolder === f ? 'selected' : ''}>${f}</option>`).join('')}
-              </select>
-            </div>
-          </div>
-        </div>
-      `).join('');
+      if (isChecked) {
+        if (!btn.targetFolders.includes(folder)) btn.targetFolders.push(folder);
+      } else {
+        btn.targetFolders = btn.targetFolders.filter(f => f !== folder);
+      }
+
+      const labelEl = document.getElementById(`lbl-btn-folder-${btnIndex}`);
+      if (labelEl) {
+        labelEl.innerText = btn.targetFolders.length === 0 ? 'Chưa chọn thư mục' : btn.targetFolders.join(', ');
+      }
+
+      saveStateToLocal();
+      // Tự động đồng bộ và hiển thị ngay các thư mục được chọn sang Phần B
+      renderMultiFolderView();
     }
 
     function updateButtonProp(index, prop, value) {
@@ -569,24 +600,22 @@
         id: 'btn_' + Date.now().toString(36),
         label: `NÚT ${newIndex}`,
         icon: defaultIcon,
-        targetFolder: 'hoacap1'
+        targetFolders: ['hoacap1']
       });
 
       renderButtonsConfigForm();
+      renderMultiFolderView();
     }
 
     function removeCustomButton(index) {
       if (confirm('Xóa nút này khỏi giao diện game của lớp?')) {
         state.classesData[state.activeClass].config.buttons.splice(index, 1);
         renderButtonsConfigForm();
+        renderMultiFolderView();
       }
     }
 
-    // ================= 4. MỞ KHÓA CẤP ĐỘ =================
-    function populateConditionFolderDropdown() {
-      document.getElementById('select-new-cond-folder').innerHTML = ALL_FOLDERS.map(f => `<option value="${f}">${f}</option>`).join('');
-    }
-
+    // ================= 3. MỞ KHÓA CẤP ĐỘ =================
     function renderConditionsMenu() {
       const cls = state.classesData[state.activeClass];
       const group = document.getElementById('group-established-rules');
@@ -606,6 +635,7 @@
         state.currentSelectedConditionId = val;
         document.getElementById('new-condition-box').classList.add('hidden');
         updateLinkedFolderBox();
+        renderMultiFolderView();
       }
     }
 
@@ -616,18 +646,55 @@
       const cond = cls.config.unlockConditions[state.currentSelectedConditionId];
 
       if (!cond) {
+        // Đúng yêu cầu: khi chưa chọn điều kiện thì ẩn hoàn toàn khung thư mục liên kết
         wrapper.classList.add('hidden');
         box.innerHTML = '';
         return;
       }
 
       wrapper.classList.remove('hidden');
-      box.innerHTML = `
+      const folderList = cond.folders || (cond.folder ? [cond.folder] : []);
+      box.innerHTML = folderList.map(f => `
         <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-mono font-bold flex items-center gap-1.5 shadow-2xs">
-          <i class="fa-solid fa-folder-open text-emerald-600"></i> ${cond.folder}
+          <i class="fa-solid fa-folder-open text-emerald-600"></i> ${f}
           <span class="text-[9px] bg-emerald-200 text-emerald-900 px-1 rounded font-sans uppercase">${cond.type}</span>
         </span>
-      `;
+      `).join('');
+    }
+
+    function renderCondFolderDropdownList() {
+      const menu = document.getElementById('dropdown-cond-folders');
+      menu.innerHTML = ALL_FOLDERS.map(f => {
+        const isChecked = state.tempNewConditionFolders.includes(f);
+        return `
+          <label class="flex items-center justify-between px-2 py-1 rounded hover:bg-emerald-50 cursor-pointer text-xs font-bold text-slate-700" onclick="event.stopPropagation()">
+            <span class="flex items-center gap-1.5">
+              <i class="fa-solid fa-folder text-emerald-600 text-[10px]"></i>
+              ${f}
+            </span>
+            <input type="checkbox" value="${f}" ${isChecked ? 'checked' : ''} onchange="toggleCondFolderCheck('${f}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5">
+          </label>
+        `;
+      }).join('');
+      updateCondFolderLabel();
+    }
+
+    function toggleCondFolderCheck(folder, isChecked) {
+      if (isChecked) {
+        if (!state.tempNewConditionFolders.includes(folder)) state.tempNewConditionFolders.push(folder);
+      } else {
+        state.tempNewConditionFolders = state.tempNewConditionFolders.filter(f => f !== folder);
+      }
+      updateCondFolderLabel();
+    }
+
+    function updateCondFolderLabel() {
+      const el = document.getElementById('lbl-cond-folders-selected');
+      if (el) {
+        el.innerText = state.tempNewConditionFolders.length === 0 
+          ? 'Chưa chọn thư mục' 
+          : state.tempNewConditionFolders.join(', ');
+      }
     }
 
     function openNewConditionForm(editId = null) {
@@ -642,12 +709,14 @@
         const cond = cls.config.unlockConditions[editId];
         document.getElementById('input-new-cond-name').value = cond.name;
         document.getElementById('select-new-cond-type').value = cond.type;
-        document.getElementById('select-new-cond-folder').value = cond.folder;
+        state.tempNewConditionFolders = [...(cond.folders || [cond.folder || 'hoacap2'])];
       } else {
         title.innerText = 'Nhập Điều Kiện Mới';
         document.getElementById('input-new-cond-name').value = '';
         document.getElementById('select-new-cond-type').value = 'rank_top1';
+        state.tempNewConditionFolders = ['hoacap2'];
       }
+      renderCondFolderDropdownList();
     }
 
     function cancelNewCondition() {
@@ -659,18 +728,25 @@
       const cls = state.classesData[state.activeClass];
       const name = document.getElementById('input-new-cond-name').value.trim();
       const type = document.getElementById('select-new-cond-type').value;
-      const folder = document.getElementById('select-new-cond-folder').value;
 
       if (!name) return alert('Vui lòng nhập tên điều kiện!');
+      if (state.tempNewConditionFolders.length === 0) return alert('Vui lòng chọn ít nhất 1 thư mục liên kết!');
 
       const id = state.editingConditionId || ('cond_' + Date.now().toString(36));
-      cls.config.unlockConditions[id] = { id, name, type, folder };
+      cls.config.unlockConditions[id] = { 
+        id, 
+        name, 
+        type, 
+        folders: [...state.tempNewConditionFolders] 
+      };
+
       state.currentSelectedConditionId = id;
       state.editingConditionId = null;
 
       document.getElementById('new-condition-box').classList.add('hidden');
       renderConditionsMenu();
       saveStateToLocal();
+      renderMultiFolderView();
       alert('Đã lưu điều kiện mở khóa cho lớp!');
     }
 
@@ -683,29 +759,41 @@
       if (!state.currentSelectedConditionId) return alert('Chưa chọn điều kiện nào để xóa!');
       const cls = state.classesData[state.activeClass];
       const cond = cls.config.unlockConditions[state.currentSelectedConditionId];
-      if (confirm(`Xóa điều kiện [${cond.name}]? Thư mục liên kết [${cond.folder}] cũng sẽ xóa theo.`)) {
+      if (confirm(`Xóa điều kiện [${cond.name}]? Các thư mục liên kết cũng sẽ xóa theo.`)) {
         delete cls.config.unlockConditions[state.currentSelectedConditionId];
         state.currentSelectedConditionId = '';
         renderConditionsMenu();
         saveStateToLocal();
+        renderMultiFolderView();
       }
     }
 
-    // ================= 5. HIỂN THỊ PHẦN B =================
+    // ================= 4. HIỂN THỊ PHẦN B =================
+    // Tự động thu thập tất cả thư mục đang được các Nút hoặc Điều kiện mở cấp độ chọn
+    function getActiveVisibleFolders() {
+      const cls = state.classesData[state.activeClass];
+      const folderSet = new Set();
+
+      if (cls && cls.config && cls.config.buttons) {
+        cls.config.buttons.forEach(b => {
+          (b.targetFolders || []).forEach(f => folderSet.add(f));
+        });
+      }
+
+      if (state.currentSelectedConditionId && cls.config.unlockConditions[state.currentSelectedConditionId]) {
+        const cond = cls.config.unlockConditions[state.currentSelectedConditionId];
+        (cond.folders || []).forEach(f => folderSet.add(f));
+      }
+
+      // Nếu chưa có thư mục nào được gán thì mặc định hiển thị hoacap1
+      if (folderSet.size === 0) folderSet.add('hoacap1');
+
+      return Array.from(folderSet);
+    }
+
     function renderMultiFolderView() {
       const area = document.getElementById('multi-folder-display-area');
-      const folders = state.selectedFoldersForView;
-
-      if (folders.length === 0) {
-        area.innerHTML = `
-          <div class="py-20 text-center text-slate-400 bg-white rounded-2xl border border-dashed border-slate-300">
-            <i class="fa-regular fa-folder-open text-3xl mb-1"></i>
-            <p class="text-xs font-bold">Hãy chọn ít nhất 1 thư mục ở Phần A để xem ảnh.</p>
-          </div>
-        `;
-        document.getElementById('total-visible-images-count').innerText = '(0 ảnh)';
-        return;
-      }
+      const folders = getActiveVisibleFolders();
 
       let totalCount = 0;
       area.innerHTML = folders.map(f => {
@@ -767,7 +855,8 @@
     }
 
     function selectAllVisibleImages(isChecked) {
-      state.selectedFoldersForView.forEach(f => {
+      const folders = getActiveVisibleFolders();
+      folders.forEach(f => {
         const items = state.cachedAssets[f] || [];
         items.forEach(i => {
           if (isChecked) state.checkedImages.add(i.rawUrl);
@@ -782,7 +871,7 @@
       document.getElementById('lbl-selected-img-count').innerText = `Đã chọn: ${state.checkedImages.size}`;
     }
 
-    // ================= 6. QUÉT ASSETS TỪ GITHUB API =================
+    // ================= 5. QUÉT ASSETS TỪ GITHUB API =================
     async function syncAllFromGitHub() {
       const icon = document.getElementById('sync-icon');
       icon.classList.add('fa-spin');
@@ -810,7 +899,7 @@
       renderMultiFolderView();
     }
 
-    // ================= 7. QUẢN LÝ CSV & XẾP HẠNG =================
+    // ================= 6. QUẢN LÝ CSV & XẾP HẠNG =================
     function generatePasswordFromNameAndSTT(fullName, stt) {
       if (!fullName) return `hs${stt}`;
       let clean = fullName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd');
@@ -909,7 +998,7 @@
       alert(`Đã lưu kết quả thi đua tuần cho Lớp ${state.activeClass}!`);
     }
 
-    // ================= LƯU CẤU HÌNH LỚP HIỆN TẠI =================
+    // ================= 7. LƯU CẤU HÌNH LỚP HIỆN TẠI =================
     function saveAndApplyCurrentClass() {
       const cls = state.classesData[state.activeClass];
       cls.config.bgGlobal = document.getElementById('select-bg-global').value;
