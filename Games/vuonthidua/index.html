@@ -53,14 +53,14 @@
       filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35));
     }
 
-    /* TOOLTIP POPUP KHÓA TINH TẾ */
+    /* TOOLTIP POPUP TINH TẾ CHO VẬT PHẨM BỊ KHÓA */
     .lock-tooltip {
       visibility: hidden;
       opacity: 0;
       transition: opacity 0.2s ease, transform 0.2s ease;
-      transform: translate(-50%, 8px);
+      transform: translate(-50%, 6px);
       pointer-events: none;
-      z-index: 70;
+      z-index: 90;
     }
     .group:hover .lock-tooltip {
       visibility: visible;
@@ -124,14 +124,21 @@
     </div>
 
     <div class="flex items-center gap-2.5">
+      <!-- NÚT BẬT / TẮT ÂM THANH NỀN -->
+      <button onclick="toggleAudioMute()" id="btn-audio-toggle" class="px-2 py-1 text-xs font-bold rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition flex items-center gap-1" title="Bật/Tắt Nhạc Nền">
+        <i class="fa-solid fa-volume-high" id="icon-audio-mute"></i>
+      </button>
+
       <button onclick="clearPlacedGardenFlowers()" class="px-2.5 py-1 text-[10px] md:text-[11px] font-bold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition flex items-center gap-1 border border-rose-200">
         <i class="fa-solid fa-trash-can"></i> Dọn Hoa
       </button>
+
       <div class="text-[11px] md:text-xs text-slate-700 font-semibold border-l pl-2.5 border-slate-300 flex items-center gap-1.5">
         <span id="hdr-student-name">Đang tải...</span>
         <span class="text-[9px] md:text-[10px] px-1.5 py-0.5 rounded font-black uppercase" id="hdr-role-badge">Tổ trưởng</span>
         <span class="text-[9px] md:text-[10px] px-1.5 py-0.5 rounded font-black uppercase text-amber-900 bg-amber-100" id="hdr-rank-badge">Hạng 1 ★</span>
       </div>
+
       <button onclick="requestFullScreenLandscape()" class="text-slate-500 hover:text-emerald-700 text-xs p-1" title="Toàn màn hình">
         <i class="fa-solid fa-expand"></i>
       </button>
@@ -202,7 +209,11 @@
           { id: 'slot_4', name: 'Khu đất 4', teamId: 4, corners: [{ x: 40, y: 52 }, { x: 56, y: 52 }, { x: 57, y: 73 }, { x: 40, y: 73 }], soilImage: null }
         ],
         textOverlays: [{ id: 'txt_default', content: 'Lớp 11TA3', x: 48, y: 16, fontSize: 17 }],
-        assetScales: {}
+        assetScales: {},
+        audioSettings: {
+          bgm: { url: '', selectedFile: '', volume: 50, autoPlay: true },
+          sfx: []
+        }
       },
       students: {
         '11TA3stt1_To1': { username: '11TA3stt1_To1', name: 'Học sinh 1', stt: '1', team: 1, class: '11TA3', password: 'hs1', role: 'TT1', isQuestDone: true },
@@ -228,6 +239,11 @@
     let currentActiveButtonKey = 'nutchunhat.png';
     let draggedItemData = null;
 
+    // QUẢN LÝ AUDIO
+    let bgmAudio = null;
+    let isBgmPlaying = false;
+
+    // ================= 1. NẠP DỮ LIỆU ĐỒNG BỘ THỜI GIAN THỰC TỪ ADMIN =================
     function loadAdminSystemData() {
       const rawClasses = localStorage.getItem('garden_system_classes_v14') || 
                          localStorage.getItem('garden_system_classes_v13') || 
@@ -249,6 +265,9 @@
 
       currentClass = globalClassesData[activeClassName] || FALLBACK_CLASS_DATA;
       if (!currentClass.config.assetScales) currentClass.config.assetScales = {};
+      if (!currentClass.config.audioSettings) {
+        currentClass.config.audioSettings = { bgm: { url: '', selectedFile: '', volume: 50, autoPlay: true }, sfx: [] };
+      }
 
       const rawAssets = localStorage.getItem('garden_auto_scanned_assets_v5') || 
                         localStorage.getItem('garden_auto_scanned_assets_v4');
@@ -257,6 +276,7 @@
       }
     }
 
+    // ================= 2. QUẢN LÝ XOAY NGANG & TOÀN MÀN HÌNH =================
     function requestFullScreenLandscape() {
       const docEl = document.documentElement;
       if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
@@ -267,6 +287,7 @@
       }
     }
 
+    // ================= 3. ĐĂNG NHẬP & PHÂN QUYỀN HỌC SINH =================
     function handleStudentLogin() {
       const user = document.getElementById('input-student-user').value.trim();
       const pass = document.getElementById('input-student-pass').value.trim();
@@ -278,6 +299,7 @@
         return;
       }
 
+      // ĐẶC QUYỀN: Tài khoản hocsinh được test mọi tính năng
       if (user.toLowerCase() === 'hocsinh') {
         currentStudent = {
           username: 'hocsinh',
@@ -290,6 +312,7 @@
         sessionStorage.setItem('current_garden_student', JSON.stringify(currentStudent));
         document.getElementById('student-login-modal').classList.add('hidden');
         applyClassConfiguration();
+        initBackgroundMusic();
         return;
       }
 
@@ -329,6 +352,7 @@
       sessionStorage.setItem('current_garden_student', JSON.stringify(currentStudent));
       document.getElementById('student-login-modal').classList.add('hidden');
       applyClassConfiguration();
+      initBackgroundMusic();
     }
 
     function handleStudentLogout() {
@@ -355,6 +379,7 @@
       };
     }
 
+    // ================= 4. ÁP DỤNG CẤU HÌNH GIAO DIỆN & VÙNG ĐẤT =================
     function applyClassConfiguration() {
       const cfg = currentClass.config;
 
@@ -438,14 +463,14 @@
             return `
               <g id="plot-group-${slot.id}" class="plot-group-hover"
                  ondragover="handleDragOver(event)" 
-                 ondrop="handleDropOnPlot(event, '${slot.id}', ${slot.teamId})">
+                 ondrop="handleDropOnPlot(event, '${slot.id}',${slot.teamId})">
                 
                 <polygon points="${ptsPixel}" 
                          fill="${isMyTeamPlot ? 'rgba(180, 83, 9, 0.3)' : 'rgba(16, 185, 129, 0.22)'}" 
                          stroke="${isMyTeamPlot ? '#f59e0b' : '#10b981'}" 
                          stroke-width="${isMyTeamPlot ? '3.5' : '2'}" 
                          stroke-dasharray="${isMyTeamPlot ? 'none' : '6,4'}">
-                  <title>${slot.name} ${isMyTeamPlot ? '(Khu đất của tổ bạn)' : ''}</title>
+                  <title>${slot.name}${isMyTeamPlot ? '(Khu đất của tổ bạn)' : ''}</title>
                 </polygon>
 
                 ${currentSoilImg ? `
@@ -472,7 +497,7 @@
                         text-anchor="middle" dominant-baseline="central" 
                         fill="${isMyTeamPlot ? '#fef08a' : '#fef3c7'}" 
                         font-size="11" font-weight="900" font-family="sans-serif">
-                    🌾 ${slot.name} ${isMyTeamPlot ? '★' : ''}
+                    🌾 ${slot.name}${isMyTeamPlot ? '★' : ''}
                   </text>
                 </g>
               </g>
@@ -520,6 +545,8 @@
 
     function switchButtonCategory(iconFile) {
       currentActiveButtonKey = iconFile;
+      playSfx('tab_click');
+
       const mappings = currentClass.config.buttonMappings || {};
       const targetFolders = mappings[iconFile]?.targetFolders || ['hoacap1'];
 
@@ -540,33 +567,31 @@
     // KIỂM TRA ĐIỀU KIỆN MỞ KHÓA CHO TỪNG FILE ẢNH & LẤY THÔNG BÁO TOOLTIP
     // =========================================================================
     function checkImageLockStatus(fileName, folderName) {
-      // Tài khoản tester hocsinh: xem và thử nghiệm như bình thường
       if (currentStudent.username === 'hocsinh') {
         return { isLocked: false, lockConditionText: '' };
       }
 
       const conditions = currentClass.config.unlockConditions || {};
-      const cleanFileName = decodeURIComponent(fileName || '').trim().toLowerCase();
+      const cleanFileName = decodeURIComponent(fileName || '').split('/').pop().trim().toLowerCase();
 
       for (let cId in conditions) {
         const cond = conditions[cId];
         const folders = cond.folders || (cond.folder ? [cond.folder] : []);
-        const lockedList = (cond.selectedImages || []).map(f => decodeURIComponent(f).trim().toLowerCase());
+        const lockedList = (cond.selectedImages || []).map(f => decodeURIComponent(f).split('/').pop().trim().toLowerCase());
 
-        // Nếu ảnh nằm trong danh sách ảnh bị khóa của điều kiện này
-        // HOẶC điều kiện quản lý cả thư mục mà chưa chọn riêng file nào
-        const isMatched = (lockedList.length > 0 && lockedList.includes(cleanFileName)) ||
-                          (lockedList.length === 0 && folders.includes(folderName));
+        // Kiểm tra xem file này có nằm trong danh sách khóa của điều kiện này không
+        const isTargetLocked = (lockedList.length > 0 && lockedList.includes(cleanFileName)) ||
+                               (lockedList.length === 0 && folders.includes(folderName));
 
-        if (isMatched) {
-          // 1. Kiểm tra điều kiện Hạng 1 tuần
+        if (isTargetLocked) {
+          // Thẩm định điều kiện Hạng 1 tuần
           if (cond.type === 'rank_top1') {
             const myRank = currentClass.weeklyRanking ? (currentClass.weeklyRanking[currentStudent.team] || 1) : 1;
             if (myRank !== 1) {
               return { isLocked: true, lockConditionText: cond.name || 'Đạt Hạng 1 thi đua tuần' };
             }
           }
-          // 2. Kiểm tra điều kiện hoàn thành nhiệm vụ
+          // Thẩm định điều kiện hoàn thành nhiệm vụ
           if (cond.type === 'quest_done') {
             if (!currentStudent.isQuestDone) {
               return { isLocked: true, lockConditionText: cond.name || 'Hoàn thành nhiệm vụ ngày' };
@@ -586,14 +611,14 @@
       let combinedItems = [];
 
       const currentMapping = currentClass.config.buttonMappings[currentActiveButtonKey];
-      const allowedImageNames = (currentMapping?.selectedImages || []).map(n => decodeURIComponent(n).trim().toLowerCase());
+      const allowedImageNames = (currentMapping?.selectedImages || []).map(n => decodeURIComponent(n).split('/').pop().trim().toLowerCase());
 
       folderList.forEach(folder => {
         const files = cachedScannedAssets[folder] || [];
         const itemsToUse = files.length > 0 ? files : getFallbackFilesForFolder(folder);
 
         itemsToUse.forEach(item => {
-          const itemCleanName = decodeURIComponent(item.fileName || '').trim().toLowerCase();
+          const itemCleanName = decodeURIComponent(item.fileName || '').split('/').pop().trim().toLowerCase();
           
           const isSelectedByAdmin = allowedImageNames.length === 0 || 
                                     allowedImageNames.includes(itemCleanName) ||
@@ -621,20 +646,21 @@
       tray.innerHTML = combinedItems.map((item) => {
         const rawUrl = item.rawUrl || `${GITHUB_RAW_BASE}${item.localPath}`;
 
-        // ẢNH BỊ KHÓA: MỜ 50%, CÓ Ổ KHÓA GÓC VÀ TOOLTIP MINI HIỆN ĐIỀU KIỆN KHI RÀ CHUỘT
+        // ẢNH BỊ KHÓA: MỜ 50%, CÓ Ổ KHÓA GÓC VÀ TOOLTIP MINI HIỆN ĐIỀU KIỆN
         if (item.isLocked) {
           return `
-            <div class="group relative rounded-xl border border-white/10 bg-black/25 p-1.5 flex items-center justify-center h-16 md:h-20 transition select-none cursor-not-allowed">
+            <div onclick="handleLockedItemClick('${item.lockReason}')" 
+                 class="group relative rounded-xl border border-white/10 bg-black/25 p-1.5 flex items-center justify-center h-16 md:h-20 transition select-none cursor-not-allowed">
               
               <!-- ẢNH MỜ 50% -->
               <img src="${rawUrl}" class="max-h-full max-w-full object-contain opacity-50 filter grayscale-[40%] pointer-events-none select-none">
               
-              <!-- Ổ KHÓA GÓC TRÊN-PHẢI NHỎ GỌN TINH TẾ -->
+              <!-- Ổ KHÓA GÓC TRÊN-PHẢI NHỎ GỌN -->
               <div class="absolute top-1 right-1 w-4 h-4 rounded-full bg-amber-500/95 text-white flex items-center justify-center text-[9px] shadow-sm">
                 <i class="fa-solid fa-lock"></i>
               </div>
 
-              <!-- POPUP TOOLTIP MINI THÔNG BÁO ĐIỀU KIỆN TINH TẾ -->
+              <!-- TOOLTIP MINI HIỂN THỊ DÒNG ĐIỀU KIỆN ADMIN ĐÃ GÕ -->
               <div class="lock-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900/95 text-amber-200 border border-amber-400/40 text-[9px] font-bold rounded-lg whitespace-nowrap shadow-xl">
                 <span>🔒 ${item.lockReason}</span>
               </div>
@@ -642,7 +668,7 @@
           `;
         }
 
-        // ẢNH MỞ KHÓA HOÀN TOÀN: CHO PHÉP KÉO THẢ HOẶC CHẠM ĐẶT
+        // ẢNH MỞ KHÓA HOÀN TOÀN
         return `
           <div draggable="true" 
                ondragstart="handleDragStart(event, '${rawUrl}', '${item.fileName}', ${item.isSoilItem})"
@@ -653,6 +679,11 @@
           </div>
         `;
       }).join('');
+    }
+
+    function handleLockedItemClick(lockReason) {
+      playSfx('error_locked');
+      alert(`Vật phẩm đang khóa!\nĐiều kiện mở khóa: ${lockReason}`);
     }
 
     function getFallbackFilesForFolder(folder) {
@@ -704,11 +735,13 @@
 
       const perm = checkPermissionOnPlot(teamId);
       if (!perm.allowed) {
+        playSfx('error_locked');
         alert(perm.msg);
         return;
       }
 
       if (draggedItemData.isSoilItem) {
+        playSfx('plant_pop');
         applySoilToSlot(plotId, draggedItemData.rawUrl);
         return;
       }
@@ -724,10 +757,17 @@
       const perm = checkPermissionOnPlot(myPlot.teamId);
 
       if (isSoilItem) {
-        if (!perm.allowed) return alert(perm.msg);
+        if (!perm.allowed) {
+          playSfx('error_locked');
+          return alert(perm.msg);
+        }
+        playSfx('plant_pop');
         applySoilToSlot(myPlot.id, rawUrl);
       } else {
-        if (!perm.allowed) return alert(perm.msg);
+        if (!perm.allowed) {
+          playSfx('error_locked');
+          return alert(perm.msg);
+        }
         const sectionA = document.getElementById('section-a');
         spawnFlowerOnCanvas(rawUrl, fileName, sectionA.clientWidth / 2, sectionA.clientHeight / 2, myPlot.teamId);
       }
@@ -749,6 +789,8 @@
       placedFlowerCount++;
       const uniqueId = 'placed_flower_' + placedFlowerCount;
 
+      playSfx('plant_pop');
+
       const customScale = currentClass.config.assetScales[fileName] || 40;
       const scaleMultiplier = customScale / 100;
 
@@ -767,7 +809,7 @@
       el.innerHTML = `
         <div class="relative w-full h-full group flex items-center justify-center">
           <img src="${rawUrl}" class="max-h-full max-w-full object-contain pointer-events-none select-none filter drop-shadow">
-          <button onclick="removePlacedFlower('${uniqueId}', ${teamId || 0}, event)" class="absolute -top-2 -right-2 w-4 h-4 md:w-5 md:h-5 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[8px] font-bold shadow hidden group-hover:flex items-center justify-center">
+          <button onclick="removePlacedFlower('${uniqueId}', ${teamId || 0}, event)" class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[8px] font-bold shadow hidden group-hover:flex items-center justify-center">
             ✕
           </button>
         </div>
@@ -785,6 +827,7 @@
         if (teamId) {
           const perm = checkPermissionOnPlot(teamId);
           if (!perm.allowed) {
+            playSfx('error_locked');
             alert(perm.msg);
             return;
           }
@@ -834,19 +877,110 @@
       event.stopPropagation();
       if (teamId) {
         const perm = checkPermissionOnPlot(teamId);
-        if (!perm.allowed) return alert(perm.msg);
+        if (!perm.allowed) {
+          playSfx('error_locked');
+          return alert(perm.msg);
+        }
       }
+      playSfx('delete_item');
       const el = document.getElementById(id);
       if (el) el.remove();
     }
 
     function clearPlacedGardenFlowers() {
       if (currentStudent.role === 'MEMBER') {
+        playSfx('error_locked');
         return alert('Chỉ Tổ trưởng mới có quyền dọn dẹp khu vườn!');
       }
       if (confirm('Dọn dẹp toàn bộ các bông hoa đã cắm trên sân?')) {
+        playSfx('delete_item');
         document.getElementById('drop-flowers-layer').innerHTML = '';
         document.getElementById('empty-hint').style.display = 'flex';
+      }
+    }
+
+    // =========================================================================
+    // HỆ THỐNG ÂM THANH: NHẠC NỀN & HIỆU ỨNG TƯƠNG TÁC
+    // =========================================================================
+    function getAudioResolvedUrl(audioObj) {
+      if (!audioObj) return '';
+      let url = audioObj.url || (audioObj.selectedFile ? `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${audioObj.selectedFile}` : '');
+      if (url.includes('drive.google.com/file/d/')) {
+        const idMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (idMatch) url = `https://drive.google.com/uc?export=download&id=${idMatch[1]}`;
+      }
+      return url;
+    }
+
+    function initBackgroundMusic() {
+      const bgmCfg = currentClass.config.audioSettings?.bgm;
+      if (!bgmCfg) return;
+
+      const bgmUrl = getAudioResolvedUrl(bgmCfg);
+      if (!bgmUrl) return;
+
+      if (!bgmAudio) {
+        bgmAudio = new Audio(bgmUrl);
+        bgmAudio.loop = true;
+      } else {
+        bgmAudio.src = bgmUrl;
+      }
+
+      bgmAudio.volume = (bgmCfg.volume || 50) / 100;
+
+      if (bgmCfg.autoPlay) {
+        bgmAudio.play().then(() => {
+          isBgmPlaying = true;
+          updateAudioIcon();
+        }).catch(() => {
+          // Trình duyệt chặn autoplay thì chờ người dùng click tương tác đầu tiên
+          const startPlayOnUserAction = () => {
+            bgmAudio.play().then(() => {
+              isBgmPlaying = true;
+              updateAudioIcon();
+            });
+            window.removeEventListener('click', startPlayOnUserAction);
+          };
+          window.addEventListener('click', startPlayOnUserAction);
+        });
+      }
+    }
+
+    function toggleAudioMute() {
+      if (!bgmAudio) {
+        initBackgroundMusic();
+        return;
+      }
+      if (isBgmPlaying) {
+        bgmAudio.pause();
+        isBgmPlaying = false;
+      } else {
+        bgmAudio.play().then(() => { isBgmPlaying = true; });
+      }
+      updateAudioIcon();
+    }
+
+    function updateAudioIcon() {
+      const icon = document.getElementById('icon-audio-mute');
+      if (isBgmPlaying) {
+        icon.className = 'fa-solid fa-volume-high text-indigo-700';
+      } else {
+        icon.className = 'fa-solid fa-volume-xmark text-slate-400';
+      }
+    }
+
+    function playSfx(actionKey) {
+      const sfxList = currentClass.config.audioSettings?.sfx || [];
+      const match = sfxList.find(s => s.id === actionKey);
+      if (!match) return;
+
+      const url = getAudioResolvedUrl(match);
+      if (url) {
+        try {
+          const sfx = new Audio(url);
+          sfx.volume = 0.7;
+          sfx.play().catch(() => {});
+        } catch (e) {}
       }
     }
 
@@ -872,6 +1006,7 @@
       renderTextOverlaysOnCanvas();
     });
 
+    // KHỞI ĐỘNG HỆ THỐNG
     window.addEventListener('DOMContentLoaded', () => {
       loadAdminSystemData();
 
@@ -881,6 +1016,7 @@
           currentStudent = JSON.parse(savedStudent);
           document.getElementById('student-login-modal').classList.add('hidden');
           applyClassConfiguration();
+          initBackgroundMusic();
           return;
         } catch (e) {}
       }
