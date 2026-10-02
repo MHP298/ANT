@@ -53,7 +53,6 @@
       filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35));
     }
 
-    /* TOOLTIP POPUP TINH TẾ CHO VẬT PHẨM BỊ KHÓA */
     .lock-tooltip {
       visibility: hidden;
       opacity: 0;
@@ -152,10 +151,10 @@
     <section id="section-a" class="w-3/4 h-full relative bg-slate-950 overflow-hidden flex items-center justify-center border-r-2 border-black/20" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
       <img id="game-bg-image" src="assets/nengame/vuonlop.jpg" alt="Nền Game" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/vuonlop.jpg'" class="absolute inset-0 w-full h-full object-fill pointer-events-none select-none transition-all duration-300">
       
-      <!-- LỚP CHỨA CÁC VÙNG ĐẤT 3D SVG BÁM KHÍT 4 GÓC NEO -->
+      <!-- LỚP CHỨA CÁC VÙNG ĐẤT 3D SVG VÀ ẢNH MẪU -->
       <div id="perspective-plots-layer" class="absolute inset-0 w-full h-full pointer-events-auto z-10"></div>
       
-      <!-- LỚP CHỨA CÁC VÙNG CHỮ TỰ NHIÊN HÒA HỢP VỚI BẢNG GỖ -->
+      <!-- LỚP CHỨA CÁC VÙNG CHỮ TỰ NHIÊN -->
       <div id="text-overlays-layer" class="absolute inset-0 w-full h-full pointer-events-none z-15"></div>
       
       <!-- LỚP CHỨA HOA ĐÃ CẮM -->
@@ -288,7 +287,7 @@
       }
     }
 
-    // ================= 2. QUẢN LÝ XOAY NGANG & TOÀN MÀN HÌNH =================
+    // ================= 2. XOAY NGANG & TOÀN MÀN HÌNH =================
     function requestFullScreenLandscape() {
       const docEl = document.documentElement;
       if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
@@ -311,7 +310,6 @@
         return;
       }
 
-      // ĐẶC QUYỀN TOÀN DIỆN CHO TÀI KHOẢN HOCSINH
       if (user.toLowerCase() === 'hocsinh') {
         currentStudent = {
           username: 'hocsinh',
@@ -435,7 +433,7 @@
       switchButtonCategory(initialKey);
     }
 
-    // DỰNG VÙNG ĐẤT SVG: TỰ BÙ VIỀN TRONG SUỐT ĐỂ HÀNG RÀO ÔM SÁT 4 GÓC CAM
+    // DỰNG VÙNG ĐẤT SVG & ẨN/HIỆN KHUNG CAM DỰA TRÊN VIỆC CÓ ĐẤT HAY KHÔNG
     function renderPerspectivePlotsOnCanvas() {
       const container = document.getElementById('perspective-plots-layer');
       const slots = currentClass.config.plotSlots || [];
@@ -445,69 +443,47 @@
 
       container.innerHTML = `
         <svg class="absolute inset-0 w-full h-full pointer-events-auto" style="overflow: visible;" viewBox="0 0 ${cW} ${cH}">
-          <defs>
-            ${slots.map(slot => {
-              const pts = slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ');
-              return `
-                <clipPath id="clip-slot-${slot.id}">
-                  <polygon points="${pts}" />
-                </clipPath>
-              `;
-            }).join('')}
-          </defs>
-
           ${slots.map(slot => {
             const ptsPixel = slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ');
             const xs = slot.corners.map(c => (c.x / 100) * cW);
             const ys = slot.corners.map(c => (c.y / 100) * cH);
-            const minX = Math.min(...xs);
-            const maxX = Math.max(...xs);
-            const minY = Math.min(...ys);
-            const maxY = Math.max(...ys);
-            const boxW = maxX - minX;
-            const boxH = maxY - minY;
-
-            // Bù viền trong suốt của ảnh PNG: mở rộng 8% bề ngang và 10% bề dọc để hàng rào gỗ dính sát vào 4 góc cam
-            const expandX = boxW * 0.08;
-            const expandY = boxH * 0.10;
-            const renderX = minX - expandX / 2;
-            const renderY = minY - expandY / 2;
-            const renderW = boxW + expandX;
-            const renderH = boxH + expandY;
+            const minX = Math.min(...xs), maxX = Math.max(...xs);
+            const minY = Math.min(...ys), maxY = Math.max(...ys);
+            const boxW = maxX - minX, boxH = maxY - minY;
 
             const centerX = (slot.corners[0].x + slot.corners[1].x + slot.corners[2].x + slot.corners[3].x) / 4;
             const centerY = (slot.corners[0].y + slot.corners[1].y + slot.corners[2].y + slot.corners[3].y) / 4;
             
             const isMyTeamPlot = (currentStudent.role === 'SUPER_TESTER' || currentStudent.username === 'hocsinh') ? true : (slot.teamId === currentStudent.team);
-            const currentSoilImg = slot.soilImage || (slot.teamId === 1 ? 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/khudatrieng_nau.png' : null);
+            const currentSoilImg = slot.soilImage || null;
+
+            // KHI ĐÃ CÓ ĐẤT TRÊN Ô -> KHUNG CAM TỰ ĐỘNG ẨN ĐI (OPACITY = 0), KHI CHƯA CÓ -> HIỆN RÕ
+            const frameOpacity = currentSoilImg ? "0" : "1";
 
             return `
               <g id="plot-group-${slot.id}" class="plot-group-hover"
                  data-plot-id="${slot.id}" data-team-id="${slot.teamId}"
                  ondragover="handleDragOver(event)" 
-                 ondrop="handleDropOnPlot(event, '${slot.id}',${slot.teamId})">
+                 ondrop="handleDropOnPlot(event, '${slot.id}', ${slot.teamId})">
                 
+                <!-- KHUNG VIỀN ĐA GIÁC CAM / XANH -->
                 <polygon points="${ptsPixel}" 
-                         fill="${isMyTeamPlot ? 'rgba(180, 83, 9, 0.3)' : 'rgba(16, 185, 129, 0.22)'}" 
+                         fill="${isMyTeamPlot ? 'rgba(180, 83, 9, 0.25)' : 'rgba(16, 185, 129, 0.2)'}" 
                          stroke="${isMyTeamPlot ? '#f59e0b' : '#10b981'}" 
                          stroke-width="${isMyTeamPlot ? '3.5' : '2'}" 
-                         stroke-dasharray="${isMyTeamPlot ? 'none' : '6,4'}">
+                         stroke-dasharray="${isMyTeamPlot ? 'none' : '6,4'}"
+                         opacity="${frameOpacity}"
+                         style="transition: opacity 0.2s ease;">
                   <title>${slot.name}</title>
                 </polygon>
 
+                <!-- ẢNH KHU ĐẤT MẪU ĐÃ CĂN CHỈNH TỪ ADMIN -->
                 ${currentSoilImg ? `
                   <image href="${currentSoilImg}" 
-                         x="${renderX}" y="${renderY}" width="${renderW}" height="${renderH}" 
+                         x="${minX}" y="${minY}" width="${boxW}" height="${boxH}" 
                          preserveAspectRatio="none"
-                         clip-path="url(#clip-slot-${slot.id})"
                          opacity="0.98" />
                 ` : ''}
-
-                <polygon points="${ptsPixel}" 
-                         fill="none" 
-                         stroke="${isMyTeamPlot ? '#f59e0b' : '#10b981'}" 
-                         stroke-width="${isMyTeamPlot ? '3.5' : '2'}" 
-                         stroke-dasharray="${isMyTeamPlot ? 'none' : '6,4'}" />
 
                 <g style="pointer-events: none;">
                   <rect x="${(centerX / 100) * cW}" y="${(centerY / 100) * cH}" width="110" height="26" rx="13" 
@@ -519,7 +495,7 @@
                         text-anchor="middle" dominant-baseline="central" 
                         fill="${isMyTeamPlot ? '#fef08a' : '#fef3c7'}" 
                         font-size="11" font-weight="900" font-family="sans-serif">
-                    🌾 ${slot.name}${isMyTeamPlot ? '★' : ''}
+                    🌾 ${slot.name} ${isMyTeamPlot ? '★' : ''}
                   </text>
                 </g>
               </g>
@@ -597,7 +573,6 @@
       const currentMapping = currentClass.config.buttonMappings[currentActiveButtonKey] || {};
       const itemLocks = currentMapping.itemLockLevels || {};
 
-      // Lấy cấp độ khóa gán riêng cho ảnh này (0 là không khóa)
       let assignedLevel = 0;
       for (let k in itemLocks) {
         if (decodeURIComponent(k).split('/').pop().trim().toLowerCase() === cleanFileName) {
@@ -610,7 +585,6 @@
         return { isLocked: false, lockConditionText: '' };
       }
 
-      // Tra cứu xem Cấp độ này ứng với Điều kiện nào trong unlockConditions
       const conditions = currentClass.config.unlockConditions || {};
       let matchedCond = null;
       for (let cId in conditions) {
@@ -625,32 +599,23 @@
       if (matchedCond) {
         if (matchedCond.type === 'rank_top1') {
           const myRank = currentClass.weeklyRanking ? (currentClass.weeklyRanking[currentStudent.team] || 1) : 1;
-          if (myRank !== 1) {
-            return { isLocked: true, lockConditionText: conditionName };
-          }
+          if (myRank !== 1) return { isLocked: true, lockConditionText: conditionName };
         }
         if (matchedCond.type === 'quest_done') {
-          if (!currentStudent.isQuestDone) {
-            return { isLocked: true, lockConditionText: conditionName };
-          }
+          if (!currentStudent.isQuestDone) return { isLocked: true, lockConditionText: conditionName };
         }
         if (matchedCond.type === 'always_open') {
           return { isLocked: false, lockConditionText: '' };
         }
       } else {
-        // Chưa cấu hình điều kiện cụ thể cho cấp này -> tạm khóa theo thứ hạng
         const myRank = currentClass.weeklyRanking ? (currentClass.weeklyRanking[currentStudent.team] || 1) : 1;
-        if (myRank !== 1) {
-          return { isLocked: true, lockConditionText: `Đạt Hạng 1 tuần (Cấp ${assignedLevel})` };
-        }
+        if (myRank !== 1) return { isLocked: true, lockConditionText: `Đạt Hạng 1 tuần (Cấp ${assignedLevel})` };
       }
 
       return { isLocked: false, lockConditionText: '' };
     }
 
-    // =========================================================================
-    // HIỂN THỊ KHAY VẬT PHẨM: MỜ 50%, ICON 🔒 & TOOLTIP MINI TINH TẾ
-    // =========================================================================
+    // ================= HIỂN THỊ KHAY VẬT PHẨM: MỜ 50%, ICON 🔒 & TOOLTIP MINI =================
     function renderTrayItemsFromFolders(folderList) {
       const tray = document.getElementById('tray-grid');
       let combinedItems = [];
@@ -691,21 +656,14 @@
       tray.innerHTML = combinedItems.map((item) => {
         const rawUrl = item.rawUrl || `${GITHUB_RAW_BASE}${item.localPath}`;
 
-        // VẬT PHẨM BỊ KHÓA: MỜ 50%, GẮN Ổ KHÓA 🔒 & TOOLTIP MINI TINH TẾ
         if (item.isLocked) {
           return `
             <div onclick="handleLockedItemClick('${item.lockReason}')" 
                  class="group relative rounded-xl border border-white/10 bg-black/30 p-1.5 flex items-center justify-center h-16 md:h-20 transition select-none cursor-not-allowed">
-              
-              <!-- ẢNH MỜ 50% -->
               <img src="${rawUrl}" class="max-h-full max-w-full object-contain opacity-50 filter grayscale-[40%] pointer-events-none select-none">
-              
-              <!-- ICON Ổ KHÓA GÓC PHẢI NHỎ GỌN -->
               <div class="absolute top-1 right-1 w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[9px] shadow-sm">
                 <i class="fa-solid fa-lock"></i>
               </div>
-
-              <!-- POPUP TOOLTIP MINI CHỨA ĐÚNG DÒNG ĐIỀU KIỆN TỪ ADMIN -->
               <div class="lock-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900/95 text-amber-200 border border-amber-400/50 text-[9px] font-bold rounded-lg whitespace-nowrap shadow-xl">
                 <span>🔒 ${item.lockReason}</span>
               </div>
@@ -713,7 +671,6 @@
           `;
         }
 
-        // VẬT PHẨM ĐÃ MỞ KHÓA HOÀN TOÀN
         return `
           <div draggable="true" 
                ondragstart="handleDragStart(event, '${rawUrl}', '${item.fileName}', ${item.isSoilItem})"
@@ -750,9 +707,882 @@
       return [];
     }
 
-    // =========================================================================
-    // THUẬT TOÁN TỰ ĐỘNG BẮT ĐÚNG KHU ĐẤT KHI THẢ RƠI CHUỘT
-    // =========================================================================
+    // ================= KÉO THẢ & TỰ BẮT KHU ĐẤT =================
+    function isPointInsidePolygon(point, vs) {
+      const x = point.x, y = point.y;
+      let inside = false;
+      for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+        const xi = vs[i].x, yi = vs[i].y;
+        const xj = vs[j].x, yj = vs[j].y;
+        const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+
+    function findPlotAtCoordinates(pxPercent, pyPercent) {
+      const slots = currentClass.config.plotSlots || [];
+      for (let slot of slots) {
+        if (isPointInsidePolygon({ x: pxPercent, y: pyPercent }, slot.corners)) return slot;
+      }
+      return null;
+    }
+
+    function handleDragStart(e, rawUrl, fileName, isSoilItem) {
+      draggedItemData = { rawUrl, fileName, isSoilItem };
+      e.dataTransfer.setData('text/plain', '');
+    }
+
+    function handleDragOver(e) { e.preventDefault(); }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      if (!draggedItemData) return;
+
+      const rect = document.getElementById('section-a').getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const xPercent = (x / rect.width) * 100;
+      const yPercent = (y / rect.height) * 100;
+
+      const targetSlot = findPlotAtCoordinates(xPercent, yPercent);
+
+      if (draggedItemData.isSoilItem) {
+        if (targetSlot) {
+          const perm = checkPermissionOnPlot(targetSlot.teamId);
+          if (!perm.allowed) { playSfx('error_locked'); return alert(perm.msg); }
+          playSfx('plant_pop');
+          applySoilToSlot(targetSlot.id, draggedItemData.rawUrl);
+        } else {
+          if (currentStudent.username === 'hocsinh') {
+            const defaultSlot = currentClass.config.plotSlots[0];
+            if (defaultSlot) { playSfx('plant_pop'); applySoilToSlot(defaultSlot.id, draggedItemData.rawUrl); }
+          } else {
+            alert('Vui lòng kéo mẫu đất thả trực tiếp vào ô đất của tổ bạn!');
+          }
+        }
+        return;
+      }
+
+      if (targetSlot) {
+        const perm = checkPermissionOnPlot(targetSlot.teamId);
+        if (!perm.allowed) { playSfx('error_locked'); return alert(perm.msg); }
+        spawnFlowerOnCanvas(draggedItemData.rawUrl, draggedItemData.fileName, x, y, targetSlot.teamId);
+      } else {
+        spawnFlowerOnCanvas(draggedItemData.rawUrl, draggedItemData.fileName, x, y, null);
+      }
+    }
+
+    function handleDropOnPlot(e, plotId, teamId) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!draggedItemData) return;
+
+      const perm = checkPermissionOnPlot(teamId);
+      if (!perm.allowed) { playSfx('error_locked'); return alert(perm.msg); }
+
+      if (draggedItemData.isSoilItem) {
+        playSfx('plant_pop');
+        applySoilToSlot(plotId, draggedItemData.rawUrl);
+        return;
+      }
+
+      const rect = document.getElementById('section-a').getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      spawnFlowerOnCanvas(draggedItemData.rawUrl, draggedItemData.fileName, x, y, teamId);
+    }
+
+    function handleItemClickTray(rawUrl, fileName, isSoilItem) {
+      if (isSoilItem) {
+        let myPlot = currentClass.config.plotSlots.find(s => s.teamId === currentStudent.team);
+        if (!myPlot || currentStudent.username === 'hocsinh') myPlot = currentClass.config.plotSlots[0];
+        playSfx('plant_pop');
+        applySoilToSlot(myPlot.id, rawUrl);
+      } else {
+        let myPlot = currentClass.config.plotSlots.find(s => s.teamId === currentStudent.team) || currentClass.config.plotSlots[0];
+        const perm = checkPermissionOnPlot(myPlot.teamId);
+        if (!perm.allowed) { playSfx('error_locked'); return alert(perm.msg); }
+        const sectionA = document.getElementById('section-a');
+        spawnFlowerOnCanvas(rawUrl, fileName, sectionA.clientWidth / 2, sectionA.clientHeight / 2, myPlot.teamId);
+      }
+    }
+
+    function applySoilToSlot(plotId, soilUrl) {
+      const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
+      if (slot) {
+        slot.soilImage = soilUrl;
+        renderPerspectivePlotsOnCanvas();
+      }
+    }
+
+    let placedFlowerCount = 0;
+    function spawnFlowerOnCanvas(rawUrl, fileName, posX, posY, teamId) {
+      document.getElementById('empty-hint').style.display = 'none';
+      const container = document.getElementById('drop-flowers-layer');
+      placedFlowerCount++;
+      const uniqueId = 'placed_flower_' + placedFlowerCount;
+
+      playSfx('plant_pop');
+
+      const customScale = currentClass.config.assetScales[fileName] || 40;
+      const scaleMultiplier = customScale / 100;
+      const targetW = Math.round(80 * scaleMultiplier);
+      const targetH = Math.round(100 * scaleMultiplier);
+
+      const el = document.createElement('div');
+      el.id = uniqueId;
+      el.dataset.teamId = teamId || '';
+      el.className = 'garden-placed-flower flex items-center justify-center';
+      el.style.width = `${targetW}px`;
+      el.style.height = `${targetH}px`;
+      el.style.left = `${posX}px`;
+      el.style.top = `${posY}px`;
+
+      el.innerHTML = `
+        <div class="relative w-full h-full group flex items-center justify-center">
+          <img src="${rawUrl}" class="max-h-full max-w-full object-contain pointer-events-none select-none filter drop-shadow">
+          <button onclick="removePlacedFlower('${uniqueId}', ${teamId || 0}, event)" class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[8px] font-bold shadow hidden group-hover:flex items-center justify-center">
+            ✕
+          </button>
+        </div>
+      `;
+
+      makeElementDraggable(el, teamId);
+      container.appendChild(el);
+    }
+
+    function makeElementDraggable(el, teamId) {
+      let isDragging = false;
+      let startX, startY, initialLeft, initialTop;
+
+      const onStart = (clientX, clientY) => {
+        if (teamId) {
+          const perm = checkPermissionOnPlot(teamId);
+          if (!perm.allowed) { playSfx('error_locked'); alert(perm.msg); return; }
+        }
+        isDragging = true;
+        startX = clientX; startY = clientY;
+        initialLeft = el.offsetLeft; initialTop = el.offsetTop;
+        el.style.zIndex = 100;
+      };
+
+      const onMove = (clientX, clientY) => {
+        if (!isDragging) return;
+        el.style.left = `${initialLeft + (clientX - startX)}px`;
+        el.style.top = `${initialTop + (clientY - startY)}px`;
+      };
+
+      const onEnd = () => { if (isDragging) { isDragging = false; el.style.zIndex = 30; } };
+
+      el.addEventListener('mousedown', (e) => { if (e.target.tagName === 'BUTTON') return; onStart(e.clientX, e.clientY); });
+      window.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
+      window.addEventListener('mouseup', onEnd);
+
+      el.addEventListener('touchstart', (e) => { if (e.target.tagName === 'BUTTON') return; const t = e.touches[0]; onStart(t.clientX, t.clientY); }, { passive: true });
+      window.addEventListener('touchmove', (e) => { if (!isDragging) return; const t = e.touches[0]; onMove(t.clientX, t.clientY); }, { passive: true });
+      window.addEventListenerDưới đây là mã nguồn tệp **`index.html`** hoàn chỉnh và đồng bộ 100% với `admin298.html`:
+
+### Các tính năng cốt lõi được tích hợp trong tệp này:
+1. **Hiển thị & Ẩn Vùng Chọn Tự Động**: Khi học sinh chưa trồng đất, các khung vùng chọn (nét đứt/cam) hiển thị rõ ràng trên sân; khi kéo thả mẫu đất (cam, đỏ, xanh...) vào ô tương ứng, khung vùng chọn tự động biến mất và ảnh khu đất mẫu hiển thị lấp đầy chuẩn xác theo tọa độ đã lưu từ Admin. Khi dùng xẻng dọn dẹp, vùng chọn lại hiện ra như cũ.
+2. **Khóa cấp độ theo từng ảnh tài nguyên (`itemLockLevels`)**: Nhận diện cấp độ khóa gán riêng biệt cho từng ảnh từ `admin298.html`. Nếu chưa đạt điều kiện thi đua, ảnh bị mờ 50%, có biểu tượng ổ khóa `🔒`, kèm popup tooltip hiển thị chính xác tên điều kiện và chặn thao tác kéo thả. Tài khoản `hocsinh` hoặc `SUPER_TESTER` được test toàn quyền.
+3. **Phân quyền và thả rơi thông minh**: Thuật toán kiểm tra vùng đất giúp thả rơi chuẩn xác không bị lệch hay báo lỗi thả trượt, kết hợp phân quyền `TTx` (chỉ tổ trưởng được sửa đất tổ mình).
+4. **Hệ thống âm thanh đầy đủ**: Tích hợp nhạc nền (BGM) có nút bật/tắt loa ở Header và âm thanh hiệu ứng (SFX) cho các hành động cắm hoa, chuyển tab, dọn vườn hay cảnh báo khóa.
+
+---
+
+### Mã nguồn tệp `index.html` hoàn chỉnh
+
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Vườn Thi Đua Trồng Hoa - Sân Chơi Lớp Học</title>
+  <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+  <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
+  <style>
+    #landscape-warning { display: none; }
+    @media screen and (orientation: portrait) and (max-width: 1024px) {
+      #landscape-warning { display: flex !important; }
+    }
+
+    .bg-trans-grid {
+      background-color: rgba(255, 255, 255, 0.75);
+      background-image: linear-gradient(45deg, #f1f5f9 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f1f5f9 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f1f5f9 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f1f5f9 75%);
+      background-size: 8px 8px;
+      background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+    }
+
+    .clean-transparent-asset {
+      filter: none !important;
+      transition: transform 0.15s ease-out;
+    }
+    .clean-transparent-asset:hover { transform: scale(1.1); }
+
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.25); border-radius: 4px; }
+
+    .garden-placed-flower {
+      position: absolute;
+      touch-action: none;
+      user-select: none;
+      cursor: grab;
+      z-index: 30;
+      transform: translate(-50%, -50%);
+    }
+    .garden-placed-flower:active { cursor: grabbing; }
+
+    .plot-group-hover {
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: transform 0.22s ease-out, filter 0.22s ease-out;
+      cursor: pointer;
+    }
+    .plot-group-hover:hover, .plot-group-hover:active {
+      transform: scale(1.02);
+      filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35));
+    }
+
+    .lock-tooltip {
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      transform: translate(-50%, 6px);
+      pointer-events: none;
+      z-index: 90;
+    }
+    .group:hover .lock-tooltip {
+      visibility: visible;
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  </style>
+</head>
+<body id="game-wrapper" class="bg-cover bg-center h-screen w-screen overflow-hidden flex flex-col font-sans select-none" style="background-image: url('assets/nengame/nenungdung.jpg');">
+
+  <!-- CẢNH BÁO XOAY NGANG TRÊN DI ĐỘNG -->
+  <div id="landscape-warning" class="fixed inset-0 bg-slate-950 z-[100] flex-col items-center justify-center p-6 text-center text-white">
+    <div class="w-20 h-20 bg-emerald-600/20 text-emerald-400 rounded-3xl flex items-center justify-center text-4xl mb-4 border border-emerald-500/30 animate-pulse">
+      <i class="fa-solid fa-mobile-screen-button rotate-90"></i>
+    </div>
+    <h2 class="text-lg font-black uppercase text-amber-300 mb-2">Vui Lòng Xoay Ngang Thiết Bị</h2>
+    <p class="text-xs text-slate-300 max-w-xs leading-relaxed">
+      Để có trải nghiệm chăm sóc và trang trí khu vườn thi đua chuẩn xác nhất, hãy xoay ngang màn hình điện thoại của bạn nhé!
+    </p>
+    <button onclick="requestFullScreenLandscape()" class="mt-5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-bold text-white shadow-lg flex items-center gap-2">
+      <i class="fa-solid fa-expand"></i> Kích hoạt toàn màn hình
+    </button>
+  </div>
+
+  <!-- POPUP ĐĂNG NHẬP -->
+  <div id="student-login-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 border border-slate-200 text-center">
+      <div class="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto text-3xl mb-3 shadow-inner">🌸</div>
+      <h2 class="text-lg font-black text-slate-800 uppercase">Vườn Thi Đua Lớp Học</h2>
+      <p class="text-xs text-slate-500 mb-4">Nhập tài khoản để vào khu vườn của tổ bạn</p>
+
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Tài khoản học sinh:</label>
+          <input type="text" id="input-student-user" placeholder="VD: 11TA3stt15_To1 hoặc hocsinh" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Mật khẩu:</label>
+          <input type="password" id="input-student-pass" placeholder="Mật khẩu của bạn" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+        <div id="login-error-msg" class="hidden text-rose-500 text-xs font-bold text-center"></div>
+        <button onclick="handleStudentLogin()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md transition">
+          Vào Vườn Hoa
+        </button>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400">
+        Tài khoản <b>hocsinh</b> có đặc quyền Test toàn bộ tính năng.
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="h-10 bg-white/95 backdrop-blur-md border-b border-black/10 px-4 flex items-center justify-between z-30 shrink-0 shadow-xs">
+    <div class="flex items-center gap-2">
+      <span class="text-lg">🌸</span>
+      <h1 class="font-extrabold text-xs md:text-sm text-slate-800 uppercase tracking-wide">Vườn Thi Đua Trồng Hoa</h1>
+      <span class="text-[10px] md:text-[11px] px-2 py-0.5 bg-emerald-100 text-emerald-900 rounded-full font-bold ml-1" id="hdr-class-badge">Lớp 11TA3</span>
+    </div>
+
+    <div class="flex items-center gap-2.5">
+      <button onclick="toggleAudioMute()" id="btn-audio-toggle" class="px-2 py-1 text-xs font-bold rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition flex items-center gap-1" title="Bật/Tắt Nhạc Nền">
+        <i class="fa-solid fa-volume-high" id="icon-audio-mute"></i>
+      </button>
+
+      <button onclick="clearPlacedGardenFlowers()" class="px-2.5 py-1 text-[10px] md:text-[11px] font-bold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition flex items-center gap-1 border border-rose-200">
+        <i class="fa-solid fa-trash-can"></i> Dọn Hoa
+      </button>
+
+      <div class="text-[11px] md:text-xs text-slate-700 font-semibold border-l pl-2.5 border-slate-300 flex items-center gap-1.5">
+        <span id="hdr-student-name">Đang tải...</span>
+        <span class="text-[9px] md:text-[10px] px-1.5 py-0.5 rounded font-black uppercase" id="hdr-role-badge">Tổ trưởng</span>
+        <span class="text-[9px] md:text-[10px] px-1.5 py-0.5 rounded font-black uppercase text-amber-900 bg-amber-100" id="hdr-rank-badge">Hạng 1 ★</span>
+      </div>
+
+      <button onclick="requestFullScreenLandscape()" class="text-slate-500 hover:text-emerald-700 text-xs p-1" title="Toàn màn hình">
+        <i class="fa-solid fa-expand"></i>
+      </button>
+      <button onclick="handleStudentLogout()" class="text-slate-400 hover:text-rose-600 text-xs p-1" title="Đổi tài khoản">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- BỐ CỤC CHÍNH 2 PHẦN -->
+  <div class="flex-1 flex flex-row h-[calc(100vh-40px)] overflow-hidden w-full">
+    
+    <!-- PHẦN A (3/4) -->
+    <section id="section-a" class="w-3/4 h-full relative bg-slate-950 overflow-hidden flex items-center justify-center border-r-2 border-black/20" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+      <img id="game-bg-image" src="assets/nengame/vuonlop.jpg" alt="Nền Game" onerror="this.src='[https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/vuonlop.jpg](https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/vuonlop.jpg)'" class="absolute inset-0 w-full h-full object-fill pointer-events-none select-none transition-all duration-300">
+      
+      <!-- LỚP CHỨA CÁC VÙNG ĐẤT 3D SVG & ẨN HIỆN KHUNG KHI CÓ SOIL -->
+      <div id="perspective-plots-layer" class="absolute inset-0 w-full h-full pointer-events-auto z-10"></div>
+      
+      <!-- LỚP CHỨA CÁC VÙNG CHỮ TỰ NHIÊN -->
+      <div id="text-overlays-layer" class="absolute inset-0 w-full h-full pointer-events-none z-15"></div>
+      
+      <!-- LỚP CHỨA HOA ĐÃ CẮM -->
+      <div id="drop-flowers-layer" class="absolute inset-0 w-full h-full pointer-events-auto z-20"></div>
+
+      <div id="empty-hint" class="absolute bottom-3 left-3 z-30 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-white/20 text-white text-[11px] pointer-events-none flex items-center gap-1.5 shadow-lg">
+        <i class="fa-solid fa-hand-pointer text-amber-400"></i>
+        <span id="lbl-status-tip">Kéo đất thả vào ô của bạn • Kéo hoa cắm lên luống đất!</span>
+      </div>
+    </section>
+
+    <!-- PHẦN B (1/4) -->
+    <aside id="section-b" class="w-1/4 h-full bg-cover bg-center flex flex-col shadow-2xl shrink-0 border-l border-black/20" style="background-image: url('assets/nengame/nenungdung.jpg');">
+      <div class="p-2 bg-black/20 backdrop-blur-xs border-b border-black/10 shadow-xs space-y-1.5 shrink-0">
+        <div class="text-[9px] font-black uppercase text-white drop-shadow-sm tracking-wide">MỤC VẬT PHẨM:</div>
+        <div class="grid grid-cols-4 gap-1.5" id="dynamic-button-bar"></div>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-2 flex flex-col bg-white/5 backdrop-blur-[1px]">
+        <div class="flex items-center justify-between mb-1.5 px-0.5">
+          <span id="category-title" class="text-[10px] font-black uppercase text-white drop-shadow-sm tracking-wider truncate">KHO VẬT PHẨM</span>
+          <span class="text-[9px] text-white/80 font-bold shrink-0">Kéo / Chạm</span>
+        </div>
+        <div id="tray-grid" class="grid grid-cols-3 gap-1.5"></div>
+      </div>
+    </aside>
+
+  </div>
+
+  <script>
+    const GITHUB_OWNER = 'MHP298';
+    const GITHUB_REPO = 'ANT';
+    const GITHUB_RAW_BASE = `[https://raw.githubusercontent.com/$](https://raw.githubusercontent.com/$){GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/`;
+
+    const FALLBACK_CLASS_DATA = {
+      name: '11TA3',
+      config: {
+        bgGlobal: 'assets/nengame/nenungdung.jpg',
+        bgA: 'assets/nengame/vuonlop.jpg',
+        bgB: 'assets/nengame/nenungdung.jpg',
+        buttonMappings: {
+          'nuthoa.png': { label: 'HOA', targetFolders: ['hoacap1'], selectedImages: [], itemLockLevels: {} },
+          'nutnu.png': { label: 'NỤ', targetFolders: ['nucap1'], selectedImages: [], itemLockLevels: {} },
+          'nutchunhat.png': { label: 'ĐẤT', targetFolders: ['nengame'], selectedImages: [], itemLockLevels: {} },
+          'nutxeng.png': { label: 'CÔNG CỤ', targetFolders: ['congcu'], selectedImages: [], itemLockLevels: {} }
+        },
+        unlockConditions: {
+          'cond_top1': { id: 'cond_top1', name: 'Đạt Hạng 1 thi đua tuần', type: 'rank_top1', targetLevel: 1 }
+        },
+        plotSlots: [
+          { id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 19, y: 31 }, { x: 35, y: 31 }, { x: 34, y: 50 }, { x: 18, y: 50 }], soilImage: null },
+          { id: 'slot_2', name: 'Khu đất 2', teamId: 2, corners: [{ x: 17, y: 52 }, { x: 34, y: 52 }, { x: 33, y: 73 }, { x: 16, y: 73 }], soilImage: null },
+          { id: 'slot_3', name: 'Khu đất 3', teamId: 3, corners: [{ x: 39, y: 31 }, { x: 55, y: 31 }, { x: 56, y: 50 }, { x: 40, y: 50 }], soilImage: null },
+          { id: 'slot_4', name: 'Khu đất 4', teamId: 4, corners: [{ x: 40, y: 52 }, { x: 56, y: 52 }, { x: 57, y: 73 }, { x: 40, y: 73 }], soilImage: null }
+        ],
+        textOverlays: [{ id: 'txt_default', content: 'Lớp 11TA3', x: 48, y: 16, fontSize: 17 }],
+        assetScales: {},
+        audioSettings: {
+          bgm: { url: '', selectedFile: '', volume: 50, autoPlay: true },
+          sfx: []
+        }
+      },
+      students: {
+        '11TA3stt1_To1': { username: '11TA3stt1_To1', name: 'Học sinh 1', stt: '1', team: 1, class: '11TA3', password: 'hs1', role: 'TT1', isQuestDone: true },
+        'hocsinh': { username: 'hocsinh', name: 'Tài Khoản Test', stt: '99', team: 1, class: '11TA3', password: '123', role: 'SUPER_TESTER', isQuestDone: true }
+      },
+      weeklyRanking: { 1: 1, 2: 2, 3: 3, 4: 4 }
+    };
+
+    let globalClassesData = {};
+    let activeClassName = '11TA3';
+    let currentClass = FALLBACK_CLASS_DATA;
+
+    let currentStudent = {
+      username: 'hocsinh',
+      name: 'Tài Khoản Test',
+      team: 1,
+      class: '11TA3',
+      role: 'SUPER_TESTER',
+      isQuestDone: true
+    };
+
+    let cachedScannedAssets = {};
+    let currentActiveButtonKey = 'nutchunhat.png';
+    let draggedItemData = null;
+
+    let bgmAudio = null;
+    let isBgmPlaying = false;
+
+    // ================= 1. NẠP DỮ LIỆU ĐỒNG BỘ =================
+    function loadAdminSystemData() {
+      const rawClasses = localStorage.getItem('garden_system_classes_v14') || 
+                         localStorage.getItem('garden_system_classes_v13') || 
+                         localStorage.getItem('garden_system_classes_v12');
+      const rawActive = localStorage.getItem('garden_active_class_v14') || 
+                        localStorage.getItem('garden_active_class_v13') || 
+                        localStorage.getItem('garden_active_class_v12');
+
+      if (rawClasses) {
+        try { 
+          const parsed = JSON.parse(rawClasses);
+          Object.values(parsed).forEach(c => {
+            if (!c.config.buttonMappings) c.config.buttonMappings = {};
+            Object.values(c.config.buttonMappings).forEach(btn => {
+              if (!btn.itemLockLevels) btn.itemLockLevels = {};
+            });
+            if (!c.config.unlockConditions) c.config.unlockConditions = {};
+          });
+          globalClassesData = parsed;
+        } catch (e) {}
+      }
+
+      if (rawActive && globalClassesData[rawActive]) {
+        activeClassName = rawActive;
+      } else {
+        const keys = Object.keys(globalClassesData);
+        if (keys.length > 0) activeClassName = keys[0];
+      }
+
+      currentClass = globalClassesData[activeClassName] || FALLBACK_CLASS_DATA;
+      if (!currentClass.config.assetScales) currentClass.config.assetScales = {};
+      if (!currentClass.config.audioSettings) {
+        currentClass.config.audioSettings = { bgm: { url: '', selectedFile: '', volume: 50, autoPlay: true }, sfx: [] };
+      }
+
+      const rawAssets = localStorage.getItem('garden_auto_scanned_assets_v5') || 
+                        localStorage.getItem('garden_auto_scanned_assets_v4');
+      if (rawAssets) {
+        try { cachedScannedAssets = JSON.parse(rawAssets); } catch (e) {}
+      }
+    }
+
+    function requestFullScreenLandscape() {
+      const docEl = document.documentElement;
+      if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
+      else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(() => {});
+      }
+    }
+
+    function handleStudentLogin() {
+      const user = document.getElementById('input-student-user').value.trim();
+      const pass = document.getElementById('input-student-pass').value.trim();
+      const err = document.getElementById('login-error-msg');
+
+      if (!user) {
+        err.innerText = 'Vui lòng nhập tên tài khoản!';
+        err.classList.remove('hidden');
+        return;
+      }
+
+      if (user.toLowerCase() === 'hocsinh') {
+        currentStudent = {
+          username: 'hocsinh', name: 'Tài Khoản Test', team: 1, class: activeClassName, role: 'SUPER_TESTER', isQuestDone: true
+        };
+        sessionStorage.setItem('current_garden_student', JSON.stringify(currentStudent));
+        document.getElementById('student-login-modal').classList.add('hidden');
+        applyClassConfiguration();
+        initBackgroundMusic();
+        return;
+      }
+
+      let matchedClass = null;
+      for (let cName in globalClassesData) {
+        if (user.toUpperCase().startsWith(cName.toUpperCase())) {
+          matchedClass = cName;
+          break;
+        }
+      }
+
+      if (!matchedClass) matchedClass = activeClassName;
+      currentClass = globalClassesData[matchedClass] || currentClass;
+
+      const studentObj = currentClass.students ? currentClass.students[user] : null;
+
+      if (studentObj) {
+        if (studentObj.password && studentObj.password !== pass) {
+          err.innerText = 'Mật khẩu không chính xác!';
+          err.classList.remove('hidden');
+          return;
+        }
+        currentStudent = { ...studentObj };
+      } else {
+        const toMatch = user.match(/_To(\d+)/i) || user.match(/To(\d+)/i);
+        const toNum = toMatch ? parseInt(toMatch[1]) : 1;
+        currentStudent = {
+          username: user, name: user, team: toNum, class: matchedClass, role: 'MEMBER', isQuestDone: true
+        };
+      }
+
+      sessionStorage.setItem('current_garden_student', JSON.stringify(currentStudent));
+      document.getElementById('student-login-modal').classList.add('hidden');
+      applyClassConfiguration();
+      initBackgroundMusic();
+    }
+
+    function handleStudentLogout() {
+      sessionStorage.removeItem('current_garden_student');
+      location.reload();
+    }
+
+    function checkPermissionOnPlot(targetTeamId) {
+      if (currentStudent.role === 'SUPER_TESTER' || currentStudent.username === 'hocsinh') return { allowed: true };
+      if (currentStudent.role === `TT${targetTeamId}`) return { allowed: true };
+      if (currentStudent.role && currentStudent.role.startsWith('TT')) {
+        return { allowed: false, msg: `Bạn là Tổ trưởng Tổ ${currentStudent.team}, chỉ được chỉnh sửa Khu đất ${currentStudent.team} của tổ mình!` };
+      }
+      return { allowed: false, msg: `Chỉ Tổ trưởng (TT${targetTeamId}) mới có quyền trang trí, thêm bớt vật phẩm tại Khu đất ${targetTeamId}!` };
+    }
+
+    function applyClassConfiguration() {
+      const cfg = currentClass.config;
+
+      document.getElementById('hdr-class-badge').innerText = `Lớp ${currentClass.name}`;
+      document.getElementById('hdr-student-name').innerText = `${currentStudent.name} (Tổ ${currentStudent.team})`;
+      
+      const roleBadge = document.getElementById('hdr-role-badge');
+      if (currentStudent.role === 'SUPER_TESTER' || currentStudent.username === 'hocsinh') {
+        roleBadge.className = "text-[9px] md:text-[10px] px-1.5 py-0.5 rounded font-black uppercase text-purple-900 bg-purple-200 border border-purple-300";
+        roleBadge.innerText = "Test Toàn Quyền";
+      } else if (currentStudent.role && currentStudent.role.startsWith('TT')) {
+        roleBadge.className = "text-[9px] md:text-[10px] px-1.5 py-0.5 rounded font-black uppercase text-emerald-900 bg-emerald-200 border border-emerald-300";
+        roleBadge.innerText = `Tổ Trưởng ${currentStudent.team}`;
+      } else if (currentStudent.role && currentStudent.role.startsWith('TL')) {
+        roleBadge.className = "text-[9px] md:text-[10px] px-1.5 py-0.5 rounded font-black uppercase text-indigo-900 bg-indigo-200 border border-indigo-300";
+        roleBadge.innerText = `Trợ Lý ${currentStudent.role}`;
+      } else {
+        roleBadge.className = "text-[9px] md:text-[10px] px-1.5 py-0.5 rounded font-bold uppercase text-slate-600 bg-slate-200";
+        roleBadge.innerText = "Thành viên";
+      }
+
+      const myRank = currentClass.weeklyRanking ? (currentClass.weeklyRanking[currentStudent.team] || 1) : 1;
+      const rankBadge = document.getElementById('hdr-rank-badge');
+      if (myRank === 1) {
+        rankBadge.className = "text-[9px] md:text-[10px] px-2 py-0.5 rounded-full font-black uppercase text-amber-900 bg-amber-200 border border-amber-300";
+        rankBadge.innerText = "Hạng 1 Tuần ★";
+      } else {
+        rankBadge.className = "text-[9px] md:text-[10px] px-2 py-0.5 rounded-full font-bold uppercase text-slate-600 bg-slate-200";
+        rankBadge.innerText = `Hạng ${myRank}`;
+      }
+
+      document.getElementById('game-wrapper').style.backgroundImage = `url('${cfg.bgGlobal}')`;
+      document.getElementById('game-bg-image').src = cfg.bgA;
+      document.getElementById('section-b').style.backgroundImage = `url('${cfg.bgB}')`;
+
+      renderPerspectivePlotsOnCanvas();
+      renderTextOverlaysOnCanvas();
+      renderDynamicButtonsFromAdmin();
+
+      const initialKey = cfg.buttonMappings['nutchunhat.png'] ? 'nutchunhat.png' : (Object.keys(cfg.buttonMappings || {})[0] || 'nuthoa.png');
+      switchButtonCategory(initialKey);
+    }
+
+    // ================= DỰNG VÙNG ĐẤT SVG & TỰ ĐỘNG ẨN/HIỆN KHUNG DỰA TRÊN SOIL =================
+    function renderPerspectivePlotsOnCanvas() {
+      const container = document.getElementById('perspective-plots-layer');
+      const slots = currentClass.config.plotSlots || [];
+      const sectionA = document.getElementById('section-a');
+      const cW = sectionA.clientWidth || 960;
+      const cH = sectionA.clientHeight || 640;
+
+      container.innerHTML = `
+        <svg class="absolute inset-0 w-full h-full pointer-events-auto" style="overflow: visible;" viewBox="0 0 ${cW} ${cH}">
+          <defs>
+            ${slots.map(slot => {
+              const pts = slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ');
+              return `<clipPath id="clip-slot-${slot.id}"><polygon points="${pts}" /></clipPath>`;
+            }).join('')}
+          </defs>
+
+          ${slots.map(slot => {
+            const ptsPixel = slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ');
+            const xs = slot.corners.map(c => (c.x / 100) * cW);
+            const ys = slot.corners.map(c => (c.y / 100) * cH);
+            const minX = Math.min(...xs), maxX = Math.max(...xs);
+            const minY = Math.min(...ys), maxY = Math.max(...ys);
+            const boxW = maxX - minX, boxH = maxY - minY;
+
+            const centerX = (slot.corners[0].x + slot.corners[1].x + slot.corners[2].x + slot.corners[3].x) / 4;
+            const centerY = (slot.corners[0].y + slot.corners[1].y + slot.corners[2].y + slot.corners[3].y) / 4;
+            
+            const isMyTeamPlot = (currentStudent.role === 'SUPER_TESTER' || currentStudent.username === 'hocsinh') ? true : (slot.teamId === currentStudent.team);
+            const hasSoil = !!slot.soilImage; // Kiểm tra xem ô đất đã được trồng chưa
+
+            return `
+              <g id="plot-group-${slot.id}" class="plot-group-hover"
+                 data-plot-id="${slot.id}" data-team-id="${slot.teamId}"
+                 ondragover="handleDragOver(event)" 
+                 ondrop="handleDropOnPlot(event, '${slot.id}', ${slot.teamId})">
+                
+                <!-- KHI CHƯA CÓ ĐẤT THÌ HIỆN KHUNG VÙNG CHỌN, KHI ĐÃ CÓ THÌ ẨN ĐI -->
+                <polygon points="${ptsPixel}" 
+                         fill="${hasSoil ? 'transparent' : (isMyTeamPlot ? 'rgba(180, 83, 9, 0.3)' : 'rgba(16, 185, 129, 0.22)')}" 
+                         stroke="${hasSoil ? 'transparent' : (isMyTeamPlot ? '#f59e0b' : '#10b981')}" 
+                         stroke-width="${hasSoil ? '0' : (isMyTeamPlot ? '3.5' : '2')}" 
+                         stroke-dasharray="${isMyTeamPlot ? 'none' : '6,4'}">
+                  <title>${slot.name}</title>
+                </polygon>
+
+                ${hasSoil ? `
+                  <image href="${slot.soilImage}" 
+                         x="${minX}" y="${minY}" width="${boxW}" height="${boxH}" 
+                         preserveAspectRatio="none"
+                         clip-path="url(#clip-slot-${slot.id})"
+                         opacity="0.98" />
+                ` : ''}
+
+                <polygon points="${ptsPixel}" 
+                         fill="none" 
+                         stroke="${hasSoil ? 'transparent' : (isMyTeamPlot ? '#f59e0b' : '#10b981')}" 
+                         stroke-width="${hasSoil ? '0' : (isMyTeamPlot ? '3.5' : '2')}" 
+                         stroke-dasharray="${isMyTeamPlot ? 'none' : '6,4'}" />
+
+                <g style="pointer-events: none;">
+                  <rect x="${(centerX / 100) * cW}" y="${(centerY / 100) * cH}" width="110" height="26" rx="13" 
+                        transform="translate(-55, -13)" 
+                        fill="rgba(69, 26, 3, 0.88)" 
+                        stroke="${isMyTeamPlot ? '#fbbf24' : '#b45309'}" 
+                        stroke-width="1.5" />
+                  <text x="${(centerX / 100) * cW}" y="${(centerY / 100) * cH}" 
+                        text-anchor="middle" dominant-baseline="central" 
+                        fill="${isMyTeamPlot ? '#fef08a' : '#fef3c7'}" 
+                        font-size="11" font-weight="900" font-family="sans-serif">
+                    🌾 ${slot.name} ${isMyTeamPlot ? '★' : ''}
+                  </text>
+                </g>
+              </g>
+            `;
+          }).join('')}
+        </svg>
+      `;
+    }
+
+    function renderTextOverlaysOnCanvas() {
+      const container = document.getElementById('text-overlays-layer');
+      const texts = currentClass.config.textOverlays || [];
+
+      container.innerHTML = texts.map(txt => `
+        <div style="position: absolute; left: ${txt.x}%; top: ${txt.y}%; transform: translate(-50%, -50%);" 
+             class="pointer-events-none z-15">
+          <div style="color: #5c2c16; font-size: ${txt.fontSize || 16}px; text-shadow: 0 1px 1px rgba(255, 255, 255, 0.6);"
+               class="font-black tracking-wider uppercase select-none">
+            ${txt.content}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderDynamicButtonsFromAdmin() {
+      const bar = document.getElementById('dynamic-button-bar');
+      const mappings = currentClass.config.buttonMappings || {};
+      const keys = Object.keys(mappings);
+
+      bar.innerHTML = keys.map(iconFile => {
+        const item = mappings[iconFile];
+        const iconSrc = `assets/nutgame/${iconFile}`;
+        const isActive = iconFile === currentActiveButtonKey;
+
+        return `
+          <button onclick="switchButtonCategory('${iconFile}')" id="btn-dyn-${iconFile}" class="group relative rounded-xl ${
+            isActive ? 'border-2 border-emerald-500 bg-white shadow-md scale-105' : 'border border-white/20 bg-white/80 hover:bg-white'
+          } p-1 transition flex flex-col items-center justify-center">
+            <img src="${iconSrc}" onerror="this.src='[https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/nut_hoa.png](https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/nut_hoa.png)'" class="w-8 h-8 md:w-9 md:h-9 object-contain select-none pointer-events-none">
+            <span class="text-[9px] md:text-[10px] font-black text-slate-800 mt-0.5 tracking-tight truncate">${item.label}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function switchButtonCategory(iconFile) {
+      currentActiveButtonKey = iconFile;
+      playSfx('tab_click');
+
+      const mappings = currentClass.config.buttonMappings || {};
+      const targetFolders = mappings[iconFile]?.targetFolders || ['hoacap1'];
+
+      const allButtons = document.querySelectorAll('#dynamic-button-bar button');
+      allButtons.forEach(b => {
+        b.className = "group relative rounded-xl border border-white/20 bg-white/80 hover:bg-white p-1 transition flex flex-col items-center justify-center";
+      });
+      const activeBtn = document.getElementById(`btn-dyn-${iconFile}`);
+      if (activeBtn) {
+        activeBtn.className = "group relative rounded-xl border-2 border-emerald-500 bg-white p-1 shadow-md transition flex flex-col items-center justify-center scale-105";
+      }
+
+      document.getElementById('category-title').innerText = `MỤC: ${mappings[iconFile]?.label || 'VẬT PHẨM'}`;
+      renderTrayItemsFromFolders(targetFolders);
+    }
+
+    // ================= KIỂM TRA KHÓA CẤP ĐỘ THEO TỪNG ẢNH =================
+    function checkItemLockStatusByLevel(fileName) {
+      if (currentStudent.username === 'hocsinh' || currentStudent.role === 'SUPER_TESTER') {
+        return { isLocked: false, lockConditionText: '' };
+      }
+
+      const cleanFileName = decodeURIComponent(fileName || '').split('/').pop().trim().toLowerCase();
+      const currentMapping = currentClass.config.buttonMappings[currentActiveButtonKey] || {};
+      const itemLocks = currentMapping.itemLockLevels || {};
+
+      let assignedLevel = 0;
+      for (let k in itemLocks) {
+        if (decodeURIComponent(k).split('/').pop().trim().toLowerCase() === cleanFileName) {
+          assignedLevel = parseInt(itemLocks[k]) || 0;
+          break;
+        }
+      }
+
+      if (assignedLevel <= 0) return { isLocked: false, lockConditionText: '' };
+
+      const conditions = currentClass.config.unlockConditions || {};
+      let matchedCond = null;
+      for (let cId in conditions) {
+        if (parseInt(conditions[cId].targetLevel) === assignedLevel) {
+          matchedCond = conditions[cId];
+          break;
+        }
+      }
+
+      const conditionName = matchedCond ? matchedCond.name : `Cấp độ ${assignedLevel}`;
+
+      if (matchedCond) {
+        if (matchedCond.type === 'rank_top1') {
+          const myRank = currentClass.weeklyRanking ? (currentClass.weeklyRanking[currentStudent.team] || 1) : 1;
+          if (myRank !== 1) return { isLocked: true, lockConditionText: conditionName };
+        }
+        if (matchedCond.type === 'quest_done') {
+          if (!currentStudent.isQuestDone) return { isLocked: true, lockConditionText: conditionName };
+        }
+        if (matchedCond.type === 'always_open') return { isLocked: false, lockConditionText: '' };
+      } else {
+        const myRank = currentClass.weeklyRanking ? (currentClass.weeklyRanking[currentStudent.team] || 1) : 1;
+        if (myRank !== 1) return { isLocked: true, lockConditionText: `Đạt Hạng 1 tuần (Cấp ${assignedLevel})` };
+      }
+
+      return { isLocked: false, lockConditionText: '' };
+    }
+
+    function renderTrayItemsFromFolders(folderList) {
+      const tray = document.getElementById('tray-grid');
+      let combinedItems = [];
+
+      const currentMapping = currentClass.config.buttonMappings[currentActiveButtonKey];
+      const allowedImageNames = (currentMapping?.selectedImages || []).map(n => decodeURIComponent(n).split('/').pop().trim().toLowerCase());
+
+      folderList.forEach(folder => {
+        const files = cachedScannedAssets[folder] || [];
+        const itemsToUse = files.length > 0 ? files : getFallbackFilesForFolder(folder);
+
+        itemsToUse.forEach(item => {
+          const itemCleanName = decodeURIComponent(item.fileName || '').split('/').pop().trim().toLowerCase();
+          
+          const isSelectedByAdmin = allowedImageNames.length === 0 || 
+                                    allowedImageNames.includes(itemCleanName) ||
+                                    allowedImageNames.some(aName => itemCleanName.includes(aName) || aName.includes(itemCleanName));
+
+          if (isSelectedByAdmin) {
+            const lockInfo = checkItemLockStatusByLevel(item.fileName);
+
+            combinedItems.push({
+              ...item,
+              folder: folder,
+              isLocked: lockInfo.isLocked,
+              lockReason: lockInfo.lockConditionText,
+              isSoilItem: currentActiveButtonKey === 'nutchunhat.png' || folder === 'nengame'
+            });
+          }
+        });
+      });
+
+      if (combinedItems.length === 0) {
+        tray.innerHTML = `<div class="col-span-3 text-center text-white/70 text-[11px] py-10">Chưa có vật phẩm nào được chọn.</div>`;
+        return;
+      }
+
+      tray.innerHTML = combinedItems.map((item) => {
+        const rawUrl = item.rawUrl || `${GITHUB_RAW_BASE}${item.localPath}`;
+
+        if (item.isLocked) {
+          return `
+            <div onclick="handleLockedItemClick('${item.lockReason}')" 
+                 class="group relative rounded-xl border border-white/10 bg-black/30 p-1.5 flex items-center justify-center h-16 md:h-20 transition select-none cursor-not-allowed">
+              <img src="${rawUrl}" class="max-h-full max-w-full object-contain opacity-50 filter grayscale-[40%] pointer-events-none select-none">
+              <div class="absolute top-1 right-1 w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center text-[9px] shadow-sm">
+                <i class="fa-solid fa-lock"></i>
+              </div>
+              <div class="lock-tooltip absolute -top-8 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900/95 text-amber-200 border border-amber-400/50 text-[9px] font-bold rounded-lg whitespace-nowrap shadow-xl">
+                <span>🔒 ${item.lockReason}</span>
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div draggable="true" 
+               ondragstart="handleDragStart(event, '${rawUrl}', '${item.fileName}', ${item.isSoilItem})"
+               onclick="handleItemClickTray('${rawUrl}', '${item.fileName}', ${item.isSoilItem})"
+               class="group relative rounded-xl border border-white/20 hover:border-emerald-400 bg-white/10 hover:bg-white/25 p-1.5 flex items-center justify-center h-16 md:h-20 transition cursor-grab active:cursor-grabbing">
+            <img src="${rawUrl}" class="clean-transparent-asset max-h-full max-w-full object-contain pointer-events-none select-none">
+            <i class="fa-solid fa-up-down-left-right text-[8px] text-white/30 absolute top-1 right-1 group-hover:text-emerald-300"></i>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function handleLockedItemClick(lockReason) {
+      playSfx('error_locked');
+      alert(`Vật phẩm này chưa mở khóa!\nĐiều kiện: ${lockReason}`);
+    }
+
+    function getFallbackFilesForFolder(folder) {
+      if (folder === 'hoacap1') return [{ fileName: 'tulip_cam.png', localPath: 'assets/hoacap1/tulip_hoa_cam.png' }];
+      if (folder === 'hoacap2') return [{ fileName: 'hoa_sen_vip.png', localPath: 'assets/hoacap2/hoa_sen.png' }];
+      if (folder === 'nucap1') return [{ fileName: 'nu_tulip.png', localPath: 'assets/nucap1/tulip_nu_cam.png' }];
+      if (folder === 'nucap2') return [{ fileName: 'nu_sen_vip.png', localPath: 'assets/nucap2/nu_sen.png' }];
+      if (folder === 'congcu') return [{ fileName: 'xeng.png', localPath: 'assets/congcu/xeng.png' }];
+      if (folder === 'nengame') {
+        return [
+          { fileName: 'khudatrieng_cam.png', localPath: 'assets/nengame/khudatrieng_cam.png' },
+          { fileName: 'khudatrieng_dohong.png', localPath: 'assets/nengame/khudatrieng_dohong.png' },
+          { fileName: 'khudatrieng_tim.png', localPath: 'assets/nengame/khudatrieng_tim.png' },
+          { fileName: 'khudatrieng_trắng.png', localPath: 'assets/nengame/khudatrieng_trắng.png' },
+          { fileName: 'khudatrieng_xanhduong.png', localPath: 'assets/nengame/khudatrieng_xanhduong.png' },
+          { fileName: 'khudatrieng_xanhla.png', localPath: 'assets/nengame/khudatrieng_xanhla.png' }
+        ];
+      }
+      return [];
+    }
+
+    // ================= XỬ LÝ KÉO THẢ & BẮT TỌA ĐỘ Ô ĐẤT =================
     function isPointInsidePolygon(point, vs) {
       const x = point.x, y = point.y;
       let inside = false;
@@ -795,7 +1625,6 @@
 
       const targetSlot = findPlotAtCoordinates(xPercent, yPercent);
 
-      // NẾU LÀ MẪU ĐẤT:
       if (draggedItemData.isSoilItem) {
         if (targetSlot) {
           const perm = checkPermissionOnPlot(targetSlot.teamId);
@@ -819,7 +1648,6 @@
         return;
       }
 
-      // NẾU LÀ HOA HOẶC CÔNG CỤ:
       if (targetSlot) {
         const perm = checkPermissionOnPlot(targetSlot.teamId);
         if (!perm.allowed) {
@@ -880,6 +1708,22 @@
       const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
       if (slot) {
         slot.soilImage = soilUrl;
+        renderPerspectivePlotsOnCanvas();
+      }
+    }
+
+    // GỠ BỎ ĐẤT KHỎI Ô (XÓA ĐẤT ĐỂ VÙNG CHỌN HIỆN TRỞ LẠI)
+    function clearSoilFromSlot(plotId, teamId, event) {
+      if (event) event.stopPropagation();
+      const perm = checkPermissionOnPlot(teamId);
+      if (!perm.allowed) {
+        playSfx('error_locked');
+        return alert(perm.msg);
+      }
+      playSfx('delete_item');
+      const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
+      if (slot) {
+        slot.soilImage = null;
         renderPerspectivePlotsOnCanvas();
       }
     }
@@ -1004,10 +1848,10 @@
     // ================= ÂM THANH =================
     function getAudioResolvedUrl(audioObj) {
       if (!audioObj) return '';
-      let url = audioObj.url || (audioObj.selectedFile ? `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${audioObj.selectedFile}` : '');
-      if (url.includes('drive.google.com/file/d/')) {
+      let url = audioObj.url || (audioObj.selectedFile ? `[https://raw.githubusercontent.com/$](https://raw.githubusercontent.com/$){GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${audioObj.selectedFile}` : '');
+      if (url.includes('[drive.google.com/file/d/](https://drive.google.com/file/d/)')) {
         const idMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        if (idMatch) url = `https://drive.google.com/uc?export=download&id=${idMatch[1]}`;
+        if (idMatch) url = `[https://drive.google.com/uc?export=download&id=$](https://drive.google.com/uc?export=download&id=$){idMatch[1]}`;
       }
       return url;
     }
@@ -1083,7 +1927,6 @@
       }
     }
 
-    // ================= ĐỒNG BỘ LOCALSTORAGE =================
     window.addEventListener('storage', (e) => {
       if (e.key && e.key.includes('garden_')) {
         loadAdminSystemData();
