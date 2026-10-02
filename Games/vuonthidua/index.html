@@ -7,34 +7,29 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* NỀN CARO CHO KHAY */
+    /* NỀN CARO SÁNG TRONG SUỐT CHO KHAY VẬT PHẨM */
     .bg-trans-grid {
-      background-color: rgba(255, 255, 255, 0.85);
-      background-image: linear-gradient(45deg, #e2e8f0 25%, transparent 25%), 
-                        linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), 
-                        linear-gradient(45deg, transparent 75%, #e2e8f0 75%), 
-                        linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
-      background-size: 12px 12px;
-      background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
+      background-color: rgba(255, 255, 255, 0.7);
+      background-image: linear-gradient(45deg, #f1f5f9 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f1f5f9 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f1f5f9 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f1f5f9 75%);
+      background-size: 10px 10px;
+      background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
     }
 
-    /* VIỀN NÂU ĐẬM BÁM SÁT ĐƯỜNG NÉT HOA/NỤ TRONG SUỐT */
-    .flower-outline {
-      filter: drop-shadow(0 0 1.2px #451a03) 
-              drop-shadow(0 0 2px #78350f) 
-              drop-shadow(0 4px 6px rgba(41, 15, 2, 0.7));
-      transition: transform 0.2s ease, filter 0.2s ease;
+    /* GIỮ NGUYÊN ẢNH GỐC TRONG SUỐT SẮC NÉT - KHÔNG BÓNG MỜ TỐI */
+    .clean-transparent-asset {
+      filter: none !important;
+      transition: transform 0.15s ease-out;
     }
-    .flower-outline:hover {
-      transform: scale(1.15);
-      filter: drop-shadow(0 0 2px #b45309) 
-              drop-shadow(0 0 4px #f59e0b) 
-              drop-shadow(0 6px 8px rgba(41, 15, 2, 0.8));
+    .clean-transparent-asset:hover {
+      transform: scale(1.08);
     }
 
     ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
-    ::-webkit-scrollbar-thumb { background: rgba(120, 53, 15, 0.5); border-radius: 4px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); }
+    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.25); border-radius: 4px; }
 
     .garden-placed-flower {
       position: absolute;
@@ -50,11 +45,11 @@
 
   <!-- POPUP ĐĂNG NHẬP HỌC SINH -->
   <div id="student-login-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 border border-amber-900/20 text-center">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 border border-slate-200 text-center">
       <div class="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto text-3xl mb-3 shadow-inner">
         🌸
       </div>
-      <h2 class="text-lg font-black text-emerald-950 uppercase">Vườn Thi Đua Lớp Học</h2>
+      <h2 class="text-lg font-black text-slate-800 uppercase">Vườn Thi Đua Lớp Học</h2>
       <p class="text-xs text-slate-500 mb-4">Nhập tài khoản để vào khu vườn của tổ bạn</p>
 
       <div class="space-y-3 text-left">
@@ -79,10 +74,10 @@
   </div>
 
   <!-- HEADER TRÊN CÙNG -->
-  <header class="h-11 bg-white/90 backdrop-blur-md border-b border-black/10 px-4 flex items-center justify-between z-30 shrink-0 shadow-sm">
+  <header class="h-11 bg-white/95 backdrop-blur-md border-b border-black/10 px-4 flex items-center justify-between z-30 shrink-0 shadow-xs">
     <div class="flex items-center gap-2">
       <span class="text-xl">🌸</span>
-      <h1 class="font-extrabold text-sm text-emerald-950 uppercase tracking-wide">Vườn Thi Đua Trồng Hoa</h1>
+      <h1 class="font-extrabold text-sm text-slate-800 uppercase tracking-wide">Vườn Thi Đua Trồng Hoa</h1>
       <span class="text-[11px] px-2 py-0.5 bg-emerald-100 text-emerald-900 rounded-full font-bold ml-1" id="hdr-class-badge">Lớp 10A1</span>
     </div>
 
@@ -104,10 +99,9 @@
   <div class="flex-1 flex flex-row h-[calc(100vh-44px)] overflow-hidden">
     
     <!-- PHẦN A: BÊN TRÁI (SÂN CHƠI NỀN GAME & CÁC VÙNG ĐẤT 3D) -->
-    <section id="section-a" class="flex-1 relative bg-slate-950 overflow-hidden flex items-center justify-center border-r-4 border-black/20" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+    <section id="section-a" class="flex-1 relative bg-slate-950 overflow-hidden flex items-center justify-center border-r-2 border-black/15" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
       
-      <!-- Ảnh nền sân trường -->
-      <img id="game-bg-image" src="assets/nengame/vuonlop.jpg" alt="Nền Game" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/vuonlop.jpg'" class="absolute inset-0 w-full h-full object-fill pointer-events-none select-none transition-all duration-300">
+      <img id="game-bg-image" src="assets/nengame/vuonlop.jpg" alt="Nền Game" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/vuonlop.jpg'" class="absolute inset-0 w-full h-full object-fill pointer-events-none select-none">
 
       <!-- LỚP CHỨA CÁC VÙNG ĐẤT PHỐI CẢNH 3D CỦA CÁC TỔ -->
       <div id="perspective-plots-layer" class="absolute inset-0 w-full h-full pointer-events-auto z-10"></div>
@@ -115,27 +109,26 @@
       <!-- LỚP CHỨA CÁC CÂY HOA ĐƯỢC CẮM TRÊN SÂN -->
       <div id="drop-flowers-layer" class="absolute inset-0 w-full h-full pointer-events-auto z-20"></div>
 
-      <!-- Gợi ý hướng dẫn -->
       <div id="empty-hint" class="absolute bottom-4 left-4 z-30 bg-black/60 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-white/20 text-white text-xs pointer-events-none flex items-center gap-2 shadow-lg">
         <i class="fa-solid fa-hand-pointer text-amber-400"></i>
-        <span>Kéo các hạt giống, nụ hoa từ <b>Phần B</b> cắm vào ô đất của tổ bạn!</span>
+        <span>Kéo các hạt giống, hoa từ <b>Phần B</b> cắm vào ô đất của tổ bạn!</span>
       </div>
     </section>
 
-    <!-- PHẦN B: BÊN PHẢI (NỀN RIÊNG BIỆT, NẠP NÚT TỪ ADMIN) -->
-    <aside id="section-b" class="w-80 md:w-96 lg:w-[400px] bg-cover bg-center flex flex-col h-full shadow-2xl shrink-0 border-l border-black/20" style="background-image: url('assets/nengame/nenungdung.jpg');">
+    <!-- PHẦN B: BÊN PHẢI (NỀN GỖ RIÊNG, TRONG SÁNG RÕ) -->
+    <aside id="section-b" class="w-80 md:w-96 lg:w-[400px] bg-cover bg-center flex flex-col h-full shadow-2xl shrink-0 border-l border-black/15" style="background-image: url('assets/nengame/nenungdung.jpg');">
       
-      <!-- B1: CÁC NÚT DO ADMIN GÁN (NẠP ĐỘNG TỪ JSON) -->
-      <div class="p-3 bg-black/20 backdrop-blur-xs border-b border-black/10 shadow-sm space-y-2 shrink-0">
-        <div class="text-[10px] font-black uppercase text-amber-100 drop-shadow tracking-wide">CHỌN TÍNH NĂNG VẬT PHẨM:</div>
+      <!-- B1: CÁC NÚT DO ADMIN GÁN -->
+      <div class="p-3 bg-black/15 backdrop-blur-xs border-b border-black/10 shadow-xs space-y-2 shrink-0">
+        <div class="text-[10px] font-black uppercase text-white drop-shadow-sm tracking-wide">CHỌN TÍNH NĂNG VẬT PHẨM:</div>
         <div class="grid grid-cols-4 gap-2" id="dynamic-button-bar"></div>
       </div>
 
-      <!-- B2: KHAY HIỂN THỊ CÁC ẢNH VẬT PHẨM (VIỀN NÂU BÁM NÉT, ẨN TÊN CHỮ) -->
-      <div class="flex-1 overflow-y-auto p-3.5 flex flex-col bg-black/15 backdrop-blur-[2px]">
+      <!-- B2: KHAY HIỂN THỊ CÁC ẢNH VẬT PHẨM (TRONG SUỐT NGUYÊN BẢN, SÁNG RÕ) -->
+      <div class="flex-1 overflow-y-auto p-3.5 flex flex-col bg-white/5 backdrop-blur-[1px]">
         <div class="flex items-center justify-between mb-2">
-          <span id="category-title" class="text-xs font-black uppercase text-amber-100 drop-shadow tracking-wider">KHO VẬT PHẨM</span>
-          <span class="text-[10px] text-amber-200/80 font-bold">Kéo hoặc bấm để đặt</span>
+          <span id="category-title" class="text-xs font-black uppercase text-white drop-shadow-sm tracking-wider">KHO VẬT PHẨM</span>
+          <span class="text-[10px] text-white/80 font-bold">Kéo hoặc bấm để đặt</span>
         </div>
         
         <div id="tray-grid" class="grid grid-cols-2 gap-3"></div>
@@ -150,7 +143,6 @@
     const GITHUB_REPO = 'ANT';
     const GITHUB_RAW_BASE = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/`;
 
-    // CẤU TRÚC DỮ LIỆU DỰ PHÒNG NẾU ADMIN CHƯA LƯU JSON
     const FALLBACK_CLASS_DATA = {
       name: '10A1',
       config: {
@@ -168,10 +160,7 @@
           'cond_quest': { id: 'cond_quest', name: 'Hoàn thành nhiệm vụ ngày', type: 'quest_done', folders: ['congcu'] }
         },
         plotSlots: [
-          { id: 'slot_1', name: 'Tổ 1', teamId: 1, corners: [{ x: 22, y: 32 }, { x: 46, y: 32 }, { x: 44, y: 56 }, { x: 19, y: 56 }] },
-          { id: 'slot_2', name: 'Tổ 2', teamId: 2, corners: [{ x: 54, y: 32 }, { x: 78, y: 32 }, { x: 81, y: 56 }, { x: 56, y: 56 }] },
-          { id: 'slot_3', name: 'Tổ 3', teamId: 3, corners: [{ x: 18, y: 60 }, { x: 44, y: 60 }, { x: 42, y: 86 }, { x: 15, y: 86 }] },
-          { id: 'slot_4', name: 'Tổ 4', teamId: 4, corners: [{ x: 56, y: 60 }, { x: 82, y: 60 }, { x: 85, y: 86 }, { x: 58, y: 86 }] }
+          { id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }] }
         ]
       },
       students: {
@@ -196,9 +185,7 @@
     let currentActiveButtonKey = 'nuthoa.png';
     let draggedItemData = null;
 
-    // =========================================================================
-    // TOÁN HỌC TÍNH MA TRẬN 3D BIẾN DẠNG PHỐI CẢNH (HOMOGRAPHY -> MATRIX3D)
-    // =========================================================================
+    // TÍNH TOÁN MA TRẬN PHỐI CẢNH 3D (HOMOGRAPHY -> MATRIX3D)
     function calculateMatrix3D(w, h, p0, p1, p2, p3) {
       const src = [{ x: 0, y: 0 }, { x: w, y: 0 }, { x: w, y: h }, { x: 0, y: h }];
       const dst = [p0, p1, p2, p3];
@@ -243,11 +230,10 @@
       )`;
     }
 
-    // ================= 1. NẠP DỮ LIỆU TỪ ADMIN298 (JSON) =================
+    // 1. NẠP DỮ LIỆU TỪ ADMIN298 (JSON)
     function loadAdminSystemData() {
-      // Đọc từ 2 khóa lưu trữ mới nhất của Admin298
-      const rawClasses = localStorage.getItem('garden_system_classes_v10');
-      const rawActive = localStorage.getItem('garden_active_class_v10');
+      const rawClasses = localStorage.getItem('garden_system_classes_v11');
+      const rawActive = localStorage.getItem('garden_active_class_v11');
 
       if (rawClasses) {
         try { globalClassesData = JSON.parse(rawClasses); } catch (e) {}
@@ -262,14 +248,13 @@
 
       currentClass = globalClassesData[activeClassName] || FALLBACK_CLASS_DATA;
 
-      // Đọc kho ảnh quét từ GitHub API
       const rawAssets = localStorage.getItem('garden_auto_scanned_assets_v5') || localStorage.getItem('garden_auto_scanned_assets_v4');
       if (rawAssets) {
         try { cachedScannedAssets = JSON.parse(rawAssets); } catch (e) {}
       }
     }
 
-    // ================= 2. QUẢN LÝ ĐĂNG NHẬP HỌC SINH =================
+    // 2. ĐĂNG NHẬP HỌC SINH
     function handleStudentLogin() {
       const user = document.getElementById('input-student-user').value.trim();
       const pass = document.getElementById('input-student-pass').value.trim();
@@ -281,7 +266,6 @@
         return;
       }
 
-      // Tự động phân tích tên lớp từ tiền tố tài khoản (VD: 10A1stt15_To1 -> Lớp 10A1)
       let matchedClass = null;
       for (let cName in globalClassesData) {
         if (user.toUpperCase().startsWith(cName.toUpperCase())) {
@@ -293,7 +277,6 @@
       if (!matchedClass) matchedClass = activeClassName;
       currentClass = globalClassesData[matchedClass] || currentClass;
 
-      // Kiểm tra tài khoản trong danh sách học sinh của lớp
       const studentObj = currentClass.students ? currentClass.students[user] : null;
 
       if (studentObj) {
@@ -304,7 +287,6 @@
         }
         currentStudent = { ...studentObj };
       } else {
-        // Nếu là tài khoản thử nghiệm tự do
         const toMatch = user.match(/_To(\d+)/i) || user.match(/To(\d+)/i);
         const toNum = toMatch ? parseInt(toMatch[1]) : 1;
         currentStudent = {
@@ -326,11 +308,10 @@
       location.reload();
     }
 
-    // ================= 3. ÁP DỤNG CẤU HÌNH GIAO DIỆN & VÙNG ĐẤT 3D =================
+    // 3. ÁP DỤNG CẤU HÌNH GIAO DIỆN
     function applyClassConfiguration() {
       const cfg = currentClass.config;
 
-      // 1. Cập nhật nhãn thông tin Header
       document.getElementById('hdr-class-badge').innerText = `Lớp ${currentClass.name}`;
       document.getElementById('hdr-student-name').innerText = `${currentStudent.name} (Tổ ${currentStudent.team})`;
       
@@ -344,23 +325,18 @@
         rankBadge.innerText = `Hạng ${myRank}`;
       }
 
-      // 2. Nạp ảnh nền 3 vùng do Admin cấu hình
       document.getElementById('game-wrapper').style.backgroundImage = `url('${cfg.bgGlobal}')`;
       document.getElementById('game-bg-image').src = cfg.bgA;
       document.getElementById('section-b').style.backgroundImage = `url('${cfg.bgB}')`;
 
-      // 3. Dựng các vùng đất 3D trên sân A
       renderPerspectivePlotsOnCanvas();
-
-      // 4. Sinh các nút ở Phần B1 theo đúng buttonMappings từ Admin
       renderDynamicButtonsFromAdmin();
 
-      // Nạp danh mục của nút đầu tiên
       const firstBtnIcon = Object.keys(cfg.buttonMappings || {})[0] || 'nuthoa.png';
       switchButtonCategory(firstBtnIcon);
     }
 
-    // VẼ CÁC KHU ĐẤT PHỐI CẢNH 3D TRÊN SÂN A
+    // VẼ CÁC VÙNG ĐẤT 3D TRÊN SÂN A
     function renderPerspectivePlotsOnCanvas() {
       const container = document.getElementById('perspective-plots-layer');
       const slots = currentClass.config.plotSlots || [];
@@ -369,7 +345,6 @@
       const cH = sectionA.clientHeight || 640;
 
       container.innerHTML = slots.map(slot => {
-        // Tính tọa độ pixel 4 điểm
         const p0 = { x: (slot.corners[0].x / 100) * cW, y: (slot.corners[0].y / 100) * cH };
         const p1 = { x: (slot.corners[1].x / 100) * cW, y: (slot.corners[1].y / 100) * cH };
         const p2 = { x: (slot.corners[2].x / 100) * cW, y: (slot.corners[2].y / 100) * cH };
@@ -385,15 +360,13 @@
                ondrop="handleDropOnPlot(event, '${slot.id}', ${slot.teamId})"
                class="absolute inset-0 pointer-events-none">
             
-            <!-- KHU ĐẤT ĐƯỢC BẺ CONG PHỐI CẢNH 3D ÔM KHÍT MẶT SÂN -->
             <div style="width: ${baseW}px; height: ${baseH}px; transform-origin: 0 0; transform: ${matrixCss}; position: absolute; left: 0; top: 0;" class="pointer-events-auto">
-              <div class="relative w-full h-full border-2 ${isMyTeamPlot ? 'border-amber-400 bg-amber-500/25 ring-4 ring-amber-300/30' : 'border-dashed border-emerald-400/80 bg-emerald-500/15'} rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 shadow-lg transition duration-300 group hover:bg-amber-400/30">
+              <div class="relative w-full h-full border-2 ${isMyTeamPlot ? 'border-amber-400 bg-amber-500/20' : 'border-dashed border-emerald-400/70 bg-emerald-500/10'} rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 shadow-md transition duration-200 group hover:bg-amber-400/25">
                 
-                <!-- Ảnh đất thực tế khudatrieng_nau.png uốn cong theo sân -->
-                <img src="https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/khudatrieng_nau.png" class="w-full h-full object-fill opacity-90 filter drop-shadow">
+                <!-- ẢNH ĐẤT NGUYÊN BẢN TRONG SUỐT - KHÔNG BỊ BÓNG MỜ TỐI -->
+                <img src="https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/khudatrieng_nau.png" class="w-full h-full object-fill opacity-90 select-none pointer-events-none">
                 
-                <!-- Bảng tên tổ gắn trên khu đất -->
-                <div class="absolute top-2 left-2 bg-amber-950/90 text-amber-200 text-[11px] font-black px-2.5 py-0.5 rounded-full shadow border border-amber-600/40 flex items-center gap-1">
+                <div class="absolute top-2 left-2 bg-amber-950/90 text-amber-200 text-[11px] font-black px-2.5 py-0.5 rounded-full shadow border border-amber-600/40 flex items-center gap-1 select-none pointer-events-none">
                   <span>🌾</span> ${slot.name} ${isMyTeamPlot ? '<span class="text-emerald-400 font-bold">(Của bạn)</span>' : ''}
                 </div>
               </div>
@@ -404,7 +377,7 @@
       }).join('');
     }
 
-    // ================= 4. HIỂN THỊ CÁC NÚT PHẦN B1 TỪ ADMIN =================
+    // 4. HIỂN THỊ CÁC NÚT PHẦN B1
     function renderDynamicButtonsFromAdmin() {
       const bar = document.getElementById('dynamic-button-bar');
       const mappings = currentClass.config.buttonMappings || {};
@@ -419,7 +392,7 @@
           <button onclick="switchButtonCategory('${iconFile}')" id="btn-dyn-${iconFile}" class="group relative rounded-xl ${
             isActive ? 'border-2 border-emerald-500 bg-white shadow-md scale-105' : 'border border-white/20 bg-white/80 hover:bg-white'
           } p-1 transition flex flex-col items-center justify-center">
-            <img src="${iconSrc}" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/nut_hoa.png'" class="w-9 h-9 object-contain drop-shadow">
+            <img src="${iconSrc}" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/nut_hoa.png'" class="w-9 h-9 object-contain select-none pointer-events-none">
             <span class="text-[10px] font-black text-slate-800 mt-0.5 tracking-tight">${item.label}</span>
           </button>
         `;
@@ -431,7 +404,6 @@
       const mappings = currentClass.config.buttonMappings || {};
       const targetFolders = mappings[iconFile]?.targetFolders || ['hoacap1'];
 
-      // Cập nhật trạng thái active
       const allButtons = document.querySelectorAll('#dynamic-button-bar button');
       allButtons.forEach(b => {
         b.className = "group relative rounded-xl border border-white/20 bg-white/80 hover:bg-white p-1 transition flex flex-col items-center justify-center";
@@ -445,7 +417,7 @@
       renderTrayItemsFromFolders(targetFolders);
     }
 
-    // ================= 5. THẨM ĐỊNH MỞ KHÓA & HIỂN THỊ KHAY B2 =================
+    // 5. HIỂN THỊ VẬT PHẨM KHAY B2 (HOÀN TOÀN TRONG SUỐT SẮC NÉT)
     function checkFolderUnlocked(folderName) {
       const conditions = currentClass.config.unlockConditions || {};
 
@@ -454,12 +426,10 @@
         const folders = cond.folders || (cond.folder ? [cond.folder] : []);
 
         if (folders.includes(folderName)) {
-          // Kiểm tra điều kiện Hạng 1 tuần
           if (cond.type === 'rank_top1') {
             const myRank = currentClass.weeklyRanking ? (currentClass.weeklyRanking[currentStudent.team] || 1) : 1;
             if (myRank !== 1) return { isLocked: true, reason: 'Chỉ mở cho Tổ đạt Hạng 1 tuần' };
           }
-          // Kiểm tra nhiệm vụ ngày
           if (cond.type === 'quest_done') {
             if (!currentStudent.isQuestDone) return { isLocked: true, reason: 'Hoàn thành nhiệm vụ ngày để mở' };
           }
@@ -476,8 +446,6 @@
       folderList.forEach(folder => {
         const check = checkFolderUnlocked(folder);
         const files = cachedScannedAssets[folder] || [];
-
-        // Nếu chưa có cache từ API, tạo danh sách dự phòng
         const itemsToUse = files.length > 0 ? files : getFallbackFilesForFolder(folder);
 
         itemsToUse.forEach(item => {
@@ -491,17 +459,16 @@
       });
 
       if (combinedItems.length === 0) {
-        tray.innerHTML = `<div class="col-span-2 text-center text-amber-100/60 text-xs py-12">Thư mục chưa có vật phẩm nào.</div>`;
+        tray.innerHTML = `<div class="col-span-2 text-center text-white/70 text-xs py-12">Thư mục chưa có vật phẩm nào.</div>`;
         return;
       }
 
-      tray.innerHTML = combinedItems.map((item, idx) => {
+      tray.innerHTML = combinedItems.map((item) => {
         const rawUrl = item.rawUrl || `${GITHUB_RAW_BASE}${item.localPath}`;
 
         if (item.isLocked) {
-          // VẬT PHẨM BỊ KHÓA (MỜ + Ổ KHÓA 🔒, KHÔNG HIỆN CHỮ)
           return `
-            <div class="relative rounded-2xl border border-black/20 bg-black/25 p-3 flex items-center justify-center h-28 overflow-hidden select-none cursor-not-allowed shadow-inner" title="${item.lockReason}">
+            <div class="relative rounded-2xl border border-black/10 bg-black/20 p-3 flex items-center justify-center h-28 overflow-hidden select-none cursor-not-allowed" title="${item.lockReason}">
               <img src="${rawUrl}" class="max-h-full max-w-full object-contain opacity-25 filter grayscale">
               <div class="absolute inset-0 flex flex-col items-center justify-center text-white">
                 <div class="w-8 h-8 rounded-full bg-slate-950/85 flex items-center justify-center shadow-lg border border-amber-400 mb-1">
@@ -513,14 +480,17 @@
           `;
         }
 
-        // VẬT PHẨM ĐƯỢC MỞ: VIỀN NÂU ĐẬM BÁM SÁT CÁNH HOA
+        // VẬT PHẨM MỞ: GIỮ ĐÚNG NỀN TRONG SUỐT SẮC NÉT NGUYÊN BẢN (KHÔNG ÁP FILTER LÀM ĐỤC MỜ)
         return `
           <div draggable="true" 
                ondragstart="handleDragStart(event, '${rawUrl}', '${item.fileName}')"
                onclick="placeFlowerInCenter('${rawUrl}', '${item.fileName}')"
-               class="group relative rounded-2xl border border-white/10 hover:border-amber-400/60 bg-white/10 hover:bg-white/20 p-2.5 flex items-center justify-center h-28 transition cursor-grab active:cursor-grabbing">
-            <img src="${rawUrl}" class="max-h-full max-w-full object-contain flower-outline pointer-events-none">
-            <i class="fa-solid fa-up-down-left-right text-[10px] text-amber-200/40 absolute top-2 right-2 group-hover:text-amber-300"></i>
+               class="group relative rounded-2xl border border-white/20 hover:border-emerald-400 bg-white/10 hover:bg-white/25 p-2 flex items-center justify-center h-28 transition cursor-grab active:cursor-grabbing">
+            
+            <!-- ẢNH NGUYÊN BẢN TRONG SUỐT SẮC NÉT -->
+            <img src="${rawUrl}" class="clean-transparent-asset max-h-full max-w-full object-contain pointer-events-none select-none">
+            
+            <i class="fa-solid fa-up-down-left-right text-[10px] text-white/30 absolute top-2 right-2 group-hover:text-emerald-300"></i>
           </div>
         `;
       }).join('');
@@ -535,7 +505,7 @@
       return [];
     }
 
-    // ================= 6. XỬ LÝ DRAG & DROP CẮM HOA VÀO VƯỜN =================
+    // 6. KÉO THẢ CẮM HOA VÀO VƯỜN
     function handleDragStart(e, rawUrl, fileName) {
       draggedItemData = { rawUrl, fileName };
       e.dataTransfer.setData('text/plain', '');
@@ -585,7 +555,8 @@
 
       el.innerHTML = `
         <div class="relative w-full h-full group flex items-center justify-center">
-          <img src="${rawUrl}" class="max-h-full max-w-full object-contain flower-outline pointer-events-none">
+          <!-- ẢNH HOA CẮM TRÊN SÂN SẮC NÉT TRONG SUỐT NGUYÊN GỐC -->
+          <img src="${rawUrl}" class="max-h-full max-w-full object-contain pointer-events-none select-none">
           <button onclick="removePlacedFlower('${uniqueId}', event)" class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[10px] font-bold shadow hidden group-hover:flex items-center justify-center">
             ✕
           </button>
@@ -637,16 +608,13 @@
       }
     }
 
-    // Tự động căn chỉnh lại các vùng đất 3D khi thay đổi kích thước cửa sổ trình duyệt
     window.addEventListener('resize', () => {
       renderPerspectivePlotsOnCanvas();
     });
 
-    // KHỞI ĐỘNG HỆ THỐNG
     window.addEventListener('DOMContentLoaded', () => {
       loadAdminSystemData();
 
-      // Kiểm tra xem đã có học sinh lưu trong phiên chưa
       const savedStudent = sessionStorage.getItem('current_garden_student');
       if (savedStudent) {
         try {
@@ -657,7 +625,6 @@
         } catch (e) {}
       }
 
-      // Mặc định hiển thị popup đăng nhập
       document.getElementById('student-login-modal').classList.remove('hidden');
     });
   </script>
