@@ -28,7 +28,6 @@
       background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
     }
 
-    /* GIỮ ẢNH TRONG SUỐT NGUYÊN BẢN SẮC NÉT */
     .clean-transparent-asset {
       filter: none !important;
       transition: transform 0.15s ease-out;
@@ -49,6 +48,15 @@
       z-index: 30;
     }
     .garden-placed-flower:active { cursor: grabbing; }
+
+    /* VÙNG ĐẤT SVG TƯƠNG TÁC THẢ VẬT PHẨM */
+    .plot-interactive-svg {
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .plot-interactive-svg:hover {
+      opacity: 0.95;
+    }
   </style>
 </head>
 <body id="game-wrapper" class="bg-cover bg-center h-screen w-screen overflow-hidden flex flex-col font-sans select-none" style="background-image: url('assets/nengame/nenungdung.jpg');">
@@ -131,7 +139,7 @@
       <!-- Ảnh nền sân trường -->
       <img id="game-bg-image" src="assets/nengame/vuonlop.jpg" alt="Nền Game" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/vuonlop.jpg'" class="absolute inset-0 w-full h-full object-fill pointer-events-none select-none transition-all duration-300">
 
-      <!-- LỚP CHỨA CÁC VÙNG ĐẤT PHỐI CẢNH 3D CỦA CÁC TỔ -->
+      <!-- LỚP CHỨA CÁC VÙNG ĐẤT 3D CHUẨN XÁC NỐI TỌA ĐỘ BẰNG SVG -->
       <div id="perspective-plots-layer" class="absolute inset-0 w-full h-full pointer-events-auto z-10"></div>
 
       <!-- LỚP CHỨA CÁC VÙNG CHỮ TỰ ĐỘNG ĐỔI MÀU TỪ ADMIN -->
@@ -163,7 +171,6 @@
           <span class="text-[9px] text-white/80 font-bold shrink-0">Kéo / Chạm</span>
         </div>
         
-        <!-- LƯỚI 3 CỘT MỖI HÀNG -->
         <div id="tray-grid" class="grid grid-cols-3 gap-1.5"></div>
       </div>
 
@@ -176,7 +183,6 @@
     const GITHUB_REPO = 'ANT';
     const GITHUB_RAW_BASE = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/`;
 
-    // CẤU TRÚC DỰ PHÒNG CHUẨN
     const FALLBACK_CLASS_DATA = {
       name: '10A1',
       config: {
@@ -198,9 +204,7 @@
         ],
         textOverlays: []
       },
-      students: {
-        '10A1stt1_To1': { username: '10A1stt1_To1', name: 'Nguyễn Văn An', stt: '1', team: 1, class: '10A1', password: 'nva1', isQuestDone: true }
-      },
+      students: {},
       weeklyRanking: { 1: 1, 2: 2, 3: 3, 4: 4 }
     };
 
@@ -220,54 +224,8 @@
     let currentActiveButtonKey = 'nuthoa.png';
     let draggedItemData = null;
 
-    // TÍNH TOÁN MA TRẬN PHỐI CẢNH 3D (HOMOGRAPHY -> MATRIX3D)
-    function calculateMatrix3D(w, h, p0, p1, p2, p3) {
-      const src = [{ x: 0, y: 0 }, { x: w, y: 0 }, { x: w, y: h }, { x: 0, y: h }];
-      const dst = [p0, p1, p2, p3];
-
-      let A = [];
-      for (let i = 0; i < 4; i++) {
-        const sx = src[i].x, sy = src[i].y;
-        const dx = dst[i].x, dy = dst[i].y;
-        A.push([sx, sy, 1, 0, 0, 0, -sx * dx, -sy * dy, dx]);
-        A.push([0, 0, 0, sx, sy, 1, -sx * dy, -sy * dy, dy]);
-      }
-
-      for (let i = 0; i < 8; i++) {
-        let maxRow = i;
-        for (let k = i + 1; k < 8; k++) {
-          if (Math.abs(A[k][i]) > Math.abs(A[maxRow][i])) maxRow = k;
-        }
-        let temp = A[i]; A[i] = A[maxRow]; A[maxRow] = temp;
-
-        for (let k = i + 1; k < 8; k++) {
-          let c = -A[k][i] / A[i][i];
-          for (let j = i; j <= 8; j++) {
-            if (i === j) A[k][j] = 0;
-            else A[k][j] += c * A[i][j];
-          }
-        }
-      }
-
-      let H = new Array(8);
-      for (let i = 7; i >= 0; i--) {
-        H[i] = A[i][8] / A[i][i];
-        for (let k = i - 1; k >= 0; k--) {
-          A[k][8] -= A[k][i] * H[i];
-        }
-      }
-
-      return `matrix3d(
-        ${H[0]}, ${H[3]}, 0, ${H[6]},
-        ${H[1]}, ${H[4]}, 0, ${H[7]},
-        0, 0, 1, 0,
-        ${H[2]}, ${H[5]}, 0, 1.0
-      )`;
-    }
-
     // ================= 1. NẠP DỮ LIỆU ĐỒNG BỘ THỜI GIAN THỰC TỪ ADMIN =================
     function loadAdminSystemData() {
-      // Đọc các khóa lưu trữ mới nhất từ admin298
       const rawClasses = localStorage.getItem('garden_system_classes_v13') || 
                          localStorage.getItem('garden_system_classes_v12') || 
                          localStorage.getItem('garden_system_classes_v11');
@@ -363,7 +321,7 @@
       location.reload();
     }
 
-    // ================= 4. ÁP DỤNG CẤU HÌNH GIAO DIỆN & VÙNG ĐẤT 3D =================
+    // ================= 4. ÁP DỤNG CẤU HÌNH GIAO DIỆN & VÙNG ĐẤT =================
     function applyClassConfiguration() {
       const cfg = currentClass.config;
 
@@ -385,7 +343,7 @@
       document.getElementById('game-bg-image').src = cfg.bgA;
       document.getElementById('section-b').style.backgroundImage = `url('${cfg.bgB}')`;
 
-      // Dựng các vùng đất 3D & chữ nền
+      // Dựng các vùng đất bằng SVG chuẩn xác (KHÔNG DÙNG MATRIX3D BỊ VỠ NỮA)
       renderPerspectivePlotsOnCanvas();
       renderTextOverlaysOnCanvas();
 
@@ -396,7 +354,9 @@
       switchButtonCategory(firstBtnIcon);
     }
 
-    // DỰNG VÙNG ĐẤT 3D TRÊN SÂN A
+    // =========================================================================
+    // DỰNG VÙNG ĐẤT BẰNG SVG & CLIP-PATH CHUẨN XÁC 100% (KHẮC PHỤC TRIỆT ĐỂ LỖI MA TRẬN)
+    // =========================================================================
     function renderPerspectivePlotsOnCanvas() {
       const container = document.getElementById('perspective-plots-layer');
       const slots = currentClass.config.plotSlots || [];
@@ -404,37 +364,54 @@
       const cW = sectionA.clientWidth || 960;
       const cH = sectionA.clientHeight || 640;
 
-      container.innerHTML = slots.map(slot => {
-        const p0 = { x: (slot.corners[0].x / 100) * cW, y: (slot.corners[0].y / 100) * cH };
-        const p1 = { x: (slot.corners[1].x / 100) * cW, y: (slot.corners[1].y / 100) * cH };
-        const p2 = { x: (slot.corners[2].x / 100) * cW, y: (slot.corners[2].y / 100) * cH };
-        const p3 = { x: (slot.corners[3].x / 100) * cW, y: (slot.corners[3].y / 100) * cH };
+      container.innerHTML = `
+        <svg class="absolute inset-0 w-full h-full pointer-events-auto" style="overflow: visible;" viewBox="0 0 ${cW} ${cH}">
+          <defs>
+            <!-- Định nghĩa mẫu vân đất hoặc ảnh đất cắt theo đa giác -->
+            <pattern id="soil-pattern" patternUnits="userSpaceOnUse" width="120" height="120">
+              <image href="https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/khudatrieng_nau.png" x="0" y="0" width="120" height="120" opacity="0.95" />
+            </pattern>
+          </defs>
 
-        const baseW = 300, baseH = 200;
-        const matrixCss = calculateMatrix3D(baseW, baseH, p0, p1, p2, p3);
-        const isMyTeamPlot = slot.teamId === currentStudent.team;
+          ${slots.map(slot => {
+            const ptsPixel = slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ');
+            const centerX = (slot.corners[0].x + slot.corners[1].x + slot.corners[2].x + slot.corners[3].x) / 4;
+            const centerY = (slot.corners[0].y + slot.corners[1].y + slot.corners[2].y + slot.corners[3].y) / 4;
+            const isMyTeamPlot = slot.teamId === currentStudent.team;
 
-        return `
-          <div id="plot-area-${slot.id}" 
-               ondragover="handleDragOver(event)" 
-               ondrop="handleDropOnPlot(event, '${slot.id}', ${slot.teamId})"
-               class="absolute inset-0 pointer-events-none">
-            
-            <div style="width: ${baseW}px; height: ${baseH}px; transform-origin: 0 0; transform: ${matrixCss}; position: absolute; left: 0; top: 0;" class="pointer-events-auto">
-              <div class="relative w-full h-full border-2 ${isMyTeamPlot ? 'border-amber-400 bg-amber-500/20' : 'border-dashed border-emerald-400/70 bg-emerald-500/10'} rounded-2xl overflow-hidden flex flex-col items-center justify-center p-2 shadow-md transition duration-200 group hover:bg-amber-400/25">
+            return `
+              <g id="plot-group-${slot.id}" class="plot-interactive-svg"
+                 ondragover="handleDragOver(event)" 
+                 ondrop="handleDropOnPlot(event, '${slot.id}',${slot.teamId})">
                 
-                <!-- ẢNH ĐẤT NGUYÊN BẢN TRONG SUỐT BẺ CONG 3D -->
-                <img src="https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/khudatrieng_nau.png" class="w-full h-full object-fill opacity-90 select-none pointer-events-none">
-                
-                <div class="absolute top-2 left-2 bg-amber-950/90 text-amber-200 text-[10px] md:text-[11px] font-black px-2.5 py-0.5 rounded-full shadow border border-amber-600/40 flex items-center gap-1 select-none pointer-events-none">
-                  <span>🌾</span> ${slot.name} ${isMyTeamPlot ? '<span class="text-emerald-400 font-bold">(Của bạn)</span>' : ''}
-                </div>
-              </div>
-            </div>
+                <!-- Đa giác ô đất ôm khít mặt sân theo đúng 4 góc Admin nắn -->
+                <polygon points="${ptsPixel}" 
+                         fill="${isMyTeamPlot ? 'rgba(120, 53, 15, 0.45)' : 'rgba(16, 185, 129, 0.25)'}" 
+                         stroke="${isMyTeamPlot ? '#f59e0b' : '#10b981'}" 
+                         stroke-width="${isMyTeamPlot ? '3.5' : '2'}" 
+                         stroke-dasharray="${isMyTeamPlot ? 'none' : '6,4'}">
+                  <title>${slot.name}${isMyTeamPlot ? '(Khu đất của tổ bạn)' : ''}</title>
+                </polygon>
 
-          </div>
-        `;
-      }).join('');
+                <!-- Nhãn tên tổ gắn giữa tâm ô đất -->
+                <g style="pointer-events: none;">
+                  <rect x="${(centerX / 100) * cW}" y="${(centerY / 100) * cH}" width="110" height="26" rx="13" 
+                        transform="translate(-55, -13)" 
+                        fill="rgba(69, 26, 3, 0.9)" 
+                        stroke="${isMyTeamPlot ? '#fbbf24' : '#b45309'}" 
+                        stroke-width="1.5" />
+                  <text x="${(centerX / 100) * cW}" y="${(centerY / 100) * cH}" 
+                        text-anchor="middle" dominant-baseline="central" 
+                        fill="${isMyTeamPlot ? '#fef08a' : '#fef3c7'}" 
+                        font-size="11" font-weight="900" font-family="sans-serif">
+                    🌾 ${slot.name}${isMyTeamPlot ? '★' : ''}
+                  </text>
+                </g>
+              </g>
+            `;
+          }).join('')}
+        </svg>
+      `;
     }
 
     // DỰNG VÙNG CHỮ TỰ ĐỘNG ĐỔI MÀU TRÊN SÂN A
@@ -443,7 +420,6 @@
       const texts = currentClass.config.textOverlays || [];
       const bgA = (currentClass.config.bgA || '').toLowerCase();
 
-      // Xác định tông màu chữ tương phản với nền
       let textColor = '#451a03', bgColor = 'rgba(254, 243, 199, 0.75)', borderColor = '#b45309';
       if (bgA.includes('dem') || bgA.includes('dark')) {
         textColor = '#fef3c7'; bgColor = 'rgba(0, 0, 0, 0.65)'; borderColor = '#f59e0b';
@@ -565,7 +541,6 @@
           `;
         }
 
-        // ẢNH TRONG SUỐT THU NHỎ 60% SẮC NÉT
         return `
           <div draggable="true" 
                ondragstart="handleDragStart(event, '${rawUrl}', '${item.fileName}')"
@@ -674,7 +649,6 @@
         }
       };
 
-      // Hỗ trợ cả chuột (Desktop) và chạm (Mobile Touch)
       el.addEventListener('mousedown', (e) => {
         if (e.target.tagName === 'BUTTON') return;
         onStart(e.clientX, e.clientY);
@@ -708,8 +682,7 @@
       }
     }
 
-    // ================= 8. LẮNG NGHE SỰ KIỆN CẬP NHẬT THỜI GIAN THỰC TỪ ADMIN298 =================
-    // Khi tab admin298 lưu dữ liệu mới -> Tab index tự cập nhật lại ngay tức thì
+    // ================= 8. LẮNG NGHE ĐỒNG BỘ THỜI GIAN THỰC TỪ ADMIN298 =================
     window.addEventListener('storage', (e) => {
       if (e.key && e.key.includes('garden_')) {
         loadAdminSystemData();
@@ -717,14 +690,15 @@
       }
     });
 
-    // Định kỳ kiểm tra nhanh (mỗi 1.5 giây) đảm bảo đồng bộ 100% trên mọi trình duyệt
     setInterval(() => {
-      const rawActive = localStorage.getItem('garden_active_class_v13') || localStorage.getItem('garden_active_class_v12');
+      const rawActive = localStorage.getItem('garden_active_class_v13') || 
+                        localStorage.getItem('garden_active_class_v12') || 
+                        localStorage.getItem('garden_active_class_v11');
       if (rawActive && rawActive !== activeClassName) {
         loadAdminSystemData();
         applyClassConfiguration();
       }
-    }, 1500);
+    }, 1200);
 
     window.addEventListener('resize', () => {
       renderPerspectivePlotsOnCanvas();
