@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin298 - Quản Trị Hệ Thống Trồng Hoa Thi Đua</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Họa tiết caro trong suốt cho ảnh PNG */
+    .bg-trans-grid {
+      background-color: #ffffff;
+      background-image: linear-gradient(45deg, #f1f5f9 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f1f5f9 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f1f5f9 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f1f5f9 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f8fafc; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans">
+
+  <!-- POPUP ĐĂNG NHẬP -->
+  <div id="login-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-200">
+      <div class="text-center mb-5">
+        <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto text-2xl mb-2 shadow-inner">
+          <i class="fa-solid fa-seedling"></i>
+        </div>
+        <h2 class="text-xl font-bold text-slate-800">Admin298 - Vườn Thi Đua</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Hệ thống quản lý asset & thi đua lớp học</p>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Tài khoản</label>
+          <input type="text" id="login-user" autocomplete="off" class="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Mật khẩu</label>
+          <div class="relative">
+            <input type="password" id="login-pass" autocomplete="off" class="w-full px-3.5 py-2 pr-10 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <button type="button" onclick="togglePasswordVisibility('login-pass', 'eye-icon-login')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none">
+              <i id="eye-icon-login" class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div id="login-error" class="hidden text-rose-500 text-xs font-semibold text-center"></div>
+        <button onclick="handleLogin()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- THANH HEADER TRÊN CÙNG -->
+  <header class="bg-white border-b border-slate-200 px-6 py-3 sticky top-0 z-30 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl text-emerald-600"><i class="fa-solid fa-spa"></i></span>
+      <div>
+        <h1 class="font-bold text-base text-slate-800 leading-tight">Admin298 Garden Manager</h1>
+        <p class="text-[11px] text-slate-500" id="current-user-badge">Đang đăng nhập: admin298</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="exportBackupData()" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-download text-emerald-600"></i> Xuất Dữ Liệu
+      </button>
+      <button onclick="handleLogout()" class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold flex items-center gap-1 transition">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng Xuất
+      </button>
+    </div>
+  </header>
+
+  <!-- BỐ CỤC CHÍNH: PHẦN A (1/3) & PHẦN B (2/3) -->
+  <div id="admin-app" class="hidden flex-1 flex flex-col md:flex-row h-[calc(100vh-57px)] overflow-hidden">
+    
+    <!-- PHẦN A: BÊN TRÁI - CHIẾM 1/3 CHIỀU NGANG -->
+    <aside class="w-full md:w-1/3 border-r border-slate-200 bg-white flex flex-col h-full shadow-sm">
+      <div class="p-2.5 border-b border-slate-200 bg-slate-50/70 grid grid-cols-4 gap-1">
+        <button onclick="switchTab('upload')" id="tab-btn-upload" class="py-2 text-[11px] font-bold rounded-lg bg-emerald-600 text-white shadow-sm flex items-center justify-center gap-1 transition">
+          <i class="fa-solid fa-cloud-arrow-up"></i> Tải Ảnh
+        </button>
+        <button onclick="switchTab('classes')" id="tab-btn-classes" class="py-2 text-[11px] font-bold rounded-lg bg-white hover:bg-slate-100 text-slate-600 flex items-center justify-center gap-1 transition">
+          <i class="fa-solid fa-graduation-cap"></i> Lớp Học
+        </button>
+        <button onclick="switchTab('quest')" id="tab-btn-quest" class="py-2 text-[11px] font-bold rounded-lg bg-white hover:bg-slate-100 text-slate-600 flex items-center justify-center gap-1 transition">
+          <i class="fa-solid fa-trophy"></i> Thi Đua
+        </button>
+        <button onclick="switchTab('admins')" id="tab-btn-admins" class="py-2 text-[11px] font-bold rounded-lg bg-white hover:bg-slate-100 text-slate-600 flex items-center justify-center gap-1 transition">
+          <i class="fa-solid fa-users-gear"></i> Admin Phụ
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 space-y-4 text-sm">
+        
+        <!-- SUB-PANEL 1: TẢI ẢNH VÀO THƯ MỤC -->
+        <div id="panel-upload" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-500 mb-1.5">1. Chọn thư mục đích</label>
+            <div class="flex gap-1.5">
+              <select id="select-target-folder" onchange="changeFolder(this.value)" class="flex-1 px-3 py-2 text-xs font-semibold rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50">
+              </select>
+              <button onclick="openNewFolderModal()" title="Tạo thư mục mới" class="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl border border-emerald-200 text-xs font-bold transition">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="border-2 border-dashed border-emerald-300 hover:border-emerald-500 rounded-2xl p-4 bg-emerald-50/30 text-center transition">
+            <i class="fa-solid fa-images text-2xl text-emerald-600 mb-1"></i>
+            <p class="font-bold text-xs text-slate-700">Tải nhiều ảnh từ máy tính</p>
+            <p class="text-[11px] text-slate-500 mb-3">Tự động giữ nguyên tên file gốc</p>
+            <label class="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition">
+              <i class="fa-solid fa-folder-open"></i> Chọn Các Tệp Ảnh
+              <input type="file" id="batch-file-input" multiple accept="image/*" class="hidden" onchange="handleBatchFileUpload(this.files)">
+            </label>
+          </div>
+
+          <div class="border border-slate-200 rounded-2xl p-3.5 bg-slate-50 space-y-2">
+            <label class="block text-xs font-bold text-slate-600 uppercase">Hoặc dán danh sách link URL</label>
+            <textarea id="batch-urls-input" rows="3" class="w-full p-2.5 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 font-mono"></textarea>
+            <button onclick="handleBatchUrlUpload()" class="w-full py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-arrow-turn-down"></i> Thêm Các Link Này Vào Thư Mục
+            </button>
+          </div>
+
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1">
+            <div class="flex justify-between">
+              <span>Thư mục đang xem:</span>
+              <span class="font-bold text-emerald-700 font-mono" id="lbl-active-folder">nucap1</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Tổng số ảnh:</span>
+              <span class="font-bold text-slate-800" id="lbl-total-files">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUB-PANEL 2: QUẢN LÝ LỚP HỌC & ĐỌC FILE CSV -->
+        <div id="panel-classes" class="hidden space-y-4">
+          <div class="border border-slate-200 rounded-2xl p-3.5 bg-slate-50 space-y-3">
+            <h4 class="font-bold text-xs uppercase text-slate-700 border-b border-slate-200 pb-1.5 flex items-center gap-1.5">
+              <i class="fa-solid fa-file-csv text-emerald-600"></i> Nạp Lớp Mới Bằng Link CSV
+            </h4>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Tên Lớp (x)</label>
+              <input type="text" id="csv-class-name" autocomplete="off" class="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 uppercase font-bold focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Link CSV (Google Sheets hoặc Drive)</label>
+              <input type="text" id="csv-file-url" autocomplete="off" class="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 font-mono text-[11px] focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <button onclick="fetchAndParseCSV()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-cloud-arrow-down"></i> Tải & Tự Động Sinh Tài Khoản Lớp
+            </button>
+            <div class="bg-emerald-50/70 border border-emerald-200 rounded-lg p-2 text-[10px] text-emerald-800 space-y-0.5">
+              <div>• <b>Tài khoản:</b> xstty_Toz (VD: <i>10A1stt15_To1</i>)</div>
+              <div>• <b>Mật khẩu:</b> Viết tắt họ tên + STT (VD: <i>Nguyễn Văn Minh STT 15 $\rightarrow$ <b>nvm15</b></i>)</div>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <h5 class="text-xs font-bold text-slate-600 uppercase">Danh Sách Vườn Lớp Đã Tạo</h5>
+            <div id="created-classes-list" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <!-- SUB-PANEL 3: NHIỆM VỤ & THI ĐUA -->
+        <div id="panel-quest" class="hidden space-y-4">
+          <div class="border border-slate-200 rounded-2xl p-3.5 bg-slate-50 space-y-3">
+            <h4 class="font-bold text-xs uppercase text-slate-700 border-b border-slate-200 pb-1.5 flex items-center gap-1.5">
+              <i class="fa-solid fa-bolt text-amber-500"></i> Cài Đặt Nhiệm Vụ Ngày
+            </h4>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">URL Liên kết</label>
+              <input type="text" id="quest-url" autocomplete="off" class="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Từ khóa bí mật</label>
+              <input type="text" id="quest-key" autocomplete="off" class="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <button onclick="saveQuestSettings()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition">
+              Lưu Nhiệm Vụ Ngày Mới
+            </button>
+          </div>
+
+          <div class="border border-slate-200 rounded-2xl p-3.5 bg-slate-50 space-y-3">
+            <h4 class="font-bold text-xs uppercase text-slate-700 border-b border-slate-200 pb-1.5 flex items-center gap-1.5">
+              <i class="fa-solid fa-ranking-star text-indigo-500"></i> Xếp Hạng Tuần (Cộng Cây & Kho VIP)
+            </h4>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Chọn lớp áp dụng</label>
+              <select id="select-class-ranking" class="w-full p-1.5 text-xs border rounded-lg bg-white mb-2 font-bold"></select>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <label class="block font-semibold mb-0.5">Tổ 1</label>
+                <select id="rank-to-1" class="w-full p-1.5 border rounded-lg bg-white"><option value="1">Hạng 1 (+4, VIP)</option><option value="2">Hạng 2 (+3)</option><option value="3">Hạng 3 (+2)</option><option value="4">Hạng 4 (+1)</option></select>
+              </div>
+              <div>
+                <label class="block font-semibold mb-0.5">Tổ 2</label>
+                <select id="rank-to-2" class="w-full p-1.5 border rounded-lg bg-white"><option value="2">Hạng 2 (+3)</option><option value="1">Hạng 1 (+4, VIP)</option><option value="3">Hạng 3 (+2)</option><option value="4">Hạng 4 (+1)</option></select>
+              </div>
+              <div>
+                <label class="block font-semibold mb-0.5">Tổ 3</label>
+                <select id="rank-to-3" class="w-full p-1.5 border rounded-lg bg-white"><option value="3">Hạng 3 (+2)</option><option value="1">Hạng 1 (+4, VIP)</option><option value="2">Hạng 2 (+3)</option><option value="4">Hạng 4 (+1)</option></select>
+              </div>
+              <div>
+                <label class="block font-semibold mb-0.5">Tổ 4</label>
+                <select id="rank-to-4" class="w-full p-1.5 border rounded-lg bg-white"><option value="4">Hạng 4 (+1)</option><option value="1">Hạng 1 (+4, VIP)</option><option value="2">Hạng 2 (+3)</option><option value="3">Hạng 3 (+2)</option></select>
+              </div>
+            </div>
+            <button onclick="applyWeeklyRankings()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition">
+              Cập Nhật Điểm & Số Cây Mở Thêm
+            </button>
+          </div>
+        </div>
+
+        <!-- SUB-PANEL 4: ADMIN PHỤ -->
+        <div id="panel-admins" class="hidden space-y-4">
+          <div class="border border-slate-200 rounded-2xl p-3.5 bg-slate-50 space-y-3">
+            <h4 class="font-bold text-xs uppercase text-slate-700 border-b border-slate-200 pb-1.5">Tạo Tài Khoản Giáo Viên</h4>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Tên đăng nhập</label>
+              <input type="text" id="new-admin-user" autocomplete="off" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Tên hiển thị</label>
+              <input type="text" id="new-admin-name" autocomplete="off" class="w-full p-2 border rounded-lg text-xs focus:ring-2 focus:ring-emerald-500">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-1">Mật khẩu</label>
+              <div class="relative">
+                <input type="password" id="new-admin-pass" autocomplete="off" class="w-full p-2 pr-9 border rounded-lg text-xs focus:ring-2 focus:ring-emerald-500">
+                <button type="button" onclick="togglePasswordVisibility('new-admin-pass', 'eye-icon-subadmin')" class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none">
+                  <i id="eye-icon-subadmin" class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            <button onclick="createSubAdmin()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition">
+              + Tạo Tài Khoản
+            </button>
+          </div>
+          <div class="space-y-1.5" id="sub-admins-list"></div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- PHẦN B: BÊN PHẢI - CHIẾM 2/3 CHIỀU NGANG -->
+    <main class="w-full md:w-2/3 flex flex-col h-full bg-slate-50">
+      
+      <!-- Bulk Action Bar -->
+      <div class="bg-white border-b border-slate-200 p-3.5 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+        <div class="flex items-center gap-1.5 overflow-x-auto max-w-full pb-1" id="folder-pill-bar"></div>
+
+        <div class="flex items-center gap-2">
+          <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 cursor-pointer transition select-none">
+            <input type="checkbox" id="check-all-box" onchange="toggleSelectAll(this.checked)" class="rounded text-emerald-600 focus:ring-emerald-500 w-3.5 h-3.5">
+            <span>Chọn tất cả</span>
+          </label>
+
+          <button id="btn-delete-selected" onclick="deleteSelectedAssets()" disabled class="px-3 py-1.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-600 hover:text-white text-xs font-bold flex items-center gap-1.5 transition disabled:opacity-40 disabled:cursor-not-allowed">
+            <i class="fa-solid fa-trash-can"></i>
+            <span>Xóa Đã Chọn (<span id="selected-count">0</span>)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Lưới hiển thị ảnh trong suốt -->
+      <div class="flex-1 overflow-y-auto p-4 md:p-6">
+        <div id="asset-display-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5"></div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    const DEFAULT_FOLDERS = ['anhnen', 'congcu', 'hoacap1', 'nucap1', 'hoacap2', 'nucap2'];
+    
+    let state = {
+      currentUser: null,
+      currentFolder: 'nucap1',
+      folders: DEFAULT_FOLDERS,
+      assets: {}, 
+      admins: {
+        'admin298': { name: 'Master Admin', pass: '@dmjn298', role: 'master' }
+      },
+      quest: { url: '', keyword: '' },
+      classes: {} 
+    };
+
+    let selectedAssetIds = new Set();
+
+    // HÀM CHUYỂN TIẾNG VIỆT CÓ DẤU THÀNH KHÔNG DẤU & TẠO CHỮ VIẾT TẮT
+    function generatePasswordFromNameAndSTT(fullName, stt) {
+      if (!fullName) return `hs${stt}`;
+      
+      // Xóa dấu tiếng Việt, thay đ/Đ thành d/D
+      let clean = fullName.normalize('NFD')
+                          .replace(/[\u0300-\u036f]/g, '')
+                          .replace(/[đĐ]/g, 'd');
+      
+      // Tách các từ, lấy chữ cái đầu tiên của mỗi từ
+      const words = clean.trim().split(/\s+/);
+      const initials = words.map(w => w.charAt(0).toLowerCase()).join('');
+      
+      // Ghép viết tắt họ tên với số thứ tự
+      return `${initials}${stt}`;
+    }
+
+    function togglePasswordVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
+
+    function loadState() {
+      const saved = localStorage.getItem('garden_admin_state_v5');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          state = { ...state, ...parsed };
+        } catch (e) { console.error(e); }
+      }
+      DEFAULT_FOLDERS.forEach(f => {
+        if (!state.folders.includes(f)) state.folders.push(f);
+        if (!state.assets[f]) state.assets[f] = [];
+      });
+      if (!state.classes) state.classes = {};
+    }
+
+    function saveState() {
+      localStorage.setItem('garden_admin_state_v5', JSON.stringify(state));
+    }
+
+    function handleLogin() {
+      const u = document.getElementById('login-user').value.trim();
+      const p = document.getElementById('login-pass').value.trim();
+      const err = document.getElementById('login-error');
+
+      if (state.admins[u] && state.admins[u].pass === p) {
+        state.currentUser = { user: u, ...state.admins[u] };
+        sessionStorage.setItem('current_admin_user', u);
+        document.getElementById('login-modal').classList.add('hidden');
+        document.getElementById('admin-app').classList.remove('hidden');
+        document.getElementById('current-user-badge').innerText = `Đang đăng nhập: ${state.currentUser.name} (${u})`;
+        
+        initAppUI();
+      } else {
+        err.innerText = 'Tài khoản hoặc mật khẩu không chính xác!';
+        err.classList.remove('hidden');
+      }
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem('current_admin_user');
+      location.reload();
+    }
+
+    function initAppUI() {
+      renderFolderOptions();
+      renderFolderPills();
+      renderGrid();
+      renderCreatedClasses();
+      renderSubAdmins();
+      renderClassRankingOptions();
+    }
+
+    function switchTab(tab) {
+      ['upload', 'classes', 'quest', 'admins'].forEach(t => {
+        document.getElementById(`panel-${t}`).classList.add('hidden');
+        const btn = document.getElementById(`tab-btn-${t}`);
+        btn.classList.remove('bg-emerald-600', 'text-white');
+        btn.classList.add('bg-white', 'text-slate-600');
+      });
+
+      document.getElementById(`panel-${tab}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-btn-${tab}`);
+      activeBtn.classList.remove('bg-white', 'text-slate-600');
+      activeBtn.classList.add('bg-emerald-600', 'text-white');
+    }
+
+    function renderFolderOptions() {
+      const select = document.getElementById('select-target-folder');
+      select.innerHTML = state.folders.map(f => 
+        `<option value="${f}" ${f === state.currentFolder ? 'selected' : ''}>Thư mục: ${f}</option>`
+      ).join('');
+      
+      document.getElementById('lbl-active-folder').innerText = state.currentFolder;
+      const count = (state.assets[state.currentFolder] || []).length;
+      document.getElementById('lbl-total-files').innerText = count;
+    }
+
+    function renderFolderPills() {
+      const container = document.getElementById('folder-pill-bar');
+      container.innerHTML = state.folders.map(f => {
+        const isActive = f === state.currentFolder;
+        const total = (state.assets[f] || []).length;
+        return `
+          <button onclick="changeFolder('${f}')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap ${
+            isActive ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+          }">
+            <i class="fa-solid ${isActive ? 'fa-folder-open' : 'fa-folder'}"></i>
+            ${f}
+            <span class="text-[10px] px-1 rounded-full ${isActive ? 'bg-emerald-700 text-white' : 'bg-slate-200 text-slate-600'}">${total}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function changeFolder(name) {
+      state.currentFolder = name;
+      selectedAssetIds.clear();
+      updateSelectedCounter();
+      renderFolderOptions();
+      renderFolderPills();
+      renderGrid();
+    }
+
+    function openNewFolderModal() {
+      const name = prompt('Nhập tên thư mục mới (viết liền không dấu, VD: hoacap3, linhvat):');
+      if (name) {
+        const clean = name.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+        if (clean && !state.folders.includes(clean)) {
+          state.folders.push(clean);
+          state.assets[clean] = [];
+          changeFolder(clean);
+          saveState();
+        }
+      }
+    }
+
+    function handleBatchFileUpload(files) {
+      if (!files || files.length === 0) return;
+      if (!state.assets[state.currentFolder]) state.assets[state.currentFolder] = [];
+
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          state.assets[state.currentFolder].push({
+            id: 'asset_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+            fileName: file.name,
+            url: e.target.result,
+            createdAt: Date.now()
+          });
+          saveState();
+          renderFolderOptions();
+          renderFolderPills();
+          renderGrid();
+        };
+        reader.readAsDataURL(file);
+      });
+      document.getElementById('batch-file-input').value = '';
+    }
+
+    function handleBatchUrlUpload() {
+      const textarea = document.getElementById('batch-urls-input');
+      const lines = textarea.value.split('\n').map(l => l.trim()).filter(l => l.length > 5);
+      if (lines.length === 0) return;
+
+      if (!state.assets[state.currentFolder]) state.assets[state.currentFolder] = [];
+
+      lines.forEach(url => {
+        let fileName = url.substring(url.lastIndexOf('/') + 1).split('?')[0];
+        if (!fileName || fileName.length < 3) fileName = `img_${Date.now().toString().slice(-4)}.png`;
+
+        state.assets[state.currentFolder].push({
+          id: 'asset_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+          fileName: fileName,
+          url: url,
+          createdAt: Date.now()
+        });
+      });
+
+      textarea.value = '';
+      saveState();
+      renderFolderOptions();
+      renderFolderPills();
+      renderGrid();
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('asset-display-grid');
+      const list = state.assets[state.currentFolder] || [];
+
+      if (list.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-20 text-center text-slate-400 bg-white rounded-2xl border border-dashed border-slate-200">
+            <i class="fa-solid fa-images text-4xl mb-2 text-slate-300"></i>
+            <p class="text-sm font-semibold text-slate-600">Thư mục [${state.currentFolder}] hiện chưa có ảnh</p>
+            <p class="text-xs text-slate-400 mt-1">Dùng công cụ ở Phần A bên trái để tải ảnh lên nhé!</p>
+          </div>
+        `;
+        document.getElementById('check-all-box').checked = false;
+        return;
+      }
+
+      grid.innerHTML = list.map((item) => {
+        const isChecked = selectedAssetIds.has(item.id);
+        return `
+          <div class="bg-white rounded-xl border ${isChecked ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-200'} overflow-hidden shadow-xs hover:shadow-md transition flex flex-col group relative">
+            <div class="absolute top-2 left-2 z-10">
+              <input type="checkbox" onchange="toggleSelectAsset('${item.id}', this.checked)" ${isChecked ? 'checked' : ''} class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer bg-white/90 shadow">
+            </div>
+
+            <div class="h-32 w-full bg-trans-grid flex items-center justify-center p-2.5 relative">
+              <img src="${item.url}" alt="${item.fileName}" class="max-h-full max-w-full object-contain filter drop-shadow">
+            </div>
+
+            <div class="p-2.5 bg-white border-t border-slate-100 flex flex-col justify-between flex-1">
+              <p class="text-[11px] font-bold text-slate-700 truncate" title="${item.fileName}">
+                ${item.fileName}
+              </p>
+              <button onclick="copyToClipboard('${item.url}')" class="mt-2 w-full py-1 text-[10px] font-bold rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 transition flex items-center justify-center gap-1">
+                <i class="fa-solid fa-copy"></i> Sao chép link
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const allBox = document.getElementById('check-all-box');
+      allBox.checked = list.length > 0 && list.every(item => selectedAssetIds.has(item.id));
+    }
+
+    function toggleSelectAsset(id, isChecked) {
+      if (isChecked) selectedAssetIds.add(id);
+      else selectedAssetIds.delete(id);
+      updateSelectedCounter();
+      renderGrid();
+    }
+
+    function toggleSelectAll(isChecked) {
+      const list = state.assets[state.currentFolder] || [];
+      if (isChecked) list.forEach(i => selectedAssetIds.add(i.id));
+      else selectedAssetIds.clear();
+      updateSelectedCounter();
+      renderGrid();
+    }
+
+    function updateSelectedCounter() {
+      const count = selectedAssetIds.size;
+      document.getElementById('selected-count').innerText = count;
+      document.getElementById('btn-delete-selected').disabled = (count === 0);
+    }
+
+    function deleteSelectedAssets() {
+      const count = selectedAssetIds.size;
+      if (count === 0) return;
+
+      if (confirm(`Bạn có chắc chắn muốn xóa ${count} ảnh đã chọn trong thư mục [${state.currentFolder}] không?`)) {
+        state.assets[state.currentFolder] = (state.assets[state.currentFolder] || []).filter(
+          item => !selectedAssetIds.has(item.id)
+        );
+        selectedAssetIds.clear();
+        updateSelectedCounter();
+        saveState();
+        renderFolderOptions();
+        renderFolderPills();
+        renderGrid();
+      }
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Đã sao chép link ảnh thành công!');
+      });
+    }
+
+    // ĐỌC LINK CSV & TẠO USER (xstty_Toz) VÀ PASS (viết tắt + stt)
+    async function fetchAndParseCSV() {
+      const className = document.getElementById('csv-class-name').value.trim().toUpperCase();
+      let url = document.getElementById('csv-file-url').value.trim();
+
+      if (!className) return alert('Vui lòng nhập Tên Lớp (ví dụ: 10A1)!');
+      if (!url) return alert('Vui lòng dán link file CSV!');
+
+      // Chuẩn hóa link Google Drive nếu dán nhầm link view
+      if (url.includes('drive.google.com/file/d/')) {
+        const idMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (idMatch) url = `https://drive.google.com/uc?export=download&id=${idMatch[1]}`;
+      }
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Không thể tải file CSV. Vui lòng kiểm tra lại link hoặc bật chia sẻ công khai!');
+        const rawText = await res.text();
+
+        const lines = rawText.split(/\r?\n/).filter(line => line.trim().length > 0);
+        if (lines.length <= 1) throw new Error('File CSV không có dữ liệu học sinh!');
+
+        if (!state.classes) state.classes = {};
+        state.classes[className] = {
+          name: className,
+          students: {},
+          teams: {
+            1: { rank: 1, extraSlots: 4, canVIP: true, members: [], plants: [] },
+            2: { rank: 2, extraSlots: 3, canVIP: false, members: [], plants: [] },
+            3: { rank: 3, extraSlots: 2, canVIP: false, members: [], plants: [] },
+            4: { rank: 4, extraSlots: 1, canVIP: false, members: [], plants: [] }
+          }
+        };
+
+        let count = 0;
+        let sampleUser = '';
+        let samplePass = '';
+
+        for (let i = 1; i < lines.length; i++) {
+          const cols = lines[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+          if (cols.length < 3) continue;
+
+          const stt = cols[0];
+          const hoTen = cols[1];
+          const toMatch = cols[2].match(/\d+/);
+          const to = toMatch ? parseInt(toMatch[0]) : 1;
+
+          // Tạo Username theo cú pháp: xstty_Toz
+          const username = `${className}stt${stt}_To${to}`;
+          
+          // Tạo Password: viết tắt họ tên + stt (VD: Nguyễn Văn Minh 15 -> nvm15)
+          const password = generatePasswordFromNameAndSTT(hoTen, stt);
+
+          if (!sampleUser) {
+            sampleUser = username;
+            samplePass = password;
+          }
+
+          state.classes[className].students[username] = {
+            username: username,
+            name: hoTen,
+            stt: stt,
+            team: to,
+            class: className,
+            password: password,
+            hasWateredToday: false
+          };
+
+          if (state.classes[className].teams[to]) {
+            state.classes[className].teams[to].members.push(username);
+          }
+          count++;
+        }
+
+        saveState();
+        renderCreatedClasses();
+        renderClassRankingOptions();
+        alert(`Đã nạp thành công Lớp ${className} với ${count} học sinh!\n• Tài khoản mẫu: ${sampleUser}\n• Mật khẩu mẫu: ${samplePass}`);
+        document.getElementById('csv-class-name').value = '';
+        document.getElementById('csv-file-url').value = '';
+
+      } catch (err) {
+        alert('Lỗi: ' + err.message);
+      }
+    }
+
+    function renderCreatedClasses() {
+      const container = document.getElementById('created-classes-list');
+      const classKeys = Object.keys(state.classes || {});
+      if (classKeys.length === 0) {
+        container.innerHTML = `<p class="text-[11px] text-slate-400 italic">Chưa có lớp nào được tạo.</p>`;
+        return;
+      }
+
+      container.innerHTML = classKeys.map(cls => {
+        const total = Object.keys(state.classes[cls].students || {}).length;
+        return `
+          <div class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 bg-white text-xs">
+            <div>
+              <span class="font-bold text-emerald-800">${cls}</span>
+              <span class="text-slate-400 text-[10px] ml-2">(${total} học sinh)</span>
+            </div>
+            <button onclick="deleteClass('${cls}')" class="text-rose-500 hover:text-rose-700 p-1" title="Xóa lớp"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function deleteClass(cls) {
+      if (confirm(`Bạn có chắc muốn xóa toàn bộ dữ liệu vườn của lớp ${cls}?`)) {
+        delete state.classes[cls];
+        saveState();
+        renderCreatedClasses();
+        renderClassRankingOptions();
+      }
+    }
+
+    function saveQuestSettings() {
+      state.quest.url = document.getElementById('quest-url').value.trim();
+      state.quest.keyword = document.getElementById('quest-key').value.trim();
+      saveState();
+      alert('Đã cập nhật cấu hình nhiệm vụ ngày mới!');
+    }
+
+    function renderClassRankingOptions() {
+      const select = document.getElementById('select-class-ranking');
+      const classKeys = Object.keys(state.classes || {});
+      if (classKeys.length === 0) {
+        select.innerHTML = `<option value="">(Chưa có lớp học nào)</option>`;
+        return;
+      }
+      select.innerHTML = classKeys.map(cls => `<option value="${cls}">Lớp: ${cls}</option>`).join('');
+    }
+
+    function applyWeeklyRankings() {
+      const cls = document.getElementById('select-class-ranking').value;
+      if (!cls || !state.classes[cls]) return alert('Vui lòng tạo lớp học trước khi xét thứ hạng!');
+
+      [1, 2, 3, 4].forEach(i => {
+        const r = parseInt(document.getElementById(`rank-to-${i}`).value);
+        state.classes[cls].teams[i].rank = r;
+        state.classes[cls].teams[i].extraSlots = (5 - r); 
+        state.classes[cls].teams[i].canVIP = (r === 1);
+      });
+
+      saveState();
+      alert(`Đã lưu kết quả thi đua tuần cho Lớp ${cls}!`);
+    }
+
+    function createSubAdmin() {
+      const u = document.getElementById('new-admin-user').value.trim();
+      const n = document.getElementById('new-admin-name').value.trim();
+      const p = document.getElementById('new-admin-pass').value.trim();
+      if (!u || !p) return alert('Vui lòng nhập tên đăng nhập và mật khẩu!');
+
+      state.admins[u] = { name: n || u, pass: p, role: 'sub' };
+      saveState();
+      renderSubAdmins();
+      document.getElementById('new-admin-user').value = '';
+      document.getElementById('new-admin-name').value = '';
+      document.getElementById('new-admin-pass').value = '';
+    }
+
+    function renderSubAdmins() {
+      const list = document.getElementById('sub-admins-list');
+      const users = Object.keys(state.admins).filter(u => u !== 'admin298');
+      if (users.length === 0) {
+        list.innerHTML = `<p class="text-[11px] text-slate-400 italic">Chưa có admin phụ nào.</p>`;
+        return;
+      }
+      list.innerHTML = users.map(u => `
+        <div class="flex items-center justify-between p-2 rounded-lg border border-slate-200 bg-white text-xs">
+          <div>
+            <span class="font-bold text-slate-700">${state.admins[u].name}</span>
+            <span class="text-slate-400 text-[10px] ml-1">(@${u})</span>
+          </div>
+          <button onclick="deleteAdmin('${u}')" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      `).join('');
+    }
+
+    function deleteAdmin(u) {
+      if (confirm(`Xóa tài khoản admin @${u}?`)) {
+        delete state.admins[u];
+        saveState();
+        renderSubAdmins();
+      }
+    }
+
+    function exportBackupData() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+      const dlAnchor = document.createElement('a');
+      dlAnchor.setAttribute("href", dataStr);
+      dlAnchor.setAttribute("download", `garden_backup_${Date.now()}.json`);
+      dlAnchor.click();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      const savedUser = sessionStorage.getItem('current_admin_user');
+      if (savedUser && state.admins[savedUser]) {
+        state.currentUser = { user: savedUser, ...state.admins[savedUser] };
+        document.getElementById('login-modal').classList.add('hidden');
+        document.getElementById('admin-app').classList.remove('hidden');
+        document.getElementById('current-user-badge').innerText = `Đang đăng nhập: ${state.currentUser.name} (${savedUser})`;
+        initAppUI();
+      }
+    });
+  </script>
+</body>
+</html>
