@@ -533,42 +533,59 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* RESPONSIVE DỌC: Phần A chiếm 18% */
+        /* ========================================================
+           RESPONSIVE CHUYÊN SÂU: CẬP NHẬT TỶ LỆ DỌC ĐỦ NÚT CHỨC NĂNG
+           ======================================================== */
+
+        /* 1. Màn hình điện thoại DỌC (Portrait) - Tinh chỉnh Phần A vừa vặn các nút */
         @media screen and (max-width: 768px) and (orientation: portrait) {
             header {
-                padding: 8px 10px;
-                min-height: 65px;
+                padding: 6px 10px;
+                min-height: 60px;
             }
             header h1 {
-                font-size: 1rem;
+                font-size: 0.98rem;
             }
             header .gvcn {
-                font-size: 0.72rem;
+                font-size: 0.7rem;
             }
             .main-container {
                 display: flex;
                 flex-direction: column;
                 padding: 6px;
-                gap: 8px;
-                height: calc(100dvh - 65px);
+                gap: 6px;
+                height: calc(100dvh - 60px);
                 overflow: hidden;
             }
+            /* Thiết lập chiều cao Phần A linh hoạt từ 32% - 35% để hiện đủ các nút chức năng */
             .sidebar-a {
-                max-height: 18%;
+                max-height: 34%;
                 flex-shrink: 0;
                 overflow-y: auto;
                 padding: 6px 8px;
+                gap: 4px;
+            }
+            .sidebar-a .menu-btn {
+                padding: 5px 8px;
+                font-size: 0.78rem;
+                gap: 5px;
+            }
+            .sidebar-a h3 {
+                font-size: 0.78rem;
+                margin-bottom: 1px;
+                padding-bottom: 2px;
             }
             .content-b {
                 flex: 1;
                 min-height: 0;
                 overflow: hidden;
+                padding: 8px;
             }
             .pdf-iframe { height: 260px; }
             .welcome-greeting-text { font-size: 2.1rem; }
         }
 
-        /* RESPONSIVE NGANG */
+        /* 2. Màn hình điện thoại XOAY NGANG (Landscape) */
         @media screen and (max-height: 520px) and (orientation: landscape) {
             header {
                 padding: 4px 10px;
@@ -911,7 +928,6 @@
                 for (let i = 0; i < input.files.length; i++) {
                     totalBytes += input.files[i].size;
                 }
-                // Giới hạn an toàn trước khi nén base64 là ~750KB để chuỗi base64 không vượt 1MB
                 if (totalBytes > 750 * 1024) {
                     alert("⚠️ CẢNH BÁO DUNG LƯỢNG:\nTổng dung lượng các ảnh tải lên vượt quá mức cho phép trực tiếp (tối đa 1MB khi lưu trữ)!\n\nVui lòng sử dụng tính năng 'Dán link Google Drive / URL của ảnh' bên cạnh để lưu trữ an toàn, chất lượng ảnh nét nhất và không giới hạn dung lượng!");
                     input.value = "";
@@ -1380,7 +1396,7 @@
                 `;
             }
             else if (currentView === 'album_list') {
-                b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">🖼️️ Góc kỷ niệm</h3>`;
+                b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">🖼️ Góc kỷ niệm</h3>`;
                 let pureAlbums = albums.filter(a => a.title && !a.title.includes("Thông báo"));
                 if (pureAlbums.length === 0) {
                     b.innerHTML += '<p style="color:#6c757d;">Chưa có nội dung nào được đăng.</p>';
@@ -1505,7 +1521,7 @@
                             </div>
                         </div>
                         <div style="flex:1; border-radius:8px; border:1px solid #ced4da; background:#f8f9fa; display:flex; flex-direction:column; overflow:hidden;">
-                            <div style="background:#e9ecef; padding:5px 8px; font-size:0.75rem; font-weight:bold; color:var(--primary); border-bottom:1px solid #ced4da;">🖼️ Khung Preview (Click để phóng to)</div>
+                            <div style="background:#e9ecef; padding:5px 8px; font-size:0.75rem; font-weight:bold; color:var(--primary); border-bottom:1px solid #ced4da;">🖼️️ Khung Preview (Click để phóng to)</div>
                             <div id="multiNotiPreviewBox" style="flex:1; width:100%; display:flex; align-items:center; justify-content:center; padding:8px; overflow:hidden; text-align:center;">
                                 <span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>
                             </div>
@@ -1954,7 +1970,7 @@
                 newRow.style.cssText = 'display:flex; gap:6px; align-items:center;';
                 newRow.innerHTML = `
                     <input type="text" class="multi-album-input" placeholder="Dán link ảnh tiếp theo..." style="flex:1;" oninput="autoPreviewMultiAlbum(this)">
-                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleAlbumLink(this)">👁️️ Xem lại</button>
+                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleAlbumLink(this)">👁️ Xem lại</button>
                     <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeMultiAlbumRow(this)">❌</button>
                 `;
                 container.appendChild(newRow);
