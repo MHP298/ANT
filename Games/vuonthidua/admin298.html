@@ -155,9 +155,7 @@
               <label class="block text-[11px] text-slate-600 font-bold mb-1">Nền Toàn Game:</label>
               <div class="flex gap-1.5 items-center">
                 <select id="select-bg-global" onchange="handleBackgroundSelectionChange('global', this.value)" class="flex-1 px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-slate-50 font-mono"></select>
-                <button onclick="viewBackgroundPreview('global')" class="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 transition" title="Xem trước ảnh này">
-                  <i class="fa-solid fa-eye text-xs"></i>
-                </button>
+                <button onclick="viewBackgroundPreview('global')" class="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 transition" title="Xem trước"><i class="fa-solid fa-eye text-xs"></i></button>
               </div>
             </div>
 
@@ -165,9 +163,7 @@
               <label class="block text-[11px] text-slate-600 font-bold mb-1">Nền Sân Vườn (Phần A):</label>
               <div class="flex gap-1.5 items-center">
                 <select id="select-bg-a" onchange="handleBackgroundSelectionChange('a', this.value)" class="flex-1 px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-slate-50 font-mono"></select>
-                <button onclick="viewBackgroundPreview('a')" class="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 transition" title="Xem trước ảnh này">
-                  <i class="fa-solid fa-eye text-xs"></i>
-                </button>
+                <button onclick="viewBackgroundPreview('a')" class="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 transition" title="Xem trước"><i class="fa-solid fa-eye text-xs"></i></button>
               </div>
             </div>
 
@@ -175,9 +171,7 @@
               <label class="block text-[11px] text-slate-600 font-bold mb-1">Nền Cột Khay Công Cụ (Phần B):</label>
               <div class="flex gap-1.5 items-center">
                 <select id="select-bg-b" onchange="handleBackgroundSelectionChange('b', this.value)" class="flex-1 px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-slate-50 font-mono"></select>
-                <button onclick="viewBackgroundPreview('b')" class="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 transition" title="Xem trước ảnh này">
-                  <i class="fa-solid fa-eye text-xs"></i>
-                </button>
+                <button onclick="viewBackgroundPreview('b')" class="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 transition" title="Xem trước"><i class="fa-solid fa-eye text-xs"></i></button>
               </div>
             </div>
           </div>
@@ -238,13 +232,8 @@
                   <option value="__NEW__" class="text-emerald-700 font-black">+ Thiết lập mới</option>
                 </select>
 
-                <button onclick="editCurrentCondition()" id="btn-edit-cond" title="Chỉnh sửa điều kiện" class="px-2.5 py-1.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-600 text-xs font-bold transition">
-                  <i class="fa-solid fa-pen-to-square"></i>
-                </button>
-
-                <button onclick="deleteCurrentCondition()" id="btn-delete-cond" title="Xóa điều kiện" class="px-2.5 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold transition">
-                  <i class="fa-solid fa-trash-can"></i>
-                </button>
+                <button onclick="editCurrentCondition()" id="btn-edit-cond" title="Sửa" class="px-2.5 py-1.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-600 text-xs font-bold transition"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button onclick="deleteCurrentCondition()" id="btn-delete-cond" title="Xóa" class="px-2.5 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold transition"><i class="fa-solid fa-trash-can"></i></button>
               </div>
             </div>
 
@@ -258,12 +247,10 @@
 
             <div id="new-condition-box" class="hidden p-3 bg-emerald-50/80 border border-emerald-300 rounded-xl space-y-2.5">
               <span class="text-[11px] font-black uppercase text-emerald-900 block" id="lbl-form-mode">Thiết Lập Điều Kiện Mới</span>
-              
               <div>
                 <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Tên Điều kiện (Hiển thị khi hover ổ khóa):</label>
                 <input type="text" id="input-new-cond-name" placeholder="VD: Đạt Hạng 1 thi đua tuần..." class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 font-semibold bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
               </div>
-
               <div>
                 <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Kiểu kiểm tra thực thi:</label>
                 <select id="select-new-cond-type" class="w-full px-2 py-1 text-xs rounded-lg border border-slate-300 bg-white">
@@ -272,19 +259,13 @@
                   <option value="always_open">Tự Do: Luôn luôn mở</option>
                 </select>
               </div>
-
               <div>
                 <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Mở cho Cấp độ nào:</label>
                 <select id="select-new-cond-target-level" class="w-full px-2 py-1 text-xs rounded-lg border border-slate-300 bg-white font-bold text-amber-800"></select>
               </div>
-
               <div class="flex gap-2 pt-1">
-                <button onclick="saveNewCondition()" class="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-xs transition">
-                  <i class="fa-solid fa-check"></i> Lưu Điều Kiện
-                </button>
-                <button onclick="cancelNewCondition()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-lg transition">
-                  Hủy
-                </button>
+                <button onclick="saveNewCondition()" class="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-xs transition"><i class="fa-solid fa-check"></i> Lưu Điều Kiện</button>
+                <button onclick="cancelNewCondition()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-lg transition">Hủy</button>
               </div>
             </div>
           </div>
@@ -298,15 +279,10 @@
             </span>
             <i id="icon-sec-audio" class="fa-solid fa-chevron-right text-slate-400 text-xs transition-transform duration-200"></i>
           </button>
-
           <div id="content-sec-audio" class="hidden p-3.5 space-y-3 border-t border-slate-100">
             <div class="grid grid-cols-2 gap-2">
-              <button type="button" onclick="switchAudioConfigTab('bgm')" id="btn-audio-tab-bgm" class="py-2 px-3 text-xs font-black rounded-xl border border-indigo-500 bg-indigo-50 text-indigo-900 flex items-center justify-center gap-1.5 shadow-xs transition">
-                <i class="fa-solid fa-compact-disc text-indigo-600"></i> Âm Thanh Nền
-              </button>
-              <button type="button" onclick="switchAudioConfigTab('sfx')" id="btn-audio-tab-sfx" class="py-2 px-3 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center gap-1.5 transition">
-                <i class="fa-solid fa-bell text-amber-500"></i> Âm Thanh Hiệu Ứng
-              </button>
+              <button type="button" onclick="switchAudioConfigTab('bgm')" id="btn-audio-tab-bgm" class="py-2 px-3 text-xs font-black rounded-xl border border-indigo-500 bg-indigo-50 text-indigo-900 flex items-center justify-center gap-1.5 shadow-xs transition"><i class="fa-solid fa-compact-disc text-indigo-600"></i> Âm Thanh Nền</button>
+              <button type="button" onclick="switchAudioConfigTab('sfx')" id="btn-audio-tab-sfx" class="py-2 px-3 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center gap-1.5 transition"><i class="fa-solid fa-bell text-amber-500"></i> Hiệu Ứng</button>
             </div>
             <p class="text-[11px] text-slate-400 text-center italic">Chọn 1 trong 2 nút trên để chỉnh chi tiết tại Phần B.</p>
           </div>
@@ -314,39 +290,23 @@
 
       </div>
 
-      <!-- TAB 2: CSV & PHÂN QUYỀN -->
+      <!-- TAB 2: QUẢN LÝ CSV & PHÂN QUYỀN -->
       <div id="tab-panel-csv" class="hidden flex-1 overflow-y-auto p-4 space-y-4">
         <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5">
-          <h4 class="text-xs font-black uppercase text-slate-800 flex items-center gap-1.5">
-            <i class="fa-solid fa-file-csv text-emerald-600"></i> Nạp Danh Sách Học Sinh Có Cột Chức Vụ
-          </h4>
-          <p class="text-[11px] text-slate-500 leading-relaxed">
-            CSV gồm 4 cột: <b>STT, Họ và tên, Tổ, Chức vụ</b> (ví dụ: <code class="bg-slate-200 px-1 py-0.5 rounded text-emerald-800 font-bold">TT1</code>, <code class="bg-slate-200 px-1 py-0.5 rounded text-indigo-800 font-bold">TL1</code>).
-          </p>
-          <div>
-            <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Link CSV Google Sheets / Drive:</label>
-            <input type="text" id="csv-file-url" class="w-full px-2.5 py-1 text-xs rounded-lg border font-mono">
-          </div>
-          <button onclick="fetchAndParseStudentCSV()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5">
-            <i class="fa-solid fa-user-plus"></i> Đọc CSV & Đồng Bộ Phân Quyền Lớp
-          </button>
+          <h4 class="text-xs font-black uppercase text-slate-800 flex items-center gap-1.5"><i class="fa-solid fa-file-csv text-emerald-600"></i> Nạp Danh Sách Học Sinh</h4>
+          <input type="text" id="csv-file-url" placeholder="Link CSV Google Sheets / Drive..." class="w-full px-2.5 py-1 text-xs rounded-lg border font-mono">
+          <button onclick="fetchAndParseStudentCSV()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5"><i class="fa-solid fa-user-plus"></i> Đọc CSV & Đồng Bộ</button>
         </div>
-
         <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5">
-          <h4 class="text-xs font-black uppercase text-slate-800 flex items-center gap-1.5">
-            <i class="fa-solid fa-ranking-star text-amber-500"></i> Cập Nhật Thứ Hạng Tuần Cho Lớp Đang Chọn
-          </h4>
+          <h4 class="text-xs font-black uppercase text-slate-800 flex items-center gap-1.5"><i class="fa-solid fa-ranking-star text-amber-500"></i> Thứ Hạng Tuần Của Lớp</h4>
           <div class="grid grid-cols-2 gap-2 text-xs">
             <div><span>Tổ 1:</span><select id="rank-val-1" class="w-full p-1 border rounded bg-white font-bold"><option value="1">Hạng 1 ★</option><option value="2">Hạng 2</option><option value="3">Hạng 3</option><option value="4">Hạng 4</option></select></div>
             <div><span>Tổ 2:</span><select id="rank-val-2" class="w-full p-1 border rounded bg-white font-bold"><option value="2">Hạng 2</option><option value="1">Hạng 1 ★</option><option value="3">Hạng 3</option><option value="4">Hạng 4</option></select></div>
             <div><span>Tổ 3:</span><select id="rank-val-3" class="w-full p-1 border rounded bg-white font-bold"><option value="3">Hạng 3</option><option value="1">Hạng 1 ★</option><option value="2">Hạng 2</option><option value="4">Hạng 4</option></select></div>
             <div><span>Tổ 4:</span><select id="rank-val-4" class="w-full p-1 border rounded bg-white font-bold"><option value="4">Hạng 4</option><option value="1">Hạng 1 ★</option><option value="2">Hạng 2</option><option value="3">Hạng 3</option></select></div>
           </div>
-          <button onclick="saveWeeklyRankingData()" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition">
-            Lưu Kết Quả Thi Đua Lớp
-          </button>
+          <button onclick="saveWeeklyRankingData()" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition">Lưu Thứ Hạng Lớp</button>
         </div>
-
         <div class="space-y-2">
           <span class="text-xs font-bold uppercase text-slate-700">Tất Cả Các Lớp:</span>
           <div id="created-classes-container" class="space-y-1.5"></div>
@@ -355,7 +315,7 @@
 
     </aside>
 
-    <!-- PHẦN B (2/3 BÊN PHẢI) -->
+    <!-- PHẦN B (2/3 BÊN PHẢI): BẢNG QUẢN LÝ TÀI NGUYÊN & SCALE -->
     <main class="w-full md:w-2/3 flex flex-col h-full bg-slate-50 overflow-hidden">
       
       <div class="bg-white border-b border-slate-200 p-3 px-5 flex flex-wrap items-center justify-between gap-3 shadow-2xs shrink-0">
@@ -365,12 +325,8 @@
         </div>
 
         <div class="flex items-center gap-2" id="toolbar-actions" style="display: none;">
-          <button onclick="selectAllVisibleImages(true)" class="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 transition flex items-center gap-1">
-            <i class="fa-regular fa-square-check"></i> Chọn tất cả
-          </button>
-          <button onclick="selectAllVisibleImages(false)" class="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 transition flex items-center gap-1">
-            <i class="fa-regular fa-square"></i> Bỏ chọn
-          </button>
+          <button onclick="selectAllVisibleImages(true)" class="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 transition">Chọn tất cả</button>
+          <button onclick="selectAllVisibleImages(false)" class="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 transition">Bỏ chọn</button>
           <button onclick="toggleLockLevelSubBar()" id="btn-toggle-lock-bar" class="px-3 py-1 text-xs font-bold rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 transition flex items-center gap-1 shadow-2xs">
             <i class="fa-solid fa-lock text-amber-600"></i> Khóa Cấp Độ
           </button>
@@ -378,43 +334,28 @@
         </div>
       </div>
 
+      <!-- BẢNG ĐIỀU KHIỂN GÁN CẤP ĐỘ KHÓA -->
       <div id="lock-assigner-panel" class="bg-amber-50/90 border-b border-amber-200 p-2.5 px-5 flex flex-wrap items-center justify-between gap-3 shrink-0" style="display: none;">
         <div class="flex items-center gap-3">
-          <span class="text-xs font-black uppercase text-amber-950 flex items-center gap-1.5">
-            <i class="fa-solid fa-key text-amber-600"></i> Gán Cấp Độ Khóa:
-          </span>
-          <div class="flex items-center gap-1.5">
-            <span class="text-xs text-amber-900 font-bold">Cấp:</span>
-            <input type="number" id="input-assign-lock-level" min="1" max="10" value="1" class="w-14 px-2 py-1 text-xs font-black text-center rounded-lg border border-amber-300 bg-white">
-          </div>
-          <button onclick="applyBatchLockLevel()" class="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center gap-1">
-            <i class="fa-solid fa-check"></i> Gán
-          </button>
-          <button onclick="clearBatchLockLevel()" class="px-3 py-1 bg-slate-200 hover:bg-rose-100 text-slate-700 hover:text-rose-700 text-xs font-bold rounded-lg border border-slate-300 transition flex items-center gap-1">
-            <i class="fa-solid fa-lock-open"></i> Bỏ Gán Toàn Bộ
-          </button>
+          <span class="text-xs font-black uppercase text-amber-950 flex items-center gap-1.5"><i class="fa-solid fa-key text-amber-600"></i> Gán Cấp Độ:</span>
+          <input type="number" id="input-assign-lock-level" min="1" max="10" value="1" class="w-14 px-2 py-1 text-xs font-black text-center rounded-lg border border-amber-300 bg-white">
+          <button onclick="applyBatchLockLevel()" class="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg shadow-xs transition">Gán</button>
+          <button onclick="clearBatchLockLevel()" class="px-3 py-1 bg-slate-200 hover:bg-rose-100 text-slate-700 hover:text-rose-700 text-xs font-bold rounded-lg border border-slate-300 transition">Bỏ Gán</button>
         </div>
-        <span class="text-[11px] text-amber-800 font-medium">💡 Tick vào <b>ô khóa góc phải</b> của ảnh cần gán rồi bấm <b>Gán</b>.</span>
+        <span class="text-[11px] text-amber-800">💡 Tick vào <b>ô khóa góc phải ảnh</b> rồi bấm <b>Gán</b>.</span>
       </div>
 
+      <!-- THANH ĐIỀU CHỈNH SCALE (%) & REVIEW TRÊN SÂN GẠCH -->
       <div id="scale-controller-panel" class="bg-emerald-50/80 border-b border-emerald-200 p-2.5 px-5 flex flex-wrap items-center justify-between gap-4 shrink-0 transition" style="display: none;">
         <div class="flex items-center gap-3">
-          <span class="text-xs font-black uppercase text-emerald-950 flex items-center gap-1.5">
-            <i class="fa-solid fa-arrows-up-down-left-right text-emerald-700"></i> Tỉ lệ hiển thị trên sân (%):
-          </span>
+          <span class="text-xs font-black uppercase text-emerald-950">Tỉ lệ hiển thị trên sân (%):</span>
           <input type="range" id="input-scale-slider" min="15" max="150" value="40" step="1" oninput="handleScaleInput(this.value)" class="w-32 accent-emerald-600 cursor-pointer">
-          <div class="flex items-center gap-1">
-            <input type="number" id="input-scale-number" min="15" max="150" value="40" oninput="handleScaleInput(this.value)" class="w-16 px-2 py-1 text-xs font-black text-center rounded-lg border border-emerald-300 bg-white">
-            <span class="text-xs font-black text-emerald-900">%</span>
-          </div>
-          <button onclick="saveActiveScaleSetting()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-xs transition">
-            Áp Dụng Tỉ Lệ
-          </button>
+          <input type="number" id="input-scale-number" min="15" max="150" value="40" oninput="handleScaleInput(this.value)" class="w-16 px-2 py-1 text-xs font-black text-center rounded-lg border border-emerald-300 bg-white">
+          <button onclick="saveActiveScaleSetting()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-xs transition">Áp Dụng</button>
         </div>
-
         <div class="flex items-center gap-3 bg-white p-1 px-3 rounded-xl border border-emerald-300 shadow-xs">
           <div class="text-right">
-            <span class="text-[10px] font-black uppercase text-slate-500 block leading-tight">Review thực tế:</span>
+            <span class="text-[10px] font-black uppercase text-slate-500 block leading-tight">Review:</span>
             <span class="text-[9px] text-slate-400 font-semibold" id="lbl-preview-name">Chưa chọn ảnh</span>
           </div>
           <div class="w-24 h-14 rounded-lg overflow-hidden border border-amber-300 relative flex items-center justify-center bg-cover bg-center" style="background-image: url('assets/nengame/vuonlop.jpg');">
@@ -441,15 +382,9 @@
       </div>
 
       <div class="flex items-center gap-2.5">
-        <button onclick="addNewTextOverlay()" class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition">
-          <i class="fa-solid fa-font"></i> + Thêm Vùng Chữ
-        </button>
-        <button onclick="saveAndCloseFullscreenEditor()" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition">
-          <i class="fa-solid fa-floppy-disk"></i> Lưu Toàn Bộ Thiết Kế
-        </button>
-        <button onclick="closeFullscreenEditor()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-rose-600 text-white text-sm font-bold flex items-center justify-center transition">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <button onclick="addNewTextOverlay()" class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition"><i class="fa-solid fa-font"></i> + Thêm Vùng Chữ</button>
+        <button onclick="saveAndCloseFullscreenEditor()" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition"><i class="fa-solid fa-floppy-disk"></i> Lưu Toàn Bộ Thiết Kế</button>
+        <button onclick="closeFullscreenEditor()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-rose-600 text-white text-sm font-bold flex items-center justify-center transition">✕</button>
       </div>
     </div>
 
@@ -463,10 +398,10 @@
     <!-- THANH CÔNG CỤ PHỤ: CHỌN ẢNH ĐẤT THỰC TẾ & LƯU TỈ LỆ CHO TỪNG Ô -->
     <div class="h-14 bg-slate-900 border-t border-slate-800 px-6 flex items-center justify-between text-xs text-slate-300 shrink-0">
       <div class="flex items-center gap-3">
-        <span id="lbl-active-editing-plot" class="font-bold text-amber-300 bg-slate-800 px-2 py-1 rounded-lg border border-slate-700">Đang chọn: Khu đất 1</span>
+        <span id="lbl-active-editing-plot" class="font-bold text-amber-300 bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700">Đang chọn: Khu đất 1</span>
         <span>🌾 <b>Chọn ảnh đất mẫu:</b></span>
-        <select id="select-editor-soil-asset" class="px-3 py-1.5 rounded-xl bg-slate-800 text-amber-200 border border-slate-700 font-mono text-xs max-w-xs focus:outline-none">
-          <!-- Chỉ load danh sách ảnh hàng rào đất thực tế đã gán trong nút Đất -->
+        <select id="select-editor-soil-asset" onchange="previewSoilAssetForActiveSlot(this.value)" class="px-3 py-1.5 rounded-xl bg-slate-800 text-amber-200 border border-slate-700 font-mono text-xs max-w-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <!-- Load tự động danh sách ảnh mẫu đất -->
         </select>
         <button onclick="saveSoilAssetForActiveSlot()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition shadow flex items-center gap-1">
           <i class="fa-solid fa-check"></i> Lưu Tỉ Lệ Ô Này
@@ -1108,40 +1043,65 @@
       reIndexPlotSlots();
       state.tempTextOverlays = JSON.parse(JSON.stringify(cls.config.textOverlays || []));
       
+      // Nạp danh mục ảnh đất
       populateEditorSoilAssetsDropdown();
 
       document.getElementById('fullscreen-editor-modal').classList.remove('hidden');
       requestAnimationFrame(() => renderPerspectiveSlotsAndTexts());
     }
 
-    // LỌC CHÍNH XÁC CÁC ẢNH MẪU ĐẤT HÀNG RÀO TỪ NÚT ĐẤT
+    // NẠP ĐẦY ĐỦ VÀ CHÍNH XÁC DANH SÁCH ẢNH ĐẤT
     function populateEditorSoilAssetsDropdown() {
       const select = document.getElementById('select-editor-soil-asset');
       const cls = state.classesData[state.activeClass];
       const nengameList = state.cachedAssets['nengame'] || [];
 
-      let soilSelectedFileNames = [];
+      // 1. Quét tìm tất cả các file ảnh đất được gán ở bất kỳ nút nào có liên kết nengame
+      let selectedSoilFiles = [];
       Object.values(cls.config.buttonMappings || {}).forEach(m => {
-        if (m.targetFolders && m.targetFolders.includes('nengame')) {
-          soilSelectedFileNames = soilSelectedFileNames.concat(m.selectedImages || []);
+        if (m.targetFolders && m.targetFolders.includes('nengame') && m.selectedImages) {
+          selectedSoilFiles = selectedSoilFiles.concat(m.selectedImages);
         }
       });
 
-      // Lọc CHỈ LẤY các file ảnh hàng rào đất (khudatrieng_*)
+      // 2. Tìm các ảnh phù hợp (ưu tiên các file khudatrieng_*, đất, hoặc file đã được tick)
       let validSoilItems = nengameList.filter(img => {
         const name = img.fileName.toLowerCase();
-        const isSoilName = name.includes('khudat') || name.includes('dat') || name.includes('hangrao');
-        if (soilSelectedFileNames.length > 0) {
-          return soilSelectedFileNames.includes(img.fileName) && isSoilName;
+        const isSoilPattern = name.includes('khudat') || name.includes('dat') || name.includes('hangrao');
+        if (selectedSoilFiles.length > 0) {
+          return selectedSoilFiles.includes(img.fileName);
         }
-        return isSoilName;
+        return isSoilPattern;
       });
 
+      // 3. Fallback: Nếu không lọc được gì, hiển thị tất cả các file trong nengame (ngoại trừ ảnh nền lớn nenungdung, vuonlop)
       if (validSoilItems.length === 0) {
-        validSoilItems = nengameList.filter(img => img.fileName.toLowerCase().includes('khudat'));
+        validSoilItems = nengameList.filter(img => {
+          const name = img.fileName.toLowerCase();
+          return !name.includes('nenungdung') && !name.includes('vuonlop');
+        });
+      }
+
+      // 4. Fallback cuối cùng: Nếu vẫn rỗng (do chưa kịp quét GitHub), lấy toàn bộ nengameList
+      if (validSoilItems.length === 0) {
+        validSoilItems = nengameList;
       }
 
       select.innerHTML = validSoilItems.map(img => `<option value="${img.rawUrl}">${img.fileName}</option>`).join('');
+
+      // Đồng bộ ảnh xem trước ngay nếu ô đang chọn đã có soilImage
+      if (state.tempEditorSlots[state.activeEditingSlotIndex]?.soilImage) {
+        select.value = state.tempEditorSlots[state.activeEditingSlotIndex].soilImage;
+      }
+    }
+
+    // Cập nhật ảnh trực tiếp lên canvas khi đổi lựa chọn trong dropdown
+    function previewSoilAssetForActiveSlot(url) {
+      const slotIdx = state.activeEditingSlotIndex;
+      if (state.tempEditorSlots[slotIdx]) {
+        state.tempEditorSlots[slotIdx].soilImage = url;
+        renderPerspectiveSlotsAndTexts();
+      }
     }
 
     function closeFullscreenEditor() { document.getElementById('fullscreen-editor-modal').classList.add('hidden'); }
@@ -1162,7 +1122,7 @@
       if (state.tempEditorSlots[slotIdx] && selectVal) {
         state.tempEditorSlots[slotIdx].soilImage = selectVal;
         renderPerspectiveSlotsAndTexts();
-        alert(`Đã gán và lưu tỉ lệ ảnh mẫu cho ${state.tempEditorSlots[slotIdx].name}!`);
+        alert(`Đã lưu tỉ lệ ảnh mẫu cho ${state.tempEditorSlots[slotIdx].name}!`);
       }
     }
 
@@ -1223,7 +1183,7 @@
             const xs = slot.corners.map(c => (c.x / 100) * cW), ys = slot.corners.map(c => (c.y / 100) * cH);
             const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
             return `
-              <g id="svg-group-${sIdx}" onclick="state.activeEditingSlotIndex=${sIdx}; document.getElementById('lbl-active-editing-plot').innerText='Đang chọn: ${slot.name}';">
+              <g id="svg-group-${sIdx}" onclick="selectSlotForEditing(${sIdx})">
                 <polygon points="${slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ')}" id="polygon-body-${sIdx}" class="plot-polygon-shape" fill="rgba(16, 185, 129, 0.35)" stroke="#059669" stroke-width="3" stroke-dasharray="8,6"/>
                 ${slot.soilImage ? `<image href="${slot.soilImage}" x="${minX}" y="${minY}" width="${maxX - minX}" height="${maxY - minY}" preserveAspectRatio="none" clip-path="url(#editor-clip-${sIdx})" opacity="0.95"/>` : ''}
               </g>
@@ -1262,7 +1222,7 @@
       state.tempEditorSlots.forEach((slot, sIdx) => {
         const polyEl = document.getElementById(`polygon-body-${sIdx}`);
         if (polyEl) {
-          polyEl.addEventListener('mousedown', (e) => { state.activeEditingSlotIndex = sIdx; document.getElementById('lbl-active-editing-plot').innerText = `Đang chọn: ${slot.name}`; });
+          polyEl.addEventListener('mousedown', (e) => { selectSlotForEditing(sIdx); });
         }
         for (let cIdx = 0; cIdx < 4; cIdx++) {
           const handle = document.getElementById(`handle-${sIdx}-${cIdx}`);
@@ -1272,9 +1232,20 @@
       state.tempTextOverlays.forEach((txt, tIdx) => { makeTextOverlayDraggable(document.getElementById(`text-overlay-${tIdx}`), tIdx); });
     }
 
+    function selectSlotForEditing(sIdx) {
+      state.activeEditingSlotIndex = sIdx;
+      const slot = state.tempEditorSlots[sIdx];
+      if (!slot) return;
+      document.getElementById('lbl-active-editing-plot').innerText = `Đang chọn: ${slot.name}`;
+      const select = document.getElementById('select-editor-soil-asset');
+      if (slot.soilImage) {
+        select.value = slot.soilImage;
+      }
+    }
+
     function makeCornerHandleDraggable(handleEl, slotIndex, cornerIndex) {
       let isDragging = false;
-      handleEl.addEventListener('mousedown', (e) => { state.activeEditingSlotIndex = slotIndex; isDragging = true; e.stopPropagation(); });
+      handleEl.addEventListener('mousedown', (e) => { selectSlotForEditing(slotIndex); isDragging = true; e.stopPropagation(); });
       window.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         const rect = document.getElementById('editor-canvas-box').getBoundingClientRect();
@@ -1323,6 +1294,13 @@
       populateBackgroundDropdowns();
       populateButtonIconsList();
       populateEditorSoilAssetsDropdown();
+    }
+
+    function generatePasswordFromNameAndSTT(fullName, stt) {
+      if (!fullName) return `hs${stt}`;
+      let clean = fullName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd');
+      const initials = clean.trim().split(/\s+/).map(w => w.charAt(0).toLowerCase()).join('');
+      return `${initials}${stt}`;
     }
 
     async function fetchAndParseStudentCSV() {
