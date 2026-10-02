@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin298 - Game Controller & Plot Layout Editor</title>
+  <title>Admin298 - Game Controller & Perspective Layout Editor</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -20,22 +20,23 @@
     ::-webkit-scrollbar-track { background: #f8fafc; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
-    /* VÙNG CHỌN ĐẤT TRÊN CANVAS PHÓNG TO */
-    .plot-slot-box {
+    /* CÁC ĐIỂM NEO KÉO PHỐI CẢNH 3D */
+    .perspective-handle {
       position: absolute;
-      touch-action: none;
-      user-select: none;
-      cursor: grab;
-      border: 2px dashed #10b981;
-      background: rgba(16, 185, 129, 0.2);
-      border-radius: 12px;
-      transition: box-shadow 0.2s;
+      width: 18px;
+      height: 18px;
+      background: #10b981;
+      border: 3px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(0,0,0,0.6);
+      transform: translate(-50%, -50%);
+      cursor: crosshair;
+      z-index: 50;
+      transition: transform 0.1s;
     }
-    .plot-slot-box:active { cursor: grabbing; }
-    .plot-slot-box.active-slot {
-      border: 2px solid #059669;
-      box-shadow: 0 0 15px rgba(16, 185, 129, 0.7);
-      background: rgba(16, 185, 129, 0.35);
+    .perspective-handle:hover {
+      transform: translate(-50%, -50%) scale(1.3);
+      background: #f59e0b;
     }
   </style>
 </head>
@@ -227,11 +228,13 @@
             </div>
           </div>
 
+          <!-- Thư mục liên kết mở khóa -->
           <div id="linked-folder-wrapper" class="hidden">
             <label class="block text-[11px] text-slate-600 font-bold mb-1">Thư mục liên kết mở khóa trong assets:</label>
             <div id="linked-folder-display-box" class="min-h-[38px] p-2 bg-slate-50 rounded-xl border border-slate-300 flex flex-wrap gap-1.5 items-center"></div>
           </div>
 
+          <!-- Khung Thiết lập mới / Chỉnh sửa -->
           <div id="new-condition-box" class="hidden p-3 bg-emerald-50/70 border border-emerald-300 rounded-xl space-y-2 mt-2">
             <span class="text-[11px] font-black uppercase text-emerald-900 block" id="lbl-form-mode">Nhập Điều Kiện Mới</span>
             
@@ -350,25 +353,24 @@
 
   </div>
 
-  <!-- ================= MODAL PHÓNG TO TOÀN MÀN HÌNH ĐỂ THIẾT KẾ VÙNG CHỌN ĐẤT ================= -->
+  <!-- ================= TRÌNH BIÊN TẬP VÙNG ĐẤT PHỐI CẢNH 3D TOÀN MÀN HÌNH ================= -->
   <div id="fullscreen-editor-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col">
     
-    <!-- THANH CÔNG CỤ TRÊN CÙNG CỦA TRÌNH THIẾT KẾ -->
     <div class="h-14 bg-slate-900 border-b border-slate-800 px-6 flex items-center justify-between shrink-0 shadow-lg">
       <div class="flex items-center gap-3">
         <span class="text-xl">📐</span>
         <div>
-          <h3 class="font-extrabold text-sm text-white uppercase tracking-wide">Trình Thiết Kế Vùng Đất Thi Đua</h3>
-          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Lớp 10A1 • Đặt vị trí ô đất cho các tổ</p>
+          <h3 class="font-extrabold text-sm text-white uppercase tracking-wide">Trình Thiết Kế Vùng Đất Phối Cảnh 3D</h3>
+          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Kéo 4 điểm neo ở các góc để uốn hình dạng đất ôm khít mặt sân</p>
         </div>
       </div>
 
       <div class="flex items-center gap-3">
-        <button onclick="addNewPlotSlot()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition">
+        <button onclick="addNewPerspectivePlotSlot()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition">
           <i class="fa-solid fa-plus"></i> + Thêm Vùng Đất Mới
         </button>
         <button onclick="saveAndCloseFullscreenEditor()" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition">
-          <i class="fa-solid fa-floppy-disk"></i> Lưu Vị Trí Vùng Đất
+          <i class="fa-solid fa-floppy-disk"></i> Lưu Dáng Đất Đã Nắn
         </button>
         <button onclick="closeFullscreenEditor()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-rose-600 text-white text-sm font-bold flex items-center justify-center transition">
           <i class="fa-solid fa-xmark"></i>
@@ -380,10 +382,9 @@
     <div class="flex-1 overflow-hidden p-4 flex items-center justify-center relative">
       <div id="editor-canvas-box" class="relative max-w-full max-h-full aspect-[3/2] w-full rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-800 bg-black flex items-center justify-center">
         
-        <!-- Ảnh nền sân trường -->
         <img id="editor-canvas-bg" src="" class="w-full h-full object-fill pointer-events-none select-none">
 
-        <!-- Lớp chứa các vùng chọn đất do admin tạo ra -->
+        <!-- LỚP CHỨA CÁC VÙNG ĐẤT BIẾN DẠNG 3D & 4 ĐIỂM NEO -->
         <div id="editor-slots-layer" class="absolute inset-0 w-full h-full z-10 pointer-events-auto"></div>
 
       </div>
@@ -391,7 +392,7 @@
 
     <!-- HƯỚNG DẪN DƯỚI CÙNG -->
     <div class="h-10 bg-slate-900 border-t border-slate-800 px-6 flex items-center justify-between text-xs text-slate-400 shrink-0">
-      <span>💡 <b>Hướng dẫn:</b> Nhấn <b>"+ Thêm Vùng Đất Mới"</b>, sau đó giữ chuột trái để kéo di chuyển ô đất đến đúng vị trí sân vàng mong muốn.</span>
+      <span>💡 <b>Cách làm:</b> Rê chuột vào <b>4 chấm tròn xanh ở 4 góc</b> của từng mảnh đất để kéo nghiêng dốc theo phối cảnh sân trường.</span>
       <span id="lbl-total-slots-count" class="font-bold text-emerald-400">Đã bố trí: 0 vùng đất</span>
     </div>
 
@@ -403,6 +404,7 @@
     const ASSETS_PATH = 'Games/vuonthidua/assets';
     const ALL_FOLDERS = ['hoacap1', 'hoacap2', 'nucap1', 'nucap2', 'congcu', 'nengame', 'nutgame'];
 
+    // CẤU TRÚC 4 ĐIỂM GÓC TỰ DO TÍNH THEO % SÂN NỀN
     const DEFAULT_CLASS_TEMPLATE = (className) => ({
       name: className,
       config: {
@@ -420,12 +422,24 @@
           'cond_top1_nu': { id: 'cond_top1_nu', name: 'Đạt Hạng 1 (Mở nụ VIP)', type: 'rank_top1', folders: ['nucap2'] },
           'cond_quest': { id: 'cond_quest', name: 'Hoàn thành nhiệm vụ ngày', type: 'quest_done', folders: ['congcu'] }
         },
-        // Danh sách các vùng đất riêng được bố trí trên sân A (tính theo %)
+        // MẶC ĐỊNH 4 VÙNG ĐẤT ĐÃ ĐƯỢC CĂN PHỐI CẢNH 3D BAN ĐẦU
         plotSlots: [
-          { id: 'slot_1', name: 'Tổ 1', teamId: 1, x: 20, y: 30, w: 28, h: 28 },
-          { id: 'slot_2', name: 'Tổ 2', teamId: 2, x: 52, y: 30, w: 28, h: 28 },
-          { id: 'slot_3', name: 'Tổ 3', teamId: 3, x: 20, y: 60, w: 28, h: 28 },
-          { id: 'slot_4', name: 'Tổ 4', teamId: 4, x: 52, y: 60, w: 28, h: 28 }
+          {
+            id: 'slot_1', name: 'Tổ 1', teamId: 1,
+            corners: [{ x: 22, y: 32 }, { x: 46, y: 32 }, { x: 44, y: 56 }, { x: 19, y: 56 }]
+          },
+          {
+            id: 'slot_2', name: 'Tổ 2', teamId: 2,
+            corners: [{ x: 54, y: 32 }, { x: 78, y: 32 }, { x: 81, y: 56 }, { x: 56, y: 56 }]
+          },
+          {
+            id: 'slot_3', name: 'Tổ 3', teamId: 3,
+            corners: [{ x: 18, y: 60 }, { x: 44, y: 60 }, { x: 42, y: 86 }, { x: 15, y: 86 }]
+          },
+          {
+            id: 'slot_4', name: 'Tổ 4', teamId: 4,
+            corners: [{ x: 56, y: 60 }, { x: 82, y: 60 }, { x: 85, y: 86 }, { x: 58, y: 86 }]
+          }
         ]
       },
       students: {},
@@ -448,7 +462,6 @@
         folders: [],
         singleImage: null
       },
-      // Dữ liệu tạm thời khi mở trình biên tập vùng chọn
       tempEditorSlots: []
     };
 
@@ -509,32 +522,27 @@
     }
 
     function loadSavedData() {
-      const saved = localStorage.getItem('garden_system_classes_v9');
+      const saved = localStorage.getItem('garden_system_classes_v10');
       if (saved) {
         try { 
           const parsed = JSON.parse(saved);
           Object.values(parsed).forEach(c => {
-            if (!c.config.plotSlots) {
-              c.config.plotSlots = [
-                { id: 'slot_1', name: 'Tổ 1', teamId: 1, x: 20, y: 30, w: 28, h: 28 },
-                { id: 'slot_2', name: 'Tổ 2', teamId: 2, x: 52, y: 30, w: 28, h: 28 },
-                { id: 'slot_3', name: 'Tổ 3', teamId: 3, x: 20, y: 60, w: 28, h: 28 },
-                { id: 'slot_4', name: 'Tổ 4', teamId: 4, x: 52, y: 60, w: 28, h: 28 }
-              ];
+            if (!c.config.plotSlots || !c.config.plotSlots[0].corners) {
+              c.config.plotSlots = DEFAULT_CLASS_TEMPLATE(c.name).config.plotSlots;
             }
           });
           state.classesData = parsed;
         } catch (e) {}
       }
-      const savedActive = localStorage.getItem('garden_active_class_v9');
+      const savedActive = localStorage.getItem('garden_active_class_v10');
       if (savedActive && state.classesData[savedActive]) {
         state.activeClass = savedActive;
       }
     }
 
     function saveStateToLocal() {
-      localStorage.setItem('garden_system_classes_v9', JSON.stringify(state.classesData));
-      localStorage.setItem('garden_active_class_v9', state.activeClass);
+      localStorage.setItem('garden_system_classes_v10', JSON.stringify(state.classesData));
+      localStorage.setItem('garden_active_class_v10', state.activeClass);
     }
 
     // ================= QUẢN LÝ LỚP =================
@@ -634,7 +642,6 @@
       displaySingleImagePreview(val, `Ảnh nền hiện tại (${type.toUpperCase()}): ${val}`);
     }
 
-    // HIỂN THỊ XEM TRƯỚC ẢNH NỀN Ở PHẦN B (CHO PHÉP NHẤP VÀO ĐỂ PHÓNG TO THIẾT KẾ)
     function displaySingleImagePreview(imagePath, title) {
       state.activeViewData = { type: 'single_preview', folders: [], singleImage: imagePath };
       document.getElementById('section-b-title').innerText = title;
@@ -649,12 +656,11 @@
           <div onclick="openFullscreenEditor('${imagePath}')" class="relative w-full aspect-[3/2] rounded-2xl bg-slate-950 overflow-hidden flex items-center justify-center cursor-pointer shadow-lg border-2 border-emerald-500/40 hover:border-emerald-500 transition duration-300">
             <img src="${fullUrl}" class="max-h-full max-w-full object-contain pointer-events-none">
             
-            <!-- Lớp phủ gợi ý phóng to -->
             <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 backdrop-blur-xs flex flex-col items-center justify-center text-white transition duration-300">
               <div class="w-12 h-12 rounded-full bg-emerald-600 flex items-center justify-center text-xl shadow-xl mb-2">
                 <i class="fa-solid fa-expand"></i>
               </div>
-              <span class="text-xs font-black uppercase tracking-wider text-emerald-300">Bấm để phóng to & bố trí các khu đất riêng</span>
+              <span class="text-xs font-black uppercase tracking-wider text-emerald-300">Bấm để phóng to & nắn dáng đất 3D</span>
             </div>
           </div>
           <span class="text-xs font-mono font-bold text-slate-700 mt-3 text-center">${imagePath}</span>
@@ -662,10 +668,66 @@
       `;
     }
 
-    // ================= 2. TRÌNH THIẾT KẾ VÙNG CHỌN ĐẤT TOÀN MÀN HÌNH =================
+    // =========================================================================
+    // TOÁN HỌC BIẾN ĐỔI PHỐI CẢNH 3D (PERSPECTIVE HOMOGRAPHY -> CSS MATRIX3D)
+    // =========================================================================
+    function getHomographyMatrix3D(w, h, p0, p1, p2, p3) {
+      // Điểm nguồn hình chữ nhật gốc [0, w], [0, h]
+      const src = [{ x: 0, y: 0 }, { x: w, y: 0 }, { x: w, y: h }, { x: 0, y: h }];
+      const dst = [p0, p1, p2, p3];
+
+      // Giải hệ phương trình 8 ẩn Ax = B bằng Gaussian Elimination
+      let A = [];
+      for (let i = 0; i < 4; i++) {
+        const sx = src[i].x, sy = src[i].y;
+        const dx = dst[i].x, dy = dst[i].y;
+        A.push([sx, sy, 1, 0, 0, 0, -sx * dx, -sy * dx, dx]);
+        A.push([0, 0, 0, sx, sy, 1, -sx * dy, -sy * dy, dy]);
+      }
+
+      // Khử Gauss
+      for (let i = 0; i < 8; i++) {
+        let maxRow = i;
+        for (let k = i + 1; k < 8; k++) {
+          if (Math.abs(A[k][i]) > Math.abs(A[maxRow][i])) maxRow = k;
+        }
+        let temp = A[i]; A[i] = A[maxRow]; A[maxRow] = temp;
+
+        for (let k = i + 1; k < 8; k++) {
+          let c = -A[k][i] / A[i][i];
+          for (let j = i; j <= 8; j++) {
+            if (i === j) A[k][j] = 0;
+            else A[k][j] += c * A[i][j];
+          }
+        }
+      }
+
+      // Thế ngược tìm nghiệm H
+      let H = new Array(8);
+      for (let i = 7; i >= 0; i--) {
+        H[i] = A[i][8] / A[i][i];
+        for (let k = i - 1; k >= 0; k--) {
+          A[k][8] -= A[k][i] * H[i];
+        }
+      }
+
+      // Chuyển ma trận 3x3 sang matrix3d (4x4 dạng cột)
+      const h0 = H[0], h1 = H[1], h2 = H[2];
+      const h3 = H[3], h4 = H[4], h5 = H[5];
+      const h6 = H[6], h7 = H[7], h8 = 1.0;
+
+      return `matrix3d(
+        ${h0}, ${h3}, 0, ${h6},
+        ${h1}, ${h4}, 0, ${h7},
+        0, 0, 1, 0,
+        ${h2}, ${h5}, 0, ${h8}
+      )`;
+    }
+
+    // ================= 2. TRÌNH NẮN DÁNG ĐẤT 3D TOÀN MÀN HÌNH =================
     function openFullscreenEditor(imagePath) {
       const cls = state.classesData[state.activeClass];
-      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Bố trí vị trí ô đất cho các tổ`;
+      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Nắn phối cảnh 3D ô đất ôm khít sân trường`;
       
       const fullUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${imagePath}`;
       document.getElementById('editor-canvas-bg').src = fullUrl;
@@ -673,7 +735,7 @@
       // Nạp danh sách các vùng đất đã có của lớp
       state.tempEditorSlots = JSON.parse(JSON.stringify(cls.config.plotSlots || []));
       
-      renderEditorSlots();
+      renderPerspectiveSlots();
       document.getElementById('fullscreen-editor-modal').classList.remove('hidden');
     }
 
@@ -686,117 +748,120 @@
       cls.config.plotSlots = JSON.parse(JSON.stringify(state.tempEditorSlots));
       saveStateToLocal();
       closeFullscreenEditor();
-      alert(`Đã lưu thành công ${cls.config.plotSlots.length} vùng đất riêng cho Lớp ${state.activeClass}!\nCác vị trí này sẽ đồng bộ chính xác sang index.html.`);
+      alert(`Đã lưu thành công ${cls.config.plotSlots.length} dáng đất 3D cho Lớp ${state.activeClass}!\nKhi học sinh thả đất vào index.html, ảnh đất sẽ tự động co giãn đúng y hệt.`);
     }
 
-    function addNewPlotSlot() {
+    function addNewPerspectivePlotSlot() {
       const newIndex = state.tempEditorSlots.length + 1;
       const newSlot = {
         id: 'slot_' + Date.now().toString(36),
         name: `Tổ ${newIndex}`,
         teamId: newIndex,
-        x: 35, // Tọa độ % mặc định
-        y: 40,
-        w: 26, // Chiều rộng %
-        h: 26  // Chiều cao %
+        corners: [
+          { x: 35, y: 40 },
+          { x: 60, y: 40 },
+          { x: 63, y: 65 },
+          { x: 32, y: 65 }
+        ]
       };
       state.tempEditorSlots.push(newSlot);
-      renderEditorSlots();
+      renderPerspectiveSlots();
     }
 
-    function renderEditorSlots() {
+    function renderPerspectiveSlots() {
       const container = document.getElementById('editor-slots-layer');
+      const canvas = document.getElementById('editor-canvas-box');
+      const cW = canvas.clientWidth || 900;
+      const cH = canvas.clientHeight || 600;
+
       document.getElementById('lbl-total-slots-count').innerText = `Đã bố trí: ${state.tempEditorSlots.length} vùng đất`;
 
-      container.innerHTML = state.tempEditorSlots.map((slot, index) => `
-        <div id="slot-el-${slot.id}" 
-             class="plot-slot-box flex flex-col justify-between p-1.5 shadow-md" 
-             style="left: ${slot.x}%; top: ${slot.y}%; width: ${slot.w}%; height: ${slot.h}%;">
-          
-          <!-- Thanh nhãn trên cùng của ô đất -->
-          <div class="flex items-center justify-between w-full">
-            <span class="bg-amber-950/80 text-amber-200 text-[10px] font-black px-2 py-0.5 rounded-full truncate">
-              ${slot.name}
-            </span>
-            <button onclick="removeEditorSlot(${index}, event)" class="w-4 h-4 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-[9px] font-bold flex items-center justify-center shadow">
+      container.innerHTML = state.tempEditorSlots.map((slot, sIdx) => {
+        // Tọa độ pixel của 4 góc
+        const p0 = { x: (slot.corners[0].x / 100) * cW, y: (slot.corners[0].y / 100) * cH };
+        const p1 = { x: (slot.corners[1].x / 100) * cW, y: (slot.corners[1].y / 100) * cH };
+        const p2 = { x: (slot.corners[2].x / 100) * cW, y: (slot.corners[2].y / 100) * cH };
+        const p3 = { x: (slot.corners[3].x / 100) * cW, y: (slot.corners[3].y / 100) * cH };
+
+        // Chuẩn hóa kích thước hình ảnh gốc 300x200
+        const baseW = 300, baseH = 200;
+        const matrixCss = getHomographyMatrix3D(baseW, baseH, p0, p1, p2, p3);
+
+        return `
+          <div id="slot-wrapper-${slot.id}" class="absolute inset-0 pointer-events-none">
+            
+            <!-- ẢNH ĐẤT ĐƯỢC BIẾN DẠNG 3D THEO 4 GÓC -->
+            <div style="width: ${baseW}px; height: ${baseH}px; transform-origin: 0 0; transform: ${matrixCss}; position: absolute; left: 0; top: 0;" class="pointer-events-none">
+              <div class="relative w-full h-full border-2 border-dashed border-emerald-400 bg-emerald-500/20 rounded-xl overflow-hidden flex flex-col items-center justify-center p-2">
+                <img src="https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/khudatrieng_nau.png" class="w-full h-full object-fill opacity-85">
+                <span class="absolute top-2 left-2 bg-amber-950/90 text-amber-200 text-xs font-black px-2.5 py-0.5 rounded-full shadow">
+                  ${slot.name}
+                </span>
+              </div>
+            </div>
+
+            <!-- NÚT XÓA VÙNG ĐẤT -->
+            <button onclick="removePerspectiveSlot(${sIdx}, event)" 
+                    style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%; transform: translate(-100%, -100%);"
+                    class="absolute w-5 h-5 rounded-full bg-rose-600 text-white font-bold text-xs flex items-center justify-center pointer-events-auto hover:scale-125 transition z-50 shadow-md">
               ✕
             </button>
-          </div>
 
-          <!-- Ảnh mô phỏng khung đất khudatrieng_nau.png -->
-          <div class="flex-1 flex items-center justify-center overflow-hidden my-0.5 pointer-events-none">
-            <img src="https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/khudatrieng_nau.png" class="max-h-full max-w-full object-fill opacity-75">
-          </div>
+            <!-- 4 ĐIỂM NEO Ở 4 GÓC ĐỂ ADMIN KÉO UỐN PHỐI CẢNH -->
+            <div id="handle-${sIdx}-0" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%;" title="Kéo góc Trên-Trái"></div>
+            <div id="handle-${sIdx}-1" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[1].x}%; top: ${slot.corners[1].y}%;" title="Kéo góc Trên-Phải"></div>
+            <div id="handle-${sIdx}-2" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[2].x}%; top: ${slot.corners[2].y}%;" title="Kéo góc Dưới-Phải"></div>
+            <div id="handle-${sIdx}-3" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[3].x}%; top: ${slot.corners[3].y}%;" title="Kéo góc Dưới-Trái"></div>
 
-          <div class="text-[9px] text-emerald-950 font-black text-center truncate">
-            (Khu riêng ${slot.name})
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
 
-      // Kích hoạt kéo thả cho từng ô đất
-      state.tempEditorSlots.forEach((slot, index) => {
-        const el = document.getElementById(`slot-el-${slot.id}`);
-        if (el) makeSlotDraggable(el, index);
+      // Gắn sự kiện kéo điểm neo cho từng góc
+      state.tempEditorSlots.forEach((slot, sIdx) => {
+        for (let cIdx = 0; cIdx < 4; cIdx++) {
+          const handleEl = document.getElementById(`handle-${sIdx}-${cIdx}`);
+          if (handleEl) makeCornerHandleDraggable(handleEl, sIdx, cIdx);
+        }
       });
     }
 
-    function makeSlotDraggable(element, slotIndex) {
+    function makeCornerHandleDraggable(handleEl, slotIndex, cornerIndex) {
       let isDragging = false;
-      let startX, startY;
-      let initialLeftPx, initialTopPx;
 
-      element.addEventListener('mousedown', (e) => {
-        if (e.target.tagName === 'BUTTON') return;
+      handleEl.addEventListener('mousedown', (e) => {
         isDragging = true;
-        startX = e.clientX;
-        startY = e.clientY;
-        initialLeftPx = element.offsetLeft;
-        initialTopPx = element.offsetTop;
-        element.classList.add('active-slot');
-        element.style.zIndex = 50;
+        e.stopPropagation();
       });
 
       window.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         const canvas = document.getElementById('editor-canvas-box');
-        const canvasRect = canvas.getBoundingClientRect();
+        const rect = canvas.getBoundingClientRect();
 
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-
-        let newLeftPx = initialLeftPx + dx;
-        let newTopPx = initialTopPx + dy;
+        let posX = e.clientX - rect.left;
+        let posY = e.clientY - rect.top;
 
         // Giới hạn trong khung sân
-        newLeftPx = Math.max(0, Math.min(canvasRect.width - element.offsetWidth, newLeftPx));
-        newTopPx = Math.max(0, Math.min(canvasRect.height - element.offsetHeight, newTopPx));
+        posX = Math.max(0, Math.min(rect.width, posX));
+        posY = Math.max(0, Math.min(rect.height, posY));
 
-        // Chuyển sang phần trăm (%)
-        const leftPercent = (newLeftPx / canvasRect.width) * 100;
-        const topPercent = (newTopPx / canvasRect.height) * 100;
+        const pX = parseFloat(((posX / rect.width) * 100).toFixed(2));
+        const pY = parseFloat(((posY / rect.height) * 100).toFixed(2));
 
-        element.style.left = `${leftPercent}%`;
-        element.style.top = `${topPercent}%`;
-
-        // Cập nhật tọa độ vào dữ liệu
-        state.tempEditorSlots[slotIndex].x = parseFloat(leftPercent.toFixed(2));
-        state.tempEditorSlots[slotIndex].y = parseFloat(topPercent.toFixed(2));
+        state.tempEditorSlots[slotIndex].corners[cornerIndex] = { x: pX, y: pY };
+        renderPerspectiveSlots();
       });
 
       window.addEventListener('mouseup', () => {
-        if (isDragging) {
-          isDragging = false;
-          element.classList.remove('active-slot');
-          element.style.zIndex = 10;
-        }
+        if (isDragging) isDragging = false;
       });
     }
 
-    function removeEditorSlot(index, event) {
+    function removePerspectiveSlot(sIdx, event) {
       event.stopPropagation();
-      state.tempEditorSlots.splice(index, 1);
-      renderEditorSlots();
+      state.tempEditorSlots.splice(sIdx, 1);
+      renderPerspectiveSlots();
     }
 
     // ================= 3. GÁN TÍNH NĂNG NÚT =================
@@ -1302,7 +1367,7 @@
 
     function saveAndApplyCurrentClass() {
       saveStateToLocal();
-      alert(`ĐÃ LƯU THÀNH CÔNG CHO LỚP ${state.activeClass}!\nToàn bộ cài đặt nền, gán nút, điều kiện mở khóa và vị trí vùng đất riêng đã được đồng bộ sang index.html.`);
+      alert(`ĐÃ LƯU THÀNH CÔNG CHO LỚP ${state.activeClass}!\nToàn bộ cài đặt nền, gán nút, điều kiện mở khóa và vị trí vùng đất 3D đã được đồng bộ sang index.html.`);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
