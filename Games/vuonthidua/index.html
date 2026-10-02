@@ -3,504 +3,390 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vườn Hoa Thi Đua - Đua Top Học Tập</title>
+  <title>Vườn Thi Đua Trồng Hoa - Sân Chơi Lớp Học</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Thư viện hiệu ứng pháo hoa hoa nở -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
-    /* Canh khung chuẩn theo tỉ lệ phối cảnh sân trường */
-    .garden-viewport {
-      position: relative;
-      width: 100%;
-      max-width: 1100px;
-      aspect-ratio: 16 / 10.5;
-      background-size: 100% 100%;
-      background-repeat: no-repeat;
-      box-shadow: 0 20px 40px -15px rgba(0,0,0,0.3);
+    /* Nền caro trong suốt */
+    .bg-trans-grid {
+      background-color: #ffffff;
+      background-image: linear-gradient(45deg, #f1f5f9 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f1f5f9 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f1f5f9 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f1f5f9 75%);
+      background-size: 14px 14px;
+      background-position: 0 0, 0 7px, 7px -7px, -7px 0px;
     }
-    /* Vùng sân gạch vàng chứa 4 ô đất */
-    .brick-yard-zone {
-      position: absolute;
-      top: 29%;
-      bottom: 12%;
-      left: 20%;
-      right: 20%;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(2, 1fr);
-      gap: 12px;
-    }
-    /* Ô đất nâu của từng tổ */
-    .plot-container {
-      position: relative;
-      background-size: 100% 100%;
-      background-repeat: no-repeat;
-      transition: all 0.25s ease;
-    }
-    .plot-active {
-      filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.8));
-    }
-    /* Hiệu ứng bình tưới nước hoạt họa */
-    @keyframes watering {
-      0% { transform: rotate(0deg) scale(1); }
-      30% { transform: rotate(-35deg) scale(1.1); }
-      70% { transform: rotate(-35deg) scale(1.1); }
-      100% { transform: rotate(0deg) scale(1); }
-    }
-    .water-anim {
-      animation: watering 1.2s ease-in-out forwards;
-    }
+    /* Thanh cuộn gọn gàng */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    
+    /* Vật phẩm trên sân A */
+    .garden-placed-item {
+      position: absolute;
+      touch-action: none;
+      user-select: none;
+      cursor: grab;
+    }
+    .garden-placed-item:active {
+      cursor: grabbing;
+    }
   </style>
 </head>
-<body class="bg-amber-50/60 min-h-screen flex flex-col items-center justify-center p-2 font-sans select-none">
+<body class="bg-slate-900 text-slate-800 h-screen w-screen overflow-hidden flex flex-col font-sans select-none">
 
-  <!-- 1. POPUP ĐĂNG NHẬP (KHÔNG PLACEHOLDER, CÓ CON MẮT ẨN/HIỆN PASS) -->
-  <div id="login-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 border-4 border-emerald-500/30">
-      <div class="text-center mb-5">
-        <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl mb-2 shadow-inner">
-          <i class="fa-solid fa-seedling"></i>
-        </div>
-        <h2 class="text-xl font-black text-slate-800 tracking-tight">Vườn Hoa Lớp Học</h2>
-        <p class="text-xs text-slate-500 mt-0.5">Đăng nhập để thi đua & tưới cây cùng Tổ</p>
-      </div>
+  <!-- THANH TIÊU ĐỀ TRÊN CÙNG (GỌN GÀNG) -->
+  <header class="h-11 bg-white border-b border-slate-200 px-4 flex items-center justify-between z-30 shrink-0 shadow-sm">
+    <div class="flex items-center gap-2">
+      <span class="text-xl">🌸</span>
+      <h1 class="font-extrabold text-sm text-emerald-800 uppercase tracking-wide">Vườn Thi Đua Trồng Hoa</h1>
+      <span class="text-[11px] px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-bold ml-2">Lớp 10A1</span>
+    </div>
 
-      <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Tài khoản học sinh</label>
-          <input type="text" id="login-user" autocomplete="off" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-700">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Mật khẩu</label>
-          <div class="relative">
-            <input type="password" id="login-pass" autocomplete="off" class="w-full px-3.5 py-2.5 pr-10 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold text-slate-700">
-            <button type="button" onclick="togglePasswordVisibility('login-pass', 'eye-icon-login')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
-              <i id="eye-icon-login" class="fa-solid fa-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div id="login-error" class="hidden text-rose-500 text-xs font-bold text-center"></div>
-        
-        <button onclick="handleStudentLogin()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm rounded-2xl shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2">
-          <i class="fa-solid fa-door-open"></i> Vào Vườn Hoa
-        </button>
-
-        <!-- Gợi ý tài khoản kiểm tra -->
-        <div class="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl text-[11px] text-emerald-800 leading-relaxed text-center">
-          <span>Tài khoản kiểm tra (Test):</span><br>
-          <b>hocsinh</b> &bull; Mật khẩu: <b>hs1234</b>
-        </div>
+    <div class="flex items-center gap-2">
+      <button onclick="clearPlacedItems()" class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition flex items-center gap-1 border border-rose-200">
+        <i class="fa-solid fa-trash-can"></i> Dọn Sân
+      </button>
+      <div class="text-xs text-slate-500 font-semibold border-l pl-3 border-slate-200">
+        Tài khoản: <b class="text-emerald-700">hocsinh (Tổ 1)</b>
       </div>
     </div>
-  </div>
+  </header>
 
-  <!-- 2. GIAO DIỆN GAME CHÍNH -->
-  <div id="game-app" class="hidden w-full max-w-[1100px] flex flex-col items-center">
+  <!-- BỐ CỤC CHÍNH TOÀN MÀN HÌNH: PHẦN A (TRÁI) & PHẦN B (PHẢI) -->
+  <div class="flex-1 flex flex-row h-[calc(100vh-44px)] overflow-hidden">
     
-    <!-- Thanh trạng thái phía trên vườn -->
-    <header class="w-full bg-white/95 backdrop-blur-md rounded-2xl shadow-md border border-amber-200/80 p-3 mb-2 flex items-center justify-between gap-3">
-      <div class="flex items-center gap-2.5">
-        <div class="w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center font-black text-sm shadow">
-          <span id="badge-team-name">T1</span>
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h3 class="font-extrabold text-sm text-slate-800" id="lbl-student-name">Nguyễn Văn Test</h3>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold" id="lbl-class-team">Lớp 10A1 - Tổ 1</span>
-          </div>
-          <p class="text-[11px] text-slate-500" id="lbl-water-status"><i class="fa-solid fa-droplet text-sky-400"></i> Hôm nay chưa tưới nước</p>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <button onclick="openQuestModal()" class="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs rounded-xl shadow-md flex items-center gap-1.5 transition">
-          <i class="fa-solid fa-scroll"></i> Nhiệm Vụ Hôm Nay
-        </button>
-        <button onclick="handleLogout()" class="p-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 transition" title="Đăng xuất">
-          <i class="fa-solid fa-power-off"></i>
-        </button>
-      </div>
-    </header>
-
-    <!-- SÂN TRƯỜNG TOÀN CẢNH (CANVAS CHÍNH) -->
-    <div id="schoolyard" class="garden-viewport rounded-3xl overflow-hidden border-4 border-amber-800/20">
+    <!-- ==================== PHẦN A: BÊN TRÁI (SÂN CHƠI NỀN GAME) ==================== -->
+    <section id="section-a" class="flex-1 relative bg-slate-950 overflow-hidden flex items-center justify-center border-r border-slate-300" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
       
-      <!-- Bảng tên lớp trên biển gỗ sân trường -->
-      <div class="absolute top-[9%] left-1/2 -translate-x-1/2 text-center pointer-events-none" style="width: 21%;">
-        <span id="board-class-title" class="text-[13px] md:text-base font-black text-amber-950 uppercase tracking-wide drop-shadow-sm font-serif">
-          LỚP 10A1
-        </span>
+      <!-- Lớp ảnh nền game -->
+      <img id="game-bg-image" 
+           src="assets/nengame/vuonlop.jpg" 
+           alt="Nền Game" 
+           onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/vuonlop.jpg'" 
+           class="absolute inset-0 w-full h-full object-fill pointer-events-none transition-all duration-300">
+
+      <!-- Khung chứa các vật thể được kéo thả/đặt trên sân A -->
+      <div id="drop-container" class="absolute inset-0 w-full h-full z-10 pointer-events-auto">
+        <!-- Các cây, nụ, hoa, xẻng được thả vào đây -->
       </div>
 
-      <!-- VÙNG SÂN GẠCH VÀNG: CHỨA 4 Ô ĐẤT CỦA 4 TỔ -->
-      <div class="brick-yard-zone">
-        <!-- Render 4 khu đất tại đây bằng Javascript -->
-        <div id="plot-team-1" class="plot-container rounded-2xl flex flex-col justify-between p-2 cursor-pointer" onclick="clickPlot(1)"></div>
-        <div id="plot-team-2" class="plot-container rounded-2xl flex flex-col justify-between p-2 cursor-pointer" onclick="clickPlot(2)"></div>
-        <div id="plot-team-3" class="plot-container rounded-2xl flex flex-col justify-between p-2 cursor-pointer" onclick="clickPlot(3)"></div>
-        <div id="plot-team-4" class="plot-container rounded-2xl flex flex-col justify-between p-2 cursor-pointer" onclick="clickPlot(4)"></div>
+      <!-- Gợi ý thao tác khi sân trống -->
+      <div id="empty-hint" class="absolute bottom-4 left-4 z-20 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-white text-xs pointer-events-none flex items-center gap-2">
+        <i class="fa-solid fa-hand-pointer text-amber-400"></i>
+        <span>Kéo các vật phẩm từ <b>Phần B</b> thả vào đây để bài trí khu vườn!</span>
       </div>
+    </section>
 
-    </div>
-
-    <!-- Thanh chú thích hướng dẫn dưới vườn -->
-    <div class="w-full mt-2 bg-white/80 rounded-xl p-2.5 text-center text-xs text-slate-600 border border-slate-200 shadow-sm flex items-center justify-around">
-      <span>🌱 <b>Tuần 1:</b> Trồng 3 cây nụ</span>
-      <span>💧 <b>Tưới nước:</b> Cả tổ tưới đủ $\rightarrow$ Cây lớn +10%/ngày</span>
-      <span>🌸 <b>Nở hoa:</b> Đạt 100% nở rực rỡ</span>
-      <span>🏆 <b>Hạng tuần:</b> Nhận thêm 1 đến 4 cây mới</span>
-    </div>
-
-  </div>
-
-  <!-- 3. MODAL LÀM NHIỆM VỤ NHẬN LƯỢT TƯỚI -->
-  <div id="quest-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border border-slate-200">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-        <h3 class="font-extrabold text-base text-slate-800 flex items-center gap-2">
-          <i class="fa-solid fa-water text-sky-500"></i> Nhiệm Vụ Tưới Cây Hôm Nay
-        </h3>
-        <button onclick="closeQuestModal()" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
-      </div>
-
-      <div class="space-y-4 text-xs">
-        <div class="p-3 bg-amber-50 border border-amber-200 rounded-2xl">
-          <p class="font-bold text-amber-900 mb-1">Bước 1: Mở liên kết làm bài tập / tìm từ khóa</p>
-          <a id="quest-link-btn" href="#" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl mt-1 shadow-sm">
-            <i class="fa-solid fa-arrow-up-right-from-square"></i> Mở Trang Web Nhiệm Vụ
-          </a>
+    <!-- ==================== PHẦN B: BÊN PHẢI (CÔNG CỤ & KHAY VẬT PHẨM) ==================== -->
+    <aside id="section-b" class="w-80 md:w-96 lg:w-[420px] bg-slate-50 flex flex-col h-full border-l border-slate-200 shadow-xl shrink-0">
+      
+      <!-- PHẦN B1: BỘ CHỌN NỀN & CÁC NÚT ĐIỀU KHIỂN CHÍNH -->
+      <div class="p-3 bg-white border-b border-slate-200 shadow-xs space-y-3 shrink-0">
+        
+        <!-- Chọn ảnh nền từ assets/nengame/ -->
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-bold text-slate-600 whitespace-nowrap"><i class="fa-regular fa-image text-emerald-600"></i> Nền Game:</label>
+          <select id="bg-selector" onchange="changeGameBackground(this.value)" class="flex-1 px-2.5 py-1.5 text-xs font-semibold rounded-xl border border-slate-300 bg-slate-50 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            <option value="vuonlop.jpg">Sân Trường Lớp Học (vuonlop.jpg)</option>
+            <option value="nengame1.jpg">Khu Vườn Xanh (nengame1.jpg)</option>
+            <option value="nengame2.jpg">Vườn Hoa Nắng (nengame2.jpg)</option>
+          </select>
         </div>
 
+        <!-- 4 NÚT CHỨC NĂNG LẤY TỪ assets/nutgame/ -->
         <div>
-          <label class="block font-bold text-slate-700 mb-1">Bước 2: Nhập từ khóa bí mật bạn tìm được</label>
-          <input type="text" id="input-quest-key" autocomplete="off" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-bold uppercase text-slate-800 focus:ring-2 focus:ring-emerald-500">
+          <div class="text-[11px] font-bold uppercase text-slate-400 mb-1.5">Chọn Thư Mục Vật Phẩm:</div>
+          <div class="grid grid-cols-4 gap-2">
+            
+            <!-- Nút Hoa -->
+            <button onclick="switchCategory('hoa')" id="btn-nuthoa" class="group relative rounded-xl border-2 border-emerald-500 bg-emerald-50 p-1 hover:shadow-md transition flex flex-col items-center justify-center">
+              <img src="assets/nutgame/nuthoa.png" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/nut_hoa.png'; this.onerror=null;" alt="Nút Hoa" class="w-10 h-10 object-contain drop-shadow group-hover:scale-105 transition-transform">
+              <span class="text-[10px] font-black text-emerald-800 mt-0.5">HOA</span>
+            </button>
+
+            <!-- Nút Nụ -->
+            <button onclick="switchCategory('nu')" id="btn-nutnu" class="group relative rounded-xl border-2 border-slate-200 bg-white p-1 hover:border-emerald-400 hover:bg-emerald-50/50 transition flex flex-col items-center justify-center">
+              <img src="assets/nutgame/nutnu.png" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/nut_nu.png'; this.onerror=null;" alt="Nút Nụ" class="w-10 h-10 object-contain drop-shadow group-hover:scale-105 transition-transform">
+              <span class="text-[10px] font-bold text-slate-600 mt-0.5">NỤ</span>
+            </button>
+
+            <!-- Nút Chữ Nhật (Khung đất) -->
+            <button onclick="switchCategory('chunhat')" id="btn-nutchunhat" class="group relative rounded-xl border-2 border-slate-200 bg-white p-1 hover:border-emerald-400 hover:bg-emerald-50/50 transition flex flex-col items-center justify-center">
+              <img src="assets/nutgame/nutchunhat.png" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/nut_dat.png'; this.onerror=null;" alt="Nút Đất" class="w-10 h-10 object-contain drop-shadow group-hover:scale-105 transition-transform">
+              <span class="text-[10px] font-bold text-slate-600 mt-0.5">ĐẤT</span>
+            </button>
+
+            <!-- Nút Xẻng (Công cụ) -->
+            <button onclick="switchCategory('xeng')" id="btn-nutxeng" class="group relative rounded-xl border-2 border-slate-200 bg-white p-1 hover:border-emerald-400 hover:bg-emerald-50/50 transition flex flex-col items-center justify-center">
+              <img src="assets/nutgame/nutxeng.png" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/nut_xeng.png'; this.onerror=null;" alt="Nút Xẻng" class="w-10 h-10 object-contain drop-shadow group-hover:scale-105 transition-transform">
+              <span class="text-[10px] font-bold text-slate-600 mt-0.5">CÔNG CỤ</span>
+            </button>
+
+          </div>
         </div>
 
-        <button onclick="submitQuest()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl shadow-md transition flex items-center justify-center gap-1.5 text-xs">
-          <i class="fa-solid fa-faucet-drip"></i> Hoàn Thành & Tưới Cây Cho Tổ
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 4. MODAL CHỌN CÂY VÀO Ô ĐẤT TRỐNG -->
-  <div id="plant-picker-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-slate-200">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-        <h3 class="font-extrabold text-base text-slate-800 flex items-center gap-2">
-          <i class="fa-solid fa-seedling text-emerald-600"></i> Chọn Giống Hoa Cắm Xuống Vườn
-        </h3>
-        <button onclick="closePlantPicker()" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
       </div>
 
-      <div class="grid grid-cols-3 gap-3 max-h-72 overflow-y-auto p-1" id="available-plants-list">
-        <!-- Render danh sách hoa có thể chọn -->
+      <!-- PHẦN B2: KHAY HIỂN THỊ CÁC ẢNH VẬT PHẨM (KÉO THẢ SANG PHẦN A) -->
+      <div class="flex-1 overflow-y-auto p-3 flex flex-col">
+        <div class="flex items-center justify-between mb-2">
+          <span id="category-title" class="text-xs font-black uppercase text-emerald-800 tracking-wider">Danh mục: Hoa Cấp 1 & Cấp 2</span>
+          <span class="text-[10px] text-slate-400 font-semibold">Kéo hoặc nhấn để đặt</span>
+        </div>
+
+        <!-- Lưới ảnh vật phẩm của phần B2 -->
+        <div id="tray-grid" class="grid grid-cols-2 gap-2.5">
+          <!-- Ảnh sẽ được nạp động từ JS bên dưới -->
+        </div>
       </div>
-    </div>
+
+    </aside>
+
   </div>
 
   <script>
-    // 1. ASSET MẶC ĐỊNH (Sử dụng đường dẫn assets GitHub)
-    const ASSET_BASE = 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/';
-    const BG_URL = ASSET_BASE + 'anhnen/vuonlop.jpg';
-    const PLOT_URL = ASSET_BASE + 'anhnen/khudatrieng_nau.png';
+    // ĐƯỜNG DẪN GỐC TỚI CÁC THƯ MỤC TRÊN REPOSITORY
+    const BASE_URL = 'assets/';
 
-    // Danh mục giống hoa ban đầu
-    const CATALOG = [
-      { id: 'cuc_vang', name: 'Hoa Cúc Vàng', bud: ASSET_BASE + 'nucap1/nu_cuc.png', bloom: ASSET_BASE + 'hoacap1/cuc_vang.png', tier: 1 },
-      { id: 'hong_nhung', name: 'Hoa Hồng Đỏ', bud: ASSET_BASE + 'nucap1/nu_hong.png', bloom: ASSET_BASE + 'hoacap1/hoa_hong.png', tier: 1 },
-      { id: 'tulip_cam', name: 'Tulip Cam', bud: ASSET_BASE + 'nucap1/nu_tulip.png', bloom: ASSET_BASE + 'hoacap1/tulip_hoa_cam.png', tier: 1 }
-    ];
+    // DANH MỤC CÁC ASSETS ĐÃ ĐƯỢC PHÂN THEO THƯ MỤC CỦA BẠN
+    const ASSET_LIBRARY = {
+      // 1. KHI BẤM NÚT HOA: load hoacap1 (mở) và hoacap2 (khóa & mờ)
+      hoa: [
+        { id: 'h1_tulip_cam', name: 'Tulip Cam', src: BASE_URL + 'hoacap1/tulip_hoa_cam.png', locked: false, tier: 1 },
+        { id: 'h1_cuc_vang',  name: 'Cúc Vàng',   src: BASE_URL + 'hoacap1/cuc_vang.png',       locked: false, tier: 1 },
+        { id: 'h1_hoa_hong',  name: 'Hoa Hồng Đỏ',src: BASE_URL + 'hoacap1/hoa_hong.png',       locked: false, tier: 1 },
+        // Hoa cấp 2: BỊ KHÓA & MỜ
+        { id: 'h2_huongduong',name: 'Hướng Dương VIP', src: BASE_URL + 'hoacap2/hoa_huongduong.png', locked: true, tier: 2 },
+        { id: 'h2_sen_ngoc',  name: 'Sen Ngọc VIP',    src: BASE_URL + 'hoacap2/hoa_sen.png',         locked: true, tier: 2 }
+      ],
 
-    // Trạng thái phiên làm việc của học sinh
-    let currentStudent = null;
-    let selectedSlotIndex = null;
+      // 2. KHI BẤM NÚT NỤ: load nucap1 (mở) và nucap2 (khóa & mờ)
+      nu: [
+        { id: 'n1_tulip_cam', name: 'Nụ Tulip Cam', src: BASE_URL + 'nucap1/tulip_nu_cam.png', locked: false, tier: 1 },
+        { id: 'n1_nu_cuc',    name: 'Nụ Hoa Cúc',   src: BASE_URL + 'nucap1/nu_cuc.png',       locked: false, tier: 1 },
+        { id: 'n1_nu_hong',   name: 'Nụ Hoa Hồng',  src: BASE_URL + 'nucap1/nu_hong.png',      locked: false, tier: 1 },
+        // Nụ cấp 2: BỊ KHÓA & MỜ
+        { id: 'n2_huongduong',name: 'Nụ Hướng Dương', src: BASE_URL + 'nucap2/nu_huongduong.png', locked: true, tier: 2 },
+        { id: 'n2_sen_ngoc',  name: 'Nụ Sen Ngọc',    src: BASE_URL + 'nucap2/nu_sen.png',        locked: true, tier: 2 }
+      ],
 
-    // Dữ liệu Game lưu cục bộ / đồng bộ với Admin
-    let gameData = {
-      quest: { url: 'https://google.com', keyword: 'VATLI2026' },
-      classId: '10A1',
-      teams: {
-        1: { name: 'Tổ 1', totalMembers: 5, wateredToday: [], plants: [
-          { id: 'tulip_cam', growth: 40, isBloomed: false },
-          { id: 'cuc_vang', growth: 100, isBloomed: true },
-          null
-        ]},
-        2: { name: 'Tổ 2', totalMembers: 5, wateredToday: [], plants: [null, null, null] },
-        3: { name: 'Tổ 3', totalMembers: 5, wateredToday: [], plants: [null, null, null] },
-        4: { name: 'Tổ 4', totalMembers: 5, wateredToday: [], plants: [null, null, null] }
-      }
+      // 3. KHI BẤM NÚT CHỮ NHẬT: load khung ô đất
+      chunhat: [
+        { id: 'dat_nau',   name: 'Ô Đất 3 Luống', src: BASE_URL + 'nengame/khudatrieng_nau.png', locked: false, isGround: true },
+        { id: 'dat_co',    name: 'Luống Cỏ Xanh', src: BASE_URL + 'nengame/o_dat_co.png',        locked: false, isGround: true }
+      ],
+
+      // 4. KHI BẤM NÚT XẺNG: load công cụ từ congcu/
+      xeng: [
+        { id: 'cc_xeng',      name: 'Xẻng Làm Vườn', src: BASE_URL + 'congcu/xeng.png',      locked: false },
+        { id: 'cc_binhtuoi',  name: 'Bình Tưới Nước',src: BASE_URL + 'congcu/binh_tuoi.png', locked: false },
+        { id: 'cc_phanbon',   name: 'Gói Phân Bón',  src: BASE_URL + 'congcu/phan_bon.png',  locked: false }
+      ]
     };
 
-    function loadGameData() {
-      const saved = localStorage.getItem('garden_game_state_v1');
-      if (saved) {
-        try { gameData = JSON.parse(saved); } catch (e) {}
-      }
+    let currentCategory = 'hoa';
+    let draggedItemData = null;
+
+    // THAY ĐỔI ẢNH NỀN PHẦN A
+    function changeGameBackground(filename) {
+      const bgImg = document.getElementById('game-bg-image');
+      bgImg.src = BASE_URL + 'nengame/' + filename;
     }
 
-    function saveGameData() {
-      localStorage.setItem('garden_game_state_v1', JSON.stringify(gameData));
-    }
-
-    // Ẩn / Hiện Mật khẩu
-    function togglePasswordVisibility(inputId, iconId) {
-      const input = document.getElementById(inputId);
-      const icon = document.getElementById(iconId);
-      if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-      } else {
-        input.type = 'password';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-      }
-    }
-
-    // XỬ LÝ ĐĂNG NHẬP HỌC SINH (HỖ TRỢ TÀI KHOẢN TEST: hocsinh / hs1234)
-    function handleStudentLogin() {
-      const u = document.getElementById('login-user').value.trim();
-      const p = document.getElementById('login-pass').value.trim();
-      const err = document.getElementById('login-error');
-
-      // 1. Kiểm tra tài khoản TEST
-      if (u === 'hocsinh' && p === 'hs1234') {
-        currentStudent = {
-          username: 'hocsinh',
-          name: 'Học Sinh Thử Nghiệm',
-          class: '10A1',
-          team: 1
-        };
-        enterGarden();
-        return;
-      }
-
-      // 2. Kiểm tra nếu học sinh được import từ Admin (LocalStorage)
-      const adminState = localStorage.getItem('garden_admin_state_v5');
-      if (adminState) {
-        try {
-          const parsed = JSON.parse(adminState);
-          // Tìm trong các lớp
-          for (let cls in (parsed.classes || {})) {
-            const st = parsed.classes[cls].students[u];
-            if (st && st.password === p) {
-              currentStudent = st;
-              enterGarden();
-              return;
-            }
-          }
-        } catch (e) {}
-      }
-
-      err.innerText = 'Tài khoản hoặc mật khẩu không chính xác!';
-      err.classList.remove('hidden');
-    }
-
-    function enterGarden() {
-      document.getElementById('login-modal').classList.add('hidden');
-      document.getElementById('game-app').classList.remove('hidden');
+    // CHUYỂN DANH MỤC TRÊN NÚT B1 VÀ RENDER KHAY B2
+    function switchCategory(catKey) {
+      currentCategory = catKey;
       
-      document.getElementById('lbl-student-name').innerText = currentStudent.name;
-      document.getElementById('lbl-class-team').innerText = `Lớp ${currentStudent.class} - Tổ ${currentStudent.team}`;
-      document.getElementById('badge-team-name').innerText = `T${currentStudent.team}`;
-      document.getElementById('board-class-title').innerText = `VƯỜN LỚP ${currentStudent.class}`;
-
-      // Khởi tạo phông nền
-      const yard = document.getElementById('schoolyard');
-      yard.style.backgroundImage = `url('${BG_URL}')`;
-
-      renderAllPlots();
-      updateWateringStatus();
-    }
-
-    function handleLogout() {
-      location.reload();
-    }
-
-    // VẼ 4 KHU ĐẤT CỦA 4 TỔ TRÊN SÂN GẠCH
-    function renderAllPlots() {
-      [1, 2, 3, 4].forEach(teamId => {
-        const plotEl = document.getElementById(`plot-team-${teamId}`);
-        plotEl.style.backgroundImage = `url('${PLOT_URL}')`;
-        
-        // Làm nổi bật tổ của học sinh đang đăng nhập
-        if (currentStudent && currentStudent.team === teamId) {
-          plotEl.classList.add('plot-active');
+      // Đổi kiểu active cho 4 nút
+      ['hoa', 'nu', 'chunhat', 'xeng'].forEach(k => {
+        const btn = document.getElementById(`btn-nut${k}`);
+        if (k === catKey) {
+          btn.className = "group relative rounded-xl border-2 border-emerald-500 bg-emerald-50 p-1 shadow-sm transition flex flex-col items-center justify-center scale-105";
         } else {
-          plotEl.classList.remove('plot-active');
+          btn.className = "group relative rounded-xl border-2 border-slate-200 bg-white p-1 hover:border-emerald-400 hover:bg-emerald-50/50 transition flex flex-col items-center justify-center";
+        }
+      });
+
+      const titleMap = {
+        hoa: 'Danh mục: Hoa Cấp 1 & Hoa Cấp 2 (VIP)',
+        nu: 'Danh mục: Nụ Cấp 1 & Nụ Cấp 2 (VIP)',
+        chunhat: 'Danh mục: Ô Đất & Bố Cục Vườn',
+        xeng: 'Danh mục: Công Cụ Làm Vườn'
+      };
+      document.getElementById('category-title').innerText = titleMap[catKey];
+
+      renderTrayItems();
+    }
+
+    // HIỂN THỊ CÁC THẺ ẢNH TẠI B2 (CÓ CHE MỜ VÀ Ổ KHÓA NẾU CẤP 2)
+    function renderTrayItems() {
+      const tray = document.getElementById('tray-grid');
+      const items = ASSET_LIBRARY[currentCategory] || [];
+
+      tray.innerHTML = items.map(item => {
+        if (item.locked) {
+          // GIAO DIỆN BỊ CHE MỜ VÀ CÓ BIỂU TƯỢNG KHÓA
+          return `
+            <div class="relative bg-white rounded-2xl border border-slate-200 p-2 flex flex-col items-center justify-between shadow-xs overflow-hidden select-none cursor-not-allowed">
+              <div class="w-full h-24 bg-trans-grid rounded-xl flex items-center justify-center p-2 relative opacity-30 filter grayscale">
+                <img src="${item.src}" alt="${item.name}" class="max-h-full max-w-full object-contain">
+              </div>
+
+              <!-- Lớp phủ mờ + Ổ khóa -->
+              <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-[1px] flex flex-col items-center justify-center text-white z-10">
+                <div class="w-8 h-8 rounded-full bg-slate-900/80 flex items-center justify-center shadow-lg border border-amber-400/60 mb-1">
+                  <i class="fa-solid fa-lock text-amber-400 text-sm"></i>
+                </div>
+                <span class="text-[10px] font-black uppercase tracking-wider text-amber-300">Khóa Cấp 2</span>
+              </div>
+
+              <span class="text-[11px] font-bold text-slate-400 mt-1 truncate w-full text-center">${item.name}</span>
+            </div>
+          `;
         }
 
-        const team = gameData.teams[teamId];
-        const plants = team.plants || [];
+        // GIAO DIỆN MỞ CHO PHÉP KÉO THẢ HOẶC BẤM ĐỂ ĐẶT
+        return `
+          <div draggable="true" 
+               ondragstart="handleDragStart(event, '${item.id}')"
+               onclick="placeItemInCenter('${item.id}')"
+               class="group relative bg-white hover:bg-emerald-50/50 rounded-2xl border-2 border-slate-200 hover:border-emerald-500 p-2 flex flex-col items-center justify-between shadow-xs hover:shadow-md transition cursor-grab active:cursor-grabbing">
+            
+            <div class="w-full h-24 bg-trans-grid rounded-xl flex items-center justify-center p-2 relative">
+              <img src="${item.src}" alt="${item.name}" class="max-h-full max-w-full object-contain filter drop-shadow group-hover:scale-110 transition-transform">
+            </div>
 
-        // Vẽ 3 luống cây trên ô đất
-        plotEl.innerHTML = `
-          <div class="flex items-center justify-between px-1">
-            <span class="text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-950/80 text-amber-200">${team.name}</span>
-            <span class="text-[10px] font-bold text-amber-900 bg-white/90 px-1.5 rounded shadow">${team.wateredToday.length}/${team.totalMembers} 💧</span>
-          </div>
-
-          <!-- Lưới 3 luống cắm hoa -->
-          <div class="grid grid-cols-3 gap-1 h-3/4 items-end px-1 pb-1">
-            ${plants.map((p, idx) => renderPlantSlot(teamId, p, idx)).join('')}
+            <div class="w-full flex items-center justify-between mt-1 px-1">
+              <span class="text-[11px] font-bold text-slate-700 truncate">${item.name}</span>
+              <i class="fa-solid fa-up-down-left-right text-[10px] text-slate-400 group-hover:text-emerald-600"></i>
+            </div>
           </div>
         `;
+      }).join('');
+    }
+
+    // ================= XỬ LÝ KÉO - THẢ (DRAG & DROP) SANG PHẦN A =================
+    function handleDragStart(e, itemId) {
+      draggedItemData = findItemById(itemId);
+      e.dataTransfer.setData('text/plain', itemId);
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      const rect = document.getElementById('section-a').getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      if (draggedItemData) {
+        spawnItemOnCanvas(draggedItemData, x, y);
+      }
+    }
+
+    // Bấm trực tiếp vào ảnh ở B2 để đặt ra giữa sân A
+    function placeItemInCenter(itemId) {
+      const item = findItemById(itemId);
+      if (!item) return;
+      const canvas = document.getElementById('section-a');
+      const centerX = canvas.clientWidth / 2;
+      const centerY = canvas.clientHeight / 2;
+      spawnItemOnCanvas(item, centerX, centerY);
+    }
+
+    function findItemById(id) {
+      for (let k in ASSET_LIBRARY) {
+        const found = ASSET_LIBRARY[k].find(i => i.id === id);
+        if (found) return found;
+      }
+      return null;
+    }
+
+    // ĐẶT VẬT THỂ LÊN SÂN VÀ CHO PHÉP DI CHUYỂN TỰ DO
+    let placedItemCount = 0;
+    function spawnItemOnCanvas(item, posX, posY) {
+      document.getElementById('empty-hint').style.display = 'none';
+      const container = document.getElementById('drop-container');
+      placedItemCount++;
+      const uniqueId = 'placed_' + placedItemCount;
+
+      const isGround = item.isGround;
+      const defaultSize = isGround ? 'w-52 h-44' : 'w-20 h-24';
+
+      const el = document.createElement('div');
+      el.id = uniqueId;
+      el.className = `garden-placed-item ${defaultSize} flex items-center justify-center`;
+      el.style.left = `${posX - 40}px`;
+      el.style.top = `${posY - 40}px`;
+
+      el.innerHTML = `
+        <div class="relative w-full h-full group flex items-center justify-center">
+          <img src="${item.src}" class="max-h-full max-w-full object-contain filter drop-shadow-lg pointer-events-none">
+          
+          <!-- Nút xóa nhanh khi hover -->
+          <button onclick="removePlacedItem('${uniqueId}', event)" class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[10px] font-bold shadow hidden group-hover:flex items-center justify-center">
+            ✕
+          </button>
+        </div>
+      `;
+
+      // Kích hoạt di chuyển vật phẩm trên sân
+      makeDraggable(el);
+      container.appendChild(el);
+    }
+
+    // CƠ CHẾ KÉO DI CHUYỂN VẬT PHẨM TRÊN SÂN A
+    function makeDraggable(element) {
+      let isDragging = false;
+      let startX, startY, initialLeft, initialTop;
+
+      element.addEventListener('mousedown', (e) => {
+        if (e.target.tagName === 'BUTTON') return;
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        initialLeft = element.offsetLeft;
+        initialTop = element.offsetTop;
+        element.style.zIndex = 100;
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        element.style.left = `${initialLeft + dx}px`;
+        element.style.top = `${initialTop + dy}px`;
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          element.style.zIndex = 10;
+        }
       });
     }
 
-    function renderPlantSlot(teamId, plant, slotIdx) {
-      if (!plant) {
-        // Ô trống có thể trồng
-        const isMyTeam = currentStudent && currentStudent.team === teamId;
-        return `
-          <div onclick="handleSlotClick(${teamId}, ${slotIdx}, event)" class="h-full border border-dashed ${isMyTeam ? 'border-amber-400 hover:bg-emerald-500/20' : 'border-amber-900/30'} rounded-lg flex flex-col items-center justify-center cursor-pointer transition">
-            <i class="fa-solid fa-plus text-xs ${isMyTeam ? 'text-amber-300' : 'text-amber-900/40'}"></i>
-          </div>
-        `;
-      }
-
-      // Ô đã có cây: Hiển thị nụ hoặc hoa nở
-      const itemInfo = CATALOG.find(c => c.id === plant.id) || CATALOG[0];
-      const imgSrc = plant.isBloomed ? itemInfo.bloom : itemInfo.bud;
-
-      return `
-        <div class="h-full flex flex-col items-center justify-end relative group">
-          <!-- Ảnh cây -->
-          <img src="${imgSrc}" class="max-h-14 max-w-full object-contain filter drop-shadow hover:scale-110 transition duration-300">
-          
-          <!-- Thanh % sinh trưởng -->
-          <div class="w-full bg-slate-900/60 rounded-full h-1.5 overflow-hidden mt-0.5">
-            <div class="bg-emerald-400 h-full rounded-full transition-all duration-500" style="width: ${plant.growth}%"></div>
-          </div>
-        </div>
-      `;
-    }
-
-    function handleSlotClick(teamId, slotIdx, event) {
+    function removePlacedItem(id, event) {
       event.stopPropagation();
-      if (!currentStudent || currentStudent.team !== teamId) {
-        alert('Bạn chỉ có thể trồng hoa trên khu đất của Tổ mình!');
-        return;
-      }
-      selectedSlotIndex = slotIdx;
-      openPlantPicker();
+      const el = document.getElementById(id);
+      if (el) el.remove();
     }
 
-    function clickPlot(teamId) {
-      if (currentStudent && currentStudent.team === teamId) {
-        // Mở nhanh nhiệm vụ nếu bấm vào tổ mình
-        openQuestModal();
+    function clearPlacedItems() {
+      if (confirm('Bạn có muốn xóa toàn bộ các vật phẩm đã đặt trên sân?')) {
+        document.getElementById('drop-container').innerHTML = '';
+        document.getElementById('empty-hint').style.display = 'flex';
       }
     }
 
-    // CHỌN HOA CẮM VÀO LUỐNG
-    function openPlantPicker() {
-      const modal = document.getElementById('plant-picker-modal');
-      const list = document.getElementById('available-plants-list');
-      
-      list.innerHTML = CATALOG.map(item => `
-        <div onclick="selectPlantToGrow('${item.id}')" class="p-2 border border-slate-200 hover:border-emerald-500 rounded-2xl hover:bg-emerald-50/50 cursor-pointer flex flex-col items-center text-center transition">
-          <img src="${item.bloom}" class="w-12 h-12 object-contain filter drop-shadow mb-1">
-          <span class="text-[11px] font-bold text-slate-700">${item.name}</span>
-        </div>
-      `).join('');
-
-      modal.classList.remove('hidden');
-    }
-
-    function closePlantPicker() {
-      document.getElementById('plant-picker-modal').classList.add('hidden');
-    }
-
-    function selectPlantToGrow(plantId) {
-      if (selectedSlotIndex === null) return;
-      const myTeam = gameData.teams[currentStudent.team];
-      
-      myTeam.plants[selectedSlotIndex] = {
-        id: plantId,
-        growth: 10,
-        isBloomed: false
-      };
-
-      saveGameData();
-      renderAllPlots();
-      closePlantPicker();
-    }
-
-    // NHIỆM VỤ NGÀY & TƯỚI CÂY
-    function openQuestModal() {
-      document.getElementById('quest-modal').classList.remove('hidden');
-      document.getElementById('quest-link-btn').href = gameData.quest.url;
-    }
-
-    function closeQuestModal() {
-      document.getElementById('quest-modal').classList.add('hidden');
-    }
-
-    function submitQuest() {
-      const key = document.getElementById('input-quest-key').value.trim().toUpperCase();
-      if (!key) return alert('Vui lòng nhập từ khóa bí mật!');
-
-      if (key !== gameData.quest.keyword.toUpperCase()) {
-        return alert('Từ khóa chưa chính xác, hãy kiểm tra lại bài tập nhé!');
-      }
-
-      const team = gameData.teams[currentStudent.team];
-      if (team.wateredToday.includes(currentStudent.username)) {
-        return alert('Hôm nay bạn đã hoàn thành nhiệm vụ và tưới cây rồi!');
-      }
-
-      // Ghi nhận lượt tưới
-      team.wateredToday.push(currentStudent.username);
-      
-      // Nếu toàn bộ thành viên trong tổ đều đã tưới hôm nay -> Cây lớn thêm 10%
-      let hasBloomNow = false;
-      if (team.wateredToday.length >= team.totalMembers) {
-        team.plants.forEach(p => {
-          if (p) {
-            p.growth = Math.min(100, p.growth + 10);
-            if (p.growth >= 100 && !p.isBloomed) {
-              p.isBloomed = true;
-              hasBloomNow = true;
-            }
-          }
-        });
-      }
-
-      saveGameData();
-      renderAllPlots();
-      updateWateringStatus();
-      closeQuestModal();
-
-      // Hiệu ứng ăn mừng
-      confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
-      if (hasBloomNow) {
-        alert('🎉 CHÚC MỪNG! Toàn bộ tổ bạn đã tưới nước đều đặn và hoa đã nở rộ rực rỡ!');
-      } else {
-        alert('💧 Bạn đã tưới nước thành công cho vườn hoa của tổ hôm nay!');
-      }
-    }
-
-    function updateWateringStatus() {
-      if (!currentStudent) return;
-      const team = gameData.teams[currentStudent.team];
-      const hasWatered = team.wateredToday.includes(currentStudent.username);
-      const statusEl = document.getElementById('lbl-water-status');
-
-      if (hasWatered) {
-        statusEl.innerHTML = `<span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Bạn đã tưới nước hôm nay!</span>`;
-      } else {
-        statusEl.innerHTML = `<span class="text-amber-600 font-bold"><i class="fa-solid fa-droplet"></i> Chưa tưới nước hôm nay</span>`;
-      }
-    }
-
-    // Tự động nạp dữ liệu khi mở trang
+    // KHỞI ĐỘNG BAN ĐẦU
     window.addEventListener('DOMContentLoaded', () => {
-      loadGameData();
+      switchCategory('hoa');
     });
   </script>
 </body>
