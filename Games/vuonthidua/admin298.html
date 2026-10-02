@@ -39,12 +39,26 @@
       background: #f59e0b;
     }
 
-    /* VÙNG ĐA GIÁC ĐẤT TRONG SVG ĐỂ DI CHUYỂN */
+    /* ĐA GIÁC ĐẤT TRONG SVG ĐỂ DI CHUYỂN */
     .plot-polygon-shape {
       cursor: grab;
-      transition: fill 0.15s, stroke 0.15s;
+      touch-action: none;
+      user-select: none;
     }
     .plot-polygon-shape:active {
+      cursor: grabbing;
+    }
+
+    /* VÙNG CHỮ DI CHUYỂN TRÊN NỀN */
+    .draggable-text-box {
+      position: absolute;
+      touch-action: none;
+      user-select: none;
+      cursor: grab;
+      z-index: 45;
+      transform: translate(-50%, -50%);
+    }
+    .draggable-text-box:active {
       cursor: grabbing;
     }
   </style>
@@ -357,24 +371,30 @@
 
   </div>
 
-  <!-- ================= TRÌNH BIÊN TẬP VÙNG ĐẤT PHỐI CẢNH 3D TOÀN MÀN HÌNH ================= -->
+  <!-- ================= TRÌNH BIÊN TẬP VÙNG ĐẤT PHỐI CẢNH 3D & CHỮ NỀN TOÀN MÀN HÌNH ================= -->
   <div id="fullscreen-editor-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col">
     
     <div class="h-14 bg-slate-900 border-b border-slate-800 px-6 flex items-center justify-between shrink-0 shadow-lg">
       <div class="flex items-center gap-3">
         <span class="text-xl">📐</span>
         <div>
-          <h3 class="font-extrabold text-sm text-white uppercase tracking-wide">Trình Thiết Kế Vùng Đất Phối Cảnh 3D</h3>
-          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Kéo thân đa giác để di chuyển • Kéo 4 chấm tròn xanh ở 4 góc để uốn dáng đất</p>
+          <h3 class="font-extrabold text-sm text-white uppercase tracking-wide">Trình Thiết Kế Sân Vườn & Vùng Đất 3D</h3>
+          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Kéo thân đa giác để dời vị trí • Kéo 4 góc để uốn dáng đất</p>
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2.5">
+        <!-- NÚT THÊM VÙNG CHỮ MỚI -->
+        <button onclick="addNewTextOverlay()" class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition">
+          <i class="fa-solid fa-font"></i> + Thêm Vùng Chữ
+        </button>
+        <!-- NÚT THÊM VÙNG ĐẤT MỚI -->
         <button onclick="addNewPerspectivePlotSlot()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition">
           <i class="fa-solid fa-plus"></i> + Thêm Vùng Đất Mới
         </button>
+        <!-- NÚT LƯU THIẾT KẾ -->
         <button onclick="saveAndCloseFullscreenEditor()" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition">
-          <i class="fa-solid fa-floppy-disk"></i> Lưu Dáng Đất Đã Nắn
+          <i class="fa-solid fa-floppy-disk"></i> Lưu Thiết Kế
         </button>
         <button onclick="closeFullscreenEditor()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-rose-600 text-white text-sm font-bold flex items-center justify-center transition">
           <i class="fa-solid fa-xmark"></i>
@@ -388,7 +408,7 @@
         
         <img id="editor-canvas-bg" src="" class="w-full h-full object-fill pointer-events-none select-none">
 
-        <!-- LỚP CHỨA CÁC VÙNG ĐẤT BIẾN DẠNG 3D & 4 ĐIỂM NEO (DÙNG SVG LIÊN KẾT TRỰC TIẾP 4 ĐIỂM) -->
+        <!-- LỚP CHỨA CÁC VÙNG ĐẤT VÀ CHỮ -->
         <div id="editor-slots-layer" class="absolute inset-0 w-full h-full z-10 pointer-events-auto"></div>
 
       </div>
@@ -396,8 +416,8 @@
 
     <!-- HƯỚNG DẪN DƯỚI CÙNG -->
     <div class="h-10 bg-slate-900 border-t border-slate-800 px-6 flex items-center justify-between text-xs text-slate-400 shrink-0">
-      <span>💡 <b>Hướng dẫn:</b> Nhấp giữ vào <b>vùng màu xanh</b> để di chuyển toàn bộ vùng đất. Kéo <b>4 chấm tròn xanh ở 4 góc</b> để uốn dáng đất theo phối cảnh. Bấm <b>✕</b> sẽ tự động đôn số thứ tự liên tục.</span>
-      <span id="lbl-total-slots-count" class="font-bold text-emerald-400">Đã bố trí: 1 vùng đất</span>
+      <span>💡 <b>Hướng dẫn:</b> Nhấp giữ vào <b>vùng màu mờ</b> để di chuyển toàn bộ ô đất. Kéo <b>4 chấm tròn</b> để uốn dáng. Nhấp đúp vào <b>vùng chữ</b> để gõ nội dung mới.</span>
+      <span id="lbl-total-slots-count" class="font-bold text-emerald-400">Đã bố trí: 1 vùng đất • 0 vùng chữ</span>
     </div>
 
   </div>
@@ -430,7 +450,8 @@
             id: 'slot_1', name: 'Khu đất 1', teamId: 1,
             corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }]
           }
-        ]
+        ],
+        textOverlays: [] // Danh sách vùng chữ trên ảnh nền
       },
       students: {},
       weeklyRanking: { 1: 1, 2: 2, 3: 3, 4: 4 }
@@ -452,7 +473,9 @@
         folders: [],
         singleImage: null
       },
-      tempEditorSlots: []
+      tempEditorSlots: [],
+      tempTextOverlays: [],
+      currentBgTone: 'warm_wood' // 'warm_wood' | 'dark' | 'bright_grass'
     };
 
     function togglePasswordVisibility(id, iconId) {
@@ -512,7 +535,7 @@
     }
 
     function loadSavedData() {
-      const saved = localStorage.getItem('garden_system_classes_v11');
+      const saved = localStorage.getItem('garden_system_classes_v12');
       if (saved) {
         try { 
           const parsed = JSON.parse(saved);
@@ -520,19 +543,20 @@
             if (!c.config.plotSlots || c.config.plotSlots.length === 0 || !c.config.plotSlots[0].corners) {
               c.config.plotSlots = DEFAULT_CLASS_TEMPLATE(c.name).config.plotSlots;
             }
+            if (!c.config.textOverlays) c.config.textOverlays = [];
           });
           state.classesData = parsed;
         } catch (e) {}
       }
-      const savedActive = localStorage.getItem('garden_active_class_v11');
+      const savedActive = localStorage.getItem('garden_active_class_v12');
       if (savedActive && state.classesData[savedActive]) {
         state.activeClass = savedActive;
       }
     }
 
     function saveStateToLocal() {
-      localStorage.setItem('garden_system_classes_v11', JSON.stringify(state.classesData));
-      localStorage.setItem('garden_active_class_v11', state.activeClass);
+      localStorage.setItem('garden_system_classes_v12', JSON.stringify(state.classesData));
+      localStorage.setItem('garden_active_class_v12', state.activeClass);
     }
 
     function renderClassDropdown() {
@@ -596,6 +620,7 @@
       if (isClosed) menu.classList.remove('hidden');
     }
 
+    // ================= 1. CẤU HÌNH NỀN VỚI NÚT CON MẮT =================
     function populateBackgroundDropdowns() {
       const cls = state.classesData[state.activeClass];
       const bgImages = state.cachedAssets['nengame'] || [];
@@ -648,7 +673,7 @@
               <div class="w-12 h-12 rounded-full bg-emerald-600 flex items-center justify-center text-xl shadow-xl mb-2">
                 <i class="fa-solid fa-expand"></i>
               </div>
-              <span class="text-xs font-black uppercase tracking-wider text-emerald-300">Bấm để phóng to & sắp xếp các ô đất</span>
+              <span class="text-xs font-black uppercase tracking-wider text-emerald-300">Bấm để phóng to & chỉnh sửa vùng đất, vùng chữ</span>
             </div>
           </div>
           <span class="text-xs font-mono font-bold text-slate-700 mt-3 text-center">${imagePath}</span>
@@ -657,15 +682,49 @@
     }
 
     // =========================================================================
-    // TRÌNH NẮN & DI CHUYỂN DÁNG ĐẤT 3D TOÀN MÀN HÌNH (SỬA LỖI TÁCH RỜI)
+    // THUẬT TOÁN TỰ ĐỘNG XÁC ĐỊNH MÀU CHỮ THEO TÔNG MÀU ẢNH NỀN
+    // =========================================================================
+    function detectBackgroundTone(imagePath) {
+      const lower = imagePath.toLowerCase();
+      if (lower.includes('vuonlop') || lower.includes('go') || lower.includes('nau')) {
+        return {
+          textColor: '#451a03', // Nâu cà phê đậm nổi bật trên gỗ vàng
+          textShadow: '0 1px 2px rgba(254, 243, 199, 0.9)', // Đổ sáng nhẹ tạo độ nổi
+          bgColor: 'rgba(254, 243, 199, 0.65)',
+          borderColor: '#b45309'
+        };
+      }
+      if (lower.includes('dem') || lower.includes('dark') || lower.includes('ungdung')) {
+        return {
+          textColor: '#fef3c7', // Vàng kem sáng trên nền tối
+          textShadow: '0 2px 4px rgba(0, 0, 0, 0.9)',
+          bgColor: 'rgba(0, 0, 0, 0.6)',
+          borderColor: '#f59e0b'
+        };
+      }
+      // Tông cỏ xanh tự nhiên
+      return {
+        textColor: '#064e3b', // Xanh rừng rậm đậm
+        textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)',
+        bgColor: 'rgba(255, 255, 255, 0.65)',
+        borderColor: '#10b981'
+      };
+    }
+
+    // =========================================================================
+    // TRÌNH BIÊN TẬP VÙNG ĐẤT 3D & VÙNG CHỮ TOÀN MÀN HÌNH
     // =========================================================================
     function openFullscreenEditor(imagePath) {
       const cls = state.classesData[state.activeClass];
-      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Kéo thân đa giác để di chuyển • Kéo 4 chấm tròn xanh ở 4 góc để uốn dáng đất`;
+      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Kéo thân để dời vị trí • Kéo 4 góc tròn để uốn dáng đất`;
       
       const fullUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${imagePath}`;
       document.getElementById('editor-canvas-bg').src = fullUrl;
 
+      // Nhận diện tông màu tự động của ảnh nền này
+      state.currentBgToneStyle = detectBackgroundTone(imagePath);
+
+      // Nạp danh sách ô đất
       let existingSlots = cls.config.plotSlots || [];
       if (!existingSlots || existingSlots.length === 0) {
         existingSlots = [
@@ -675,16 +734,18 @@
           }
         ];
       }
-
       state.tempEditorSlots = JSON.parse(JSON.stringify(existingSlots));
       reIndexPlotSlots();
 
-      // SỬA LỖI 1: MỞ MODAL TRƯỚC RỒI MỚI RENDER ĐỂ CANVAS LẤY ĐÚNG KÍCH THƯỚC KHÔNG BỊ 0px
+      // Nạp danh sách vùng chữ
+      state.tempTextOverlays = JSON.parse(JSON.stringify(cls.config.textOverlays || []));
+
+      // Mở modal hiển thị
       document.getElementById('fullscreen-editor-modal').classList.remove('hidden');
       
-      // Chờ 1 nhịp DOM cập nhật layout rồi render
+      // Chờ cập nhật layout và render
       requestAnimationFrame(() => {
-        renderPerspectiveSlots();
+        renderPerspectiveSlotsAndTexts();
       });
     }
 
@@ -696,9 +757,10 @@
       const cls = state.classesData[state.activeClass];
       reIndexPlotSlots();
       cls.config.plotSlots = JSON.parse(JSON.stringify(state.tempEditorSlots));
+      cls.config.textOverlays = JSON.parse(JSON.stringify(state.tempTextOverlays));
       saveStateToLocal();
       closeFullscreenEditor();
-      alert(`Đã lưu thành công ${cls.config.plotSlots.length} vùng đất riêng cho Lớp ${state.activeClass}!`);
+      alert(`Đã lưu thành công ${cls.config.plotSlots.length} vùng đất và ${cls.config.textOverlays.length} vùng chữ cho Lớp ${state.activeClass}!`);
     }
 
     function reIndexPlotSlots() {
@@ -729,7 +791,7 @@
       
       state.tempEditorSlots.push(newSlot);
       reIndexPlotSlots();
-      renderPerspectiveSlots();
+      renderPerspectiveSlotsAndTexts();
     }
 
     function removePerspectiveSlot(sIdx, event) {
@@ -746,88 +808,141 @@
       }
 
       reIndexPlotSlots();
-      renderPerspectiveSlots();
+      renderPerspectiveSlotsAndTexts();
     }
 
-    // SỬA LỖI 2: DÙNG ĐA GIÁC SVG NỐI TRỰC TIẾP 4 ĐIỂM NEO - KHÔNG BAO GIỜ BỊ LỆCH RA GÓC (0, 0)
-    function renderPerspectiveSlots() {
+    // =========================================================================
+    // QUẢN LÝ VÙNG CHỮ TỰ ĐỘNG ĐỔI MÀU
+    // =========================================================================
+    function addNewTextOverlay() {
+      const newText = {
+        id: 'txt_' + Date.now().toString(36),
+        content: `Vườn Thi Đua Lớp ${state.activeClass}`,
+        x: 50, // Mặc định ở giữa bảng gỗ trên cao
+        y: 18,
+        fontSize: 16
+      };
+      state.tempTextOverlays.push(newText);
+      renderPerspectiveSlotsAndTexts();
+    }
+
+    function removeTextOverlay(tIdx, event) {
+      event.stopPropagation();
+      state.tempTextOverlays.splice(tIdx, 1);
+      renderPerspectiveSlotsAndTexts();
+    }
+
+    function editTextContent(tIdx) {
+      const current = state.tempTextOverlays[tIdx].content;
+      const updated = prompt('Nhập nội dung chữ hiển thị:', current);
+      if (updated !== null && updated.trim().length > 0) {
+        state.tempTextOverlays[tIdx].content = updated.trim();
+        renderPerspectiveSlotsAndTexts();
+      }
+    }
+
+    // =========================================================================
+    // RENDER ĐA GIÁC ĐẤT CÓ MẢNG MÀU MỜ + VÙNG CHỮ TỰ ĐỔI MÀU
+    // =========================================================================
+    function renderPerspectiveSlotsAndTexts() {
       const container = document.getElementById('editor-slots-layer');
-      document.getElementById('lbl-total-slots-count').innerText = `Đã bố trí: ${state.tempEditorSlots.length} vùng đất`;
+      const canvas = document.getElementById('editor-canvas-box');
+      const cW = canvas.clientWidth || 900;
+      const cH = canvas.clientHeight || 600;
+
+      document.getElementById('lbl-total-slots-count').innerText = 
+        `Đã bố trí: ${state.tempEditorSlots.length} vùng đất • ${state.tempTextOverlays.length} vùng chữ`;
+
+      const tone = state.currentBgToneStyle || detectBackgroundTone('');
 
       container.innerHTML = `
-        <!-- Lớp SVG vẽ toàn bộ các đa giác ôm khít 4 đỉnh -->
-        <svg class="absolute inset-0 w-full h-full pointer-events-auto" style="overflow: visible;">
+        <!-- LỚP 1: SVG VẼ ĐA GIÁC ĐẤT VỚI MẢNG MÀU MỜ SẮC NÉT (TÍNH THEO PIXEL THẬT) -->
+        <svg class="absolute inset-0 w-full h-full pointer-events-auto" style="overflow: visible;" viewBox="0 0 ${cW} ${cH}">
           ${state.tempEditorSlots.map((slot, sIdx) => {
-            const pts = slot.corners.map(c => `${c.x}%,${c.y}%`).join(' ');
-            
-            // Tính trọng tâm đa giác để đặt nhãn tên luôn nằm ở giữa ô đất
-            const centerX = (slot.corners[0].x + slot.corners[1].x + slot.corners[2].x + slot.corners[3].x) / 4;
-            const centerY = (slot.corners[0].y + slot.corners[1].y + slot.corners[2].y + slot.corners[3].y) / 4;
+            // Chuyển đổi % thành pixel thực tế để SVG render mảng màu mờ chuẩn 100%
+            const ptsPixel = slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ');
 
             return `
               <g id="svg-group-${sIdx}">
-                <!-- Đa giác thân ô đất: Kéo di chuyển cả vùng không đổi kích thước -->
-                <polygon points="${pts}" 
+                <!-- MẢNG MÀU MỜ LÀM NỀN CHO KHU ĐẤT: KHÔNG BỊ MẤT -->
+                <polygon points="${ptsPixel}" 
                          id="polygon-body-${sIdx}"
                          class="plot-polygon-shape"
-                         fill="rgba(16, 185, 129, 0.28)" 
-                         stroke="#10b981" 
-                         stroke-width="2.5" 
-                         stroke-dasharray="6,4">
+                         fill="rgba(16, 185, 129, 0.35)" 
+                         stroke="#059669" 
+                         stroke-width="3" 
+                         stroke-dasharray="8,6">
                   <title>Nhấp giữ và kéo để di chuyển ${slot.name}</title>
                 </polygon>
-
-                <!-- Nhãn tên gắn chặt ở tâm đa giác -->
-                <g style="pointer-events: none;">
-                  <rect x="${centerX}%" y="${centerY}%" width="90" height="26" rx="13" 
-                        transform="translate(-45, -13)" 
-                        fill="rgba(69, 26, 3, 0.9)" stroke="#b45309" stroke-width="1.5" />
-                  <text x="${centerX}%" y="${centerY}%" 
-                        text-anchor="middle" dominant-baseline="central" 
-                        fill="#fef3c7" font-size="11" font-weight="900" font-family="sans-serif">
-                    ${slot.name}
-                  </text>
-                </g>
               </g>
             `;
           }).join('')}
         </svg>
 
-        <!-- Lớp chứa các nút Xóa và 4 nút neo tròn ở 4 góc -->
-        ${state.tempEditorSlots.map((slot, sIdx) => `
-          <div id="controls-slot-${sIdx}" class="absolute inset-0 pointer-events-none">
-            <!-- Nút Xóa vùng đất đặt ngay góc trên-trái P0 -->
-            <button onclick="removePerspectiveSlot(${sIdx}, event)" 
-                    style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%; transform: translate(-120%, -120%);"
-                    class="absolute w-6 h-6 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center justify-center pointer-events-auto hover:scale-125 transition z-50 shadow-lg"
-                    title="Xóa vùng đất này (các vùng sau sẽ tự đôn số)">
-              ✕
-            </button>
+        <!-- LỚP 2: NHÃN TÊN TRUNG TÂM & NÚT ĐIỀU KHIỂN CỦA VÙNG ĐẤT -->
+        ${state.tempEditorSlots.map((slot, sIdx) => {
+          const centerX = (slot.corners[0].x + slot.corners[1].x + slot.corners[2].x + slot.corners[3].x) / 4;
+          const centerY = (slot.corners[0].y + slot.corners[1].y + slot.corners[2].y + slot.corners[3].y) / 4;
 
-            <!-- 4 NÚT NEO TRÒN GẮN CHUẨN XÁC VÀO 4 GÓC -->
-            <div id="handle-${sIdx}-0" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%;" title="Kéo góc 1 (Trên-Trái)"></div>
-            <div id="handle-${sIdx}-1" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[1].x}%; top: ${slot.corners[1].y}%;" title="Kéo góc 2 (Trên-Phải)"></div>
-            <div id="handle-${sIdx}-2" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[2].x}%; top: ${slot.corners[2].y}%;" title="Kéo góc 3 (Dưới-Phải)"></div>
-            <div id="handle-${sIdx}-3" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[3].x}%; top: ${slot.corners[3].y}%;" title="Kéo góc 4 (Dưới-Trái)"></div>
+          return `
+            <div id="controls-slot-${sIdx}" class="absolute inset-0 pointer-events-none">
+              <!-- Nhãn tên ô đất ở tâm -->
+              <div style="left: ${centerX}%; top: ${centerY}%; transform: translate(-50%, -50%);" 
+                   class="absolute px-3 py-1 bg-amber-950/90 text-amber-200 border border-amber-600/60 rounded-full font-black text-xs shadow-lg pointer-events-none flex items-center gap-1">
+                <span>🌾</span> ${slot.name}
+              </div>
+
+              <!-- Nút Xóa vùng đất -->
+              <button onclick="removePerspectiveSlot(${sIdx}, event)" 
+                      style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%; transform: translate(-120%, -120%);"
+                      class="absolute w-6 h-6 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center justify-center pointer-events-auto hover:scale-125 transition z-50 shadow-lg"
+                      title="Xóa vùng đất này (các vùng sau sẽ tự đôn số)">
+                ✕
+              </button>
+
+              <!-- 4 NÚT NEO TRÒN Ở 4 GÓC -->
+              <div id="handle-${sIdx}-0" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%;" title="Kéo góc 1"></div>
+              <div id="handle-${sIdx}-1" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[1].x}%; top: ${slot.corners[1].y}%;" title="Kéo góc 2"></div>
+              <div id="handle-${sIdx}-2" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[2].x}%; top: ${slot.corners[2].y}%;" title="Kéo góc 3"></div>
+              <div id="handle-${sIdx}-3" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[3].x}%; top: ${slot.corners[3].y}%;" title="Kéo góc 4"></div>
+            </div>
+          `;
+        }).join('')}
+
+        <!-- LỚP 3: CÁC VÙNG CHỮ TỰ ĐỘNG ĐỔI MÀU THEO NỀN -->
+        ${state.tempTextOverlays.map((txt, tIdx) => `
+          <div id="text-overlay-${tIdx}" 
+               style="left: ${txt.x}%; top: ${txt.y}%;" 
+               class="draggable-text-box group pointer-events-auto">
+            <div ondblclick="editTextContent(${tIdx})" 
+                 style="color: ${tone.textColor}; text-shadow: ${tone.textShadow}; background: ${tone.bgColor}; border: 1.5px dashed ${tone.borderColor}; font-size: ${txt.fontSize}px;"
+                 class="px-3.5 py-1.5 rounded-xl font-extrabold tracking-wide flex items-center gap-2 shadow-md">
+              <span class="truncate">${txt.content}</span>
+              <button onclick="removeTextOverlay(${tIdx}, event)" class="w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-700 text-white text-[9px] font-bold opacity-0 group-hover:opacity-100 transition flex items-center justify-center">✕</button>
+            </div>
           </div>
         `).join('')}
       `;
 
-      // GẮN SỰ KIỆN KÉO DI CHUYỂN
+      // GẮN SỰ KIỆN KÉO THẢ VÙNG ĐẤT
       state.tempEditorSlots.forEach((slot, sIdx) => {
-        // 1. Kéo thân đa giác
         const polyEl = document.getElementById(`polygon-body-${sIdx}`);
         if (polyEl) makePlotPolygonDraggable(polyEl, sIdx);
 
-        // 2. Kéo 4 nút neo ở góc
         for (let cIdx = 0; cIdx < 4; cIdx++) {
           const handleEl = document.getElementById(`handle-${sIdx}-${cIdx}`);
           if (handleEl) makeCornerHandleDraggable(handleEl, sIdx, cIdx);
         }
       });
+
+      // GẮN SỰ KIỆN KÉO THẢ VÙNG CHỮ
+      state.tempTextOverlays.forEach((txt, tIdx) => {
+        const txtEl = document.getElementById(`text-overlay-${tIdx}`);
+        if (txtEl) makeTextOverlayDraggable(txtEl, tIdx);
+      });
     }
 
-    // 1. KÉO DI CHUYỂN TOÀN BỘ VÙNG ĐẤT (GIỮ NGUYÊN HÌNH DÁNG & KÍCH THƯỚC)
+    // KÉO DI CHUYỂN NGUYÊN KHỐI VÙNG ĐẤT
     function makePlotPolygonDraggable(polyEl, slotIndex) {
       let isDragging = false;
       let startMouseX = 0, startMouseY = 0;
@@ -868,7 +983,7 @@
           state.tempEditorSlots[slotIndex].corners[i].y = parseFloat((originalCorners[i].y + clampedDeltaY).toFixed(2));
         }
 
-        renderPerspectiveSlots();
+        renderPerspectiveSlotsAndTexts();
       });
 
       window.addEventListener('mouseup', () => {
@@ -876,7 +991,7 @@
       });
     }
 
-    // 2. KÉO ĐIỂM NEO Ở 4 GÓC ĐỂ UỐN NẮN PHỐI CẢNH 3D
+    // KÉO 4 CHẤM NEO Ở GÓC
     function makeCornerHandleDraggable(handleEl, slotIndex, cornerIndex) {
       let isDragging = false;
 
@@ -900,7 +1015,46 @@
         const pY = parseFloat(((posY / rect.height) * 100).toFixed(2));
 
         state.tempEditorSlots[slotIndex].corners[cornerIndex] = { x: pX, y: pY };
-        renderPerspectiveSlots();
+        renderPerspectiveSlotsAndTexts();
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (isDragging) isDragging = false;
+      });
+    }
+
+    // KÉO DI CHUYỂN VÙNG CHỮ
+    function makeTextOverlayDraggable(txtEl, tIdx) {
+      let isDragging = false;
+      let startMouseX = 0, startMouseY = 0;
+      let origX = 0, origY = 0;
+
+      txtEl.addEventListener('mousedown', (e) => {
+        if (e.target.tagName === 'BUTTON') return;
+        isDragging = true;
+        startMouseX = e.clientX;
+        startMouseY = e.clientY;
+        origX = state.tempTextOverlays[tIdx].x;
+        origY = state.tempTextOverlays[tIdx].y;
+        e.stopPropagation();
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const canvas = document.getElementById('editor-canvas-box');
+        const rect = canvas.getBoundingClientRect();
+
+        const dxPercent = ((e.clientX - startMouseX) / rect.width) * 100;
+        const dyPercent = ((e.clientY - startMouseY) / rect.height) * 100;
+
+        let newX = Math.max(5, Math.min(95, origX + dxPercent));
+        let newY = Math.max(5, Math.min(95, origY + dyPercent));
+
+        state.tempTextOverlays[tIdx].x = parseFloat(newX.toFixed(2));
+        state.tempTextOverlays[tIdx].y = parseFloat(newY.toFixed(2));
+
+        txtEl.style.left = `${newX}%`;
+        txtEl.style.top = `${newY}%`;
       });
 
       window.addEventListener('mouseup', () => {
@@ -1411,7 +1565,7 @@
 
     function saveAndApplyCurrentClass() {
       saveStateToLocal();
-      alert(`ĐÃ LƯU THÀNH CÔNG CHO LỚP ${state.activeClass}!\nToàn bộ cài đặt nền, gán nút, điều kiện mở khóa và vị trí vùng đất 3D đã được đồng bộ sang index.html.`);
+      alert(`ĐÃ LƯU THÀNH CÔNG CHO LỚP ${state.activeClass}!\nToàn bộ cài đặt nền, gán nút, điều kiện mở khóa, ô đất 3D và chữ nền đã được đồng bộ sang index.html.`);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
