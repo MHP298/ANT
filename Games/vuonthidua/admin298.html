@@ -429,14 +429,14 @@
 
   </div>
 
-  <!-- MODAL THIẾT KẾ SÂN VƯỜN & GÁN ẢNH KHU ĐẤT MẪU CHO TỪNG Ô -->
+  <!-- MODAL THIẾT KẾ SÂN VƯỜN & CĂN CHỈNH TỈ LỆ ẢNH ĐẤT CHO TỪNG Ô -->
   <div id="fullscreen-editor-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col">
     <div class="h-14 bg-slate-900 border-b border-slate-800 px-6 flex items-center justify-between shrink-0 shadow-lg">
       <div class="flex items-center gap-3">
         <span class="text-xl">📐</span>
         <div>
-          <h3 class="font-extrabold text-sm text-white uppercase tracking-wide">Trình Thiết Kế Sân Vườn & Gán Ảnh Khu Đất Mẫu</h3>
-          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Nắn 4 góc lưới • Chọn ảnh mẫu khu đất và Lưu lại cho từng ô</p>
+          <h3 class="font-extrabold text-sm text-white uppercase tracking-wide">Trình Thiết Kế Sân Vườn & Căn Chỉnh Vùng Đất</h3>
+          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Nắn 4 góc lưới • Chọn ảnh mẫu đất và Lưu tỉ lệ cho từng ô đất</p>
         </div>
       </div>
 
@@ -460,15 +460,16 @@
       </div>
     </div>
 
-    <!-- THANH CÔNG CỤ PHỤ DƯỚI MODAL ĐỂ CHỌN ẢNH MẪU ĐẤT CHO TỪNG Ô -->
+    <!-- THANH CÔNG CỤ PHỤ: CHỌN ẢNH ĐẤT THỰC TẾ & LƯU TỈ LỆ CHO TỪNG Ô -->
     <div class="h-14 bg-slate-900 border-t border-slate-800 px-6 flex items-center justify-between text-xs text-slate-300 shrink-0">
       <div class="flex items-center gap-3">
-        <span>🌾 <b>Chọn ảnh mẫu đất cho ô đang chọn:</b></span>
-        <select id="select-editor-soil-asset" class="px-3 py-1.5 rounded-xl bg-slate-800 text-amber-200 border border-slate-700 font-mono text-xs">
-          <!-- Load từ thư mục nengame -->
+        <span id="lbl-active-editing-plot" class="font-bold text-amber-300 bg-slate-800 px-2 py-1 rounded-lg border border-slate-700">Đang chọn: Khu đất 1</span>
+        <span>🌾 <b>Chọn ảnh đất mẫu:</b></span>
+        <select id="select-editor-soil-asset" class="px-3 py-1.5 rounded-xl bg-slate-800 text-amber-200 border border-slate-700 font-mono text-xs max-w-xs focus:outline-none">
+          <!-- Chỉ load danh sách ảnh hàng rào đất thực tế đã gán trong nút Đất -->
         </select>
-        <button onclick="saveSoilAssetForActiveSlot()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition shadow">
-          Lưu Ảnh Ô Này
+        <button onclick="saveSoilAssetForActiveSlot()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition shadow flex items-center gap-1">
+          <i class="fa-solid fa-check"></i> Lưu Tỉ Lệ Ô Này
         </button>
       </div>
       <span id="lbl-total-slots-count" class="font-bold text-emerald-400">Đã bố trí: 1 vùng đất</span>
@@ -500,14 +501,19 @@
           {
             id: 'slot_1', name: 'Khu đất 1', teamId: 1,
             corners: [{ x: 19, y: 31 }, { x: 35, y: 31 }, { x: 34, y: 50 }, { x: 18, y: 50 }],
-            soilImage: 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/nengame/khudatrieng_cam.png'
+            soilImage: null
           }
         ],
         textOverlays: [],
         assetScales: {},
         audioSettings: {
           bgm: { url: '', selectedFile: '', volume: 50, autoPlay: true },
-          sfx: []
+          sfx: [
+            { id: 'plant_pop', name: 'Cắm hoa / Đặt đất', url: '', selectedFile: '' },
+            { id: 'tab_click', name: 'Chuyển mục khay', url: '', selectedFile: '' },
+            { id: 'error_locked', name: 'Bị khóa / Sai quyền', url: '', selectedFile: '' },
+            { id: 'delete_item', name: 'Xóa vật phẩm / Dọn vườn', url: '', selectedFile: '' }
+          ]
         }
       },
       students: {},
@@ -537,10 +543,9 @@
         const contentEl = document.getElementById(`content-${k}`);
         const iconEl = document.getElementById(`icon-${k}`);
         if (!contentEl || !iconEl) return;
-
         if (k === secKey) {
-          const isCurrentlyHidden = contentEl.classList.contains('hidden');
-          if (isCurrentlyHidden) {
+          const isHidden = contentEl.classList.contains('hidden');
+          if (isHidden) {
             contentEl.classList.remove('hidden');
             iconEl.classList.replace('fa-chevron-right', 'fa-chevron-down');
             if (secKey === 'sec-audio') switchAudioConfigTab(state.currentAudioTab);
@@ -558,13 +563,8 @@
     function togglePasswordVisibility(id, iconId) {
       const el = document.getElementById(id);
       const icon = document.getElementById(iconId);
-      if (el.type === 'password') {
-        el.type = 'text';
-        icon.classList.replace('fa-eye', 'fa-eye-slash');
-      } else {
-        el.type = 'password';
-        icon.classList.replace('fa-eye-slash', 'fa-eye');
-      }
+      if (el.type === 'password') { el.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash'); }
+      else { el.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); }
     }
 
     function handleLogin() {
@@ -581,10 +581,7 @@
       }
     }
 
-    function handleLogout() {
-      sessionStorage.removeItem('current_admin_user');
-      location.reload();
-    }
+    function handleLogout() { sessionStorage.removeItem('current_admin_user'); location.reload(); }
 
     function switchAdminTab(tab) {
       if (tab === 'controls') {
@@ -617,17 +614,13 @@
           Object.values(parsed).forEach(c => {
             if (!c.config.audioSettings) c.config.audioSettings = DEFAULT_CLASS_TEMPLATE(c.name).config.audioSettings;
             if (!c.config.buttonMappings) c.config.buttonMappings = {};
-            Object.values(c.config.buttonMappings).forEach(btn => {
-              if (!btn.itemLockLevels) btn.itemLockLevels = {};
-            });
+            Object.values(c.config.buttonMappings).forEach(btn => { if (!btn.itemLockLevels) btn.itemLockLevels = {}; });
           });
           state.classesData = parsed;
         } catch (e) {}
       }
       const savedActive = localStorage.getItem('garden_active_class_v14');
-      if (savedActive && state.classesData[savedActive]) {
-        state.activeClass = savedActive;
-      }
+      if (savedActive && state.classesData[savedActive]) state.activeClass = savedActive;
     }
 
     function saveStateToLocal() {
@@ -637,8 +630,7 @@
 
     function renderClassDropdown() {
       const select = document.getElementById('select-active-class');
-      const classKeys = Object.keys(state.classesData);
-      select.innerHTML = classKeys.map(c => `<option value="${c}" ${c === state.activeClass ? 'selected' : ''}>Lớp ${c}</option>`).join('');
+      select.innerHTML = Object.keys(state.classesData).map(c => `<option value="${c}" ${c === state.activeClass ? 'selected' : ''}>Lớp ${c}</option>`).join('');
     }
 
     function switchActiveClass(className) {
@@ -656,13 +648,9 @@
       const name = prompt('Nhập tên lớp mới (Ví dụ: 10A2, 11TA3):');
       if (!name) return;
       const clean = name.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-      if (!clean) return alert('Tên lớp không hợp lệ!');
-      if (state.classesData[clean]) return alert('Lớp này đã tồn tại!');
-
+      if (!clean || state.classesData[clean]) return alert('Tên lớp không hợp lệ hoặc đã tồn tại!');
       state.classesData[clean] = DEFAULT_CLASS_TEMPLATE(clean);
       state.activeClass = clean;
-      state.currentActiveButtonIcon = '';
-      state.activeViewData = { type: 'none', folders: [], singleImage: null, contextType: 'button', contextKey: '' };
       saveStateToLocal();
       renderClassDropdown();
       loadActiveClassConfig();
@@ -673,14 +661,10 @@
     function loadActiveClassConfig() {
       const cls = state.classesData[state.activeClass];
       if (!cls) return;
-
       populateBackgroundDropdowns();
       populateButtonIconsList();
       renderConditionsMenu();
-
-      [1, 2, 3, 4].forEach(t => {
-        document.getElementById(`rank-val-${t}`).value = cls.weeklyRanking[t] || t;
-      });
+      [1, 2, 3, 4].forEach(t => { document.getElementById(`rank-val-${t}`).value = cls.weeklyRanking[t] || t; });
     }
 
     function closeAllFolderDropdowns(e) {
@@ -700,13 +684,7 @@
     function populateBackgroundDropdowns() {
       const cls = state.classesData[state.activeClass];
       const bgImages = state.cachedAssets['nengame'] || [];
-      const generateOptions = (currentVal) => {
-        if (bgImages.length === 0) return `<option value="${currentVal}">${currentVal}</option>`;
-        return bgImages.map(img => 
-          `<option value="${img.localPath}" ${img.localPath === currentVal ? 'selected' : ''}>${img.fileName}</option>`
-        ).join('');
-      };
-
+      const generateOptions = (currentVal) => bgImages.length === 0 ? `<option value="${currentVal}">${currentVal}</option>` : bgImages.map(img => `<option value="${img.localPath}" ${img.localPath === currentVal ? 'selected' : ''}>${img.fileName}</option>`).join('');
       document.getElementById('select-bg-global').innerHTML = generateOptions(cls.config.bgGlobal);
       document.getElementById('select-bg-a').innerHTML = generateOptions(cls.config.bgA);
       document.getElementById('select-bg-b').innerHTML = generateOptions(cls.config.bgB);
@@ -717,17 +695,13 @@
       if (type === 'global') cls.config.bgGlobal = value;
       if (type === 'a') cls.config.bgA = value;
       if (type === 'b') cls.config.bgB = value;
-
       saveStateToLocal();
       displaySingleImagePreview(value, `Xem trước ảnh nền (${type.toUpperCase()}): ${value}`);
     }
 
     function viewBackgroundPreview(type) {
       const cls = state.classesData[state.activeClass];
-      let val = cls.config.bgGlobal;
-      if (type === 'a') val = cls.config.bgA;
-      if (type === 'b') val = cls.config.bgB;
-
+      let val = type === 'a' ? cls.config.bgA : (type === 'b' ? cls.config.bgB : cls.config.bgGlobal);
       displaySingleImagePreview(val, `Ảnh nền hiện tại (${type.toUpperCase()}): ${val}`);
     }
 
@@ -740,18 +714,13 @@
       document.getElementById('total-visible-images-count').innerText = '(1 ảnh)';
 
       const fullUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${imagePath}`;
-      const area = document.getElementById('multi-folder-display-area');
-      
-      area.innerHTML = `
+      document.getElementById('multi-folder-display-area').innerHTML = `
         <div class="bg-white rounded-3xl border border-slate-200 p-6 flex flex-col items-center justify-center shadow-xs max-w-2xl mx-auto group">
           <div onclick="openFullscreenEditor('${imagePath}')" class="relative w-full aspect-[3/2] rounded-2xl bg-slate-950 overflow-hidden flex items-center justify-center cursor-pointer shadow-lg border-2 border-emerald-500/40 hover:border-emerald-500 transition duration-300">
             <img src="${fullUrl}" class="max-h-full max-w-full object-contain pointer-events-none">
-            
             <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 backdrop-blur-xs flex flex-col items-center justify-center text-white transition duration-300">
-              <div class="w-12 h-12 rounded-full bg-emerald-600 flex items-center justify-center text-xl shadow-xl mb-2">
-                <i class="fa-solid fa-expand"></i>
-              </div>
-              <span class="text-xs font-black uppercase tracking-wider text-emerald-300">Bấm để phóng to & chỉnh sửa vùng đất, vùng chữ</span>
+              <div class="w-12 h-12 rounded-full bg-emerald-600 flex items-center justify-center text-xl shadow-xl mb-2"><i class="fa-solid fa-expand"></i></div>
+              <span class="text-xs font-black uppercase tracking-wider text-emerald-300">Bấm để phóng to & căn chỉnh sân vườn</span>
             </div>
           </div>
           <span class="text-xs font-mono font-bold text-slate-700 mt-3 text-center">${imagePath}</span>
@@ -759,19 +728,10 @@
       `;
     }
 
-    // ================= GÁN TÍNH NĂNG NÚT =================
     function populateButtonIconsList() {
       const select = document.getElementById('select-active-button-icon');
       const nutImages = state.cachedAssets['nutgame'] || [];
-
-      let html = `<option value="">-- Chọn nút --</option>`;
-      if (nutImages.length > 0) {
-        html += nutImages.map(img => 
-          `<option value="${img.fileName}" ${img.fileName === state.currentActiveButtonIcon ? 'selected' : ''}>${img.fileName}</option>`
-        ).join('');
-      }
-      select.innerHTML = html;
-
+      select.innerHTML = `<option value="">-- Chọn nút --</option>` + nutImages.map(img => `<option value="${img.fileName}" ${img.fileName === state.currentActiveButtonIcon ? 'selected' : ''}>${img.fileName}</option>`).join('');
       loadAssignedButtonDetails();
     }
 
@@ -783,7 +743,6 @@
     function loadAssignedButtonDetails() {
       const detailBox = document.getElementById('button-detail-settings');
       const icon = state.currentActiveButtonIcon;
-
       if (!icon) {
         detailBox.classList.add('hidden');
         document.getElementById('input-active-button-label').value = '';
@@ -791,67 +750,41 @@
         renderPartBEmptyState();
         return;
       }
-
       detailBox.classList.remove('hidden');
       const cls = state.classesData[state.activeClass];
-      if (!cls.config.buttonMappings) cls.config.buttonMappings = {};
-
       if (!cls.config.buttonMappings[icon]) {
-        let autoLabel = icon.replace(/\.[^/.]+$/, "").replace('nut', '').toUpperCase() || 'NÚT';
-        cls.config.buttonMappings[icon] = { label: autoLabel, targetFolders: [], selectedImages: [], itemLockLevels: {} };
+        cls.config.buttonMappings[icon] = { label: icon.replace(/\.[^/.]+$/, "").replace('nut', '').toUpperCase() || 'NÚT', targetFolders: [], selectedImages: [], itemLockLevels: {} };
       }
-
       const mapping = cls.config.buttonMappings[icon];
       document.getElementById('input-active-button-label').value = mapping.label;
       renderAssignedFolderDropdownCheckboxes();
-
-      if (mapping.targetFolders && mapping.targetFolders.length > 0) {
-        setPartBActiveFolders(mapping.targetFolders, `Các thư mục gán cho nút [${icon}]`, 'button', icon);
-      } else {
-        renderPartBEmptyState();
-      }
+      if (mapping.targetFolders.length > 0) setPartBActiveFolders(mapping.targetFolders, `Các thư mục gán cho nút [${icon}]`, 'button', icon);
+      else renderPartBEmptyState();
     }
 
     function handleActiveButtonLabelChange(newLabel) {
       const cls = state.classesData[state.activeClass];
       const icon = state.currentActiveButtonIcon;
-      if (icon && cls.config.buttonMappings[icon]) {
-        cls.config.buttonMappings[icon].label = newLabel.trim();
-        saveStateToLocal();
-      }
+      if (icon && cls.config.buttonMappings[icon]) { cls.config.buttonMappings[icon].label = newLabel.trim(); saveStateToLocal(); }
     }
 
     function renderAssignedFolderDropdownCheckboxes() {
       const cls = state.classesData[state.activeClass];
       const mapping = cls.config.buttonMappings[state.currentActiveButtonIcon] || { targetFolders: [] };
-      const container = document.getElementById('dropdown-btn-assigned-folders');
-
-      container.innerHTML = ALL_FOLDERS.filter(f => f !== 'amthanh').map(f => {
-        const isChecked = mapping.targetFolders.includes(f);
-        return `
-          <label class="flex items-center justify-between px-2.5 py-1.5 rounded hover:bg-emerald-50 cursor-pointer text-xs font-bold text-slate-700" onclick="event.stopPropagation()">
-            <span class="flex items-center gap-1.5">
-              <i class="fa-solid fa-folder text-emerald-600 text-[10px]"></i>
-              ${f}
-            </span>
-            <input type="checkbox" value="${f}" ${isChecked ? 'checked' : ''} onchange="toggleAssignedFolderCheck('${f}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5">
-          </label>
-        `;
-      }).join('');
-
+      document.getElementById('dropdown-btn-assigned-folders').innerHTML = ALL_FOLDERS.filter(f => f !== 'amthanh').map(f => `
+        <label class="flex items-center justify-between px-2.5 py-1.5 rounded hover:bg-emerald-50 cursor-pointer text-xs font-bold text-slate-700" onclick="event.stopPropagation()">
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-folder text-emerald-600 text-[10px]"></i> ${f}</span>
+          <input type="checkbox" value="${f}" ${mapping.targetFolders.includes(f) ? 'checked' : ''} onchange="toggleAssignedFolderCheck('${f}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5">
+        </label>
+      `).join('');
       updateAssignedFoldersLabel();
     }
 
     function toggleAssignedFolderCheck(folder, isChecked) {
       const cls = state.classesData[state.activeClass];
       const mapping = cls.config.buttonMappings[state.currentActiveButtonIcon];
-
-      if (isChecked) {
-        if (!mapping.targetFolders.includes(folder)) mapping.targetFolders.push(folder);
-      } else {
-        mapping.targetFolders = mapping.targetFolders.filter(f => f !== folder);
-      }
-
+      if (isChecked) { if (!mapping.targetFolders.includes(folder)) mapping.targetFolders.push(folder); }
+      else { mapping.targetFolders = mapping.targetFolders.filter(f => f !== folder); }
       updateAssignedFoldersLabel();
       saveStateToLocal();
       setPartBActiveFolders(mapping.targetFolders, `Các thư mục gán cho nút [${state.currentActiveButtonIcon}]`, 'button', state.currentActiveButtonIcon);
@@ -860,20 +793,14 @@
     function updateAssignedFoldersLabel() {
       const cls = state.classesData[state.activeClass];
       const mapping = cls.config.buttonMappings[state.currentActiveButtonIcon] || { targetFolders: [] };
-      const el = document.getElementById('lbl-assigned-folders-status');
-      el.innerText = mapping.targetFolders.length === 0 ? 'Chưa chọn thư mục' : mapping.targetFolders.join(', ');
+      document.getElementById('lbl-assigned-folders-status').innerText = mapping.targetFolders.length === 0 ? 'Chưa chọn thư mục' : mapping.targetFolders.join(', ');
     }
 
-    // ================= MỞ KHÓA CẤP ĐỘ =================
     function getAllConfiguredLockLevels() {
       const cls = state.classesData[state.activeClass];
       const levelsSet = new Set([1]);
-      const mappings = cls.config.buttonMappings || {};
-      Object.values(mappings).forEach(m => {
-        const locks = m.itemLockLevels || {};
-        Object.values(locks).forEach(lvl => {
-          if (lvl > 0) levelsSet.add(parseInt(lvl));
-        });
+      Object.values(cls.config.buttonMappings || {}).forEach(m => {
+        Object.values(m.itemLockLevels || {}).forEach(lvl => { if (lvl > 0) levelsSet.add(parseInt(lvl)); });
       });
       return Array.from(levelsSet).sort((a, b) => a - b);
     }
@@ -882,61 +809,44 @@
       const cls = state.classesData[state.activeClass];
       const group = document.getElementById('group-established-rules');
       const conditions = cls.config.unlockConditions || {};
-      const condKeys = Object.keys(conditions);
-      document.getElementById('badge-total-rules').innerText = `${condKeys.length} Luật`;
-
-      group.innerHTML = condKeys.map(k => `<option value="${k}">${conditions[k].name}</option>`).join('');
+      document.getElementById('badge-total-rules').innerText = `${Object.keys(conditions).length} Luật`;
+      group.innerHTML = Object.keys(conditions).map(k => `<option value="${k}">${conditions[k].name}</option>`).join('');
       document.getElementById('select-condition-main').value = state.currentSelectedConditionId || '';
       updateConditionDisplayBox();
     }
 
     function handleConditionChange(val) {
-      if (val === '__NEW__') {
-        openNewConditionForm();
-      } else {
-        state.currentSelectedConditionId = val;
-        document.getElementById('new-condition-box').classList.add('hidden');
-        updateConditionDisplayBox();
-      }
+      if (val === '__NEW__') openNewConditionForm();
+      else { state.currentSelectedConditionId = val; document.getElementById('new-condition-box').classList.add('hidden'); updateConditionDisplayBox(); }
     }
 
     function updateConditionDisplayBox() {
       const cls = state.classesData[state.activeClass];
       const box = document.getElementById('box-current-cond-display');
       const cond = cls.config.unlockConditions[state.currentSelectedConditionId];
-
-      if (!cond) {
-        box.classList.add('hidden');
-        return;
-      }
-
+      if (!cond) { box.classList.add('hidden'); return; }
       box.classList.remove('hidden');
       document.getElementById('lbl-display-cond-level').innerText = `Cấp độ ${cond.targetLevel || 1}`;
-      let typeText = 'Kiểu: Đạt Hạng 1 tuần';
-      if (cond.type === 'quest_done') typeText = 'Kiểu: Hoàn thành nhiệm vụ/từ khóa';
-      if (cond.type === 'always_open') typeText = 'Kiểu: Tự do luôn mở';
+      let typeText = cond.type === 'quest_done' ? 'Kiểu: Nhiệm vụ ngày' : (cond.type === 'always_open' ? 'Kiểu: Luôn mở' : 'Kiểu: Hạng 1 tuần');
       document.getElementById('lbl-display-cond-type').innerText = typeText;
     }
 
     function openNewConditionForm(editId = null) {
       state.editingConditionId = editId;
       const box = document.getElementById('new-condition-box');
-      const title = document.getElementById('lbl-form-mode');
       box.classList.remove('hidden');
-
       const levels = getAllConfiguredLockLevels();
       const levelSelect = document.getElementById('select-new-cond-target-level');
       levelSelect.innerHTML = levels.map(lvl => `<option value="${lvl}">Cấp độ ${lvl}</option>`).join('');
-
       const cls = state.classesData[state.activeClass];
       if (editId && cls.config.unlockConditions[editId]) {
-        title.innerText = 'Chỉnh Sửa Điều Kiện';
+        document.getElementById('lbl-form-mode').innerText = 'Chỉnh Sửa Điều Kiện';
         const cond = cls.config.unlockConditions[editId];
         document.getElementById('input-new-cond-name').value = cond.name;
         document.getElementById('select-new-cond-type').value = cond.type;
         levelSelect.value = cond.targetLevel || 1;
       } else {
-        title.innerText = 'Thiết Lập Điều Kiện Mới';
+        document.getElementById('lbl-form-mode').innerText = 'Thiết Lập Điều Kiện Mới';
         document.getElementById('input-new-cond-name').value = '';
         document.getElementById('select-new-cond-type').value = 'rank_top1';
         levelSelect.value = levels[0] || 1;
@@ -954,15 +864,11 @@
       const name = document.getElementById('input-new-cond-name').value.trim();
       const type = document.getElementById('select-new-cond-type').value;
       const targetLevel = parseInt(document.getElementById('select-new-cond-target-level').value) || 1;
-
       if (!name) return alert('Vui lòng nhập tên điều kiện!');
-
       const id = state.editingConditionId || ('cond_' + Date.now().toString(36));
       cls.config.unlockConditions[id] = { id, name, type, targetLevel };
-
       state.currentSelectedConditionId = id;
       state.editingConditionId = null;
-
       document.getElementById('new-condition-box').classList.add('hidden');
       renderConditionsMenu();
       saveStateToLocal();
@@ -970,15 +876,14 @@
     }
 
     function editCurrentCondition() {
-      if (!state.currentSelectedConditionId) return alert('Vui lòng chọn một điều kiện trong danh sách để chỉnh sửa!');
+      if (!state.currentSelectedConditionId) return alert('Vui lòng chọn điều kiện cần sửa!');
       openNewConditionForm(state.currentSelectedConditionId);
     }
 
     function deleteCurrentCondition() {
-      if (!state.currentSelectedConditionId) return alert('Chưa chọn điều kiện nào để xóa!');
+      if (!state.currentSelectedConditionId) return alert('Chưa chọn điều kiện cần xóa!');
       const cls = state.classesData[state.activeClass];
-      const cond = cls.config.unlockConditions[state.currentSelectedConditionId];
-      if (confirm(`Xóa điều kiện [${cond.name}]?`)) {
+      if (confirm('Xóa điều kiện này?')) {
         delete cls.config.unlockConditions[state.currentSelectedConditionId];
         state.currentSelectedConditionId = '';
         renderConditionsMenu();
@@ -986,7 +891,6 @@
       }
     }
 
-    // ================= HIỂN THỊ PHẦN B =================
     function renderPartBEmptyState() {
       state.activeViewData = { type: 'none', folders: [], singleImage: null, contextType: 'none', contextKey: '' };
       document.getElementById('section-b-title').innerText = 'Kho Ảnh Assets Đang Hiển Thị';
@@ -994,22 +898,17 @@
       document.getElementById('toolbar-actions').style.display = 'none';
       document.getElementById('scale-controller-panel').style.display = 'none';
       document.getElementById('lock-assigner-panel').style.display = 'none';
-
       document.getElementById('multi-folder-display-area').innerHTML = `
         <div class="py-24 text-center text-slate-400 bg-white rounded-2xl border border-dashed border-slate-300">
           <i class="fa-regular fa-hand-pointer text-3xl mb-2 text-slate-300"></i>
           <p class="text-xs font-bold text-slate-500">Chưa có lựa chọn nào từ Phần A</p>
-          <p class="text-[11px] text-slate-400 mt-0.5">Chọn một nút để thiết lập ảnh, gán cấp độ khóa và tỉ lệ hiển thị.</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">Chọn một nút ở Phần A để cấu hình tài nguyên.</p>
         </div>
       `;
     }
 
     function setPartBActiveFolders(folders, customTitle, contextType = 'button', contextKey = '') {
-      if (!folders || folders.length === 0) {
-        renderPartBEmptyState();
-        return;
-      }
-
+      if (!folders || folders.length === 0) { renderPartBEmptyState(); return; }
       state.activeViewData = { type: 'folders', folders: [...folders], singleImage: null, contextType, contextKey };
       state.selectedLockImagesForBatch = [];
       document.getElementById('section-b-title').innerText = customTitle || 'Kho Ảnh Assets Đang Hiển Thị';
@@ -1020,42 +919,35 @@
 
     function toggleLockLevelSubBar() {
       const panel = document.getElementById('lock-assigner-panel');
-      const isHidden = panel.style.display === 'none';
-      panel.style.display = isHidden ? 'flex' : 'none';
+      panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
     }
 
     function getContextSelectedImages() {
       const cls = state.classesData[state.activeClass];
       const { contextType, contextKey } = state.activeViewData;
-      if (contextType === 'button' && cls.config.buttonMappings[contextKey]) {
-        return cls.config.buttonMappings[contextKey].selectedImages || [];
-      }
+      if (contextType === 'button' && cls.config.buttonMappings[contextKey]) return cls.config.buttonMappings[contextKey].selectedImages || [];
       return [];
     }
 
     function setContextSelectedImages(newArray) {
       const cls = state.classesData[state.activeClass];
       const { contextType, contextKey } = state.activeViewData;
-      if (contextType === 'button' && cls.config.buttonMappings[contextKey]) {
-        cls.config.buttonMappings[contextKey].selectedImages = newArray;
-      }
+      if (contextType === 'button' && cls.config.buttonMappings[contextKey]) cls.config.buttonMappings[contextKey].selectedImages = newArray;
       saveStateToLocal();
       updateSelectedImageCount();
     }
 
     function renderMultiFolderView() {
       if (state.activeViewData.type !== 'folders') return;
-
       const area = document.getElementById('multi-folder-display-area');
       const folders = state.activeViewData.folders;
       const selectedImgList = getContextSelectedImages();
       const cls = state.classesData[state.activeClass];
       if (!cls.config.assetScales) cls.config.assetScales = {};
 
-      const currentBtnMapping = cls.config.buttonMappings[state.currentActiveButtonIcon] || { itemLockLevels: {} };
-      const currentLocks = currentBtnMapping.itemLockLevels || {};
-
+      const currentLocks = cls.config.buttonMappings[state.currentActiveButtonIcon]?.itemLockLevels || {};
       let totalCount = 0;
+
       area.innerHTML = folders.map(f => {
         const items = state.cachedAssets[f] || [];
         totalCount += items.length;
@@ -1065,14 +957,11 @@
           <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs space-y-3">
             <div class="flex items-center justify-between border-b border-slate-100 pb-2">
               <div class="flex items-center gap-2">
-                <input type="checkbox" ${isFolderAllChecked ? 'checked' : ''} onchange="toggleSelectAllInFolder('${f}', this.checked)" class="rounded text-emerald-600 w-4 h-4 cursor-pointer" title="Chọn toàn bộ ảnh thư mục này hiển thị cho nút">
-                <b class="text-xs uppercase text-slate-800 tracking-wide font-mono flex items-center gap-1.5">
-                  <i class="fa-solid fa-folder text-emerald-600"></i> ${f}
-                </b>
+                <input type="checkbox" ${isFolderAllChecked ? 'checked' : ''} onchange="toggleSelectAllInFolder('${f}', this.checked)" class="rounded text-emerald-600 w-4 h-4 cursor-pointer">
+                <b class="text-xs uppercase text-slate-800 tracking-wide font-mono flex items-center gap-1.5"><i class="fa-solid fa-folder text-emerald-600"></i> ${f}</b>
                 <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">${items.length} ảnh</span>
               </div>
             </div>
-
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
               ${items.map(item => {
                 const isCheckedDisplay = selectedImgList.includes(item.fileName);
@@ -1083,22 +972,16 @@
                 return `
                   <div onclick="selectImageForScaleReview('${item.fileName}', '${item.rawUrl}')" 
                        class="relative bg-white rounded-xl border ${lockLvl > 0 ? 'border-amber-400 ring-2 ring-amber-400/20' : (isCheckedDisplay ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-200')} p-2 flex flex-col justify-between group hover:shadow-xs transition cursor-pointer">
-                    
                     <div class="absolute top-1.5 left-1.5 z-10" onclick="event.stopPropagation()">
-                      <input type="checkbox" ${isCheckedDisplay ? 'checked' : ''} onchange="toggleSingleImageCheck('${item.fileName}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5 cursor-pointer" title="Hiển thị ảnh này cho nút">
+                      <input type="checkbox" ${isCheckedDisplay ? 'checked' : ''} onchange="toggleSingleImageCheck('${item.fileName}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5 cursor-pointer">
                     </div>
-
                     <div class="absolute top-1.5 right-1.5 z-10 flex items-center gap-0.5 bg-white/90 rounded-md px-1 py-0.5 shadow-2xs border border-amber-200" onclick="event.stopPropagation()">
                       <input type="checkbox" ${isLockChecked ? 'checked' : ''} onchange="toggleItemLockCheckbox('${item.fileName}', this.checked)" class="rounded text-amber-600 w-3.5 h-3.5 cursor-pointer">
-                      <span class="text-[9px] font-black ${lockLvl > 0 ? 'text-amber-800' : 'text-slate-400'} flex items-center gap-0.5">
-                        <i class="fa-solid fa-lock text-[8px]"></i> ${lockLvl > 0 ? lockLvl : ''}
-                      </span>
+                      <span class="text-[9px] font-black ${lockLvl > 0 ? 'text-amber-800' : 'text-slate-400'}"><i class="fa-solid fa-lock text-[8px]"></i> ${lockLvl > 0 ? lockLvl : ''}</span>
                     </div>
-
                     <div class="h-20 w-full bg-trans-grid rounded-lg flex items-center justify-center p-1 mt-1">
                       <img src="${item.rawUrl}" class="max-h-full max-w-full object-contain filter drop-shadow">
                     </div>
-
                     <div class="mt-1 flex items-center justify-between">
                       <span class="text-[10px] font-mono text-slate-500 truncate flex-1" title="${item.fileName}">${item.fileName}</span>
                       <span class="text-[9px] font-black bg-emerald-100 text-emerald-800 px-1 rounded">${scaleVal}%</span>
@@ -1116,8 +999,7 @@
 
       if (!state.activeSelectedImageName && selectedImgList.length > 0) {
         const firstFile = selectedImgList[0];
-        const allItems = [].concat(...Object.values(state.cachedAssets));
-        const match = allItems.find(i => i.fileName === firstFile);
+        const match = [].concat(...Object.values(state.cachedAssets)).find(i => i.fileName === firstFile);
         if (match) selectImageForScaleReview(match.fileName, match.rawUrl);
       }
     }
@@ -1126,17 +1008,10 @@
       const cls = state.classesData[state.activeClass];
       const mapping = cls.config.buttonMappings[state.currentActiveButtonIcon];
       if (!mapping) return;
-
-      if (isChecked) {
-        if (!state.selectedLockImagesForBatch.includes(fileName)) {
-          state.selectedLockImagesForBatch.push(fileName);
-        }
-      } else {
+      if (isChecked) { if (!state.selectedLockImagesForBatch.includes(fileName)) state.selectedLockImagesForBatch.push(fileName); }
+      else {
         state.selectedLockImagesForBatch = state.selectedLockImagesForBatch.filter(f => f !== fileName);
-        if (mapping.itemLockLevels && mapping.itemLockLevels[fileName]) {
-          delete mapping.itemLockLevels[fileName];
-          saveStateToLocal();
-        }
+        if (mapping.itemLockLevels && mapping.itemLockLevels[fileName]) { delete mapping.itemLockLevels[fileName]; saveStateToLocal(); }
       }
       renderMultiFolderView();
     }
@@ -1144,48 +1019,31 @@
     function applyBatchLockLevel() {
       const cls = state.classesData[state.activeClass];
       const mapping = cls.config.buttonMappings[state.currentActiveButtonIcon];
-      if (!mapping) return alert('Chưa chọn nút để gán!');
-
+      if (!mapping) return alert('Chưa chọn nút!');
       if (!mapping.itemLockLevels) mapping.itemLockLevels = {};
       const lvl = parseInt(document.getElementById('input-assign-lock-level').value) || 1;
-
-      if (state.selectedLockImagesForBatch.length === 0) {
-        return alert('Vui lòng tick chọn ít nhất 1 ô khóa (góc phải trên ảnh) trước khi bấm Gán!');
-      }
-
-      state.selectedLockImagesForBatch.forEach(f => {
-        mapping.itemLockLevels[f] = lvl;
-      });
-
+      if (state.selectedLockImagesForBatch.length === 0) return alert('Vui lòng tick ô khóa góc phải của ảnh cần gán!');
+      state.selectedLockImagesForBatch.forEach(f => { mapping.itemLockLevels[f] = lvl; });
       state.selectedLockImagesForBatch = [];
       saveStateToLocal();
       renderMultiFolderView();
-      alert(`Đã gán Cấp độ khóa ${lvl} thành công cho các ảnh được chọn!`);
+      alert(`Đã gán Cấp độ khóa ${lvl}!`);
     }
 
     function clearBatchLockLevel() {
       const cls = state.classesData[state.activeClass];
       const mapping = cls.config.buttonMappings[state.currentActiveButtonIcon];
       if (!mapping) return;
-
-      if (confirm('Bỏ gán khóa cho toàn bộ ảnh trong mục này?')) {
-        mapping.itemLockLevels = {};
-        state.selectedLockImagesForBatch = [];
-        saveStateToLocal();
-        renderMultiFolderView();
-        alert('Đã gỡ bỏ toàn bộ khóa cấp độ cho mục này!');
-      }
+      if (confirm('Bỏ gán khóa toàn bộ?')) { mapping.itemLockLevels = {}; state.selectedLockImagesForBatch = []; saveStateToLocal(); renderMultiFolderView(); }
     }
 
     function selectImageForScaleReview(fileName, rawUrl) {
       state.activeSelectedImageName = fileName;
       const cls = state.classesData[state.activeClass];
       const scaleVal = cls.config.assetScales[fileName] || 40;
-
       document.getElementById('lbl-preview-name').innerText = fileName;
       document.getElementById('input-scale-slider').value = scaleVal;
       document.getElementById('input-scale-number').value = scaleVal;
-
       const previewImg = document.getElementById('img-preview-target');
       previewImg.src = rawUrl;
       previewImg.style.transform = `scale(${scaleVal / 100})`;
@@ -1195,117 +1053,98 @@
       const num = parseInt(val) || 40;
       document.getElementById('input-scale-slider').value = num;
       document.getElementById('input-scale-number').value = num;
-
-      const previewImg = document.getElementById('img-preview-target');
-      previewImg.style.transform = `scale(${num / 100})`;
-
+      document.getElementById('img-preview-target').style.transform = `scale(${num / 100})`;
       if (state.activeSelectedImageName) {
-        const cls = state.classesData[state.activeClass];
-        cls.config.assetScales[state.activeSelectedImageName] = num;
+        state.classesData[state.activeClass].config.assetScales[state.activeSelectedImageName] = num;
         saveStateToLocal();
       }
     }
 
-    function saveActiveScaleSetting() {
-      saveStateToLocal();
-      renderMultiFolderView();
-      alert(`Đã lưu tỉ lệ ${document.getElementById('input-scale-number').value}% cho ảnh [${state.activeSelectedImageName}]!`);
-    }
-
+    function saveActiveScaleSetting() { saveStateToLocal(); renderMultiFolderView(); alert('Đã lưu tỉ lệ!'); }
     function toggleSingleImageCheck(fileName, isChecked) {
       let currentList = [...getContextSelectedImages()];
-      if (isChecked) {
-        if (!currentList.includes(fileName)) currentList.push(fileName);
-      } else {
-        currentList = currentList.filter(name => name !== fileName);
-      }
+      if (isChecked) { if (!currentList.includes(fileName)) currentList.push(fileName); }
+      else { currentList = currentList.filter(name => name !== fileName); }
       setContextSelectedImages(currentList);
       renderMultiFolderView();
     }
-
     function toggleSelectAllInFolder(folder, isChecked) {
-      const items = state.cachedAssets[folder] || [];
       let currentList = [...getContextSelectedImages()];
-      items.forEach(i => {
-        if (isChecked) {
-          if (!currentList.includes(i.fileName)) currentList.push(i.fileName);
-        } else {
-          currentList = currentList.filter(name => name !== i.fileName);
-        }
+      (state.cachedAssets[folder] || []).forEach(i => {
+        if (isChecked) { if (!currentList.includes(i.fileName)) currentList.push(i.fileName); }
+        else { currentList = currentList.filter(n => n !== i.fileName); }
       });
       setContextSelectedImages(currentList);
       renderMultiFolderView();
     }
-
     function selectAllVisibleImages(isChecked) {
       if (state.activeViewData.type !== 'folders') return;
       let currentList = [...getContextSelectedImages()];
-
       state.activeViewData.folders.forEach(f => {
-        const items = state.cachedAssets[f] || [];
-        items.forEach(i => {
-          if (isChecked) {
-            if (!currentList.includes(i.fileName)) currentList.push(i.fileName);
-          } else {
-            currentList = currentList.filter(name => name !== i.fileName);
-          }
+        (state.cachedAssets[f] || []).forEach(i => {
+          if (isChecked) { if (!currentList.includes(i.fileName)) currentList.push(i.fileName); }
+          else { currentList = currentList.filter(n => n !== i.fileName); }
         });
       });
-
       setContextSelectedImages(currentList);
       renderMultiFolderView();
     }
+    function updateSelectedImageCount() { document.getElementById('lbl-selected-img-count').innerText = `Đã chọn: ${getContextSelectedImages().length}`; }
 
-    function updateSelectedImageCount() {
-      const selectedCount = getContextSelectedImages().length;
-      document.getElementById('lbl-selected-img-count').innerText = `Đã chọn: ${selectedCount}`;
-    }
-
-    // ================= TRÌNH THIẾT KẾ SÂN VƯỜN 3D & GÁN ẢNH KHU ĐẤT MẪU =================
+    // ================= TRÌNH THIẾT KẾ SÂN VƯỜN & ẢNH MẪU ĐẤT =================
     function detectBackgroundTone(imagePath) {
       const lower = imagePath.toLowerCase();
-      if (lower.includes('vuonlop') || lower.includes('go') || lower.includes('nau')) {
-        return { textColor: '#451a03', textShadow: '0 1px 2px rgba(254, 243, 199, 0.9)', bgColor: 'rgba(254, 243, 199, 0.75)', borderColor: '#b45309' };
-      }
-      if (lower.includes('dem') || lower.includes('dark') || lower.includes('ungdung')) {
-        return { textColor: '#fef3c7', textShadow: '0 2px 4px rgba(0, 0, 0, 0.9)', bgColor: 'rgba(0, 0, 0, 0.65)', borderColor: '#f59e0b' };
-      }
+      if (lower.includes('vuonlop') || lower.includes('go') || lower.includes('nau')) return { textColor: '#451a03', textShadow: '0 1px 2px rgba(254, 243, 199, 0.9)', bgColor: 'rgba(254, 243, 199, 0.75)', borderColor: '#b45309' };
       return { textColor: '#064e3b', textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)', bgColor: 'rgba(255, 255, 255, 0.7)', borderColor: '#10b981' };
     }
 
     function openFullscreenEditor(imagePath) {
       const cls = state.classesData[state.activeClass];
-      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Nắn 4 góc lưới • Chọn ảnh mẫu đất cho từng ô và Lưu lại`;
-      
-      const fullUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${imagePath}`;
-      document.getElementById('editor-canvas-bg').src = fullUrl;
+      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Nắn 4 góc lưới • Chọn ô đất để gán ảnh mẫu đất`;
+      document.getElementById('editor-canvas-bg').src = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${imagePath}`;
       state.currentBgToneStyle = detectBackgroundTone(imagePath);
 
-      let existingSlots = cls.config.plotSlots || [];
-      if (!existingSlots || existingSlots.length === 0) {
-        existingSlots = [{ id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }] }];
-      }
-      state.tempEditorSlots = JSON.parse(JSON.stringify(existingSlots));
+      state.tempEditorSlots = JSON.parse(JSON.stringify(cls.config.plotSlots || [{ id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }] }]));
       reIndexPlotSlots();
-
       state.tempTextOverlays = JSON.parse(JSON.stringify(cls.config.textOverlays || []));
       
-      // Load dropdown ảnh mẫu đất từ nengame
       populateEditorSoilAssetsDropdown();
 
       document.getElementById('fullscreen-editor-modal').classList.remove('hidden');
       requestAnimationFrame(() => renderPerspectiveSlotsAndTexts());
     }
 
+    // LỌC CHÍNH XÁC CÁC ẢNH MẪU ĐẤT HÀNG RÀO TỪ NÚT ĐẤT
     function populateEditorSoilAssetsDropdown() {
       const select = document.getElementById('select-editor-soil-asset');
-      const soilImages = state.cachedAssets['nengame'] || [];
-      select.innerHTML = soilImages.map(img => `<option value="${img.rawUrl}">${img.fileName}</option>`).join('');
+      const cls = state.classesData[state.activeClass];
+      const nengameList = state.cachedAssets['nengame'] || [];
+
+      let soilSelectedFileNames = [];
+      Object.values(cls.config.buttonMappings || {}).forEach(m => {
+        if (m.targetFolders && m.targetFolders.includes('nengame')) {
+          soilSelectedFileNames = soilSelectedFileNames.concat(m.selectedImages || []);
+        }
+      });
+
+      // Lọc CHỈ LẤY các file ảnh hàng rào đất (khudatrieng_*)
+      let validSoilItems = nengameList.filter(img => {
+        const name = img.fileName.toLowerCase();
+        const isSoilName = name.includes('khudat') || name.includes('dat') || name.includes('hangrao');
+        if (soilSelectedFileNames.length > 0) {
+          return soilSelectedFileNames.includes(img.fileName) && isSoilName;
+        }
+        return isSoilName;
+      });
+
+      if (validSoilItems.length === 0) {
+        validSoilItems = nengameList.filter(img => img.fileName.toLowerCase().includes('khudat'));
+      }
+
+      select.innerHTML = validSoilItems.map(img => `<option value="${img.rawUrl}">${img.fileName}</option>`).join('');
     }
 
-    function closeFullscreenEditor() {
-      document.getElementById('fullscreen-editor-modal').classList.add('hidden');
-    }
+    function closeFullscreenEditor() { document.getElementById('fullscreen-editor-modal').classList.add('hidden'); }
 
     function saveAndCloseFullscreenEditor() {
       const cls = state.classesData[state.activeClass];
@@ -1314,7 +1153,7 @@
       cls.config.textOverlays = JSON.parse(JSON.stringify(state.tempTextOverlays));
       saveStateToLocal();
       closeFullscreenEditor();
-      alert(`Đã lưu thành công ${cls.config.plotSlots.length} vùng đất kèm ảnh mẫu cho Lớp ${state.activeClass}!`);
+      alert(`Đã lưu toàn bộ ${cls.config.plotSlots.length} vùng đất kèm tỉ lệ ảnh mẫu!`);
     }
 
     function saveSoilAssetForActiveSlot() {
@@ -1323,7 +1162,7 @@
       if (state.tempEditorSlots[slotIdx] && selectVal) {
         state.tempEditorSlots[slotIdx].soilImage = selectVal;
         renderPerspectiveSlotsAndTexts();
-        alert(`Đã gán ảnh mẫu đất cho ${state.tempEditorSlots[slotIdx].name}! Bấm "Lưu Toàn Bộ Thiết Kế" để hoàn tất.`);
+        alert(`Đã gán và lưu tỉ lệ ảnh mẫu cho ${state.tempEditorSlots[slotIdx].name}!`);
       }
     }
 
@@ -1340,24 +1179,9 @@
       if (event) event.stopPropagation();
       const sourceSlot = state.tempEditorSlots[sourceIndex];
       if (!sourceSlot) return;
-
       const nextNum = state.tempEditorSlots.length + 1;
-      let shiftX = 10, shiftY = 6;
-      const maxCurrentX = Math.max(...sourceSlot.corners.map(c => c.x));
-      if (maxCurrentX + shiftX > 96) { shiftX = -12; shiftY = 14; }
-
-      const clonedCorners = sourceSlot.corners.map(c => ({
-        x: Math.max(3, Math.min(97, parseFloat((c.x + shiftX).toFixed(2)))),
-        y: Math.max(3, Math.min(97, parseFloat((c.y + shiftY).toFixed(2))))
-      }));
-
-      state.tempEditorSlots.push({ 
-        id: `slot_${nextNum}`, 
-        name: `Khu đất ${nextNum}`, 
-        teamId: nextNum, 
-        corners: clonedCorners,
-        soilImage: sourceSlot.soilImage || null
-      });
+      const clonedCorners = sourceSlot.corners.map(c => ({ x: Math.min(97, c.x + 8), y: Math.min(97, c.y + 6) }));
+      state.tempEditorSlots.push({ id: `slot_${nextNum}`, name: `Khu đất ${nextNum}`, teamId: nextNum, corners: clonedCorners, soilImage: sourceSlot.soilImage || null });
       reIndexPlotSlots();
       renderPerspectiveSlotsAndTexts();
     }
@@ -1365,74 +1189,43 @@
     function removePerspectiveSlot(sIdx, event) {
       if (event) event.stopPropagation();
       state.tempEditorSlots.splice(sIdx, 1);
-      if (state.tempEditorSlots.length === 0) {
-        state.tempEditorSlots = [{ id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }] }];
-      }
+      if (state.tempEditorSlots.length === 0) state.tempEditorSlots = [{ id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }] }];
       reIndexPlotSlots();
       renderPerspectiveSlotsAndTexts();
     }
 
     function addNewTextOverlay() {
-      state.tempTextOverlays.push({
-        id: 'txt_' + Date.now().toString(36),
-        content: `Vườn Thi Đua Lớp ${state.activeClass}`,
-        x: 50, y: 18, fontSize: 16
-      });
+      state.tempTextOverlays.push({ id: 'txt_' + Date.now().toString(36), content: `Vườn Lớp ${state.activeClass}`, x: 50, y: 18, fontSize: 16 });
       renderPerspectiveSlotsAndTexts();
     }
 
-    function removeTextOverlay(tIdx, event) {
-      if (event) event.stopPropagation();
-      state.tempTextOverlays.splice(tIdx, 1);
-      renderPerspectiveSlotsAndTexts();
-    }
-
+    function removeTextOverlay(tIdx, event) { event.stopPropagation(); state.tempTextOverlays.splice(tIdx, 1); renderPerspectiveSlotsAndTexts(); }
     function editTextContent(tIdx) {
-      const current = state.tempTextOverlays[tIdx].content;
-      const updated = prompt('Nhập nội dung chữ hiển thị:', current);
-      if (updated !== null && updated.trim().length > 0) {
-        state.tempTextOverlays[tIdx].content = updated.trim();
-        renderPerspectiveSlotsAndTexts();
-      }
+      const updated = prompt('Nội dung chữ:', state.tempTextOverlays[tIdx].content);
+      if (updated !== null && updated.trim()) { state.tempTextOverlays[tIdx].content = updated.trim(); renderPerspectiveSlotsAndTexts(); }
     }
 
     function renderPerspectiveSlotsAndTexts() {
       const container = document.getElementById('editor-slots-layer');
       const canvas = document.getElementById('editor-canvas-box');
-      const cW = canvas.clientWidth || 900;
-      const cH = canvas.clientHeight || 600;
-
-      document.getElementById('lbl-total-slots-count').innerText = 
-        `Đã bố trí: ${state.tempEditorSlots.length} vùng đất • ${state.tempTextOverlays.length} vùng chữ`;
+      const cW = canvas.clientWidth || 900, cH = canvas.clientHeight || 600;
+      document.getElementById('lbl-total-slots-count').innerText = `Đã bố trí: ${state.tempEditorSlots.length} vùng đất`;
+      document.getElementById('lbl-active-editing-plot').innerText = `Đang chọn: ${state.tempEditorSlots[state.activeEditingSlotIndex]?.name || 'Khu đất 1'}`;
 
       const tone = state.currentBgToneStyle || detectBackgroundTone('');
 
       container.innerHTML = `
         <svg class="absolute inset-0 w-full h-full pointer-events-auto" style="overflow: visible;" viewBox="0 0 ${cW} ${cH}">
           <defs>
-            ${state.tempEditorSlots.map((slot, sIdx) => {
-              const pts = slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ');
-              return `<clipPath id="editor-clip-${sIdx}"><polygon points="${pts}" /></clipPath>`;
-            }).join('')}
+            ${state.tempEditorSlots.map((slot, sIdx) => `<clipPath id="editor-clip-${sIdx}"><polygon points="${slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ')}" /></clipPath>`).join('')}
           </defs>
-
           ${state.tempEditorSlots.map((slot, sIdx) => {
-            const ptsPixel = slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ');
-            const xs = slot.corners.map(c => (c.x / 100) * cW);
-            const ys = slot.corners.map(c => (c.y / 100) * cH);
-            const minX = Math.min(...xs), maxX = Math.max(...xs);
-            const minY = Math.min(...ys), maxY = Math.max(...ys);
-            const boxW = maxX - minX, boxH = maxY - minY;
-
+            const xs = slot.corners.map(c => (c.x / 100) * cW), ys = slot.corners.map(c => (c.y / 100) * cH);
+            const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
             return `
-              <g id="svg-group-${sIdx}" onclick="state.activeEditingSlotIndex=${sIdx}">
-                <polygon points="${ptsPixel}" id="polygon-body-${sIdx}" class="plot-polygon-shape"
-                         fill="rgba(16, 185, 129, 0.35)" stroke="#059669" stroke-width="3" stroke-dasharray="8,6">
-                  <title>Nhấp chọn và kéo ${slot.name}</title>
-                </polygon>
-                ${slot.soilImage ? `
-                  <image href="${slot.soilImage}" x="${minX}" y="${minY}" width="${boxW}" height="${boxH}" preserveAspectRatio="none" clip-path="url(#editor-clip-${sIdx})" opacity="0.9"/>
-                ` : ''}
+              <g id="svg-group-${sIdx}" onclick="state.activeEditingSlotIndex=${sIdx}; document.getElementById('lbl-active-editing-plot').innerText='Đang chọn: ${slot.name}';">
+                <polygon points="${slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ')}" id="polygon-body-${sIdx}" class="plot-polygon-shape" fill="rgba(16, 185, 129, 0.35)" stroke="#059669" stroke-width="3" stroke-dasharray="8,6"/>
+                ${slot.soilImage ? `<image href="${slot.soilImage}" x="${minX}" y="${minY}" width="${maxX - minX}" height="${maxY - minY}" preserveAspectRatio="none" clip-path="url(#editor-clip-${sIdx})" opacity="0.95"/>` : ''}
               </g>
             `;
           }).join('')}
@@ -1442,22 +1235,12 @@
           const centerX = (slot.corners[0].x + slot.corners[1].x + slot.corners[2].x + slot.corners[3].x) / 4;
           const centerY = (slot.corners[0].y + slot.corners[1].y + slot.corners[2].y + slot.corners[3].y) / 4;
           return `
-            <div id="controls-slot-${sIdx}" class="absolute inset-0 pointer-events-none">
-              <div style="left: ${centerX}\%; top:${centerY}%; transform: translate(-50%, -50%);" 
-                   class="absolute px-3 py-1 bg-amber-950/90 text-amber-200 border border-amber-600/60 rounded-full font-black text-xs shadow-lg pointer-events-none flex items-center gap-1">
-                <span>🌾</span> ${slot.name}
+            <div class="absolute inset-0 pointer-events-none">
+              <div style="left: ${centerX}\%; top:${centerY}%; transform: translate(-50%, -50%);" class="absolute px-3 py-1 bg-amber-950/90 text-amber-200 border border-amber-600/60 rounded-full font-black text-xs shadow-lg pointer-events-none">🌾 ${slot.name}</div>
+              <div style="left: ${slot.corners[0].x}\%; top:${slot.corners[0].y}%; transform: translate(-110%, -125%);" class="absolute flex items-center gap-1.5 pointer-events-auto z-50">
+                <button onclick="copyPlotSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-emerald-600 text-white text-[11px] font-bold flex items-center justify-center shadow-lg"><i class="fa-solid fa-copy"></i></button>
+                <button onclick="removePerspectiveSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-rose-600 text-white text-xs font-bold flex items-center justify-center shadow-lg">✕</button>
               </div>
-
-              <div style="left: ${slot.corners[0].x}\%; top:${slot.corners[0].y}%; transform: translate(-110%, -125%);"
-                   class="absolute flex items-center gap-1.5 pointer-events-auto z-50">
-                <button onclick="copyPlotSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center shadow-lg hover:scale-125 transition" title="Copy ô đất này">
-                  <i class="fa-solid fa-copy"></i>
-                </button>
-                <button onclick="removePerspectiveSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center justify-center shadow-lg hover:scale-125 transition" title="Xóa ô đất">
-                  ✕
-                </button>
-              </div>
-
               <div id="handle-${sIdx}-0" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[0].x}\%; top:${slot.corners[0].y}%;"></div>
               <div id="handle-${sIdx}-1" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[1].x}\%; top:${slot.corners[1].y}%;"></div>
               <div id="handle-${sIdx}-2" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[2].x}\%; top:${slot.corners[2].y}%;"></div>
@@ -1468,9 +1251,9 @@
 
         ${state.tempTextOverlays.map((txt, tIdx) => `
           <div id="text-overlay-${tIdx}" style="left: ${txt.x}\%; top:${txt.y}%;" class="draggable-text-box group pointer-events-auto">
-            <div ondblclick="editTextContent(${tIdx})" style="color: ${tone.textColor}; text-shadow: ${tone.textShadow}; background:${tone.bgColor}; border: 1.5px dashed ${tone.borderColor}; font-size:${txt.fontSize}px;" class="px-3.5 py-1.5 rounded-xl font-extrabold tracking-wide flex items-center gap-2 shadow-md">
-              <span class="truncate">${txt.content}</span>
-              <button onclick="removeTextOverlay(${tIdx}, event)" class="w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-700 text-white text-[9px] font-bold opacity-0 group-hover:opacity-100 transition flex items-center justify-center">✕</button>
+            <div ondblclick="editTextContent(${tIdx})" style="color: ${tone.textColor}; text-shadow: ${tone.textShadow}; background:${tone.bgColor}; border: 1.5px dashed ${tone.borderColor}; font-size:${txt.fontSize}px;" class="px-3.5 py-1.5 rounded-xl font-extrabold flex items-center gap-2 shadow-md">
+              <span>${txt.content}</span>
+              <button onclick="removeTextOverlay(${tIdx}, event)" class="w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-bold opacity-0 group-hover:opacity-100 flex items-center justify-center">✕</button>
             </div>
           </div>
         `).join('')}
@@ -1478,93 +1261,48 @@
 
       state.tempEditorSlots.forEach((slot, sIdx) => {
         const polyEl = document.getElementById(`polygon-body-${sIdx}`);
-        if (polyEl) makePlotPolygonDraggable(polyEl, sIdx);
+        if (polyEl) {
+          polyEl.addEventListener('mousedown', (e) => { state.activeEditingSlotIndex = sIdx; document.getElementById('lbl-active-editing-plot').innerText = `Đang chọn: ${slot.name}`; });
+        }
         for (let cIdx = 0; cIdx < 4; cIdx++) {
-          const handleEl = document.getElementById(`handle-${sIdx}-${cIdx}`);
-          if (handleEl) makeCornerHandleDraggable(handleEl, sIdx, cIdx);
+          const handle = document.getElementById(`handle-${sIdx}-${cIdx}`);
+          if (handle) makeCornerHandleDraggable(handle, sIdx, cIdx);
         }
       });
-
-      state.tempTextOverlays.forEach((txt, tIdx) => {
-        const txtEl = document.getElementById(`text-overlay-${tIdx}`);
-        if (txtEl) makeTextOverlayDraggable(txtEl, tIdx);
-      });
-    }
-
-    function makePlotPolygonDraggable(polyEl, slotIndex) {
-      let isDragging = false, startMouseX = 0, startMouseY = 0, originalCorners = [];
-      polyEl.addEventListener('mousedown', (e) => {
-        if (e.button !== 0) return;
-        state.activeEditingSlotIndex = slotIndex;
-        isDragging = true;
-        startMouseX = e.clientX; startMouseY = e.clientY;
-        originalCorners = JSON.parse(JSON.stringify(state.tempEditorSlots[slotIndex].corners));
-        e.stopPropagation();
-      });
-      window.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        const rect = document.getElementById('editor-canvas-box').getBoundingClientRect();
-        const deltaX = ((e.clientX - startMouseX) / rect.width) * 100;
-        const deltaY = ((e.clientY - startMouseY) / rect.height) * 100;
-
-        let minX = Math.min(...originalCorners.map(c => c.x)), maxX = Math.max(...originalCorners.map(c => c.x));
-        let minY = Math.min(...originalCorners.map(c => c.y)), maxY = Math.max(...originalCorners.map(c => c.y));
-        let clampedX = deltaX, clampedY = deltaY;
-
-        if (minX + clampedX < 2) clampedX = 2 - minX;
-        if (maxX + clampedX > 98) clampedX = 98 - maxX;
-        if (minY + clampedY < 2) clampedY = 2 - minY;
-        if (maxY + clampedY > 98) clampedY = 98 - maxY;
-
-        for (let i = 0; i < 4; i++) {
-          state.tempEditorSlots[slotIndex].corners[i].x = parseFloat((originalCorners[i].x + clampedX).toFixed(2));
-          state.tempEditorSlots[slotIndex].corners[i].y = parseFloat((originalCorners[i].y + clampedY).toFixed(2));
-        }
-        renderPerspectiveSlotsAndTexts();
-      });
-      window.addEventListener('mouseup', () => { if (isDragging) isDragging = false; });
+      state.tempTextOverlays.forEach((txt, tIdx) => { makeTextOverlayDraggable(document.getElementById(`text-overlay-${tIdx}`), tIdx); });
     }
 
     function makeCornerHandleDraggable(handleEl, slotIndex, cornerIndex) {
       let isDragging = false;
-      handleEl.addEventListener('mousedown', (e) => { 
-        state.activeEditingSlotIndex = slotIndex;
-        isDragging = true; 
-        e.stopPropagation(); 
-      });
+      handleEl.addEventListener('mousedown', (e) => { state.activeEditingSlotIndex = slotIndex; isDragging = true; e.stopPropagation(); });
       window.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         const rect = document.getElementById('editor-canvas-box').getBoundingClientRect();
-        let posX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
-        let posY = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
         state.tempEditorSlots[slotIndex].corners[cornerIndex] = {
-          x: parseFloat(((posX / rect.width) * 100).toFixed(2)),
-          y: parseFloat(((posY / rect.height) * 100).toFixed(2))
+          x: parseFloat((Math.max(0, Math.min(rect.width, e.clientX - rect.left)) / rect.width * 100).toFixed(2)),
+          y: parseFloat((Math.max(0, Math.min(rect.height, e.clientY - rect.top)) / rect.height * 100).toFixed(2))
         };
         renderPerspectiveSlotsAndTexts();
       });
-      window.addEventListener('mouseup', () => { if (isDragging) isDragging = false; });
+      window.addEventListener('mouseup', () => { isDragging = false; });
     }
 
     function makeTextOverlayDraggable(txtEl, tIdx) {
-      let isDragging = false, startMouseX = 0, startMouseY = 0, origX = 0, origY = 0;
+      let isDragging = false, startX = 0, startY = 0, origX = 0, origY = 0;
       txtEl.addEventListener('mousedown', (e) => {
         if (e.target.tagName === 'BUTTON') return;
-        isDragging = true;
-        startMouseX = e.clientX; startMouseY = e.clientY;
+        isDragging = true; startX = e.clientX; startY = e.clientY;
         origX = state.tempTextOverlays[tIdx].x; origY = state.tempTextOverlays[tIdx].y;
         e.stopPropagation();
       });
       window.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         const rect = document.getElementById('editor-canvas-box').getBoundingClientRect();
-        let newX = Math.max(5, Math.min(95, origX + ((e.clientX - startMouseX) / rect.width) * 100));
-        let newY = Math.max(5, Math.min(95, origY + ((e.clientY - startMouseY) / rect.height) * 100));
-        state.tempTextOverlays[tIdx].x = parseFloat(newX.toFixed(2));
-        state.tempTextOverlays[tIdx].y = parseFloat(newY.toFixed(2));
-        txtEl.style.left = `${newX}%`; txtEl.style.top = `${newY}%`;
+        state.tempTextOverlays[tIdx].x = parseFloat(Math.max(5, Math.min(95, origX + (e.clientX - startX) / rect.width * 100)).toFixed(2));
+        state.tempTextOverlays[tIdx].y = parseFloat(Math.max(5, Math.min(95, origY + (e.clientY - startY) / rect.height * 100)).toFixed(2));
+        txtEl.style.left = `${state.tempTextOverlays[tIdx].x}%`; txtEl.style.top = `${state.tempTextOverlays[tIdx].y}%`;
       });
-      window.addEventListener('mouseup', () => { if (isDragging) isDragging = false; });
+      window.addEventListener('mouseup', () => { isDragging = false; });
     }
 
     // ================= QUÉT GITHUB & CSV =================
@@ -1577,26 +1315,14 @@
           if (res.ok) {
             const data = await res.json();
             state.cachedAssets[folder] = data.filter(item => item.type === 'file' && /\.(png|jpe?g|webp|svg|mp3|wav|ogg|m4a)$/i.test(item.name))
-              .map(item => ({
-                fileName: item.name,
-                displayName: item.name.replace(/\.[^/.]+$/, "").replace(/[_-]+/g, ' ').toUpperCase(),
-                localPath: `assets/${folder}/${item.name}`,
-                rawUrl: `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${item.path}`
-              }));
+              .map(item => ({ fileName: item.name, localPath: `assets/${folder}/${item.name}`, rawUrl: `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${item.path}` }));
           }
         } catch (e) {}
       }
       icon.classList.remove('fa-spin');
       populateBackgroundDropdowns();
       populateButtonIconsList();
-      if (document.getElementById('select-editor-soil-asset')) populateEditorSoilAssetsDropdown();
-    }
-
-    function generatePasswordFromNameAndSTT(fullName, stt) {
-      if (!fullName) return `hs${stt}`;
-      let clean = fullName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd');
-      const initials = clean.trim().split(/\s+/).map(w => w.charAt(0).toLowerCase()).join('');
-      return `${initials}${stt}`;
+      populateEditorSoilAssetsDropdown();
     }
 
     async function fetchAndParseStudentCSV() {
