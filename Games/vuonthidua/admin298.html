@@ -26,7 +26,7 @@
       <div class="text-center mb-5">
         <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto text-2xl mb-2">🌸</div>
         <h2 class="text-xl font-bold text-slate-800">Admin298 Panel</h2>
-        <p class="text-xs text-slate-500">Cấu hình giao diện và hành vi Game</p>
+        <p class="text-xs text-slate-500">Tự động quét assets & cấu hình nền game</p>
       </div>
       <div class="space-y-4">
         <div>
@@ -53,15 +53,18 @@
   <!-- HEADER -->
   <header class="bg-white border-b border-slate-200 px-6 py-3 sticky top-0 z-30 flex items-center justify-between shadow-sm">
     <div class="flex items-center gap-3">
-      <span class="text-2xl text-emerald-600"><i class="fa-solid fa-sliders"></i></span>
+      <span class="text-2xl text-emerald-600"><i class="fa-brands fa-github"></i></span>
       <div>
         <h1 class="font-bold text-base text-slate-800 leading-tight">Admin298 - Game Controller</h1>
-        <p class="text-[11px] text-slate-500">Đang đồng bộ trực tiếp với index.html</p>
+        <p class="text-[11px] text-slate-500 font-mono">Repo: MHP298/ANT/Games/vuonthidua/assets</p>
       </div>
     </div>
     <div class="flex items-center gap-3">
+      <button onclick="syncAllFromGitHub()" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-rotate text-emerald-600" id="sync-icon"></i> Quét Lại GitHub
+      </button>
       <button onclick="saveAndApplyToGame()" class="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition">
-        <i class="fa-solid fa-floppy-disk"></i> Lưu Cấu Hình Cho Game
+        <i class="fa-solid fa-floppy-disk"></i> Lưu & Áp Dụng Sang Game
       </button>
       <button onclick="handleLogout()" class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold">
         Đăng Xuất
@@ -69,169 +72,109 @@
     </div>
   </header>
 
-  <!-- BỐ CỤC CHÍNH 2 PHẦN: A (1/3) & B (2/3) -->
+  <!-- BỐ CỤC CHÍNH 2 PHẦN -->
   <div id="admin-app" class="hidden flex-1 flex flex-col md:flex-row h-[calc(100vh-57px)] overflow-hidden">
     
-    <!-- PHẦN A (1/3 BÊN TRÁI): BẢNG CẤU HÌNH GIAO DIỆN & NÚT -->
-    <aside class="w-full md:w-1/3 border-r border-slate-200 bg-white flex flex-col h-full shadow-sm overflow-y-auto p-4 space-y-5">
+    <!-- PHẦN A (1/3 TRÁI): CẤU HÌNH HÌNH NỀN VÀ NÚT -->
+    <aside class="w-full md:w-1/3 border-r border-slate-200 bg-white flex flex-col h-full shadow-sm overflow-y-auto p-4 space-y-4">
       
-      <!-- 1. CẤU HÌNH NỀN GAME MẶC ĐỊNH -->
-      <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-        <h4 class="text-xs font-black uppercase text-emerald-800 flex items-center gap-1.5">
-          <i class="fa-regular fa-image"></i> 1. Ảnh Nền Sân Game (Phần A)
-        </h4>
-        <label class="block text-[11px] text-slate-500 font-semibold">Chọn ảnh nền mặc định khi học sinh mở web:</label>
-        <select id="cfg-bg-game" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-semibold bg-white">
-          <option value="assets/nengame/vuonlop.jpg">vuonlop.jpg (Sân trường học lớp)</option>
-          <option value="assets/nengame/nengame1.jpg">nengame1.jpg (Khu vườn cỏ xanh)</option>
-          <option value="assets/nengame/nengame2.jpg">nengame2.jpg (Vườn hoa nắng)</option>
-        </select>
-      </div>
-
-      <!-- 2. CẤU HÌNH 4 NÚT VẬT PHẨM (PHẦN B1) -->
+      <!-- KHU VỰC CẤU HÌNH 3 LOẠI NỀN -->
       <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
         <h4 class="text-xs font-black uppercase text-emerald-800 flex items-center gap-1.5">
-          <i class="fa-solid fa-shapes"></i> 2. Cấu Hình 4 Nút Chức Năng (Phần B1)
+          <i class="fa-regular fa-image"></i> Cấu Hình Nền Giao Diện
         </h4>
 
-        <!-- Nút 1 -->
-        <div class="p-2.5 bg-white rounded-xl border border-slate-200 space-y-1.5">
-          <div class="flex items-center justify-between">
-            <b class="text-xs text-slate-700">Nút Số 1:</b>
-            <input type="text" id="cfg-btn1-label" value="HOA" class="w-16 px-1.5 py-0.5 text-xs text-center border rounded font-bold">
-          </div>
-          <div class="grid grid-cols-2 gap-1.5 text-[11px]">
-            <div>
-              <span class="text-slate-400">Icon ảnh:</span>
-              <input type="text" id="cfg-btn1-icon" value="assets/nutgame/nuthoa.png" class="w-full p-1 border rounded text-[10px] font-mono">
-            </div>
-            <div>
-              <span class="text-slate-400">Hành động load:</span>
-              <select id="cfg-btn1-act" class="w-full p-1 border rounded text-[10px] bg-slate-50">
-                <option value="hoa" selected>Mở Hoa cấp 1 & 2</option>
-                <option value="nu">Mở Nụ cấp 1 & 2</option>
-                <option value="chunhat">Mở Khung đất</option>
-                <option value="xeng">Mở Công cụ</option>
-              </select>
-            </div>
+        <!-- Nền Toàn Game -->
+        <div>
+          <label class="block text-[11px] text-slate-600 font-bold mb-0.5">1. Nền Bao Quanh Toàn Game:</label>
+          <div class="flex gap-1.5">
+            <input type="text" id="cfg-bg-global" value="assets/nengame/nenungdung.jpg" class="flex-1 px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 font-mono">
+            <select onchange="document.getElementById('cfg-bg-global').value = this.value" id="select-bg-global" class="w-24 text-[10px] border rounded-lg bg-white"></select>
           </div>
         </div>
 
-        <!-- Nút 2 -->
-        <div class="p-2.5 bg-white rounded-xl border border-slate-200 space-y-1.5">
-          <div class="flex items-center justify-between">
-            <b class="text-xs text-slate-700">Nút Số 2:</b>
-            <input type="text" id="cfg-btn2-label" value="NỤ" class="w-16 px-1.5 py-0.5 text-xs text-center border rounded font-bold">
-          </div>
-          <div class="grid grid-cols-2 gap-1.5 text-[11px]">
-            <div>
-              <span class="text-slate-400">Icon ảnh:</span>
-              <input type="text" id="cfg-btn2-icon" value="assets/nutgame/nutnu.png" class="w-full p-1 border rounded text-[10px] font-mono">
-            </div>
-            <div>
-              <span class="text-slate-400">Hành động load:</span>
-              <select id="cfg-btn2-act" class="w-full p-1 border rounded text-[10px] bg-slate-50">
-                <option value="nu" selected>Mở Nụ cấp 1 & 2</option>
-                <option value="hoa">Mở Hoa cấp 1 & 2</option>
-                <option value="chunhat">Mở Khung đất</option>
-                <option value="xeng">Mở Công cụ</option>
-              </select>
-            </div>
+        <!-- Nền Phần A -->
+        <div>
+          <label class="block text-[11px] text-slate-600 font-bold mb-0.5">2. Nền Sân Vườn (Phần A bên trái):</label>
+          <div class="flex gap-1.5">
+            <input type="text" id="cfg-bg-a" value="assets/nengame/vuonlop.jpg" class="flex-1 px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 font-mono">
+            <select onchange="document.getElementById('cfg-bg-a').value = this.value" id="select-bg-a" class="w-24 text-[10px] border rounded-lg bg-white"></select>
           </div>
         </div>
 
-        <!-- Nút 3 -->
-        <div class="p-2.5 bg-white rounded-xl border border-slate-200 space-y-1.5">
-          <div class="flex items-center justify-between">
-            <b class="text-xs text-slate-700">Nút Số 3:</b>
-            <input type="text" id="cfg-btn3-label" value="ĐẤT" class="w-16 px-1.5 py-0.5 text-xs text-center border rounded font-bold">
-          </div>
-          <div class="grid grid-cols-2 gap-1.5 text-[11px]">
-            <div>
-              <span class="text-slate-400">Icon ảnh:</span>
-              <input type="text" id="cfg-btn3-icon" value="assets/nutgame/nutchunhat.png" class="w-full p-1 border rounded text-[10px] font-mono">
-            </div>
-            <div>
-              <span class="text-slate-400">Hành động load:</span>
-              <select id="cfg-btn3-act" class="w-full p-1 border rounded text-[10px] bg-slate-50">
-                <option value="chunhat" selected>Mở Khung đất</option>
-                <option value="hoa">Mở Hoa</option>
-                <option value="nu">Mở Nụ</option>
-                <option value="xeng">Mở Công cụ</option>
-              </select>
-            </div>
+        <!-- Nền Phần B -->
+        <div>
+          <label class="block text-[11px] text-slate-600 font-bold mb-0.5">3. Nền Cột Công Cụ (Phần B bên phải):</label>
+          <div class="flex gap-1.5">
+            <input type="text" id="cfg-bg-b" value="assets/nengame/nenungdung.jpg" class="flex-1 px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 font-mono">
+            <select onchange="document.getElementById('cfg-bg-b').value = this.value" id="select-bg-b" class="w-24 text-[10px] border rounded-lg bg-white"></select>
           </div>
         </div>
-
-        <!-- Nút 4 -->
-        <div class="p-2.5 bg-white rounded-xl border border-slate-200 space-y-1.5">
-          <div class="flex items-center justify-between">
-            <b class="text-xs text-slate-700">Nút Số 4:</b>
-            <input type="text" id="cfg-btn4-label" value="CÔNG CỤ" class="w-16 px-1.5 py-0.5 text-xs text-center border rounded font-bold">
-          </div>
-          <div class="grid grid-cols-2 gap-1.5 text-[11px]">
-            <div>
-              <span class="text-slate-400">Icon ảnh:</span>
-              <input type="text" id="cfg-btn4-icon" value="assets/nutgame/nutxeng.png" class="w-full p-1 border rounded text-[10px] font-mono">
-            </div>
-            <div>
-              <span class="text-slate-400">Hành động load:</span>
-              <select id="cfg-btn4-act" class="w-full p-1 border rounded text-[10px] bg-slate-50">
-                <option value="xeng" selected>Mở Công cụ</option>
-                <option value="hoa">Mở Hoa</option>
-                <option value="nu">Mở Nụ</option>
-                <option value="chunhat">Mở Khung đất</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
       </div>
 
-      <!-- 3. QUYỀN MỞ KHÓA CẤP 2 (VIP) -->
-      <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+      <!-- KHU VỰC CẤU HÌNH 4 NÚT PHẦN B1 -->
+      <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
         <h4 class="text-xs font-black uppercase text-emerald-800 flex items-center gap-1.5">
-          <i class="fa-solid fa-lock-open"></i> 3. Mở Khóa Kho Cấp 2
+          <i class="fa-solid fa-shapes"></i> Cấu Hình 4 Nút Bấm (Phần B1)
         </h4>
+
+        <!-- Nút 1 đến 4 -->
+        <div id="buttons-config-container" class="space-y-2"></div>
+      </div>
+
+      <!-- MỞ KHÓA HOA CẤP 2 -->
+      <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200">
         <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700 select-none">
           <input type="checkbox" id="cfg-unlock-tier2" class="w-4 h-4 rounded text-emerald-600">
-          <span>Cho phép mở khóa toàn bộ hoa & nụ VIP (Bỏ lớp mờ)</span>
+          <span>Mở khóa toàn bộ hoa & nụ VIP Cấp 2 (Bỏ mờ & bỏ khóa)</span>
         </label>
       </div>
 
     </aside>
 
-    <!-- PHẦN B (2/3 BÊN PHẢI): BẢN XEM TRƯỚC (PREVIEW) GIAO DIỆN GAME -->
-    <main class="w-full md:w-2/3 flex flex-col h-full bg-slate-100 p-6 items-center justify-center">
-      <div class="w-full max-w-2xl bg-white rounded-3xl p-5 shadow-lg border border-slate-200 space-y-4">
-        <h3 class="font-bold text-sm text-slate-700">Mô phỏng 4 nút trên Game sau khi cấu hình:</h3>
-        
-        <div class="grid grid-cols-4 gap-3" id="preview-button-bar">
-          <!-- Render mô phỏng 4 nút -->
-        </div>
-
-        <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 leading-relaxed">
-          💡 Khi bạn nhấn <b>"Lưu Cấu Hình Cho Game"</b>, trang <code>index.html</code> sẽ tự động cập nhật ngay lập tức mà bạn không cần phải sửa bất kỳ dòng code nào!
-        </div>
+    <!-- PHẦN B (2/3 PHẢI): DANH SÁCH FILE VÀ THƯ MỤC QUÉT ĐƯỢC TỪ GITHUB -->
+    <main class="w-full md:w-2/3 flex flex-col h-full bg-slate-50">
+      
+      <!-- Thanh điều hướng thư mục -->
+      <div class="bg-white border-b border-slate-200 p-3 flex flex-wrap items-center justify-between gap-2 shadow-xs">
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1" id="folder-tabs-bar"></div>
+        <span id="scan-status" class="text-xs text-emerald-700 font-bold hidden">
+          <i class="fa-solid fa-spinner fa-spin"></i> Đang nạp...
+        </span>
       </div>
+
+      <!-- Lưới ảnh trong thư mục đang chọn -->
+      <div class="flex-1 overflow-y-auto p-4 md:p-6">
+        <div id="assets-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3.5"></div>
+      </div>
+
     </main>
 
   </div>
 
   <script>
-    // Cấu trúc cấu hình mặc định dùng chung
-    const DEFAULT_CONFIG = {
-      background: 'assets/nengame/vuonlop.jpg',
-      unlockTier2: false,
-      buttons: {
-        btn1: { label: 'HOA', icon: 'assets/nutgame/nuthoa.png', action: 'hoa' },
-        btn2: { label: 'NỤ', icon: 'assets/nutgame/nutnu.png', action: 'nu' },
-        btn3: { label: 'ĐẤT', icon: 'assets/nutgame/nutchunhat.png', action: 'chunhat' },
-        btn4: { label: 'CÔNG CỤ', icon: 'assets/nutgame/nutxeng.png', action: 'xeng' }
+    const GITHUB_OWNER = 'MHP298';
+    const GITHUB_REPO = 'ANT';
+    const ASSETS_PATH = 'Games/vuonthidua/assets';
+
+    const FOLDERS = ['nengame', 'hoacap1', 'hoacap2', 'nucap1', 'nucap2', 'congcu', 'nutgame'];
+
+    let state = {
+      currentFolder: 'nengame',
+      cachedAssets: {}, // { 'nengame': [ { fileName, displayName, path, rawUrl } ] }
+      gameConfig: {
+        bgGlobal: 'assets/nengame/nenungdung.jpg',
+        bgA: 'assets/nengame/vuonlop.jpg',
+        bgB: 'assets/nengame/nenungdung.jpg',
+        unlockTier2: false,
+        buttons: {
+          btn1: { label: 'HOA', icon: 'assets/nutgame/nuthoa.png', action: 'hoa' },
+          btn2: { label: 'NỤ', icon: 'assets/nutgame/nutnu.png', action: 'nu' },
+          btn3: { label: 'ĐẤT', icon: 'assets/nutgame/nutchunhat.png', action: 'chunhat' },
+          btn4: { label: 'CÔNG CỤ', icon: 'assets/nutgame/nutxeng.png', action: 'xeng' }
+        }
       }
     };
-
-    let gameConfig = { ...DEFAULT_CONFIG };
 
     function togglePasswordVisibility(id, iconId) {
       const el = document.getElementById(id);
@@ -254,7 +197,7 @@
         sessionStorage.setItem('current_admin_user', u);
         document.getElementById('login-modal').classList.add('hidden');
         document.getElementById('admin-app').classList.remove('hidden');
-        initAdminControls();
+        initAdmin();
       } else {
         document.getElementById('login-error').innerText = 'Sai tài khoản hoặc mật khẩu!';
         document.getElementById('login-error').classList.remove('hidden');
@@ -266,58 +209,163 @@
       location.reload();
     }
 
-    function initAdminControls() {
-      // Đọc cấu hình đã lưu
-      const saved = localStorage.getItem('garden_shared_config');
-      if (saved) {
-        try { gameConfig = JSON.parse(saved); } catch (e) {}
-      }
-
-      // Điền vào form
-      document.getElementById('cfg-bg-game').value = gameConfig.background;
-      document.getElementById('cfg-unlock-tier2').checked = gameConfig.unlockTier2;
-
-      [1, 2, 3, 4].forEach(i => {
-        const btn = gameConfig.buttons[`btn${i}`];
-        document.getElementById(`cfg-btn${i}-label`).value = btn.label;
-        document.getElementById(`cfg-btn${i}-icon`).value = btn.icon;
-        document.getElementById(`cfg-btn${i}-act`).value = btn.action;
-      });
-
-      renderPreviewButtons();
+    function initAdmin() {
+      loadSavedConfig();
+      renderFolderTabs();
+      renderButtonsConfigForm();
+      syncAllFromGitHub();
     }
 
-    function renderPreviewButtons() {
-      const bar = document.getElementById('preview-button-bar');
-      bar.innerHTML = [1, 2, 3, 4].map(i => {
-        const btn = gameConfig.buttons[`btn${i}`];
+    function loadSavedConfig() {
+      const saved = localStorage.getItem('garden_shared_config_v2');
+      if (saved) {
+        try { state.gameConfig = { ...state.gameConfig, ...JSON.parse(saved) }; } catch (e) {}
+      }
+      document.getElementById('cfg-bg-global').value = state.gameConfig.bgGlobal;
+      document.getElementById('cfg-bg-a').value = state.gameConfig.bgA;
+      document.getElementById('cfg-bg-b').value = state.gameConfig.bgB;
+      document.getElementById('cfg-unlock-tier2').checked = state.gameConfig.unlockTier2;
+    }
+
+    function renderButtonsConfigForm() {
+      const container = document.getElementById('buttons-config-container');
+      container.innerHTML = [1, 2, 3, 4].map(i => {
+        const btn = state.gameConfig.buttons[`btn${i}`];
         return `
-          <div class="p-2.5 rounded-2xl border-2 border-emerald-500 bg-emerald-50 flex flex-col items-center justify-center text-center shadow-xs">
-            <img src="${btn.icon}" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/nut_hoa.png'" class="w-12 h-12 object-contain mb-1">
-            <b class="text-xs text-emerald-900">${btn.label}</b>
-            <span class="text-[10px] text-emerald-600 font-mono">load: ${btn.action}</span>
+          <div class="p-2.5 bg-white rounded-xl border border-slate-200 space-y-1.5 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-700">Nút ${i}:</span>
+              <input type="text" id="cfg-btn${i}-label" value="${btn.label}" class="w-20 px-2 py-0.5 text-center border rounded font-bold">
+            </div>
+            <div class="grid grid-cols-2 gap-1.5 text-[11px]">
+              <div>
+                <span class="text-slate-400">Đường dẫn icon:</span>
+                <input type="text" id="cfg-btn${i}-icon" value="${btn.icon}" class="w-full p-1 border rounded text-[10px] font-mono">
+              </div>
+              <div>
+                <span class="text-slate-400">Thư mục mở ra:</span>
+                <select id="cfg-btn${i}-act" class="w-full p-1 border rounded text-[10px] bg-slate-50">
+                  <option value="hoa" ${btn.action === 'hoa' ? 'selected' : ''}>Hoa Cấp 1 & 2</option>
+                  <option value="nu" ${btn.action === 'nu' ? 'selected' : ''}>Nụ Cấp 1 & 2</option>
+                  <option value="chunhat" ${btn.action === 'chunhat' ? 'selected' : ''}>Ô Đất 3 Luống</option>
+                  <option value="xeng" ${btn.action === 'xeng' ? 'selected' : ''}>Dụng Cụ Làm Vườn</option>
+                </select>
+              </div>
+            </div>
           </div>
         `;
       }).join('');
     }
 
+    function renderFolderTabs() {
+      const container = document.getElementById('folder-tabs-bar');
+      container.innerHTML = FOLDERS.map(f => {
+        const isActive = f === state.currentFolder;
+        const total = (state.cachedAssets[f] || []).length;
+        return `
+          <button onclick="switchFolder('${f}')" class="px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap ${
+            isActive ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+          }">
+            <i class="fa-solid fa-folder"></i> ${f}
+            <span class="text-[10px] px-1.5 rounded-full ${isActive ? 'bg-emerald-700 text-white' : 'bg-slate-200 text-slate-600'}">${total}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function switchFolder(folder) {
+      state.currentFolder = folder;
+      renderFolderTabs();
+      renderAssetsGrid();
+    }
+
+    // TỰ ĐỘNG GỌI GITHUB API QUÉT TOÀN BỘ FILE VÀ THƯ MỤC
+    async function syncAllFromGitHub() {
+      const status = document.getElementById('scan-status');
+      const icon = document.getElementById('sync-icon');
+      status.classList.remove('hidden');
+      icon.classList.add('fa-spin');
+
+      for (const folder of FOLDERS) {
+        try {
+          const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${ASSETS_PATH}/${folder}`);
+          if (res.ok) {
+            const data = await res.json();
+            state.cachedAssets[folder] = data.filter(item => 
+              item.type === 'file' && /\.(png|jpe?g|webp|svg)$/i.test(item.name)
+            ).map(item => ({
+              fileName: item.name,
+              displayName: item.name.replace(/\.[^/.]+$/, "").replace(/[_-]+/g, ' ').toUpperCase(),
+              localPath: `assets/${folder}/${item.name}`,
+              rawUrl: `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${item.path}`
+            }));
+          }
+        } catch (e) { console.error(e); }
+      }
+
+      status.classList.add('hidden');
+      icon.classList.remove('fa-spin');
+      populateBackgroundDropdowns();
+      renderFolderTabs();
+      renderAssetsGrid();
+    }
+
+    function populateBackgroundDropdowns() {
+      const bgFiles = state.cachedAssets['nengame'] || [];
+      const optionsHtml = `<option value="">(Chọn nhanh ảnh)</option>` + 
+        bgFiles.map(b => `<option value="${b.localPath}">${b.fileName}</option>`).join('');
+      
+      document.getElementById('select-bg-global').innerHTML = optionsHtml;
+      document.getElementById('select-bg-a').innerHTML = optionsHtml;
+      document.getElementById('select-bg-b').innerHTML = optionsHtml;
+    }
+
+    function renderAssetsGrid() {
+      const grid = document.getElementById('assets-grid');
+      const list = state.cachedAssets[state.currentFolder] || [];
+
+      if (list.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-16 text-center text-slate-400 bg-white rounded-2xl border border-dashed border-slate-300">
+            <i class="fa-regular fa-image text-3xl mb-1"></i>
+            <p class="text-xs font-bold">Thư mục [${state.currentFolder}] chưa có file nào trên GitHub.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = list.map(item => `
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md p-2.5 flex flex-col justify-between transition">
+          <div class="h-28 w-full bg-trans-grid rounded-xl flex items-center justify-center p-2 relative">
+            <img src="${item.rawUrl}" class="max-h-full max-w-full object-contain filter drop-shadow">
+          </div>
+          <div class="mt-2">
+            <b class="text-xs text-slate-800 truncate block">${item.displayName}</b>
+            <span class="text-[10px] font-mono text-slate-400 truncate block">${item.fileName}</span>
+            <button onclick="navigator.clipboard.writeText('${item.localPath}'); alert('Đã chép: ${item.localPath}')" class="mt-2 w-full py-1 bg-slate-100 hover:bg-emerald-50 text-[10px] font-bold rounded-lg text-slate-600 transition">
+              Sao chép đường dẫn
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
     function saveAndApplyToGame() {
-      // Thu thập dữ liệu từ giao diện
-      gameConfig.background = document.getElementById('cfg-bg-game').value;
-      gameConfig.unlockTier2 = document.getElementById('cfg-unlock-tier2').checked;
+      state.gameConfig.bgGlobal = document.getElementById('cfg-bg-global').value.trim();
+      state.gameConfig.bgA = document.getElementById('cfg-bg-a').value.trim();
+      state.gameConfig.bgB = document.getElementById('cfg-bg-b').value.trim();
+      state.gameConfig.unlockTier2 = document.getElementById('cfg-unlock-tier2').checked;
 
       [1, 2, 3, 4].forEach(i => {
-        gameConfig.buttons[`btn${i}`] = {
+        state.gameConfig.buttons[`btn${i}`] = {
           label: document.getElementById(`cfg-btn${i}-label`).value.trim(),
           icon: document.getElementById(`cfg-btn${i}-icon`).value.trim(),
           action: document.getElementById(`cfg-btn${i}-act`).value
         };
       });
 
-      // Lưu vào localStorage dùng chung
-      localStorage.setItem('garden_shared_config', JSON.stringify(gameConfig));
-      renderPreviewButtons();
-      alert('ĐÃ LƯU THÀNH CÔNG!\nGame (index.html) sẽ nhận ngay nền mới và cấu hình nút này.');
+      localStorage.setItem('garden_shared_config_v2', JSON.stringify(state.gameConfig));
+      alert('ĐÃ LƯU THÀNH CÔNG!\nCả 3 loại nền và 4 nút chức năng đã được cập nhật sang index.html.');
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -325,7 +373,7 @@
       if (user === 'admin298') {
         document.getElementById('login-modal').classList.add('hidden');
         document.getElementById('admin-app').classList.remove('hidden');
-        initAdminControls();
+        initAdmin();
       }
     });
   </script>
