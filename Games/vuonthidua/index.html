@@ -190,14 +190,13 @@
         bgA: 'assets/nengame/vuonlop.jpg',
         bgB: 'assets/nengame/nenungdung.jpg',
         buttonMappings: {
-          'nuthoa.png': { label: 'HOA', targetFolders: ['hoacap1', 'hoacap2'] },
-          'nutnu.png': { label: 'NỤ', targetFolders: ['nucap1', 'nucap2'] },
-          'nutchunhat.png': { label: 'ĐẤT', targetFolders: ['nengame'] },
-          'nutxeng.png': { label: 'CÔNG CỤ', targetFolders: ['congcu'] }
+          'nuthoa.png': { label: 'HOA', targetFolders: ['hoacap1'], selectedImages: [] },
+          'nutnu.png': { label: 'NỤ', targetFolders: ['nucap1'], selectedImages: [] },
+          'nutchunhat.png': { label: 'ĐẤT', targetFolders: ['nengame'], selectedImages: [] },
+          'nutxeng.png': { label: 'CÔNG CỤ', targetFolders: ['congcu'], selectedImages: [] }
         },
         unlockConditions: {
-          'cond_top1': { id: 'cond_top1', name: 'Đạt Hạng 1 thi đua tuần', type: 'rank_top1', folders: ['hoacap2', 'nucap2'] },
-          'cond_quest': { id: 'cond_quest', name: 'Hoàn thành nhiệm vụ ngày', type: 'quest_done', folders: ['congcu'] }
+          'cond_top1': { id: 'cond_top1', name: 'Đạt Hạng 1 thi đua tuần', type: 'rank_top1', folders: ['hoacap2'], selectedImages: [] }
         },
         plotSlots: [
           { id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }] }
@@ -226,12 +225,12 @@
 
     // ================= 1. NẠP DỮ LIỆU ĐỒNG BỘ THỜI GIAN THỰC TỪ ADMIN =================
     function loadAdminSystemData() {
-      const rawClasses = localStorage.getItem('garden_system_classes_v13') || 
-                         localStorage.getItem('garden_system_classes_v12') || 
-                         localStorage.getItem('garden_system_classes_v11');
-      const rawActive = localStorage.getItem('garden_active_class_v13') || 
-                        localStorage.getItem('garden_active_class_v12') || 
-                        localStorage.getItem('garden_active_class_v11');
+      const rawClasses = localStorage.getItem('garden_system_classes_v14') || 
+                         localStorage.getItem('garden_system_classes_v13') || 
+                         localStorage.getItem('garden_system_classes_v12');
+      const rawActive = localStorage.getItem('garden_active_class_v14') || 
+                        localStorage.getItem('garden_active_class_v13') || 
+                        localStorage.getItem('garden_active_class_v12');
 
       if (rawClasses) {
         try { globalClassesData = JSON.parse(rawClasses); } catch (e) {}
@@ -343,7 +342,7 @@
       document.getElementById('game-bg-image').src = cfg.bgA;
       document.getElementById('section-b').style.backgroundImage = `url('${cfg.bgB}')`;
 
-      // Dựng các vùng đất bằng SVG chuẩn xác (KHÔNG DÙNG MATRIX3D BỊ VỠ NỮA)
+      // Dựng các vùng đất bằng SVG chuẩn xác
       renderPerspectivePlotsOnCanvas();
       renderTextOverlaysOnCanvas();
 
@@ -354,9 +353,7 @@
       switchButtonCategory(firstBtnIcon);
     }
 
-    // =========================================================================
-    // DỰNG VÙNG ĐẤT BẰNG SVG & CLIP-PATH CHUẨN XÁC 100% (KHẮC PHỤC TRIỆT ĐỂ LỖI MA TRẬN)
-    // =========================================================================
+    // DỰNG VÙNG ĐẤT BẰNG SVG CHUẨN XÁC 100%
     function renderPerspectivePlotsOnCanvas() {
       const container = document.getElementById('perspective-plots-layer');
       const slots = currentClass.config.plotSlots || [];
@@ -366,13 +363,6 @@
 
       container.innerHTML = `
         <svg class="absolute inset-0 w-full h-full pointer-events-auto" style="overflow: visible;" viewBox="0 0 ${cW} ${cH}">
-          <defs>
-            <!-- Định nghĩa mẫu vân đất hoặc ảnh đất cắt theo đa giác -->
-            <pattern id="soil-pattern" patternUnits="userSpaceOnUse" width="120" height="120">
-              <image href="https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/khudatrieng_nau.png" x="0" y="0" width="120" height="120" opacity="0.95" />
-            </pattern>
-          </defs>
-
           ${slots.map(slot => {
             const ptsPixel = slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ');
             const centerX = (slot.corners[0].x + slot.corners[1].x + slot.corners[2].x + slot.corners[3].x) / 4;
@@ -382,7 +372,7 @@
             return `
               <g id="plot-group-${slot.id}" class="plot-interactive-svg"
                  ondragover="handleDragOver(event)" 
-                 ondrop="handleDropOnPlot(event, '${slot.id}',${slot.teamId})">
+                 ondrop="handleDropOnPlot(event, '${slot.id}', ${slot.teamId})">
                 
                 <!-- Đa giác ô đất ôm khít mặt sân theo đúng 4 góc Admin nắn -->
                 <polygon points="${ptsPixel}" 
@@ -390,7 +380,7 @@
                          stroke="${isMyTeamPlot ? '#f59e0b' : '#10b981'}" 
                          stroke-width="${isMyTeamPlot ? '3.5' : '2'}" 
                          stroke-dasharray="${isMyTeamPlot ? 'none' : '6,4'}">
-                  <title>${slot.name}${isMyTeamPlot ? '(Khu đất của tổ bạn)' : ''}</title>
+                  <title>${slot.name} ${isMyTeamPlot ? '(Khu đất của tổ bạn)' : ''}</title>
                 </polygon>
 
                 <!-- Nhãn tên tổ gắn giữa tâm ô đất -->
@@ -404,7 +394,7 @@
                         text-anchor="middle" dominant-baseline="central" 
                         fill="${isMyTeamPlot ? '#fef08a' : '#fef3c7'}" 
                         font-size="11" font-weight="900" font-family="sans-serif">
-                    🌾 ${slot.name}${isMyTeamPlot ? '★' : ''}
+                    🌾 ${slot.name} ${isMyTeamPlot ? '★' : ''}
                   </text>
                 </g>
               </g>
@@ -478,7 +468,7 @@
       renderTrayItemsFromFolders(targetFolders);
     }
 
-    // 6. HIỂN THỊ VẬT PHẨM KHAY B2 (THU NHỎ 60%, 3 ẢNH MỖI HÀNG, SẮC NÉT TRONG SUỐT)
+    // 6. HIỂN THỊ VẬT PHẨM KHAY B2 (CHỈ NẠP ĐÚNG CÁC ẢNH ĐƯỢC CHECK BÊN ADMIN)
     function checkFolderUnlocked(folderName) {
       const conditions = currentClass.config.unlockConditions || {};
 
@@ -504,23 +494,32 @@
       const tray = document.getElementById('tray-grid');
       let combinedItems = [];
 
+      // LẤY DANH SÁCH ẢNH ĐƯỢC CHECK CHO NÚT ĐANG CHỌN
+      const currentMapping = currentClass.config.buttonMappings[currentActiveButtonKey];
+      const allowedImageNames = currentMapping?.selectedImages || [];
+
       folderList.forEach(folder => {
         const check = checkFolderUnlocked(folder);
         const files = cachedScannedAssets[folder] || [];
         const itemsToUse = files.length > 0 ? files : getFallbackFilesForFolder(folder);
 
         itemsToUse.forEach(item => {
-          combinedItems.push({
-            ...item,
-            folder: folder,
-            isLocked: check.isLocked,
-            lockReason: check.reason
-          });
+          // CHỈ NẠP NẾU ẢNH ĐƯỢC ADMIN TÍCH CHỌN
+          const isSelectedByAdmin = allowedImageNames.length === 0 || allowedImageNames.includes(item.fileName);
+
+          if (isSelectedByAdmin) {
+            combinedItems.push({
+              ...item,
+              folder: folder,
+              isLocked: check.isLocked,
+              lockReason: check.reason
+            });
+          }
         });
       });
 
       if (combinedItems.length === 0) {
-        tray.innerHTML = `<div class="col-span-3 text-center text-white/70 text-[11px] py-10">Thư mục chưa có vật phẩm.</div>`;
+        tray.innerHTML = `<div class="col-span-3 text-center text-white/70 text-[11px] py-10">Chưa có vật phẩm nào được chọn.</div>`;
         return;
       }
 
@@ -682,7 +681,7 @@
       }
     }
 
-    // ================= 8. LẮNG NGHE ĐỒNG BỘ THỜI GIAN THỰC TỪ ADMIN298 =================
+    // ================= 8. ĐỒNG BỘ THỜI GIAN THỰC TỪ ADMIN298 =================
     window.addEventListener('storage', (e) => {
       if (e.key && e.key.includes('garden_')) {
         loadAdminSystemData();
@@ -691,9 +690,8 @@
     });
 
     setInterval(() => {
-      const rawActive = localStorage.getItem('garden_active_class_v13') || 
-                        localStorage.getItem('garden_active_class_v12') || 
-                        localStorage.getItem('garden_active_class_v11');
+      const rawActive = localStorage.getItem('garden_active_class_v14') || 
+                        localStorage.getItem('garden_active_class_v13');
       if (rawActive && rawActive !== activeClassName) {
         loadAdminSystemData();
         applyClassConfiguration();
