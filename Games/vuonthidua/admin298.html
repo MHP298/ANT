@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin298 - Game Controller & Unlock Manager</title>
+  <title>Admin298 - Game Controller & Multi-Class Engine</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -16,7 +16,7 @@
       background-size: 14px 14px;
       background-position: 0 0, 0 7px, 7px -7px, -7px 0px;
     }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: #f8fafc; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
   </style>
@@ -28,8 +28,8 @@
     <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-200">
       <div class="text-center mb-5">
         <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto text-2xl mb-2">🌸</div>
-        <h2 class="text-xl font-bold text-slate-800">Admin298 Management</h2>
-        <p class="text-xs text-slate-500">Hệ thống quản trị và mở khóa vườn thi đua</p>
+        <h2 class="text-xl font-bold text-slate-800">Admin298 Controller</h2>
+        <p class="text-xs text-slate-500">Quản trị cấp độ & thiết lập phân tầng lớp học</p>
       </div>
       <div class="space-y-4">
         <div>
@@ -54,7 +54,7 @@
   </div>
 
   <!-- HEADER -->
-  <header class="bg-white border-b border-slate-200 px-6 py-3 sticky top-0 z-30 flex items-center justify-between shadow-sm">
+  <header class="bg-white border-b border-slate-200 px-6 py-2.5 sticky top-0 z-30 flex items-center justify-between shadow-xs">
     <div class="flex items-center gap-3">
       <span class="text-2xl text-emerald-600"><i class="fa-solid fa-sliders"></i></span>
       <div>
@@ -62,12 +62,12 @@
         <p class="text-[11px] text-slate-500 font-mono">Repo: MHP298/ANT (Games/vuonthidua/assets)</p>
       </div>
     </div>
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2">
       <button onclick="syncAllFromGitHub()" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition">
         <i class="fa-solid fa-rotate text-emerald-600" id="sync-icon"></i> Quét Lại GitHub
       </button>
-      <button onclick="saveAndApplyToGame()" class="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition">
-        <i class="fa-solid fa-floppy-disk"></i> Lưu & Đồng Bộ Sang Game
+      <button onclick="saveAndApplyCurrentClass()" class="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition">
+        <i class="fa-solid fa-floppy-disk"></i> Lưu Cấu Hình Lớp
       </button>
       <button onclick="handleLogout()" class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold">
         Đăng Xuất
@@ -75,13 +75,25 @@
     </div>
   </header>
 
-  <!-- BỐ CỤC CHÍNH 2 PHẦN: A (1/3 TRÁI) & B (2/3 PHẢI) -->
-  <div id="admin-app" class="hidden flex-1 flex flex-col md:flex-row h-[calc(100vh-57px)] overflow-hidden">
+  <!-- BỐ CỤC CHÍNH 2 PHẦN -->
+  <div id="admin-app" class="hidden flex-1 flex flex-col md:flex-row h-[calc(100vh-53px)] overflow-hidden">
     
-    <!-- PHẦN A (1/3 BÊN TRÁI): ĐIỀU KHIỂN & CẤU HÌNH -->
+    <!-- PHẦN A (1/3 BÊN TRÁI): BẢNG ĐIỀU KHIỂN & CẤU HÌNH -->
     <aside class="w-full md:w-1/3 border-r border-slate-200 bg-white flex flex-col h-full shadow-sm">
       
-      <!-- Tab chuyển đổi giữa Cấu Hình Game & Quản Lý CSV Học Sinh -->
+      <!-- BỘ CHỌN & QUẢN LÝ LỚP HỌC (PHÂN TẦNG DỮ LIỆU) -->
+      <div class="p-3 bg-emerald-50/70 border-b border-emerald-200 flex items-center justify-between gap-2 shrink-0">
+        <div class="flex items-center gap-1.5 flex-1">
+          <i class="fa-solid fa-graduation-cap text-emerald-700 text-sm"></i>
+          <span class="text-xs font-black uppercase text-emerald-900">Lớp Đang Chọn:</span>
+          <select id="select-active-class" onchange="switchActiveClass(this.value)" class="flex-1 px-2.5 py-1 text-xs rounded-lg border border-emerald-300 font-bold bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"></select>
+        </div>
+        <button onclick="openAddNewClassPrompt()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center gap-1">
+          <i class="fa-solid fa-plus"></i> Thêm Lớp
+        </button>
+      </div>
+
+      <!-- Tab Chuyển Đổi Nội Dung -->
       <div class="p-2 border-b border-slate-200 bg-slate-50 grid grid-cols-2 gap-1.5 shrink-0">
         <button onclick="switchAdminTab('controls')" id="tab-btn-controls" class="py-1.5 text-xs font-bold rounded-lg bg-emerald-600 text-white shadow-xs">
           Cấu Hình & Mở Khóa
@@ -91,49 +103,55 @@
         </button>
       </div>
 
-      <!-- NỘI DUNG TAB 1: CẤU HÌNH GIAO DIỆN & MỞ KHÓA -->
+      <!-- TAB 1: CẤU HÌNH GIAO DIỆN & MỞ KHÓA (THEO LỚP ĐANG CHỌN) -->
       <div id="tab-panel-controls" class="flex-1 overflow-y-auto p-4 space-y-4">
         
-        <!-- BỘ CHỌN ĐA THƯ MỤC ASSETS ĐỂ HIỂN THỊ QUA PHẦN B -->
-        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-black uppercase text-slate-700">Chọn thư mục hiển thị ở Phần B:</span>
-            <span class="text-[10px] text-slate-500 font-semibold" id="lbl-checked-folders-count">Đã chọn: 1</span>
-          </div>
-          <div id="folders-checkbox-group" class="grid grid-cols-2 gap-1.5 text-xs">
-            <!-- Render danh sách checkbox các thư mục có trong assets -->
+        <!-- MENU CHỌN NHIỀU THƯ MỤC HIỂN THỊ Ở PHẦN B -->
+        <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5 relative">
+          <label class="block text-xs font-black uppercase text-slate-700">CHỌN THƯ MỤC HIỂN THỊ Ở PHẦN B:</label>
+          <div class="relative">
+            <button type="button" onclick="toggleMultiFolderDropdown()" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white flex items-center justify-between font-bold text-slate-700 shadow-2xs">
+              <span id="lbl-multiselect-status" class="truncate">Chọn các thư mục...</span>
+              <i class="fa-solid fa-chevron-down text-slate-400 text-xs"></i>
+            </button>
+            <div id="dropdown-folders-list" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-30 p-2 space-y-1 max-h-56 overflow-y-auto"></div>
           </div>
         </div>
 
-        <!-- KHUNG 1: CẤU HÌNH NỀN GIAO DIỆN -->
-        <div class="p-3.5 bg-white rounded-2xl border border-slate-200 space-y-2.5 shadow-xs">
+        <!-- MỤC 1: CẤU HÌNH NỀN GIAO DIỆN CHO LỚP -->
+        <div class="p-3.5 bg-white rounded-2xl border border-slate-200 space-y-2.5 shadow-2xs">
           <h4 class="text-xs font-black uppercase text-emerald-800 flex items-center gap-1.5">
             <i class="fa-regular fa-image"></i> Cấu Hình Nền Giao Diện
           </h4>
           <div>
-            <label class="block text-[11px] text-slate-600 font-bold mb-0.5">Nền Toàn Game:</label>
-            <input type="text" id="cfg-bg-global" value="assets/nengame/nenungdung.jpg" class="w-full px-2.5 py-1 text-xs rounded-lg border font-mono">
+            <label class="block text-[11px] text-slate-600 font-bold mb-1">Nền Toàn Game:</label>
+            <select id="select-bg-global" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-slate-50 font-mono"></select>
           </div>
           <div>
-            <label class="block text-[11px] text-slate-600 font-bold mb-0.5">Nền Sân Vườn (Phần A):</label>
-            <input type="text" id="cfg-bg-a" value="assets/nengame/vuonlop.jpg" class="w-full px-2.5 py-1 text-xs rounded-lg border font-mono">
+            <label class="block text-[11px] text-slate-600 font-bold mb-1">Nền Sân Vườn (Phần A):</label>
+            <select id="select-bg-a" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-slate-50 font-mono"></select>
           </div>
           <div>
-            <label class="block text-[11px] text-slate-600 font-bold mb-0.5">Nền Cột Khay Công Cụ (Phần B):</label>
-            <input type="text" id="cfg-bg-b" value="assets/nengame/nenungdung.jpg" class="w-full px-2.5 py-1 text-xs rounded-lg border font-mono">
+            <label class="block text-[11px] text-slate-600 font-bold mb-1">Nền Cột Khay Công Cụ (Phần B):</label>
+            <select id="select-bg-b" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-slate-50 font-mono"></select>
           </div>
         </div>
 
-        <!-- KHUNG 2: CẤU HÌNH 4 NÚT BẤM (PHẦN B1) -->
-        <div class="p-3.5 bg-white rounded-2xl border border-slate-200 space-y-2 shadow-xs">
-          <h4 class="text-xs font-black uppercase text-emerald-800 flex items-center gap-1.5">
-            <i class="fa-solid fa-shapes"></i> Cấu Hình 4 Nút Bấm (Phần B1)
-          </h4>
-          <div id="buttons-config-container" class="space-y-2"></div>
+        <!-- MỤC 2: CẤU HÌNH NÚT BẤM CỦA LỚP + NÚT "THÊM NÚT" -->
+        <div class="p-3.5 bg-white rounded-2xl border border-slate-200 space-y-2.5 shadow-2xs">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-black uppercase text-emerald-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-shapes"></i> Cấu Hình Nút Bấm (Phần B1)
+            </h4>
+            <button onclick="addNewCustomButton()" class="px-2.5 py-1 text-[11px] bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-lg border border-emerald-200 transition flex items-center gap-1">
+              <i class="fa-solid fa-plus"></i> Thêm Nút
+            </button>
+          </div>
+          <div id="buttons-config-container" class="space-y-2.5"></div>
         </div>
 
-        <!-- KHUNG 3: MỞ KHÓA CẤP ĐỘ (THEO ĐÚNG YÊU CẦU MỚI) -->
-        <div class="p-3.5 bg-white rounded-2xl border-2 border-emerald-500/40 space-y-3 shadow-xs">
+        <!-- MỤC 3: MỞ KHÓA CẤP ĐỘ CỦA LỚP -->
+        <div class="p-3.5 bg-white rounded-2xl border-2 border-emerald-500/40 space-y-3 shadow-2xs">
           <div class="flex items-center justify-between border-b pb-1.5">
             <h4 class="text-xs font-black uppercase text-emerald-900 flex items-center gap-1.5">
               <i class="fa-solid fa-key text-amber-500"></i> Mở khóa cấp độ
@@ -141,44 +159,36 @@
             <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold" id="badge-total-rules">0 Luật</span>
           </div>
 
-          <!-- Ô menu Điều kiện mở cấp độ -->
           <div>
             <label class="block text-[11px] text-slate-600 font-bold mb-1">Điều kiện mở cấp độ:</label>
             <div class="flex gap-1.5 items-center">
               <select id="select-condition-main" onchange="handleConditionChange(this.value)" class="flex-1 px-2.5 py-1.5 text-xs rounded-xl border border-slate-300 font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 <option value="">Chọn</option>
-                <!-- Danh sách điều kiện đã thiết lập -->
                 <optgroup label="Danh Sách Đã Thiết Lập" id="group-established-rules"></optgroup>
                 <option value="__NEW__" class="text-emerald-700 font-black">+ Thiết lập mới</option>
               </select>
 
-              <!-- Nút Bỏ điều kiện -->
-              <button onclick="deleteCurrentCondition()" id="btn-delete-cond" title="Bỏ điều kiện này" class="px-2.5 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold transition">
+              <button onclick="deleteCurrentCondition()" id="btn-delete-cond" title="Bỏ điều kiện" class="px-2.5 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold transition">
                 <i class="fa-solid fa-trash-can"></i>
               </button>
 
-              <!-- Nút Chỉnh sửa -->
               <button onclick="editCurrentCondition()" id="btn-edit-cond" title="Chỉnh sửa điều kiện" class="px-2.5 py-1.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-600 text-xs font-bold transition">
                 <i class="fa-solid fa-pen-to-square"></i>
               </button>
             </div>
           </div>
 
-          <!-- Ô chọn/hiển thị thư mục liên kết trong assets -->
-          <div>
+          <div id="linked-folder-wrapper" class="hidden">
             <label class="block text-[11px] text-slate-600 font-bold mb-1">Thư mục liên kết mở khóa trong assets:</label>
-            <div id="linked-folder-display-box" class="min-h-[38px] p-2 bg-slate-50 rounded-xl border border-slate-300 flex flex-wrap gap-1 items-center">
-              <span class="text-slate-400 text-[11px] italic">(Chưa chọn điều kiện nào)</span>
-            </div>
+            <div id="linked-folder-display-box" class="min-h-[38px] p-2 bg-slate-50 rounded-xl border border-slate-300 flex flex-wrap gap-1 items-center"></div>
           </div>
 
-          <!-- KHUNG XUẤT HIỆN KHI BẤM "THIẾT LẬP MỚI" HOẶC "CHỈNH SỬA" -->
           <div id="new-condition-box" class="hidden p-3 bg-emerald-50/70 border border-emerald-300 rounded-xl space-y-2 mt-2">
             <span class="text-[11px] font-black uppercase text-emerald-900 block" id="lbl-form-mode">Nhập Điều Kiện Mới</span>
             
             <div>
               <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Tên Điều kiện:</label>
-              <input type="text" id="input-new-cond-name" placeholder="VD: Đạt Hạng 1 tuần, Làm xong bài tập..." class="w-full px-2.5 py-1 text-xs rounded-lg border border-slate-300 font-semibold">
+              <input type="text" id="input-new-cond-name" placeholder="VD: Đạt Hạng 1 tuần..." class="w-full px-2.5 py-1 text-xs rounded-lg border border-slate-300 font-semibold">
             </div>
 
             <div>
@@ -196,8 +206,8 @@
             </div>
 
             <div class="flex gap-2 pt-1">
-              <button onclick="saveNewCondition()" class="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-sm transition">
-                <i class="fa-solid fa-check"></i> Lưu Thiết Lập
+              <button onclick="saveNewCondition()" class="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-xs transition">
+                <i class="fa-solid fa-check"></i> Lưu Thiết Lập Mới
               </button>
               <button onclick="cancelNewCondition()" class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-lg transition">
                 Hủy
@@ -209,39 +219,26 @@
 
       </div>
 
-      <!-- NỘI DUNG TAB 2: QUẢN LÝ DỮ LIỆU CSV HỌC SINH & THI ĐUA -->
+      <!-- TAB 2: QUẢN LÝ DỮ LIỆU CSV & KẾT QUẢ THI ĐUA -->
       <div id="tab-panel-csv" class="hidden flex-1 overflow-y-auto p-4 space-y-4">
         
-        <!-- NẠP CSV HỌC SINH -->
         <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5">
           <h4 class="text-xs font-black uppercase text-slate-800 flex items-center gap-1.5">
-            <i class="fa-solid fa-file-csv text-emerald-600"></i> Nạp Lớp Học Bằng Link CSV
+            <i class="fa-solid fa-file-csv text-emerald-600"></i> Nạp Học Sinh Vào Lớp Đang Chọn
           </h4>
           <div>
-            <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Tên Lớp (VD: 10A1)</label>
-            <input type="text" id="csv-class-name" class="w-full px-2.5 py-1 text-xs rounded-lg border font-bold uppercase">
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Link CSV Google Sheets / Drive</label>
+            <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Link CSV Google Sheets / Drive:</label>
             <input type="text" id="csv-file-url" class="w-full px-2.5 py-1 text-xs rounded-lg border font-mono">
           </div>
-          <button onclick="fetchAndParseStudentCSV()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center justify-center gap-1.5">
+          <button onclick="fetchAndParseStudentCSV()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition flex items-center justify-center gap-1.5">
             <i class="fa-solid fa-user-plus"></i> Đọc CSV & Tạo Tài Khoản Lớp
           </button>
-          <div class="text-[10px] text-slate-500 italic">
-            Quy tắc: User: <b>xstty_Toz</b> | Mật khẩu: <b>Viết tắt họ tên + STT</b>.
-          </div>
         </div>
 
-        <!-- NẠP CSV THI ĐUA / XẾP HẠNG TUẦN -->
         <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5">
           <h4 class="text-xs font-black uppercase text-slate-800 flex items-center gap-1.5">
-            <i class="fa-solid fa-ranking-star text-amber-500"></i> Kết Quả Thi Đua Làm Căn Cứ Mở Khóa
+            <i class="fa-solid fa-ranking-star text-amber-500"></i> Cập Nhật Thứ Hạng Tuần Cho Lớp Đang Chọn
           </h4>
-          <div>
-            <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">Chọn Lớp:</label>
-            <select id="select-ranking-class" class="w-full px-2.5 py-1 text-xs rounded-lg border font-bold bg-white"></select>
-          </div>
           <div class="grid grid-cols-2 gap-2 text-xs">
             <div>
               <span>Tổ 1:</span>
@@ -261,13 +258,12 @@
             </div>
           </div>
           <button onclick="saveWeeklyRankingData()" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition">
-            Lưu Kết Quả Thi Đua
+            Lưu Kết Quả Thi Đua Lớp
           </button>
         </div>
 
-        <!-- DANH SÁCH LỚP VÀ TÀI KHOẢN ĐÃ TẠO -->
         <div class="space-y-2">
-          <span class="text-xs font-bold uppercase text-slate-700">Các Lớp Đang Có:</span>
+          <span class="text-xs font-bold uppercase text-slate-700">Tất Cả Các Lớp:</span>
           <div id="created-classes-container" class="space-y-1.5"></div>
         </div>
 
@@ -278,28 +274,24 @@
     <!-- PHẦN B (2/3 BÊN PHẢI): HIỂN THỊ CÁC THƯ MỤC ASSETS ĐÃ CHỌN -->
     <main class="w-full md:w-2/3 flex flex-col h-full bg-slate-50 overflow-hidden">
       
-      <!-- Bulk Toolbar phía trên -->
-      <div class="bg-white border-b border-slate-200 p-3 px-5 flex flex-wrap items-center justify-between gap-3 shadow-xs shrink-0">
+      <div class="bg-white border-b border-slate-200 p-3 px-5 flex flex-wrap items-center justify-between gap-3 shadow-2xs shrink-0">
         <div class="flex items-center gap-2">
-          <b class="text-xs text-slate-800">Khay Xem Ảnh Assets</b>
+          <b class="text-xs text-slate-800">Kho Ảnh Assets Hiển Thị</b>
           <span class="text-[11px] text-slate-400" id="total-visible-images-count">(0 ảnh)</span>
         </div>
 
         <div class="flex items-center gap-2">
-          <button onclick="selectAllImagesInView(true)" class="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 transition">
-            <i class="fa-regular fa-square-check"></i> Chọn Hết
+          <button onclick="selectAllVisibleImages(true)" class="px-3 py-1 text-xs font-bold rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 transition flex items-center gap-1.5">
+            <i class="fa-regular fa-square-check"></i> Chọn tất cả
           </button>
-          <button onclick="selectAllImagesInView(false)" class="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 transition">
-            <i class="fa-regular fa-square"></i> Bỏ Chọn Toàn Bộ
+          <button onclick="selectAllVisibleImages(false)" class="px-3 py-1 text-xs font-bold rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 transition flex items-center gap-1.5">
+            <i class="fa-regular fa-square"></i> Bỏ tất cả lựa chọn
           </button>
           <span class="text-xs font-bold text-emerald-700 border-l pl-2 border-slate-200" id="lbl-selected-img-count">Đã chọn: 0</span>
         </div>
       </div>
 
-      <!-- Vùng hiển thị cuộn các thư mục đã chọn -->
-      <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6" id="multi-folder-display-area">
-        <!-- Render các khối ảnh theo từng thư mục -->
-      </div>
+      <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6" id="multi-folder-display-area"></div>
 
     </main>
 
@@ -311,30 +303,39 @@
     const ASSETS_PATH = 'Games/vuonthidua/assets';
     const ALL_FOLDERS = ['hoacap1', 'hoacap2', 'nucap1', 'nucap2', 'congcu', 'nengame', 'nutgame'];
 
-    let state = {
-      selectedFoldersForView: ['hoacap1', 'hoacap2'], // Mặc định chọn nhiều thư mục xem
-      checkedImages: new Set(),
-      cachedAssets: {}, // { 'hoacap1': [ { fileName, displayName, localPath, rawUrl } ] }
-      gameConfig: {
+    // CẤU TRÚC MẶC ĐỊNH CHO MỘT LỚP HỌC MỚI
+    const DEFAULT_CLASS_TEMPLATE = (className) => ({
+      name: className,
+      config: {
         bgGlobal: 'assets/nengame/nenungdung.jpg',
         bgA: 'assets/nengame/vuonlop.jpg',
         bgB: 'assets/nengame/nenungdung.jpg',
-        buttons: {
-          btn1: { label: 'HOA', icon: 'assets/nutgame/nuthoa.png', targetFolder: 'hoacap1' },
-          btn2: { label: 'NỤ', icon: 'assets/nutgame/nutnu.png', targetFolder: 'nucap1' },
-          btn3: { label: 'ĐẤT', icon: 'assets/nutgame/nutchunhat.png', targetFolder: 'nengame' },
-          btn4: { label: 'CÔNG CỤ', icon: 'assets/nutgame/nutxeng.png', targetFolder: 'congcu' }
-        },
-        // Bảng quy tắc điều kiện mở cấp độ
+        buttons: [
+          { id: 'btn_1', label: 'HOA', icon: 'assets/nutgame/nuthoa.png', targetFolder: 'hoacap1' },
+          { id: 'btn_2', label: 'NỤ', icon: 'assets/nutgame/nutnu.png', targetFolder: 'nucap1' },
+          { id: 'btn_3', label: 'ĐẤT', icon: 'assets/nutgame/nutchunhat.png', targetFolder: 'nengame' },
+          { id: 'btn_4', label: 'CÔNG CỤ', icon: 'assets/nutgame/nutxeng.png', targetFolder: 'congcu' }
+        ],
         unlockConditions: {
           'cond_top1': { id: 'cond_top1', name: 'Đạt Hạng 1 thi đua tuần', type: 'rank_top1', folder: 'hoacap2' },
           'cond_top1_nu': { id: 'cond_top1_nu', name: 'Đạt Hạng 1 (Mở nụ VIP)', type: 'rank_top1', folder: 'nucap2' },
           'cond_quest': { id: 'cond_quest', name: 'Hoàn thành nhiệm vụ ngày', type: 'quest_done', folder: 'congcu' }
         }
       },
+      students: {},
+      weeklyRanking: { 1: 1, 2: 2, 3: 3, 4: 4 }
+    });
+
+    let state = {
+      activeClass: '10A1',
+      classesData: {
+        '10A1': DEFAULT_CLASS_TEMPLATE('10A1')
+      },
+      selectedFoldersForView: ['hoacap1', 'hoacap2'],
+      checkedImages: new Set(),
+      cachedAssets: {},
       currentSelectedConditionId: '',
-      editingConditionId: null,
-      classesData: {}
+      editingConditionId: null
     };
 
     function togglePasswordVisibility(id, iconId) {
@@ -360,7 +361,7 @@
         document.getElementById('admin-app').classList.remove('hidden');
         initAdminApp();
       } else {
-        document.getElementById('login-error').innerText = 'Tài khoản hoặc mật khẩu không chính xác!';
+        document.getElementById('login-error').innerText = 'Sai tài khoản hoặc mật khẩu!';
         document.getElementById('login-error').classList.remove('hidden');
       }
     }
@@ -385,99 +386,215 @@
     }
 
     function initAdminApp() {
-      loadSavedConfig();
-      renderFolderCheckboxesGroup();
-      renderButtonsConfigForm();
-      populateFolderDropdowns();
-      renderConditionsMenu();
-      renderMultiFolderView();
+      loadSavedData();
+      renderClassDropdown();
+      loadActiveClassConfig();
+      renderMultiFolderDropdownList();
+      populateConditionFolderDropdown();
       renderClassesList();
       syncAllFromGitHub();
     }
 
-    function loadSavedConfig() {
-      const saved = localStorage.getItem('garden_system_config_v4');
+    function loadSavedData() {
+      const saved = localStorage.getItem('garden_system_classes_v6');
       if (saved) {
-        try { state.gameConfig = { ...state.gameConfig, ...JSON.parse(saved) }; } catch (e) {}
+        try { state.classesData = JSON.parse(saved); } catch (e) {}
       }
-      const savedClasses = localStorage.getItem('garden_classes_data_v4');
-      if (savedClasses) {
-        try { state.classesData = JSON.parse(savedClasses); } catch (e) {}
+      const savedActive = localStorage.getItem('garden_active_class_v6');
+      if (savedActive && state.classesData[savedActive]) {
+        state.activeClass = savedActive;
+      } else {
+        const keys = Object.keys(state.classesData);
+        if (keys.length > 0) state.activeClass = keys[0];
       }
-
-      document.getElementById('cfg-bg-global').value = state.gameConfig.bgGlobal;
-      document.getElementById('cfg-bg-a').value = state.gameConfig.bgA;
-      document.getElementById('cfg-bg-b').value = state.gameConfig.bgB;
     }
 
-    // RENDER NHÓM CHECKBOX CHỌN NHIỀU THƯ MỤC ĐỂ HIỂN THỊ
-    function renderFolderCheckboxesGroup() {
-      const container = document.getElementById('folders-checkbox-group');
+    function saveStateToLocal() {
+      localStorage.setItem('garden_system_classes_v6', JSON.stringify(state.classesData));
+      localStorage.setItem('garden_active_class_v6', state.activeClass);
+    }
+
+    // ================= QUẢN LÝ DANH SÁCH LỚP =================
+    function renderClassDropdown() {
+      const select = document.getElementById('select-active-class');
+      const classKeys = Object.keys(state.classesData);
+      select.innerHTML = classKeys.map(c => `<option value="${c}" ${c === state.activeClass ? 'selected' : ''}>Lớp ${c}</option>`).join('');
+    }
+
+    function switchActiveClass(className) {
+      state.activeClass = className;
+      state.currentSelectedConditionId = '';
+      saveStateToLocal();
+      loadActiveClassConfig();
+    }
+
+    function openAddNewClassPrompt() {
+      const name = prompt('Nhập tên lớp mới (Ví dụ: 10A2, 11B3):');
+      if (!name) return;
+      const clean = name.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (!clean) return alert('Tên lớp không hợp lệ!');
+      if (state.classesData[clean]) return alert('Lớp này đã tồn tại!');
+
+      state.classesData[clean] = DEFAULT_CLASS_TEMPLATE(clean);
+      state.activeClass = clean;
+      saveStateToLocal();
+      renderClassDropdown();
+      loadActiveClassConfig();
+      renderClassesList();
+    }
+
+    function loadActiveClassConfig() {
+      const cls = state.classesData[state.activeClass];
+      if (!cls) return;
+
+      populateBackgroundDropdowns();
+      renderButtonsConfigForm();
+      renderConditionsMenu();
+
+      // Cập nhật giá trị xếp hạng tuần
+      [1, 2, 3, 4].forEach(t => {
+        document.getElementById(`rank-val-${t}`).value = cls.weeklyRanking[t] || t;
+      });
+    }
+
+    // ================= 1. MENU CHỌN THƯ MỤC DROPDOWN CHECKBOX =================
+    function toggleMultiFolderDropdown() {
+      document.getElementById('dropdown-folders-list').classList.toggle('hidden');
+    }
+
+    function renderMultiFolderDropdownList() {
+      const container = document.getElementById('dropdown-folders-list');
       container.innerHTML = ALL_FOLDERS.map(f => {
         const isChecked = state.selectedFoldersForView.includes(f);
         return `
-          <label class="flex items-center gap-1.5 px-2 py-1 rounded-lg border bg-white cursor-pointer hover:bg-emerald-50 text-[11px] font-bold select-none">
-            <input type="checkbox" value="${f}" ${isChecked ? 'checked' : ''} onchange="toggleFolderView('${f}', this.checked)" class="rounded text-emerald-600 focus:ring-emerald-500 w-3.5 h-3.5">
-            <span class="truncate">${f}</span>
+          <label class="flex items-center justify-between px-2.5 py-1.5 rounded-lg hover:bg-emerald-50 cursor-pointer text-xs font-bold text-slate-700">
+            <span class="flex items-center gap-2">
+              <i class="fa-solid fa-folder text-emerald-600 text-[11px]"></i>
+              ${f}
+            </span>
+            <input type="checkbox" value="${f}" ${isChecked ? 'checked' : ''} onchange="handleFolderCheckboxToggle('${f}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5">
           </label>
         `;
       }).join('');
-      document.getElementById('lbl-checked-folders-count').innerText = `Đã chọn: ${state.selectedFoldersForView.length}`;
+      updateMultiFolderLabel();
     }
 
-    function toggleFolderView(folder, isChecked) {
+    function handleFolderCheckboxToggle(folder, isChecked) {
       if (isChecked) {
         if (!state.selectedFoldersForView.includes(folder)) state.selectedFoldersForView.push(folder);
       } else {
         state.selectedFoldersForView = state.selectedFoldersForView.filter(f => f !== folder);
       }
-      document.getElementById('lbl-checked-folders-count').innerText = `Đã chọn: ${state.selectedFoldersForView.length}`;
+      updateMultiFolderLabel();
       renderMultiFolderView();
     }
 
-    function populateFolderDropdowns() {
-      const select = document.getElementById('select-new-cond-folder');
-      select.innerHTML = ALL_FOLDERS.map(f => `<option value="${f}">${f}</option>`).join('');
+    function updateMultiFolderLabel() {
+      const count = state.selectedFoldersForView.length;
+      document.getElementById('lbl-multiselect-status').innerText = count === 0 
+        ? 'Chưa chọn thư mục nào' 
+        : `Đã chọn (${count}): ${state.selectedFoldersForView.join(', ')}`;
     }
 
+    // ================= 2. CẤU HÌNH NỀN GIAO DIỆN =================
+    function populateBackgroundDropdowns() {
+      const cls = state.classesData[state.activeClass];
+      const bgImages = state.cachedAssets['nengame'] || [];
+      const generateOptions = (currentVal) => {
+        if (bgImages.length === 0) return `<option value="${currentVal}">${currentVal}</option>`;
+        return bgImages.map(img => 
+          `<option value="${img.localPath}" ${img.localPath === currentVal ? 'selected' : ''}>${img.fileName}</option>`
+        ).join('');
+      };
+
+      document.getElementById('select-bg-global').innerHTML = generateOptions(cls.config.bgGlobal);
+      document.getElementById('select-bg-a').innerHTML = generateOptions(cls.config.bgA);
+      document.getElementById('select-bg-b').innerHTML = generateOptions(cls.config.bgB);
+    }
+
+    // ================= 3. CẤU HÌNH NÚT BẤM =================
     function renderButtonsConfigForm() {
+      const cls = state.classesData[state.activeClass];
       const container = document.getElementById('buttons-config-container');
-      container.innerHTML = [1, 2, 3, 4].map(i => {
-        const btn = state.gameConfig.buttons[`btn${i}`];
-        return `
-          <div class="p-2 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1">
-            <div class="flex items-center justify-between">
-              <span class="font-bold text-slate-700">Nút ${i}:</span>
-              <input type="text" id="cfg-btn${i}-label" value="${btn.label}" class="w-16 px-1 text-center border rounded font-bold">
-            </div>
-            <div class="grid grid-cols-2 gap-1 text-[11px]">
-              <div>
-                <span class="text-slate-400">Icon:</span>
-                <input type="text" id="cfg-btn${i}-icon" value="${btn.icon}" class="w-full p-1 border rounded text-[10px] font-mono">
-              </div>
-              <div>
-                <span class="text-slate-400">Mở thư mục:</span>
-                <select id="cfg-btn${i}-folder" class="w-full p-1 border rounded text-[10px] bg-white font-bold">
-                  ${ALL_FOLDERS.map(f => `<option value="${f}" ${btn.targetFolder === f ? 'selected' : ''}>${f}</option>`).join('')}
-                </select>
-              </div>
+      const nutImages = state.cachedAssets['nutgame'] || [];
+
+      container.innerHTML = cls.config.buttons.map((btn, index) => `
+        <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1.5 relative group">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-700">Nút ${index + 1}:</span>
+            <div class="flex items-center gap-1.5">
+              <input type="text" value="${btn.label}" onchange="updateButtonProp(${index}, 'label', this.value)" class="w-20 px-1.5 py-0.5 text-center border rounded font-bold bg-white uppercase">
+              ${cls.config.buttons.length > 1 ? `
+                <button onclick="removeCustomButton(${index})" class="text-rose-500 hover:text-rose-700 p-1" title="Xóa nút này">
+                  <i class="fa-solid fa-trash-can text-[11px]"></i>
+                </button>
+              ` : ''}
             </div>
           </div>
-        `;
-      }).join('');
+
+          <div class="grid grid-cols-2 gap-2 text-[11px]">
+            <div>
+              <span class="text-slate-500 font-semibold block mb-0.5">Icon (nutgame/):</span>
+              <select onchange="updateButtonProp(${index}, 'icon', this.value)" class="w-full p-1 border rounded bg-white font-mono text-[10px]">
+                ${nutImages.length > 0 
+                  ? nutImages.map(img => `<option value="${img.localPath}" ${img.localPath === btn.icon ? 'selected' : ''}>${img.fileName}</option>`).join('')
+                  : `<option value="${btn.icon}">${btn.icon}</option>`
+                }
+              </select>
+            </div>
+
+            <div>
+              <span class="text-slate-500 font-semibold block mb-0.5">Mở thư mục:</span>
+              <select onchange="updateButtonProp(${index}, 'targetFolder', this.value)" class="w-full p-1 border rounded bg-white font-bold text-[10px]">
+                ${ALL_FOLDERS.map(f => `<option value="${f}" ${btn.targetFolder === f ? 'selected' : ''}>${f}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+        </div>
+      `).join('');
     }
 
-    // ================= KHUNG 3: MỞ KHÓA CẤP ĐỘ =================
+    function updateButtonProp(index, prop, value) {
+      state.classesData[state.activeClass].config.buttons[index][prop] = value;
+    }
+
+    function addNewCustomButton() {
+      const cls = state.classesData[state.activeClass];
+      const newIndex = cls.config.buttons.length + 1;
+      const defaultIcon = (state.cachedAssets['nutgame'] && state.cachedAssets['nutgame'][0]) 
+        ? state.cachedAssets['nutgame'][0].localPath 
+        : 'assets/nutgame/nuthoa.png';
+
+      cls.config.buttons.push({
+        id: 'btn_' + Date.now().toString(36),
+        label: `NÚT ${newIndex}`,
+        icon: defaultIcon,
+        targetFolder: 'hoacap1'
+      });
+
+      renderButtonsConfigForm();
+    }
+
+    function removeCustomButton(index) {
+      if (confirm('Xóa nút này khỏi giao diện game của lớp?')) {
+        state.classesData[state.activeClass].config.buttons.splice(index, 1);
+        renderButtonsConfigForm();
+      }
+    }
+
+    // ================= 4. MỞ KHÓA CẤP ĐỘ =================
+    function populateConditionFolderDropdown() {
+      document.getElementById('select-new-cond-folder').innerHTML = ALL_FOLDERS.map(f => `<option value="${f}">${f}</option>`).join('');
+    }
+
     function renderConditionsMenu() {
+      const cls = state.classesData[state.activeClass];
       const group = document.getElementById('group-established-rules');
-      const conditions = state.gameConfig.unlockConditions || {};
+      const conditions = cls.config.unlockConditions || {};
       const condKeys = Object.keys(conditions);
       document.getElementById('badge-total-rules').innerText = `${condKeys.length} Luật`;
 
-      group.innerHTML = condKeys.map(k => `
-        <option value="${k}">${conditions[k].name}</option>
-      `).join('');
-
+      group.innerHTML = condKeys.map(k => `<option value="${k}">${conditions[k].name}</option>`).join('');
       document.getElementById('select-condition-main').value = state.currentSelectedConditionId || '';
       updateLinkedFolderBox();
     }
@@ -493,14 +610,18 @@
     }
 
     function updateLinkedFolderBox() {
+      const cls = state.classesData[state.activeClass];
+      const wrapper = document.getElementById('linked-folder-wrapper');
       const box = document.getElementById('linked-folder-display-box');
-      const cond = state.gameConfig.unlockConditions[state.currentSelectedConditionId];
+      const cond = cls.config.unlockConditions[state.currentSelectedConditionId];
 
       if (!cond) {
-        box.innerHTML = `<span class="text-slate-400 text-[11px] italic">(Chưa chọn điều kiện nào)</span>`;
+        wrapper.classList.add('hidden');
+        box.innerHTML = '';
         return;
       }
 
+      wrapper.classList.remove('hidden');
       box.innerHTML = `
         <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-mono font-bold flex items-center gap-1.5 shadow-2xs">
           <i class="fa-solid fa-folder-open text-emerald-600"></i> ${cond.folder}
@@ -515,9 +636,10 @@
       const title = document.getElementById('lbl-form-mode');
       box.classList.remove('hidden');
 
-      if (editId && state.gameConfig.unlockConditions[editId]) {
+      const cls = state.classesData[state.activeClass];
+      if (editId && cls.config.unlockConditions[editId]) {
         title.innerText = 'Chỉnh Sửa Điều Kiện';
-        const cond = state.gameConfig.unlockConditions[editId];
+        const cond = cls.config.unlockConditions[editId];
         document.getElementById('input-new-cond-name').value = cond.name;
         document.getElementById('select-new-cond-type').value = cond.type;
         document.getElementById('select-new-cond-folder').value = cond.folder;
@@ -534,6 +656,7 @@
     }
 
     function saveNewCondition() {
+      const cls = state.classesData[state.activeClass];
       const name = document.getElementById('input-new-cond-name').value.trim();
       const type = document.getElementById('select-new-cond-type').value;
       const folder = document.getElementById('select-new-cond-folder').value;
@@ -541,14 +664,14 @@
       if (!name) return alert('Vui lòng nhập tên điều kiện!');
 
       const id = state.editingConditionId || ('cond_' + Date.now().toString(36));
-      state.gameConfig.unlockConditions[id] = { id, name, type, folder };
+      cls.config.unlockConditions[id] = { id, name, type, folder };
       state.currentSelectedConditionId = id;
       state.editingConditionId = null;
 
       document.getElementById('new-condition-box').classList.add('hidden');
       renderConditionsMenu();
       saveStateToLocal();
-      alert('Đã lưu điều kiện mở khóa thành công!');
+      alert('Đã lưu điều kiện mở khóa cho lớp!');
     }
 
     function editCurrentCondition() {
@@ -558,16 +681,17 @@
 
     function deleteCurrentCondition() {
       if (!state.currentSelectedConditionId) return alert('Chưa chọn điều kiện nào để xóa!');
-      const cond = state.gameConfig.unlockConditions[state.currentSelectedConditionId];
-      if (confirm(`Bạn có chắc chắn muốn bỏ điều kiện [${cond.name}]? Thư mục liên kết [${cond.folder}] cũng sẽ xóa theo.`)) {
-        delete state.gameConfig.unlockConditions[state.currentSelectedConditionId];
+      const cls = state.classesData[state.activeClass];
+      const cond = cls.config.unlockConditions[state.currentSelectedConditionId];
+      if (confirm(`Xóa điều kiện [${cond.name}]? Thư mục liên kết [${cond.folder}] cũng sẽ xóa theo.`)) {
+        delete cls.config.unlockConditions[state.currentSelectedConditionId];
         state.currentSelectedConditionId = '';
         renderConditionsMenu();
         saveStateToLocal();
       }
     }
 
-    // ================= PHẦN B: HIỂN THỊ CÁC THƯ MỤC ASSETS ĐÃ CHỌN =================
+    // ================= 5. HIỂN THỊ PHẦN B =================
     function renderMultiFolderView() {
       const area = document.getElementById('multi-folder-display-area');
       const folders = state.selectedFoldersForView;
@@ -587,18 +711,18 @@
       area.innerHTML = folders.map(f => {
         const items = state.cachedAssets[f] || [];
         totalCount += items.length;
+        const isFolderAllChecked = items.length > 0 && items.every(i => state.checkedImages.has(i.rawUrl));
 
         return `
           <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs space-y-3">
             <div class="flex items-center justify-between border-b border-slate-100 pb-2">
               <div class="flex items-center gap-2">
-                <i class="fa-solid fa-folder text-emerald-600"></i>
-                <b class="text-xs uppercase text-slate-800 tracking-wide font-mono">${f}</b>
+                <input type="checkbox" ${isFolderAllChecked ? 'checked' : ''} onchange="toggleSelectAllInFolder('${f}', this.checked)" class="rounded text-emerald-600 w-4 h-4 cursor-pointer" title="Chọn toàn bộ ảnh thư mục này">
+                <b class="text-xs uppercase text-slate-800 tracking-wide font-mono flex items-center gap-1.5">
+                  <i class="fa-solid fa-folder text-emerald-600"></i> ${f}
+                </b>
                 <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">${items.length} ảnh</span>
               </div>
-              <button onclick="selectImagesInFolder('${f}', true)" class="text-[10px] font-bold text-emerald-600 hover:underline">
-                Chọn hết thư mục này
-              </button>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -607,7 +731,7 @@
                 return `
                   <div class="relative bg-white rounded-xl border ${isChecked ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-200'} p-2 flex flex-col justify-between group hover:shadow-xs transition">
                     <div class="absolute top-1.5 left-1.5 z-10">
-                      <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleImageCheck('${item.rawUrl}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5 cursor-pointer">
+                      <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSingleImageCheck('${item.rawUrl}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5 cursor-pointer">
                     </div>
                     <div class="h-20 w-full bg-trans-grid rounded-lg flex items-center justify-center p-1">
                       <img src="${item.rawUrl}" class="max-h-full max-w-full object-contain filter drop-shadow">
@@ -625,14 +749,14 @@
       updateSelectedImageCount();
     }
 
-    function toggleImageCheck(rawUrl, isChecked) {
+    function toggleSingleImageCheck(rawUrl, isChecked) {
       if (isChecked) state.checkedImages.add(rawUrl);
       else state.checkedImages.delete(rawUrl);
       updateSelectedImageCount();
       renderMultiFolderView();
     }
 
-    function selectImagesInFolder(folder, isChecked) {
+    function toggleSelectAllInFolder(folder, isChecked) {
       const items = state.cachedAssets[folder] || [];
       items.forEach(i => {
         if (isChecked) state.checkedImages.add(i.rawUrl);
@@ -642,7 +766,7 @@
       renderMultiFolderView();
     }
 
-    function selectAllImagesInView(isChecked) {
+    function selectAllVisibleImages(isChecked) {
       state.selectedFoldersForView.forEach(f => {
         const items = state.cachedAssets[f] || [];
         items.forEach(i => {
@@ -658,7 +782,7 @@
       document.getElementById('lbl-selected-img-count').innerText = `Đã chọn: ${state.checkedImages.size}`;
     }
 
-    // ================= TỰ ĐỘNG QUÉT ASSETS TỪ GITHUB API =================
+    // ================= 6. QUÉT ASSETS TỪ GITHUB API =================
     async function syncAllFromGitHub() {
       const icon = document.getElementById('sync-icon');
       icon.classList.add('fa-spin');
@@ -681,11 +805,12 @@
       }
 
       icon.classList.remove('fa-spin');
-      localStorage.setItem('garden_auto_scanned_assets_v4', JSON.stringify(state.cachedAssets));
+      populateBackgroundDropdowns();
+      renderButtonsConfigForm();
       renderMultiFolderView();
     }
 
-    // ================= QUẢN LÝ CSV HỌC SINH & THI ĐUA =================
+    // ================= 7. QUẢN LÝ CSV & XẾP HẠNG =================
     function generatePasswordFromNameAndSTT(fullName, stt) {
       if (!fullName) return `hs${stt}`;
       let clean = fullName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd');
@@ -695,10 +820,8 @@
     }
 
     async function fetchAndParseStudentCSV() {
-      const className = document.getElementById('csv-class-name').value.trim().toUpperCase();
+      const className = state.activeClass;
       let url = document.getElementById('csv-file-url').value.trim();
-
-      if (!className) return alert('Vui lòng nhập tên lớp!');
       if (!url) return alert('Vui lòng dán link file CSV!');
 
       if (url.includes('drive.google.com/file/d/')) {
@@ -708,13 +831,9 @@
 
       try {
         const res = await fetch(url);
-        if (!res.ok) throw new Error('Không thể tải CSV. Kiểm tra lại quyền chia sẻ!');
+        if (!res.ok) throw new Error('Không thể tải CSV. Vui lòng kiểm tra quyền chia sẻ!');
         const rawText = await res.text();
         const lines = rawText.split(/\r?\n/).filter(l => l.trim().length > 0);
-
-        if (!state.classesData[className]) {
-          state.classesData[className] = { name: className, students: {}, weeklyRanking: { 1: 1, 2: 2, 3: 3, 4: 4 } };
-        }
 
         let count = 0;
         for (let i = 1; i < lines.length; i++) {
@@ -738,7 +857,6 @@
         saveStateToLocal();
         renderClassesList();
         alert(`Đã nạp thành công Lớp ${className} với ${count} học sinh!`);
-        document.getElementById('csv-class-name').value = '';
         document.getElementById('csv-file-url').value = '';
 
       } catch (e) { alert('Lỗi: ' + e.message); }
@@ -746,46 +864,41 @@
 
     function renderClassesList() {
       const container = document.getElementById('created-classes-container');
-      const selectRank = document.getElementById('select-ranking-class');
       const classKeys = Object.keys(state.classesData);
-
-      if (classKeys.length === 0) {
-        container.innerHTML = `<p class="text-[11px] text-slate-400 italic">Chưa có lớp nào.</p>`;
-        selectRank.innerHTML = `<option value="">(Chưa có lớp)</option>`;
-        return;
-      }
-
-      selectRank.innerHTML = classKeys.map(c => `<option value="${c}">Lớp ${c}</option>`).join('');
 
       container.innerHTML = classKeys.map(cls => {
         const total = Object.keys(state.classesData[cls].students || {}).length;
+        const isActive = cls === state.activeClass;
         return `
-          <div class="flex items-center justify-between p-2 rounded-xl border border-slate-200 bg-white text-xs">
+          <div class="flex items-center justify-between p-2 rounded-xl border ${isActive ? 'border-emerald-500 bg-emerald-50/50' : 'border-slate-200 bg-white'} text-xs">
             <div>
               <b class="text-emerald-800">${cls}</b>
               <span class="text-slate-400 text-[10px] ml-1">(${total} học sinh)</span>
+              ${isActive ? '<span class="text-[9px] bg-emerald-200 text-emerald-900 px-1 rounded ml-1 font-bold">Đang chọn</span>' : ''}
             </div>
-            <button onclick="deleteClass('${cls}')" class="text-rose-500 hover:text-rose-700 p-1" title="Xóa lớp">
-              <i class="fa-solid fa-trash"></i>
-            </button>
+            <div class="flex items-center gap-1">
+              ${!isActive ? `<button onclick="switchActiveClass('${cls}')" class="px-2 py-0.5 bg-slate-100 hover:bg-emerald-100 text-slate-700 text-[10px] font-bold rounded">Chọn</button>` : ''}
+              ${classKeys.length > 1 ? `<button onclick="deleteClass('${cls}')" class="text-rose-500 hover:text-rose-700 p-1" title="Xóa lớp"><i class="fa-solid fa-trash"></i></button>` : ''}
+            </div>
           </div>
         `;
       }).join('');
     }
 
     function deleteClass(cls) {
-      if (confirm(`Xóa toàn bộ dữ liệu lớp ${cls}?`)) {
+      if (confirm(`Xóa toàn bộ dữ liệu của Lớp ${cls}?`)) {
         delete state.classesData[cls];
+        state.activeClass = Object.keys(state.classesData)[0];
         saveStateToLocal();
+        renderClassDropdown();
+        loadActiveClassConfig();
         renderClassesList();
       }
     }
 
     function saveWeeklyRankingData() {
-      const cls = document.getElementById('select-ranking-class').value;
-      if (!cls || !state.classesData[cls]) return alert('Vui lòng chọn lớp!');
-
-      state.classesData[cls].weeklyRanking = {
+      const cls = state.classesData[state.activeClass];
+      cls.weeklyRanking = {
         1: parseInt(document.getElementById('rank-val-1').value),
         2: parseInt(document.getElementById('rank-val-2').value),
         3: parseInt(document.getElementById('rank-val-3').value),
@@ -793,30 +906,18 @@
       };
 
       saveStateToLocal();
-      alert(`Đã lưu kết quả thi đua tuần cho Lớp ${cls}! Tổ đạt Hạng 1 sẽ được index.html mở khóa cấp độ.`);
+      alert(`Đã lưu kết quả thi đua tuần cho Lớp ${state.activeClass}!`);
     }
 
-    // ================= LƯU & ÁP DỤNG SANG INDEX.HTML =================
-    function saveAndApplyToGame() {
-      state.gameConfig.bgGlobal = document.getElementById('cfg-bg-global').value.trim();
-      state.gameConfig.bgA = document.getElementById('cfg-bg-a').value.trim();
-      state.gameConfig.bgB = document.getElementById('cfg-bg-b').value.trim();
-
-      [1, 2, 3, 4].forEach(i => {
-        state.gameConfig.buttons[`btn${i}`] = {
-          label: document.getElementById(`cfg-btn${i}-label`).value.trim(),
-          icon: document.getElementById(`cfg-btn${i}-icon`).value.trim(),
-          targetFolder: document.getElementById(`cfg-btn${i}-folder`).value
-        };
-      });
+    // ================= LƯU CẤU HÌNH LỚP HIỆN TẠI =================
+    function saveAndApplyCurrentClass() {
+      const cls = state.classesData[state.activeClass];
+      cls.config.bgGlobal = document.getElementById('select-bg-global').value;
+      cls.config.bgA = document.getElementById('select-bg-a').value;
+      cls.config.bgB = document.getElementById('select-bg-b').value;
 
       saveStateToLocal();
-      alert('ĐÃ LƯU & ĐỒNG BỘ THÀNH CÔNG!\nTrang index.html sẽ tự động thực thi các điều kiện mở khóa này.');
-    }
-
-    function saveStateToLocal() {
-      localStorage.setItem('garden_system_config_v4', JSON.stringify(state.gameConfig));
-      localStorage.setItem('garden_classes_data_v4', JSON.stringify(state.classesData));
+      alert(`ĐÃ LƯU THÀNH CÔNG CHO LỚP ${state.activeClass}!\nKhi học sinh lớp ${state.activeClass} đăng nhập vào index.html, game sẽ tự động nạp đúng cấu hình này.`);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
