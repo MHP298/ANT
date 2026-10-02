@@ -23,12 +23,12 @@
     /* CÁC ĐIỂM NEO KÉO PHỐI CẢNH 3D */
     .perspective-handle {
       position: absolute;
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       background: #10b981;
       border: 3px solid #ffffff;
       border-radius: 50%;
-      box-shadow: 0 0 10px rgba(0,0,0,0.6);
+      box-shadow: 0 0 10px rgba(0,0,0,0.7);
       transform: translate(-50%, -50%);
       cursor: crosshair;
       z-index: 60;
@@ -39,13 +39,12 @@
       background: #f59e0b;
     }
 
-    /* VÙNG THÂN Ô ĐẤT KÉO DI CHUYỂN */
-    .plot-drag-body {
+    /* VÙNG ĐA GIÁC ĐẤT TRONG SVG ĐỂ DI CHUYỂN */
+    .plot-polygon-shape {
       cursor: grab;
-      touch-action: none;
-      user-select: none;
+      transition: fill 0.15s, stroke 0.15s;
     }
-    .plot-drag-body:active {
+    .plot-polygon-shape:active {
       cursor: grabbing;
     }
   </style>
@@ -141,7 +140,6 @@
             <i class="fa-regular fa-image"></i> Cấu Hình Nền Giao Diện
           </h4>
           
-          <!-- Nền Toàn Game -->
           <div>
             <label class="block text-[11px] text-slate-600 font-bold mb-1">Nền Toàn Game:</label>
             <div class="flex gap-1.5 items-center">
@@ -152,7 +150,6 @@
             </div>
           </div>
 
-          <!-- Nền Sân Vườn (Phần A) -->
           <div>
             <label class="block text-[11px] text-slate-600 font-bold mb-1">Nền Sân Vườn (Phần A):</label>
             <div class="flex gap-1.5 items-center">
@@ -163,7 +160,6 @@
             </div>
           </div>
 
-          <!-- Nền Cột Khay Công Cụ (Phần B) -->
           <div>
             <label class="block text-[11px] text-slate-600 font-bold mb-1">Nền Cột Khay Công Cụ (Phần B):</label>
             <div class="flex gap-1.5 items-center">
@@ -369,7 +365,7 @@
         <span class="text-xl">📐</span>
         <div>
           <h3 class="font-extrabold text-sm text-white uppercase tracking-wide">Trình Thiết Kế Vùng Đất Phối Cảnh 3D</h3>
-          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Kéo thân ô đất để di chuyển sắp xếp • Kéo 4 góc tròn để uốn dáng đất</p>
+          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Kéo thân đa giác để di chuyển • Kéo 4 chấm tròn xanh ở 4 góc để uốn dáng đất</p>
         </div>
       </div>
 
@@ -392,7 +388,7 @@
         
         <img id="editor-canvas-bg" src="" class="w-full h-full object-fill pointer-events-none select-none">
 
-        <!-- LỚP CHỨA CÁC VÙNG ĐẤT BIẾN DẠNG 3D & 4 ĐIỂM NEO -->
+        <!-- LỚP CHỨA CÁC VÙNG ĐẤT BIẾN DẠNG 3D & 4 ĐIỂM NEO (DÙNG SVG LIÊN KẾT TRỰC TIẾP 4 ĐIỂM) -->
         <div id="editor-slots-layer" class="absolute inset-0 w-full h-full z-10 pointer-events-auto"></div>
 
       </div>
@@ -400,7 +396,7 @@
 
     <!-- HƯỚNG DẪN DƯỚI CÙNG -->
     <div class="h-10 bg-slate-900 border-t border-slate-800 px-6 flex items-center justify-between text-xs text-slate-400 shrink-0">
-      <span>💡 <b>Hướng dẫn:</b> Nhấp giữ chuột vào <b>thân ô đất</b> để di chuyển toàn bộ vùng mà không đổi kích thước. Kéo <b>4 chấm tròn xanh ở 4 góc</b> để uốn dáng phối cảnh.</span>
+      <span>💡 <b>Hướng dẫn:</b> Nhấp giữ vào <b>vùng màu xanh</b> để di chuyển toàn bộ vùng đất. Kéo <b>4 chấm tròn xanh ở 4 góc</b> để uốn dáng đất theo phối cảnh. Bấm <b>✕</b> sẽ tự động đôn số thứ tự liên tục.</span>
       <span id="lbl-total-slots-count" class="font-bold text-emerald-400">Đã bố trí: 1 vùng đất</span>
     </div>
 
@@ -539,7 +535,6 @@
       localStorage.setItem('garden_active_class_v11', state.activeClass);
     }
 
-    // ================= QUẢN LÝ LỚP =================
     function renderClassDropdown() {
       const select = document.getElementById('select-active-class');
       const classKeys = Object.keys(state.classesData);
@@ -601,7 +596,6 @@
       if (isClosed) menu.classList.remove('hidden');
     }
 
-    // ================= 1. CẤU HÌNH NỀN VỚI NÚT CON MẮT =================
     function populateBackgroundDropdowns() {
       const cls = state.classesData[state.activeClass];
       const bgImages = state.cachedAssets['nengame'] || [];
@@ -663,56 +657,11 @@
     }
 
     // =========================================================================
-    // TOÁN HỌC BIẾN ĐỔI PHỐI CẢNH 3D (PERSPECTIVE HOMOGRAPHY -> CSS MATRIX3D)
+    // TRÌNH NẮN & DI CHUYỂN DÁNG ĐẤT 3D TOÀN MÀN HÌNH (SỬA LỖI TÁCH RỜI)
     // =========================================================================
-    function getHomographyMatrix3D(w, h, p0, p1, p2, p3) {
-      const src = [{ x: 0, y: 0 }, { x: w, y: 0 }, { x: w, y: h }, { x: 0, y: h }];
-      const dst = [p0, p1, p2, p3];
-
-      let A = [];
-      for (let i = 0; i < 4; i++) {
-        const sx = src[i].x, sy = src[i].y;
-        const dx = dst[i].x, dy = dst[i].y;
-        A.push([sx, sy, 1, 0, 0, 0, -sx * dx, -sy * dy, dx]);
-        A.push([0, 0, 0, sx, sy, 1, -sx * dy, -sy * dy, dy]);
-      }
-
-      for (let i = 0; i < 8; i++) {
-        let maxRow = i;
-        for (let k = i + 1; k < 8; k++) {
-          if (Math.abs(A[k][i]) > Math.abs(A[maxRow][i])) maxRow = k;
-        }
-        let temp = A[i]; A[i] = A[maxRow]; A[maxRow] = temp;
-
-        for (let k = i + 1; k < 8; k++) {
-          let c = -A[k][i] / A[i][i];
-          for (let j = i; j <= 8; j++) {
-            if (i === j) A[k][j] = 0;
-            else A[k][j] += c * A[i][j];
-          }
-        }
-      }
-
-      let H = new Array(8);
-      for (let i = 7; i >= 0; i--) {
-        H[i] = A[i][8] / A[i][i];
-        for (let k = i - 1; k >= 0; k--) {
-          A[k][8] -= A[k][i] * H[i];
-        }
-      }
-
-      return `matrix3d(
-        ${H[0]}, ${H[3]}, 0, ${H[6]},
-        ${H[1]}, ${H[4]}, 0, ${H[7]},
-        0, 0, 1, 0,
-        ${H[2]}, ${H[5]}, 0, 1.0
-      )`;
-    }
-
-    // ================= 2. TRÌNH NẮN & DI CHUYỂN DÁNG ĐẤT 3D TOÀN MÀN HÌNH =================
     function openFullscreenEditor(imagePath) {
       const cls = state.classesData[state.activeClass];
-      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Kéo thân để dời vị trí • Kéo 4 góc tròn để uốn phối cảnh`;
+      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Kéo thân đa giác để di chuyển • Kéo 4 chấm tròn xanh ở 4 góc để uốn dáng đất`;
       
       const fullUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${imagePath}`;
       document.getElementById('editor-canvas-bg').src = fullUrl;
@@ -730,8 +679,13 @@
       state.tempEditorSlots = JSON.parse(JSON.stringify(existingSlots));
       reIndexPlotSlots();
 
-      renderPerspectiveSlots();
+      // SỬA LỖI 1: MỞ MODAL TRƯỚC RỒI MỚI RENDER ĐỂ CANVAS LẤY ĐÚNG KÍCH THƯỚC KHÔNG BỊ 0px
       document.getElementById('fullscreen-editor-modal').classList.remove('hidden');
+      
+      // Chờ 1 nhịp DOM cập nhật layout rồi render
+      requestAnimationFrame(() => {
+        renderPerspectiveSlots();
+      });
     }
 
     function closeFullscreenEditor() {
@@ -758,18 +712,18 @@
 
     function addNewPerspectivePlotSlot() {
       const nextIndex = state.tempEditorSlots.length + 1;
-      const offsetX = ((nextIndex - 1) % 2) * 15;
-      const offsetY = Math.floor((nextIndex - 1) / 2) * 12;
+      const offsetX = ((nextIndex - 1) % 2) * 12;
+      const offsetY = Math.floor((nextIndex - 1) / 2) * 10;
 
       const newSlot = {
         id: `slot_${nextIndex}`,
         name: `Khu đất ${nextIndex}`,
         teamId: nextIndex,
         corners: [
-          { x: Math.min(80, 25 + offsetX), y: Math.min(75, 30 + offsetY) },
-          { x: Math.min(95, 55 + offsetX), y: Math.min(75, 30 + offsetY) },
-          { x: Math.min(95, 58 + offsetX), y: Math.min(90, 55 + offsetY) },
-          { x: Math.min(80, 22 + offsetX), y: Math.min(90, 55 + offsetY) }
+          { x: Math.min(75, 25 + offsetX), y: Math.min(70, 32 + offsetY) },
+          { x: Math.min(95, 58 + offsetX), y: Math.min(70, 32 + offsetY) },
+          { x: Math.min(95, 62 + offsetX), y: Math.min(88, 58 + offsetY) },
+          { x: Math.min(75, 22 + offsetX), y: Math.min(88, 58 + offsetY) }
         ]
       };
       
@@ -795,64 +749,77 @@
       renderPerspectiveSlots();
     }
 
+    // SỬA LỖI 2: DÙNG ĐA GIÁC SVG NỐI TRỰC TIẾP 4 ĐIỂM NEO - KHÔNG BAO GIỜ BỊ LỆCH RA GÓC (0, 0)
     function renderPerspectiveSlots() {
       const container = document.getElementById('editor-slots-layer');
-      const canvas = document.getElementById('editor-canvas-box');
-      const cW = canvas.clientWidth || 900;
-      const cH = canvas.clientHeight || 600;
-
       document.getElementById('lbl-total-slots-count').innerText = `Đã bố trí: ${state.tempEditorSlots.length} vùng đất`;
 
-      container.innerHTML = state.tempEditorSlots.map((slot, sIdx) => {
-        const p0 = { x: (slot.corners[0].x / 100) * cW, y: (slot.corners[0].y / 100) * cH };
-        const p1 = { x: (slot.corners[1].x / 100) * cW, y: (slot.corners[1].y / 100) * cH };
-        const p2 = { x: (slot.corners[2].x / 100) * cW, y: (slot.corners[2].y / 100) * cH };
-        const p3 = { x: (slot.corners[3].x / 100) * cW, y: (slot.corners[3].y / 100) * cH };
-
-        const baseW = 300, baseH = 200;
-        const matrixCss = getHomographyMatrix3D(baseW, baseH, p0, p1, p2, p3);
-
-        return `
-          <div id="slot-wrapper-${slot.id}" class="absolute inset-0 pointer-events-none">
+      container.innerHTML = `
+        <!-- Lớp SVG vẽ toàn bộ các đa giác ôm khít 4 đỉnh -->
+        <svg class="absolute inset-0 w-full h-full pointer-events-auto" style="overflow: visible;">
+          ${state.tempEditorSlots.map((slot, sIdx) => {
+            const pts = slot.corners.map(c => `${c.x}%,${c.y}%`).join(' ');
             
-            <!-- THÂN VÙNG ĐẤT 3D: CÓ TÍNH NĂNG KÉO DI CHUYỂN NGUYÊN KHỐI (GIỮ NGUYÊN KÍCH THƯỚC) -->
-            <div id="plot-body-${sIdx}" 
-                 style="width: ${baseW}px; height: ${baseH}px; transform-origin: 0 0; transform: ${matrixCss}; position: absolute; left: 0; top: 0;" 
-                 class="plot-drag-body pointer-events-auto"
-                 title="Giữ chuột và kéo để di chuyển vùng đất này">
-              <div class="relative w-full h-full border-2 border-dashed border-emerald-400 bg-emerald-500/20 rounded-xl overflow-hidden flex flex-col items-center justify-center p-2 shadow-sm hover:border-amber-400 hover:bg-emerald-500/30 transition">
-                <img src="https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/khudatrieng_nau.png" class="w-full h-full object-fill opacity-85 pointer-events-none">
-                <span class="absolute top-2 left-2 bg-amber-950/90 text-amber-200 text-xs font-black px-3 py-1 rounded-full shadow border border-amber-600/50 pointer-events-none">
-                  ${slot.name}
-                </span>
-              </div>
-            </div>
+            // Tính trọng tâm đa giác để đặt nhãn tên luôn nằm ở giữa ô đất
+            const centerX = (slot.corners[0].x + slot.corners[1].x + slot.corners[2].x + slot.corners[3].x) / 4;
+            const centerY = (slot.corners[0].y + slot.corners[1].y + slot.corners[2].y + slot.corners[3].y) / 4;
 
-            <!-- NÚT XÓA VÙNG ĐẤT -->
+            return `
+              <g id="svg-group-${sIdx}">
+                <!-- Đa giác thân ô đất: Kéo di chuyển cả vùng không đổi kích thước -->
+                <polygon points="${pts}" 
+                         id="polygon-body-${sIdx}"
+                         class="plot-polygon-shape"
+                         fill="rgba(16, 185, 129, 0.28)" 
+                         stroke="#10b981" 
+                         stroke-width="2.5" 
+                         stroke-dasharray="6,4">
+                  <title>Nhấp giữ và kéo để di chuyển ${slot.name}</title>
+                </polygon>
+
+                <!-- Nhãn tên gắn chặt ở tâm đa giác -->
+                <g style="pointer-events: none;">
+                  <rect x="${centerX}%" y="${centerY}%" width="90" height="26" rx="13" 
+                        transform="translate(-45, -13)" 
+                        fill="rgba(69, 26, 3, 0.9)" stroke="#b45309" stroke-width="1.5" />
+                  <text x="${centerX}%" y="${centerY}%" 
+                        text-anchor="middle" dominant-baseline="central" 
+                        fill="#fef3c7" font-size="11" font-weight="900" font-family="sans-serif">
+                    ${slot.name}
+                  </text>
+                </g>
+              </g>
+            `;
+          }).join('')}
+        </svg>
+
+        <!-- Lớp chứa các nút Xóa và 4 nút neo tròn ở 4 góc -->
+        ${state.tempEditorSlots.map((slot, sIdx) => `
+          <div id="controls-slot-${sIdx}" class="absolute inset-0 pointer-events-none">
+            <!-- Nút Xóa vùng đất đặt ngay góc trên-trái P0 -->
             <button onclick="removePerspectiveSlot(${sIdx}, event)" 
-                    style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%; transform: translate(-100%, -100%);"
+                    style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%; transform: translate(-120%, -120%);"
                     class="absolute w-6 h-6 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center justify-center pointer-events-auto hover:scale-125 transition z-50 shadow-lg"
                     title="Xóa vùng đất này (các vùng sau sẽ tự đôn số)">
               ✕
             </button>
 
-            <!-- 4 NÚT NEO Ở 4 GÓC: CHỈ KHI KÉO VÀO ĐÂY MỚI LÀM THAY ĐỔI DÁNG/KÍCH THƯỚC -->
-            <div id="handle-${sIdx}-0" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%;" title="Kéo góc Trên-Trái để nắn dáng"></div>
-            <div id="handle-${sIdx}-1" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[1].x}%; top: ${slot.corners[1].y}%;" title="Kéo góc Trên-Phải để nắn dáng"></div>
-            <div id="handle-${sIdx}-2" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[2].x}%; top: ${slot.corners[2].y}%;" title="Kéo góc Dưới-Phải để nắn dáng"></div>
-            <div id="handle-${sIdx}-3" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[3].x}%; top: ${slot.corners[3].y}%;" title="Kéo góc Dưới-Trái để nắn dáng"></div>
-
+            <!-- 4 NÚT NEO TRÒN GẮN CHUẨN XÁC VÀO 4 GÓC -->
+            <div id="handle-${sIdx}-0" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%;" title="Kéo góc 1 (Trên-Trái)"></div>
+            <div id="handle-${sIdx}-1" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[1].x}%; top: ${slot.corners[1].y}%;" title="Kéo góc 2 (Trên-Phải)"></div>
+            <div id="handle-${sIdx}-2" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[2].x}%; top: ${slot.corners[2].y}%;" title="Kéo góc 3 (Dưới-Phải)"></div>
+            <div id="handle-${sIdx}-3" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[3].x}%; top: ${slot.corners[3].y}%;" title="Kéo góc 4 (Dưới-Trái)"></div>
           </div>
-        `;
-      }).join('');
+        `).join('')}
+      `;
 
-      // GẮN SỰ KIỆN KÉO DI CHUYỂN NGUYÊN KHỐI VÀ KÉO 4 GÓC NEO
+      // GẮN SỰ KIỆN KÉO DI CHUYỂN
       state.tempEditorSlots.forEach((slot, sIdx) => {
-        // 1. Kéo thân ô đất để tịnh tiến cả 4 góc mà không đổi dáng
-        const bodyEl = document.getElementById(`plot-body-${sIdx}`);
-        if (bodyEl) makePlotBodyDraggable(bodyEl, sIdx);
+        // 1. Kéo thân đa giác
+        const polyEl = document.getElementById(`polygon-body-${sIdx}`);
+        if (polyEl) makePlotPolygonDraggable(polyEl, sIdx);
 
-        // 2. Kéo từng góc neo để biến dạng phối cảnh
+        // 2. Kéo 4 nút neo ở góc
         for (let cIdx = 0; cIdx < 4; cIdx++) {
           const handleEl = document.getElementById(`handle-${sIdx}-${cIdx}`);
           if (handleEl) makeCornerHandleDraggable(handleEl, sIdx, cIdx);
@@ -860,36 +827,29 @@
       });
     }
 
-    // =========================================================================
-    // HÀM 1: KÉO DI CHUYỂN TOÀN BỘ VÙNG ĐẤT (GIỮ NGUYÊN HÌNH DÁNG & KÍCH THƯỚC)
-    // =========================================================================
-    function makePlotBodyDraggable(bodyEl, slotIndex) {
-      let isBodyDragging = false;
+    // 1. KÉO DI CHUYỂN TOÀN BỘ VÙNG ĐẤT (GIỮ NGUYÊN HÌNH DÁNG & KÍCH THƯỚC)
+    function makePlotPolygonDraggable(polyEl, slotIndex) {
+      let isDragging = false;
       let startMouseX = 0, startMouseY = 0;
       let originalCorners = [];
 
-      bodyEl.addEventListener('mousedown', (e) => {
-        // Chỉ kéo khi bấm chuột trái và không bấm vào nút con
-        if (e.button !== 0 || e.target.tagName === 'BUTTON') return;
-        isBodyDragging = true;
+      polyEl.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        isDragging = true;
         startMouseX = e.clientX;
         startMouseY = e.clientY;
-
-        // Lưu bản sao tọa độ 4 góc lúc bắt đầu bấm
         originalCorners = JSON.parse(JSON.stringify(state.tempEditorSlots[slotIndex].corners));
         e.stopPropagation();
       });
 
       window.addEventListener('mousemove', (e) => {
-        if (!isBodyDragging) return;
+        if (!isDragging) return;
         const canvas = document.getElementById('editor-canvas-box');
         const rect = canvas.getBoundingClientRect();
 
-        // Độ dời chuột theo % của canvas
         const deltaXPercent = ((e.clientX - startMouseX) / rect.width) * 100;
         const deltaYPercent = ((e.clientY - startMouseY) / rect.height) * 100;
 
-        // Kiểm tra biên để không cho kéo lọt ra ngoài mép sân (0% - 100%)
         let minX = Math.min(...originalCorners.map(c => c.x));
         let maxX = Math.max(...originalCorners.map(c => c.x));
         let minY = Math.min(...originalCorners.map(c => c.y));
@@ -898,12 +858,11 @@
         let clampedDeltaX = deltaXPercent;
         let clampedDeltaY = deltaYPercent;
 
-        if (minX + clampedDeltaX < 0) clampedDeltaX = -minX;
-        if (maxX + clampedDeltaX > 100) clampedDeltaX = 100 - maxX;
-        if (minY + clampedDeltaY < 0) clampedDeltaY = -minY;
-        if (maxY + clampedDeltaY > 100) clampedDeltaY = 100 - maxY;
+        if (minX + clampedDeltaX < 2) clampedDeltaX = 2 - minX;
+        if (maxX + clampedDeltaX > 98) clampedDeltaX = 98 - maxX;
+        if (minY + clampedDeltaY < 2) clampedDeltaY = 2 - minY;
+        if (maxY + clampedDeltaY > 98) clampedDeltaY = 98 - maxY;
 
-        // Tịnh tiến đồng loạt cả 4 góc theo đúng độ dời -> Giữ nguyên 100% kích thước & dáng
         for (let i = 0; i < 4; i++) {
           state.tempEditorSlots[slotIndex].corners[i].x = parseFloat((originalCorners[i].x + clampedDeltaX).toFixed(2));
           state.tempEditorSlots[slotIndex].corners[i].y = parseFloat((originalCorners[i].y + clampedDeltaY).toFixed(2));
@@ -913,13 +872,11 @@
       });
 
       window.addEventListener('mouseup', () => {
-        if (isBodyDragging) isBodyDragging = false;
+        if (isDragging) isDragging = false;
       });
     }
 
-    // =========================================================================
-    // HÀM 2: KÉO ĐIỂM NEO Ở 4 GÓC ĐỂ UỐN NẮN PHỐI CẢNH 3D
-    // =========================================================================
+    // 2. KÉO ĐIỂM NEO Ở 4 GÓC ĐỂ UỐN NẮN PHỐI CẢNH 3D
     function makeCornerHandleDraggable(handleEl, slotIndex, cornerIndex) {
       let isDragging = false;
 
