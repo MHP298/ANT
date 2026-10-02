@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin298 - Game Controller & Multi-Class Engine</title>
+  <title>Admin298 - Game Controller & Plot Layout Editor</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -19,6 +19,24 @@
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: #f8fafc; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+    /* VÙNG CHỌN ĐẤT TRÊN CANVAS PHÓNG TO */
+    .plot-slot-box {
+      position: absolute;
+      touch-action: none;
+      user-select: none;
+      cursor: grab;
+      border: 2px dashed #10b981;
+      background: rgba(16, 185, 129, 0.2);
+      border-radius: 12px;
+      transition: box-shadow 0.2s;
+    }
+    .plot-slot-box:active { cursor: grabbing; }
+    .plot-slot-box.active-slot {
+      border: 2px solid #059669;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.7);
+      background: rgba(16, 185, 129, 0.35);
+    }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans select-none" onclick="closeAllFolderDropdowns(event)">
@@ -106,7 +124,7 @@
       <!-- TAB 1: CẤU HÌNH GIAO DIỆN & MỞ KHÓA -->
       <div id="tab-panel-controls" class="flex-1 overflow-y-auto p-4 space-y-4">
         
-        <!-- MỤC 1: CẤU HÌNH NỀN GIAO DIỆN (CÓ NÚT CON MẮT XEM TRƯỚC) -->
+        <!-- MỤC 1: CẤU HÌNH NỀN GIAO DIỆN -->
         <div class="p-3.5 bg-white rounded-2xl border border-slate-200 space-y-2.5 shadow-2xs">
           <h4 class="text-xs font-black uppercase text-emerald-800 flex items-center gap-1.5">
             <i class="fa-regular fa-image"></i> Cấu Hình Nền Giao Diện
@@ -146,17 +164,16 @@
           </div>
         </div>
 
-        <!-- MỤC 2: GÁN TÍNH NĂNG NÚT (BAN ĐẦU ĐỂ TRỐNG, CHỈ HIỆN KHI CHỌN NÚT) -->
+        <!-- MỤC 2: GÁN TÍNH NĂNG NÚT -->
         <div class="p-3.5 bg-white rounded-2xl border border-slate-200 space-y-3 shadow-2xs">
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-black uppercase text-emerald-800 flex items-center gap-1.5">
               <i class="fa-solid fa-shapes"></i> Gán Tính Năng Nút
             </h4>
-            <span class="text-[10px] text-slate-400 font-semibold" id="lbl-button-binding-info">Gán thư mục mở cho nút</span>
+            <span class="text-[10px] text-slate-400 font-semibold">Chọn nút để cấu hình</span>
           </div>
 
           <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
-            <!-- Ô Chọn Nút (nutgame/): Mặc định là chuỗi rỗng -->
             <div>
               <label class="block text-[11px] font-bold text-slate-600 mb-1">Chọn Nút (nutgame/):</label>
               <select id="select-active-button-icon" onchange="handleActiveButtonChange(this.value)" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white font-mono font-semibold">
@@ -164,22 +181,18 @@
               </select>
             </div>
 
-            <!-- Khung chi tiết: Mặc định ẩn hoàn toàn, chỉ hiện khi đã chọn nút hợp lệ -->
             <div id="button-detail-settings" class="hidden space-y-2.5 border-t border-slate-200 pt-2.5">
               <div>
                 <label class="block text-[11px] font-bold text-slate-600 mb-1">Tên Nhãn Nút:</label>
                 <input type="text" id="input-active-button-label" onchange="handleActiveButtonLabelChange(this.value)" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white font-bold uppercase" placeholder="VD: HOA, NỤ, ĐẤT...">
               </div>
 
-              <!-- Menu Mở thư mục dạng Dropdown Checkbox -->
               <div class="relative folder-dropdown-container">
                 <label class="block text-[11px] font-bold text-slate-600 mb-1">Mở thư mục liên kết:</label>
                 <button type="button" onclick="toggleDropdownFolder('dropdown-btn-assigned-folders', event)" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white flex items-center justify-between font-bold text-slate-700 shadow-2xs">
                   <span id="lbl-assigned-folders-status" class="truncate">Chưa chọn thư mục</span>
                   <i class="fa-solid fa-chevron-down text-slate-400 text-[10px] ml-1"></i>
                 </button>
-
-                <!-- Menu sổ xuống chứa checkbox các thư mục -->
                 <div id="dropdown-btn-assigned-folders" class="hidden folder-dropdown-menu absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-40 p-2 space-y-1 max-h-52 overflow-y-auto"></div>
               </div>
             </div>
@@ -214,13 +227,11 @@
             </div>
           </div>
 
-          <!-- Thư mục liên kết mở khóa (Chỉ xuất hiện khi đã chọn điều kiện) -->
           <div id="linked-folder-wrapper" class="hidden">
             <label class="block text-[11px] text-slate-600 font-bold mb-1">Thư mục liên kết mở khóa trong assets:</label>
             <div id="linked-folder-display-box" class="min-h-[38px] p-2 bg-slate-50 rounded-xl border border-slate-300 flex flex-wrap gap-1.5 items-center"></div>
           </div>
 
-          <!-- Khung Thiết lập mới / Chỉnh sửa -->
           <div id="new-condition-box" class="hidden p-3 bg-emerald-50/70 border border-emerald-300 rounded-xl space-y-2 mt-2">
             <span class="text-[11px] font-black uppercase text-emerald-900 block" id="lbl-form-mode">Nhập Điều Kiện Mới</span>
             
@@ -261,7 +272,7 @@
 
       </div>
 
-      <!-- TAB 2: QUẢN LÝ DỮ LIỆU CSV & KẾT QUẢ THI ĐUA -->
+      <!-- TAB 2: QUẢN LÝ CSV & THI ĐUA -->
       <div id="tab-panel-csv" class="hidden flex-1 overflow-y-auto p-4 space-y-4">
         
         <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5">
@@ -313,7 +324,7 @@
 
     </aside>
 
-    <!-- PHẦN B (2/3 BÊN PHẢI): HIỂN THỊ KHO ẢNH KHI CÓ LỰA CHỌN TỪ PHẦN A -->
+    <!-- PHẦN B (2/3 BÊN PHẢI): HIỂN THỊ KHO ẢNH -->
     <main class="w-full md:w-2/3 flex flex-col h-full bg-slate-50 overflow-hidden">
       
       <div class="bg-white border-b border-slate-200 p-3 px-5 flex flex-wrap items-center justify-between gap-3 shadow-2xs shrink-0">
@@ -333,12 +344,56 @@
         </div>
       </div>
 
-      <!-- Vùng hiển thị ảnh Phần B -->
-      <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6" id="multi-folder-display-area">
-        <!-- Ban đầu để trống hoàn toàn -->
-      </div>
+      <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6" id="multi-folder-display-area"></div>
 
     </main>
+
+  </div>
+
+  <!-- ================= MODAL PHÓNG TO TOÀN MÀN HÌNH ĐỂ THIẾT KẾ VÙNG CHỌN ĐẤT ================= -->
+  <div id="fullscreen-editor-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col">
+    
+    <!-- THANH CÔNG CỤ TRÊN CÙNG CỦA TRÌNH THIẾT KẾ -->
+    <div class="h-14 bg-slate-900 border-b border-slate-800 px-6 flex items-center justify-between shrink-0 shadow-lg">
+      <div class="flex items-center gap-3">
+        <span class="text-xl">📐</span>
+        <div>
+          <h3 class="font-extrabold text-sm text-white uppercase tracking-wide">Trình Thiết Kế Vùng Đất Thi Đua</h3>
+          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Lớp 10A1 • Đặt vị trí ô đất cho các tổ</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="addNewPlotSlot()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition">
+          <i class="fa-solid fa-plus"></i> + Thêm Vùng Đất Mới
+        </button>
+        <button onclick="saveAndCloseFullscreenEditor()" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition">
+          <i class="fa-solid fa-floppy-disk"></i> Lưu Vị Trí Vùng Đất
+        </button>
+        <button onclick="closeFullscreenEditor()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-rose-600 text-white text-sm font-bold flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- KHUNG CHỨA SÂN NỀN TOÀN MÀN HÌNH -->
+    <div class="flex-1 overflow-hidden p-4 flex items-center justify-center relative">
+      <div id="editor-canvas-box" class="relative max-w-full max-h-full aspect-[3/2] w-full rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-800 bg-black flex items-center justify-center">
+        
+        <!-- Ảnh nền sân trường -->
+        <img id="editor-canvas-bg" src="" class="w-full h-full object-fill pointer-events-none select-none">
+
+        <!-- Lớp chứa các vùng chọn đất do admin tạo ra -->
+        <div id="editor-slots-layer" class="absolute inset-0 w-full h-full z-10 pointer-events-auto"></div>
+
+      </div>
+    </div>
+
+    <!-- HƯỚNG DẪN DƯỚI CÙNG -->
+    <div class="h-10 bg-slate-900 border-t border-slate-800 px-6 flex items-center justify-between text-xs text-slate-400 shrink-0">
+      <span>💡 <b>Hướng dẫn:</b> Nhấn <b>"+ Thêm Vùng Đất Mới"</b>, sau đó giữ chuột trái để kéo di chuyển ô đất đến đúng vị trí sân vàng mong muốn.</span>
+      <span id="lbl-total-slots-count" class="font-bold text-emerald-400">Đã bố trí: 0 vùng đất</span>
+    </div>
 
   </div>
 
@@ -364,7 +419,14 @@
           'cond_top1': { id: 'cond_top1', name: 'Đạt Hạng 1 thi đua tuần', type: 'rank_top1', folders: ['hoacap2'] },
           'cond_top1_nu': { id: 'cond_top1_nu', name: 'Đạt Hạng 1 (Mở nụ VIP)', type: 'rank_top1', folders: ['nucap2'] },
           'cond_quest': { id: 'cond_quest', name: 'Hoàn thành nhiệm vụ ngày', type: 'quest_done', folders: ['congcu'] }
-        }
+        },
+        // Danh sách các vùng đất riêng được bố trí trên sân A (tính theo %)
+        plotSlots: [
+          { id: 'slot_1', name: 'Tổ 1', teamId: 1, x: 20, y: 30, w: 28, h: 28 },
+          { id: 'slot_2', name: 'Tổ 2', teamId: 2, x: 52, y: 30, w: 28, h: 28 },
+          { id: 'slot_3', name: 'Tổ 3', teamId: 3, x: 20, y: 60, w: 28, h: 28 },
+          { id: 'slot_4', name: 'Tổ 4', teamId: 4, x: 52, y: 60, w: 28, h: 28 }
+        ]
       },
       students: {},
       weeklyRanking: { 1: 1, 2: 2, 3: 3, 4: 4 }
@@ -380,12 +442,14 @@
       currentSelectedConditionId: '',
       editingConditionId: null,
       tempNewConditionFolders: ['hoacap2'],
-      currentActiveButtonIcon: '', // MẶC ĐỊNH LÀ RỖNG KHI MỚI VÀO
+      currentActiveButtonIcon: '',
       activeViewData: {
         type: 'none',
         folders: [],
         singleImage: null
-      }
+      },
+      // Dữ liệu tạm thời khi mở trình biên tập vùng chọn
+      tempEditorSlots: []
     };
 
     function togglePasswordVisibility(id, iconId) {
@@ -441,24 +505,36 @@
       loadActiveClassConfig();
       renderClassesList();
       syncAllFromGitHub();
-      // Mới vào để trống hoàn toàn ở Phần B
       renderPartBEmptyState();
     }
 
     function loadSavedData() {
-      const saved = localStorage.getItem('garden_system_classes_v8');
+      const saved = localStorage.getItem('garden_system_classes_v9');
       if (saved) {
-        try { state.classesData = JSON.parse(saved); } catch (e) {}
+        try { 
+          const parsed = JSON.parse(saved);
+          Object.values(parsed).forEach(c => {
+            if (!c.config.plotSlots) {
+              c.config.plotSlots = [
+                { id: 'slot_1', name: 'Tổ 1', teamId: 1, x: 20, y: 30, w: 28, h: 28 },
+                { id: 'slot_2', name: 'Tổ 2', teamId: 2, x: 52, y: 30, w: 28, h: 28 },
+                { id: 'slot_3', name: 'Tổ 3', teamId: 3, x: 20, y: 60, w: 28, h: 28 },
+                { id: 'slot_4', name: 'Tổ 4', teamId: 4, x: 52, y: 60, w: 28, h: 28 }
+              ];
+            }
+          });
+          state.classesData = parsed;
+        } catch (e) {}
       }
-      const savedActive = localStorage.getItem('garden_active_class_v8');
+      const savedActive = localStorage.getItem('garden_active_class_v9');
       if (savedActive && state.classesData[savedActive]) {
         state.activeClass = savedActive;
       }
     }
 
     function saveStateToLocal() {
-      localStorage.setItem('garden_system_classes_v8', JSON.stringify(state.classesData));
-      localStorage.setItem('garden_active_class_v8', state.activeClass);
+      localStorage.setItem('garden_system_classes_v9', JSON.stringify(state.classesData));
+      localStorage.setItem('garden_active_class_v9', state.activeClass);
     }
 
     // ================= QUẢN LÝ LỚP =================
@@ -471,7 +547,7 @@
     function switchActiveClass(className) {
       state.activeClass = className;
       state.currentSelectedConditionId = '';
-      state.currentActiveButtonIcon = ''; // Reset nút về trống
+      state.currentActiveButtonIcon = '';
       state.activeViewData = { type: 'none', folders: [], singleImage: null };
       saveStateToLocal();
       loadActiveClassConfig();
@@ -558,6 +634,7 @@
       displaySingleImagePreview(val, `Ảnh nền hiện tại (${type.toUpperCase()}): ${val}`);
     }
 
+    // HIỂN THỊ XEM TRƯỚC ẢNH NỀN Ở PHẦN B (CHO PHÉP NHẤP VÀO ĐỂ PHÓNG TO THIẾT KẾ)
     function displaySingleImagePreview(imagePath, title) {
       state.activeViewData = { type: 'single_preview', folders: [], singleImage: imagePath };
       document.getElementById('section-b-title').innerText = title;
@@ -566,22 +643,167 @@
 
       const fullUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${imagePath}`;
       const area = document.getElementById('multi-folder-display-area');
+      
       area.innerHTML = `
-        <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col items-center justify-center shadow-xs max-w-xl mx-auto">
-          <div class="w-full aspect-video rounded-xl bg-slate-900 overflow-hidden flex items-center justify-center p-2 shadow-inner border border-slate-300">
-            <img src="${fullUrl}" class="max-h-full max-w-full object-contain">
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 flex flex-col items-center justify-center shadow-xs max-w-2xl mx-auto group">
+          <div onclick="openFullscreenEditor('${imagePath}')" class="relative w-full aspect-[3/2] rounded-2xl bg-slate-950 overflow-hidden flex items-center justify-center cursor-pointer shadow-lg border-2 border-emerald-500/40 hover:border-emerald-500 transition duration-300">
+            <img src="${fullUrl}" class="max-h-full max-w-full object-contain pointer-events-none">
+            
+            <!-- Lớp phủ gợi ý phóng to -->
+            <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 backdrop-blur-xs flex flex-col items-center justify-center text-white transition duration-300">
+              <div class="w-12 h-12 rounded-full bg-emerald-600 flex items-center justify-center text-xl shadow-xl mb-2">
+                <i class="fa-solid fa-expand"></i>
+              </div>
+              <span class="text-xs font-black uppercase tracking-wider text-emerald-300">Bấm để phóng to & bố trí các khu đất riêng</span>
+            </div>
           </div>
           <span class="text-xs font-mono font-bold text-slate-700 mt-3 text-center">${imagePath}</span>
         </div>
       `;
     }
 
-    // ================= 2. GÁN TÍNH NĂNG NÚT =================
+    // ================= 2. TRÌNH THIẾT KẾ VÙNG CHỌN ĐẤT TOÀN MÀN HÌNH =================
+    function openFullscreenEditor(imagePath) {
+      const cls = state.classesData[state.activeClass];
+      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Bố trí vị trí ô đất cho các tổ`;
+      
+      const fullUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${imagePath}`;
+      document.getElementById('editor-canvas-bg').src = fullUrl;
+
+      // Nạp danh sách các vùng đất đã có của lớp
+      state.tempEditorSlots = JSON.parse(JSON.stringify(cls.config.plotSlots || []));
+      
+      renderEditorSlots();
+      document.getElementById('fullscreen-editor-modal').classList.remove('hidden');
+    }
+
+    function closeFullscreenEditor() {
+      document.getElementById('fullscreen-editor-modal').classList.add('hidden');
+    }
+
+    function saveAndCloseFullscreenEditor() {
+      const cls = state.classesData[state.activeClass];
+      cls.config.plotSlots = JSON.parse(JSON.stringify(state.tempEditorSlots));
+      saveStateToLocal();
+      closeFullscreenEditor();
+      alert(`Đã lưu thành công ${cls.config.plotSlots.length} vùng đất riêng cho Lớp ${state.activeClass}!\nCác vị trí này sẽ đồng bộ chính xác sang index.html.`);
+    }
+
+    function addNewPlotSlot() {
+      const newIndex = state.tempEditorSlots.length + 1;
+      const newSlot = {
+        id: 'slot_' + Date.now().toString(36),
+        name: `Tổ ${newIndex}`,
+        teamId: newIndex,
+        x: 35, // Tọa độ % mặc định
+        y: 40,
+        w: 26, // Chiều rộng %
+        h: 26  // Chiều cao %
+      };
+      state.tempEditorSlots.push(newSlot);
+      renderEditorSlots();
+    }
+
+    function renderEditorSlots() {
+      const container = document.getElementById('editor-slots-layer');
+      document.getElementById('lbl-total-slots-count').innerText = `Đã bố trí: ${state.tempEditorSlots.length} vùng đất`;
+
+      container.innerHTML = state.tempEditorSlots.map((slot, index) => `
+        <div id="slot-el-${slot.id}" 
+             class="plot-slot-box flex flex-col justify-between p-1.5 shadow-md" 
+             style="left: ${slot.x}%; top: ${slot.y}%; width: ${slot.w}%; height: ${slot.h}%;">
+          
+          <!-- Thanh nhãn trên cùng của ô đất -->
+          <div class="flex items-center justify-between w-full">
+            <span class="bg-amber-950/80 text-amber-200 text-[10px] font-black px-2 py-0.5 rounded-full truncate">
+              ${slot.name}
+            </span>
+            <button onclick="removeEditorSlot(${index}, event)" class="w-4 h-4 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-[9px] font-bold flex items-center justify-center shadow">
+              ✕
+            </button>
+          </div>
+
+          <!-- Ảnh mô phỏng khung đất khudatrieng_nau.png -->
+          <div class="flex-1 flex items-center justify-center overflow-hidden my-0.5 pointer-events-none">
+            <img src="https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/khudatrieng_nau.png" class="max-h-full max-w-full object-fill opacity-75">
+          </div>
+
+          <div class="text-[9px] text-emerald-950 font-black text-center truncate">
+            (Khu riêng ${slot.name})
+          </div>
+        </div>
+      `).join('');
+
+      // Kích hoạt kéo thả cho từng ô đất
+      state.tempEditorSlots.forEach((slot, index) => {
+        const el = document.getElementById(`slot-el-${slot.id}`);
+        if (el) makeSlotDraggable(el, index);
+      });
+    }
+
+    function makeSlotDraggable(element, slotIndex) {
+      let isDragging = false;
+      let startX, startY;
+      let initialLeftPx, initialTopPx;
+
+      element.addEventListener('mousedown', (e) => {
+        if (e.target.tagName === 'BUTTON') return;
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        initialLeftPx = element.offsetLeft;
+        initialTopPx = element.offsetTop;
+        element.classList.add('active-slot');
+        element.style.zIndex = 50;
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const canvas = document.getElementById('editor-canvas-box');
+        const canvasRect = canvas.getBoundingClientRect();
+
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        let newLeftPx = initialLeftPx + dx;
+        let newTopPx = initialTopPx + dy;
+
+        // Giới hạn trong khung sân
+        newLeftPx = Math.max(0, Math.min(canvasRect.width - element.offsetWidth, newLeftPx));
+        newTopPx = Math.max(0, Math.min(canvasRect.height - element.offsetHeight, newTopPx));
+
+        // Chuyển sang phần trăm (%)
+        const leftPercent = (newLeftPx / canvasRect.width) * 100;
+        const topPercent = (newTopPx / canvasRect.height) * 100;
+
+        element.style.left = `${leftPercent}%`;
+        element.style.top = `${topPercent}%`;
+
+        // Cập nhật tọa độ vào dữ liệu
+        state.tempEditorSlots[slotIndex].x = parseFloat(leftPercent.toFixed(2));
+        state.tempEditorSlots[slotIndex].y = parseFloat(topPercent.toFixed(2));
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          element.classList.remove('active-slot');
+          element.style.zIndex = 10;
+        }
+      });
+    }
+
+    function removeEditorSlot(index, event) {
+      event.stopPropagation();
+      state.tempEditorSlots.splice(index, 1);
+      renderEditorSlots();
+    }
+
+    // ================= 3. GÁN TÍNH NĂNG NÚT =================
     function populateButtonIconsList() {
       const select = document.getElementById('select-active-button-icon');
       const nutImages = state.cachedAssets['nutgame'] || [];
 
-      // Mặc định luôn có tùy chọn rỗng đầu tiên
       let html = `<option value="">-- Chọn nút --</option>`;
       if (nutImages.length > 0) {
         html += nutImages.map(img => 
@@ -602,7 +824,6 @@
       const detailBox = document.getElementById('button-detail-settings');
       const icon = state.currentActiveButtonIcon;
 
-      // NẾU CHƯA CHỌN NÚT (RỖNG) -> ẨN TOÀN BỘ VÀ XÓA PHẦN B
       if (!icon) {
         detailBox.classList.add('hidden');
         document.getElementById('input-active-button-label').value = '';
@@ -611,7 +832,6 @@
         return;
       }
 
-      // NẾU ĐÃ CHỌN NÚT -> HIỂN THỊ KHUNG CHI TIẾT
       detailBox.classList.remove('hidden');
 
       const cls = state.classesData[state.activeClass];
@@ -627,7 +847,6 @@
 
       renderAssignedFolderDropdownCheckboxes();
       
-      // HIỂN THỊ CÁC THƯ MỤC LIÊN KẾT ĐÃ CÓ CỦA NÚT SANG PHẦN B
       if (mapping.targetFolders && mapping.targetFolders.length > 0) {
         setPartBActiveFolders(mapping.targetFolders, `Các thư mục gán cho nút [${icon}]`);
       } else {
@@ -687,7 +906,7 @@
       el.innerText = mapping.targetFolders.length === 0 ? 'Chưa chọn thư mục' : mapping.targetFolders.join(', ');
     }
 
-    // ================= 3. MỞ KHÓA CẤP ĐỘ =================
+    // ================= 4. MỞ KHÓA CẤP ĐỘ =================
     function renderConditionsMenu() {
       const cls = state.classesData[state.activeClass];
       const group = document.getElementById('group-established-rules');
@@ -844,7 +1063,7 @@
       }
     }
 
-    // ================= 4. HIỂN THỊ PHẦN B =================
+    // ================= 5. HIỂN THỊ PHẦN B =================
     function renderPartBEmptyState() {
       state.activeViewData = { type: 'none', folders: [], singleImage: null };
       document.getElementById('section-b-title').innerText = 'Kho Ảnh Assets Đang Hiển Thị';
@@ -954,7 +1173,7 @@
       document.getElementById('lbl-selected-img-count').innerText = `Đã chọn: ${state.checkedImages.size}`;
     }
 
-    // ================= 5. QUÉT ASSETS TỪ GITHUB API =================
+    // ================= 6. QUÉT ASSETS TỪ GITHUB API =================
     async function syncAllFromGitHub() {
       const icon = document.getElementById('sync-icon');
       icon.classList.add('fa-spin');
@@ -981,7 +1200,7 @@
       populateButtonIconsList();
     }
 
-    // ================= 6. CSV & KẾT QUẢ THI ĐUA =================
+    // ================= 7. CSV & KẾT QUẢ THI ĐUA =================
     function generatePasswordFromNameAndSTT(fullName, stt) {
       if (!fullName) return `hs${stt}`;
       let clean = fullName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd');
@@ -1083,7 +1302,7 @@
 
     function saveAndApplyCurrentClass() {
       saveStateToLocal();
-      alert(`ĐÃ LƯU THÀNH CÔNG CHO LỚP ${state.activeClass}!\nToàn bộ cài đặt nền, gán nút và điều kiện mở khóa đã được đồng bộ sang game index.html.`);
+      alert(`ĐÃ LƯU THÀNH CÔNG CHO LỚP ${state.activeClass}!\nToàn bộ cài đặt nền, gán nút, điều kiện mở khóa và vị trí vùng đất riêng đã được đồng bộ sang index.html.`);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
