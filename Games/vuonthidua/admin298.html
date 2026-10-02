@@ -143,7 +143,7 @@
         </button>
       </div>
 
-      <!-- TAB 1: CẤU HÌNH GIAO DIỆN & MỞ KHÓA (ACCORDION MENU) -->
+      <!-- TAB 1: CẤU HÌNH GIAO DIỆN & MỞ KHÓA (ACCORDION MENU 4 MỤC) -->
       <div id="tab-panel-controls" class="flex-1 overflow-y-auto p-3 space-y-2.5">
         
         <!-- MỤC 1: CẤU HÌNH NỀN GIAO DIỆN -->
@@ -270,7 +270,7 @@
 
               <div>
                 <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Kiểu kiểm tra thực thi:</label>
-                <select id="select-new-cond-type" class="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-300 bg-white">
+                <select id="select-new-cond-type" class="w-full px-2 py-1 text-xs rounded-lg border border-slate-300 bg-white">
                   <option value="rank_top1">Xếp Hạng: Đạt Hạng 1 của tuần</option>
                   <option value="quest_done">Nhiệm Vụ: Hoàn thành nhập từ khóa ngày</option>
                   <option value="always_open">Tự Do: Luôn luôn mở</option>
@@ -295,6 +295,28 @@
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- MỤC 4: CẤU HÌNH ÂM THANH (MỚI BỔ SUNG) -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
+          <button type="button" onclick="toggleAccordionSection('sec-audio')" class="w-full p-3 bg-slate-50 hover:bg-emerald-50/60 flex items-center justify-between transition cursor-pointer">
+            <span class="text-xs font-black uppercase text-indigo-900 flex items-center gap-2">
+              <i class="fa-solid fa-music text-indigo-600"></i> Cấu Hình Âm Thanh
+            </span>
+            <i id="icon-sec-audio" class="fa-solid fa-chevron-right text-slate-400 text-xs transition-transform duration-200"></i>
+          </button>
+
+          <div id="content-sec-audio" class="hidden p-3.5 space-y-3 border-t border-slate-100">
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" onclick="switchAudioConfigTab('bgm')" id="btn-audio-tab-bgm" class="py-2 px-3 text-xs font-black rounded-xl border border-indigo-500 bg-indigo-50 text-indigo-900 flex items-center justify-center gap-1.5 shadow-xs transition">
+                <i class="fa-solid fa-compact-disc text-indigo-600"></i> Âm Thanh Nền
+              </button>
+              <button type="button" onclick="switchAudioConfigTab('sfx')" id="btn-audio-tab-sfx" class="py-2 px-3 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center gap-1.5 transition">
+                <i class="fa-solid fa-bell text-amber-500"></i> Âm Thanh Hiệu Ứng
+              </button>
+            </div>
+            <p class="text-[11px] text-slate-400 text-center italic">Chọn 1 trong 2 nút trên để chỉnh chi tiết tại Phần B.</p>
           </div>
         </div>
 
@@ -355,7 +377,7 @@
 
     </aside>
 
-    <!-- PHẦN B (2/3 BÊN PHẢI): HIỂN THỊ KHO ẢNH & BỘ ĐIỀU CHỈNH SCALE REVIEW -->
+    <!-- PHẦN B (2/3 BÊN PHẢI): HIỂN THỊ KHO ẢNH / CẤU HÌNH ÂM THANH -->
     <main class="w-full md:w-2/3 flex flex-col h-full bg-slate-50 overflow-hidden">
       
       <!-- THANH CÔNG CỤ TRÊN CÙNG PHẦN B -->
@@ -403,13 +425,14 @@
         </div>
       </div>
 
+      <!-- VÙNG HIỂN THỊ CHÍNH PHẦN B (CHỨA KHO ẢNH HOẶC KHUNG ÂM THANH) -->
       <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6" id="multi-folder-display-area"></div>
 
     </main>
 
   </div>
 
-  <!-- MODAL TOÀN MÀN HÌNH -->
+  <!-- MODAL NẮN DÁNG ĐẤT 3D TOÀN MÀN HÌNH -->
   <div id="fullscreen-editor-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col">
     <div class="h-14 bg-slate-900 border-b border-slate-800 px-6 flex items-center justify-between shrink-0 shadow-lg">
       <div class="flex items-center gap-3">
@@ -450,7 +473,7 @@
     const GITHUB_OWNER = 'MHP298';
     const GITHUB_REPO = 'ANT';
     const ASSETS_PATH = 'Games/vuonthidua/assets';
-    const ALL_FOLDERS = ['hoacap1', 'hoacap2', 'nucap1', 'nucap2', 'congcu', 'nengame', 'nutgame'];
+    const ALL_FOLDERS = ['hoacap1', 'hoacap2', 'nucap1', 'nucap2', 'congcu', 'nengame', 'nutgame', 'amthanh'];
 
     const DEFAULT_CLASS_TEMPLATE = (className) => ({
       name: className,
@@ -474,7 +497,22 @@
           }
         ],
         textOverlays: [],
-        assetScales: {}
+        assetScales: {},
+        // CẤU HÌNH ÂM THANH MẶC ĐỊNH
+        audioSettings: {
+          bgm: {
+            url: '',
+            selectedFile: '',
+            volume: 50,
+            autoPlay: true
+          },
+          sfx: [
+            { id: 'plant_pop', name: 'Cắm hoa / Đặt đất', url: '', selectedFile: '' },
+            { id: 'tab_click', name: 'Chuyển mục khay', url: '', selectedFile: '' },
+            { id: 'error_locked', name: 'Bị khóa / Sai quyền', url: '', selectedFile: '' },
+            { id: 'delete_item', name: 'Xóa vật phẩm / Dọn vườn', url: '', selectedFile: '' }
+          ]
+        }
       },
       students: {},
       weeklyRanking: { 1: 1, 2: 2, 3: 3, 4: 4 }
@@ -490,20 +528,28 @@
       activeSelectedImageName: '',
       tempEditorSlots: [],
       tempTextOverlays: [],
-      currentBgToneStyle: null
+      currentBgToneStyle: null,
+      currentAudioTab: 'bgm', // 'bgm' | 'sfx'
+      previewAudioInstance: null
     };
 
     // ================= XỬ LÝ ACCORDION MENU CHO PHẦN A =================
     function toggleAccordionSection(secKey) {
-      const sections = ['sec-bg', 'sec-btn', 'sec-cond'];
+      const sections = ['sec-bg', 'sec-btn', 'sec-cond', 'sec-audio'];
       sections.forEach(k => {
         const contentEl = document.getElementById(`content-${k}`);
         const iconEl = document.getElementById(`icon-${k}`);
+        if (!contentEl || !iconEl) return;
+
         if (k === secKey) {
           const isCurrentlyHidden = contentEl.classList.contains('hidden');
           if (isCurrentlyHidden) {
             contentEl.classList.remove('hidden');
             iconEl.classList.replace('fa-chevron-right', 'fa-chevron-down');
+            // Nếu bấm mở mục Âm thanh, mở ngay cấu hình âm thanh ở Phần B
+            if (secKey === 'sec-audio') {
+              switchAudioConfigTab(state.currentAudioTab);
+            }
           } else {
             contentEl.classList.add('hidden');
             iconEl.classList.replace('fa-chevron-down', 'fa-chevron-right');
@@ -572,7 +618,15 @@
     function loadSavedData() {
       const saved = localStorage.getItem('garden_system_classes_v14');
       if (saved) {
-        try { state.classesData = JSON.parse(saved); } catch (e) {}
+        try { 
+          const parsed = JSON.parse(saved);
+          Object.values(parsed).forEach(c => {
+            if (!c.config.audioSettings) {
+              c.config.audioSettings = DEFAULT_CLASS_TEMPLATE(c.name).config.audioSettings;
+            }
+          });
+          state.classesData = parsed;
+        } catch (e) {}
       }
       const savedActive = localStorage.getItem('garden_active_class_v14');
       if (savedActive && state.classesData[savedActive]) {
@@ -774,7 +828,7 @@
       const mapping = cls.config.buttonMappings[state.currentActiveButtonIcon] || { targetFolders: [] };
       const container = document.getElementById('dropdown-btn-assigned-folders');
 
-      container.innerHTML = ALL_FOLDERS.map(f => {
+      container.innerHTML = ALL_FOLDERS.filter(f => f !== 'amthanh').map(f => {
         const isChecked = mapping.targetFolders.includes(f);
         return `
           <label class="flex items-center justify-between px-2.5 py-1.5 rounded hover:bg-emerald-50 cursor-pointer text-xs font-bold text-slate-700" onclick="event.stopPropagation()">
@@ -812,7 +866,7 @@
       el.innerText = mapping.targetFolders.length === 0 ? 'Chưa chọn thư mục' : mapping.targetFolders.join(', ');
     }
 
-    // ================= MỞ KHÓA CẤP ĐỘ (ĐỒNG BỘ THƯ MỤC REAL-TIME) =================
+    // ================= MỞ KHÓA CẤP ĐỘ =================
     function renderConditionsMenu() {
       const cls = state.classesData[state.activeClass];
       const group = document.getElementById('group-established-rules');
@@ -893,7 +947,7 @@
 
     function renderCondFolderDropdownList() {
       const menu = document.getElementById('dropdown-cond-folders');
-      menu.innerHTML = ALL_FOLDERS.map(f => {
+      menu.innerHTML = ALL_FOLDERS.filter(f => f !== 'amthanh').map(f => {
         const isChecked = state.tempNewConditionFolders.includes(f);
         return `
           <label class="flex items-center justify-between px-2 py-1 rounded hover:bg-emerald-50 cursor-pointer text-xs font-bold text-slate-700" onclick="event.stopPropagation()">
@@ -975,7 +1029,7 @@
       }
     }
 
-    // ================= HIỂN THỊ PHẦN B: HIỂN THỊ Ổ KHÓA GÓC ẢNH & SCALE REVIEW =================
+    // ================= HIỂN THỊ PHẦN B: KHO ẢNH & SCALE REVIEW =================
     function renderPartBEmptyState() {
       state.activeViewData = { type: 'none', folders: [], singleImage: null, contextType: 'none', contextKey: '' };
       document.getElementById('section-b-title').innerText = 'Kho Ảnh Assets Đang Hiển Thị';
@@ -987,7 +1041,7 @@
         <div class="py-24 text-center text-slate-400 bg-white rounded-2xl border border-dashed border-slate-300">
           <i class="fa-regular fa-hand-pointer text-3xl mb-2 text-slate-300"></i>
           <p class="text-xs font-bold text-slate-500">Chưa có lựa chọn nào từ Phần A</p>
-          <p class="text-[11px] text-slate-400 mt-0.5">Chọn một nút, xem ảnh nền hoặc chọn điều kiện để hiển thị và tích chọn các ảnh tương ứng.</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">Chọn một nút, xem ảnh nền, mở khóa hoặc âm thanh để hiển thị cấu hình tương ứng.</p>
         </div>
       `;
     }
@@ -1067,12 +1121,10 @@
                   <div onclick="selectImageForScaleReview('${item.fileName}', '${item.rawUrl}')" 
                        class="relative bg-white rounded-xl border ${isChecked ? (isConditionMode ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-emerald-500 ring-2 ring-emerald-500/20') : 'border-slate-200'} p-2 flex flex-col justify-between group hover:shadow-xs transition cursor-pointer">
                     
-                    <!-- Checkbox chọn ảnh -->
                     <div class="absolute top-1.5 left-1.5 z-10" onclick="event.stopPropagation()">
                       <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSingleImageCheck('${item.fileName}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5 cursor-pointer">
                     </div>
 
-                    <!-- Ổ KHÓA GÓC TRÊN-PHẢI: HIỂN THỊ KHI Ở CHẾ ĐỘ MỞ KHÓA CẤP ĐỘ VÀ ĐƯỢC CHỌN -->
                     ${isConditionMode && isChecked ? `
                       <div class="absolute top-1.5 right-1.5 z-10 w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center text-[10px] shadow-sm" title="Ảnh này đang bị gắn điều kiện khóa cấp độ">
                         <i class="fa-solid fa-lock"></i>
@@ -1188,6 +1240,246 @@
     function updateSelectedImageCount() {
       const selectedCount = getContextSelectedImages().length;
       document.getElementById('lbl-selected-img-count').innerText = `Đã chọn: ${selectedCount}`;
+    }
+
+    // =========================================================================
+    // CẤU HÌNH ÂM THANH: NHẠC NỀN & HIỆU ỨNG TƯƠNG TÁC THEO HÀNH ĐỘNG
+    // =========================================================================
+    function switchAudioConfigTab(tabKey) {
+      state.currentAudioTab = tabKey;
+      const btnBgm = document.getElementById('btn-audio-tab-bgm');
+      const btnSfx = document.getElementById('btn-audio-tab-sfx');
+
+      if (tabKey === 'bgm') {
+        btnBgm.className = 'py-2 px-3 text-xs font-black rounded-xl border border-indigo-500 bg-indigo-50 text-indigo-900 flex items-center justify-center gap-1.5 shadow-xs transition';
+        btnSfx.className = 'py-2 px-3 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center gap-1.5 transition';
+        renderBackgroundMusicPanel();
+      } else {
+        btnSfx.className = 'py-2 px-3 text-xs font-black rounded-xl border border-indigo-500 bg-indigo-50 text-indigo-900 flex items-center justify-center gap-1.5 shadow-xs transition';
+        btnBgm.className = 'py-2 px-3 text-xs font-bold rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center gap-1.5 transition';
+        renderSoundEffectsPanel();
+      }
+    }
+
+    // GIAO DIỆN PHẦN B: ÂM THANH NỀN (BGM)
+    function renderBackgroundMusicPanel() {
+      state.activeViewData = { type: 'audio', folders: [], singleImage: null, contextType: 'audio', contextKey: 'bgm' };
+      document.getElementById('section-b-title').innerText = 'Cấu Hình Âm Thanh Nền (BGM)';
+      document.getElementById('total-visible-images-count').innerText = '';
+      document.getElementById('toolbar-actions').style.display = 'none';
+      document.getElementById('scale-controller-panel').style.display = 'none';
+
+      const cls = state.classesData[state.activeClass];
+      const bgmCfg = cls.config.audioSettings.bgm;
+      const audioFiles = state.cachedAssets['amthanh'] || [];
+
+      const fileOptions = audioFiles.map(f => 
+        `<option value="${f.localPath}" ${f.localPath === bgmCfg.selectedFile ? 'selected' : ''}>${f.fileName}</option>`
+      ).join('');
+
+      const area = document.getElementById('multi-folder-display-area');
+      area.innerHTML = `
+        <div class="max-w-2xl mx-auto bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-5">
+          <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+            <div class="w-10 h-10 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-lg shadow-inner">
+              <i class="fa-solid fa-compact-disc"></i>
+            </div>
+            <div>
+              <h4 class="text-sm font-black text-slate-800 uppercase">Thiết Lập Nhạc Nền Game</h4>
+              <p class="text-xs text-slate-400">Chọn file từ thư mục assets/amthanh/ hoặc dán đường link Drive/mp3 bên ngoài</p>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Nguồn 1: Chọn từ assets/amthanh/ -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">1. Chọn file nhạc từ thư mục assets/amthanh/:</label>
+              <select onchange="updateBgmSetting('selectedFile', this.value)" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-mono bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="">-- Chưa chọn file repo --</option>
+                ${fileOptions}
+              </select>
+            </div>
+
+            <!-- Nguồn 2: Dán link Drive / URL trực tiếp -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">2. Hoặc dán link Google Drive / URL mp3 trực tiếp:</label>
+              <input type="text" value="${bgmCfg.url || ''}" onchange="updateBgmSetting('url', this.value)" placeholder="VD: https://drive.google.com/file/d/... hoặc link audio mp3" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+
+            <!-- Điều chỉnh âm lượng & Nghe thử -->
+            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <span class="text-xs font-bold text-slate-700">Âm lượng:</span>
+                <input type="range" min="0" max="100" value="${bgmCfg.volume || 50}" oninput="updateBgmSetting('volume', this.value)" class="w-28 accent-indigo-600 cursor-pointer">
+                <span class="text-xs font-black text-indigo-800 w-8" id="lbl-bgm-volume-val">${bgmCfg.volume || 50}%</span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button onclick="testPlayAudio('bgm')" id="btn-test-bgm" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5">
+                  <i class="fa-solid fa-play"></i> Nghe Thử
+                </button>
+              </div>
+            </div>
+
+            <!-- Tùy chọn Tự động phát -->
+            <div class="flex items-center justify-between p-3 bg-indigo-50/50 rounded-2xl border border-indigo-100">
+              <span class="text-xs font-bold text-indigo-950">Tự động phát nhạc khi học sinh vào game:</span>
+              <input type="checkbox" ${bgmCfg.autoPlay ? 'checked' : ''} onchange="updateBgmSetting('autoPlay', this.checked)" class="w-4 h-4 rounded text-indigo-600 cursor-pointer">
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function updateBgmSetting(key, val) {
+      const cls = state.classesData[state.activeClass];
+      if (key === 'volume') {
+        cls.config.audioSettings.bgm.volume = parseInt(val) || 50;
+        document.getElementById('lbl-bgm-volume-val').innerText = `${val}%`;
+      } else if (key === 'url') {
+        cls.config.audioSettings.bgm.url = val.trim();
+      } else if (key === 'selectedFile') {
+        cls.config.audioSettings.bgm.selectedFile = val;
+      } else if (key === 'autoPlay') {
+        cls.config.audioSettings.bgm.autoPlay = val;
+      }
+      saveStateToLocal();
+    }
+
+    // GIAO DIỆN PHẦN B: ÂM THANH HIỆU ỨNG (SFX) THEO HÀNH ĐỘNG
+    function renderSoundEffectsPanel() {
+      state.activeViewData = { type: 'audio', folders: [], singleImage: null, contextType: 'audio', contextKey: 'sfx' };
+      document.getElementById('section-b-title').innerText = 'Cấu Hình Âm Thanh Hiệu Ứng (SFX)';
+      document.getElementById('total-visible-images-count').innerText = '';
+      document.getElementById('toolbar-actions').style.display = 'none';
+      document.getElementById('scale-controller-panel').style.display = 'none';
+
+      const cls = state.classesData[state.activeClass];
+      const sfxList = cls.config.audioSettings.sfx || [];
+      const audioFiles = state.cachedAssets['amthanh'] || [];
+
+      const area = document.getElementById('multi-folder-display-area');
+      area.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
+            <div>
+              <h4 class="text-xs font-black uppercase text-slate-800">Danh Sách Hiệu Ứng Tương Tác</h4>
+              <p class="text-[11px] text-slate-400">Gán file âm thanh hoặc link URL cho từng hành động của học sinh trong game</p>
+            </div>
+            <button onclick="addNewSfxActionRow()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5">
+              <i class="fa-solid fa-plus"></i> + Thêm Hành Động Mới
+            </button>
+          </div>
+
+          <div class="space-y-3" id="sfx-action-rows-container">
+            ${sfxList.map((sfx, idx) => {
+              const fileOptions = audioFiles.map(f => 
+                `<option value="${f.localPath}" ${f.localPath === sfx.selectedFile ? 'selected' : ''}>${f.fileName}</option>`
+              ).join('');
+
+              return `
+                <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs space-y-3">
+                  <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <div class="flex items-center gap-2">
+                      <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center justify-center">${idx + 1}</span>
+                      <input type="text" value="${sfx.name}" onchange="updateSfxSetting(${idx}, 'name', this.value)" class="text-xs font-black text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:outline-none px-1" placeholder="Tên hành động...">
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <button onclick="testPlayAudio('sfx', ${idx})" class="px-2.5 py-1 bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 text-[11px] font-bold rounded-lg transition flex items-center gap-1">
+                        <i class="fa-solid fa-play text-[10px]"></i> Thử
+                      </button>
+                      <button onclick="removeSfxActionRow(${idx})" class="w-6 h-6 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs flex items-center justify-center transition" title="Xóa hành động này">
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                    <!-- Dropdown chọn file repo -->
+                    <div>
+                      <label class="block text-[10px] font-bold text-slate-500 mb-1">Chọn từ assets/amthanh/:</label>
+                      <select onchange="updateSfxSetting(${idx}, 'selectedFile', this.value)" class="w-full px-2.5 py-1.5 text-xs rounded-xl border border-slate-300 bg-slate-50 font-mono">
+                        <option value="">-- Chưa chọn file repo --</option>
+                        ${fileOptions}
+                      </select>
+                    </div>
+
+                    <!-- Ô dán link Drive / URL trực tiếp -->
+                    <div>
+                      <label class="block text-[10px] font-bold text-slate-500 mb-1">Hoặc dán Link Drive / URL mp3:</label>
+                      <input type="text" value="${sfx.url || ''}" onchange="updateSfxSetting(${idx}, 'url', this.value)" placeholder="Dán link audio..." class="w-full px-2.5 py-1.5 text-xs rounded-xl border border-slate-300 font-mono">
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function addNewSfxActionRow() {
+      const cls = state.classesData[state.activeClass];
+      cls.config.audioSettings.sfx.push({
+        id: 'action_' + Date.now().toString(36),
+        name: 'Hành động mới ' + (cls.config.audioSettings.sfx.length + 1),
+        url: '',
+        selectedFile: ''
+      });
+      saveStateToLocal();
+      renderSoundEffectsPanel();
+    }
+
+    function removeSfxActionRow(idx) {
+      const cls = state.classesData[state.activeClass];
+      cls.config.audioSettings.sfx.splice(idx, 1);
+      saveStateToLocal();
+      renderSoundEffectsPanel();
+    }
+
+    function updateSfxSetting(idx, key, val) {
+      const cls = state.classesData[state.activeClass];
+      if (cls.config.audioSettings.sfx[idx]) {
+        cls.config.audioSettings.sfx[idx][key] = val.trim();
+        saveStateToLocal();
+      }
+    }
+
+    // NGHE THỬ ÂM THANH TRỰC TIẾP TẠI ADMIN
+    function testPlayAudio(type, sfxIdx = null) {
+      if (state.previewAudioInstance) {
+        state.previewAudioInstance.pause();
+        state.previewAudioInstance = null;
+      }
+
+      const cls = state.classesData[state.activeClass];
+      let targetUrl = '';
+
+      if (type === 'bgm') {
+        const bgm = cls.config.audioSettings.bgm;
+        targetUrl = bgm.url || (bgm.selectedFile ? `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${bgm.selectedFile}` : '');
+      } else {
+        const sfx = cls.config.audioSettings.sfx[sfxIdx];
+        targetUrl = sfx.url || (sfx.selectedFile ? `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${sfx.selectedFile}` : '');
+      }
+
+      // Xử lý link Google Drive sang link nghe trực tiếp
+      if (targetUrl.includes('drive.google.com/file/d/')) {
+        const idMatch = targetUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (idMatch) targetUrl = `https://drive.google.com/uc?export=download&id=${idMatch[1]}`;
+      }
+
+      if (!targetUrl) return alert('Chưa chọn file hoặc dán link âm thanh để nghe thử!');
+
+      try {
+        state.previewAudioInstance = new Audio(targetUrl);
+        if (type === 'bgm') {
+          state.previewAudioInstance.volume = (cls.config.audioSettings.bgm.volume || 50) / 100;
+        }
+        state.previewAudioInstance.play().catch(e => alert('Không thể phát file này: ' + e.message));
+      } catch (e) {
+        alert('Lỗi phát âm thanh: ' + e.message);
+      }
     }
 
     // ================= TRÌNH BIÊN TẬP VÙNG ĐẤT & CHỮ =================
@@ -1331,12 +1623,12 @@
           const centerY = (slot.corners[0].y + slot.corners[1].y + slot.corners[2].y + slot.corners[3].y) / 4;
           return `
             <div id="controls-slot-${sIdx}" class="absolute inset-0 pointer-events-none">
-              <div style="left: ${centerX}%; top: ${centerY}%; transform: translate(-50%, -50%);" 
+              <div style="left: ${centerX}%; top:${centerY}%; transform: translate(-50%, -50%);" 
                    class="absolute px-3 py-1 bg-amber-950/90 text-amber-200 border border-amber-600/60 rounded-full font-black text-xs shadow-lg pointer-events-none flex items-center gap-1">
                 <span>🌾</span> ${slot.name}
               </div>
 
-              <div style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%; transform: translate(-110%, -125%);"
+              <div style="left: ${slot.corners[0].x}%; top:${slot.corners[0].y}%; transform: translate(-110%, -125%);"
                    class="absolute flex items-center gap-1.5 pointer-events-auto z-50">
                 <button onclick="copyPlotSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center shadow-lg hover:scale-125 transition" title="Copy ô đất này">
                   <i class="fa-solid fa-copy"></i>
@@ -1346,17 +1638,17 @@
                 </button>
               </div>
 
-              <div id="handle-${sIdx}-0" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%;"></div>
-              <div id="handle-${sIdx}-1" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[1].x}%; top: ${slot.corners[1].y}%;"></div>
-              <div id="handle-${sIdx}-2" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[2].x}%; top: ${slot.corners[2].y}%;"></div>
-              <div id="handle-${sIdx}-3" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[3].x}%; top: ${slot.corners[3].y}%;"></div>
+              <div id="handle-${sIdx}-0" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[0].x}%; top:${slot.corners[0].y}%;"></div>
+              <div id="handle-${sIdx}-1" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[1].x}%; top:${slot.corners[1].y}%;"></div>
+              <div id="handle-${sIdx}-2" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[2].x}\%; top:${slot.corners[2].y}%;"></div>
+              <div id="handle-${sIdx}-3" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[3].x}\%; top:${slot.corners[3].y}%;"></div>
             </div>
           `;
         }).join('')}
 
         ${state.tempTextOverlays.map((txt, tIdx) => `
-          <div id="text-overlay-${tIdx}" style="left: ${txt.x}%; top: ${txt.y}%;" class="draggable-text-box group pointer-events-auto">
-            <div ondblclick="editTextContent(${tIdx})" style="color: ${tone.textColor}; text-shadow: ${tone.textShadow}; background: ${tone.bgColor}; border: 1.5px dashed ${tone.borderColor}; font-size: ${txt.fontSize}px;" class="px-3.5 py-1.5 rounded-xl font-extrabold tracking-wide flex items-center gap-2 shadow-md">
+          <div id="text-overlay-${tIdx}" style="left: ${txt.x}\%; top:${txt.y}%;" class="draggable-text-box group pointer-events-auto">
+            <div ondblclick="editTextContent(${tIdx})" style="color: ${tone.textColor}; text-shadow: ${tone.textShadow}; background:${tone.bgColor}; border: 1.5px dashed ${tone.borderColor}; font-size:${txt.fontSize}px;" class="px-3.5 py-1.5 rounded-xl font-extrabold tracking-wide flex items-center gap-2 shadow-md">
               <span class="truncate">${txt.content}</span>
               <button onclick="removeTextOverlay(${tIdx}, event)" class="w-4 h-4 rounded-full bg-rose-500 hover:bg-rose-700 text-white text-[9px] font-bold opacity-0 group-hover:opacity-100 transition flex items-center justify-center">✕</button>
             </div>
@@ -1459,7 +1751,7 @@
           const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${ASSETS_PATH}/${folder}`);
           if (res.ok) {
             const data = await res.json();
-            state.cachedAssets[folder] = data.filter(item => item.type === 'file' && /\.(png|jpe?g|webp|svg)$/i.test(item.name))
+            state.cachedAssets[folder] = data.filter(item => item.type === 'file' && /\.(png|jpe?g|webp|svg|mp3|wav|ogg|m4a)$/i.test(item.name))
               .map(item => ({
                 fileName: item.name,
                 displayName: item.name.replace(/\.[^/.]+$/, "").replace(/[_-]+/g, ' ').toUpperCase(),
@@ -1585,7 +1877,7 @@
 
     function saveAndApplyCurrentClass() {
       saveStateToLocal();
-      alert(`ĐÃ LƯU THÀNH CÔNG CHO LỚP ${state.activeClass}!\nToàn bộ cài đặt nền, scale ảnh, danh sách ảnh bị khóa, phân quyền chức vụ, ô đất và chữ nền đã đồng bộ sang index.html.`);
+      alert(`ĐÃ LƯU THÀNH CÔNG CHO LỚP ${state.activeClass}!\nToàn bộ cài đặt nền, scale ảnh, khóa cấp độ, âm thanh, phân quyền chức vụ, ô đất và chữ nền đã đồng bộ.`);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
