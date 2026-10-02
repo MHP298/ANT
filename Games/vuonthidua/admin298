@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin298 - Tự Động Quét & Quản Lý Asset</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .bg-trans-grid {
+      background-color: #ffffff;
+      background-image: linear-gradient(45deg, #f1f5f9 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f1f5f9 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f1f5f9 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f1f5f9 75%);
+      background-size: 14px 14px;
+      background-position: 0 0, 0 7px, 7px -7px, -7px 0px;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f8fafc; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans">
+
+  <!-- POPUP ĐĂNG NHẬP -->
+  <div id="login-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-200">
+      <div class="text-center mb-5">
+        <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto text-2xl mb-2 shadow-inner">
+          <i class="fa-solid fa-seedling"></i>
+        </div>
+        <h2 class="text-xl font-bold text-slate-800">Admin298 Management</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Tự động đồng bộ kho asset từ GitHub</p>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Tài khoản</label>
+          <input type="text" id="login-user" autocomplete="off" class="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Mật khẩu</label>
+          <div class="relative">
+            <input type="password" id="login-pass" autocomplete="off" class="w-full px-3.5 py-2 pr-10 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <button type="button" onclick="togglePasswordVisibility('login-pass', 'eye-icon-login')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none">
+              <i id="eye-icon-login" class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div id="login-error" class="hidden text-rose-500 text-xs font-semibold text-center"></div>
+        <button onclick="handleLogin()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="bg-white border-b border-slate-200 px-6 py-3 sticky top-0 z-30 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-3">
+      <span class="text-2xl text-emerald-600"><i class="fa-brands fa-github"></i></span>
+      <div>
+        <h1 class="font-bold text-base text-slate-800 leading-tight">Admin298 - Tự Động Quét Kho Asset</h1>
+        <p class="text-[11px] text-slate-500 font-mono">Repo: MHP298/ANT (Games/vuonthidua/assets)</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="syncAllAssetsFromGitHub()" id="btn-sync-all" class="px-3 py-1.5 rounded-lg border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center gap-1.5 transition">
+        <i class="fa-solid fa-rotate text-emerald-600" id="sync-icon"></i> Đồng Bộ Lại Toàn Bộ
+      </button>
+      <button onclick="handleLogout()" class="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold flex items-center gap-1 transition">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng Xuất
+      </button>
+    </div>
+  </header>
+
+  <!-- NỘI DUNG CHÍNH -->
+  <div id="admin-app" class="hidden flex-1 flex flex-col md:flex-row h-[calc(100vh-57px)] overflow-hidden">
+    
+    <!-- PHẦN A: BÊN TRÁI (1/3) - QUẢN LÝ THƯ MỤC & CẤU HÌNH GITHUB -->
+    <aside class="w-full md:w-1/3 border-r border-slate-200 bg-white flex flex-col h-full shadow-sm">
+      <div class="p-3 border-b border-slate-200 bg-slate-50">
+        <h3 class="text-xs font-black uppercase text-slate-600 tracking-wider">Cấu Hình GitHub Repository</h3>
+        <div class="mt-2 space-y-2 text-xs">
+          <div>
+            <label class="block text-[11px] text-slate-500 font-semibold mb-0.5">Đường dẫn thư mục Assets:</label>
+            <input type="text" id="cfg-path" value="Games/vuonthidua/assets" class="w-full px-2.5 py-1.5 border rounded-lg bg-white font-mono text-[11px] focus:ring-1 focus:ring-emerald-500">
+          </div>
+          <button onclick="saveAndReload()" class="w-full py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg font-bold text-xs transition">
+            Áp Dụng & Quét Lại
+          </button>
+        </div>
+      </div>
+
+      <!-- Danh sách các thư mục -->
+      <div class="flex-1 overflow-y-auto p-3 space-y-1.5">
+        <div class="text-[11px] font-bold uppercase text-slate-400 px-2 mb-1">Thư mục tự động nhận diện:</div>
+        <div id="folder-list-container" class="space-y-1">
+          <!-- Render danh sách thư mục -->
+        </div>
+      </div>
+
+      <!-- Thống kê trạng thái -->
+      <div class="p-3 border-t border-slate-200 bg-slate-50 text-xs text-slate-600 space-y-1">
+        <div class="flex justify-between">
+          <span>Thư mục đang xem:</span>
+          <b class="text-emerald-700 font-mono" id="lbl-active-folder">hoacap1</b>
+        </div>
+        <div class="flex justify-between">
+          <span>Tổng số file quét được:</span>
+          <b class="text-slate-800" id="lbl-total-files">0</b>
+        </div>
+      </div>
+    </aside>
+
+    <!-- PHẦN B: BÊN PHẢI (2/3) - LƯỚI HIỂN THỊ KHO ẢNH QUÉT ĐƯỢC -->
+    <main class="w-full md:w-2/3 flex flex-col h-full bg-slate-50">
+      
+      <!-- Action Bar -->
+      <div class="bg-white border-b border-slate-200 p-3.5 flex items-center justify-between shadow-xs">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-slate-700">Thư mục: <span id="current-folder-title" class="font-mono text-emerald-700 font-black">hoacap1</span></span>
+          <span id="folder-loading-status" class="text-[11px] text-amber-600 font-semibold hidden">
+            <i class="fa-solid fa-spinner fa-spin"></i> Đang tải từ GitHub API...
+          </span>
+        </div>
+
+        <button onclick="copyGeneratedCode()" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+          <i class="fa-solid fa-code"></i> Sao Chép Mảng JS Cho Game
+        </button>
+      </div>
+
+      <!-- Lưới ảnh -->
+      <div class="flex-1 overflow-y-auto p-4 md:p-6">
+        <div id="asset-display-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3.5"></div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    const GITHUB_OWNER = 'MHP298';
+    const GITHUB_REPO = 'ANT';
+    let ASSETS_BASE_PATH = 'Games/vuonthidua/assets';
+
+    // Danh sách các thư mục cần quét
+    const TARGET_FOLDERS = [
+      { key: 'hoacap1', label: 'Hoa Cấp 1 (Mở)', icon: 'fa-flower' },
+      { key: 'hoacap2', label: 'Hoa Cấp 2 (VIP Khóa)', icon: 'fa-crown' },
+      { key: 'nucap1',  label: 'Nụ Cấp 1 (Mở)', icon: 'fa-seedling' },
+      { key: 'nucap2',  label: 'Nụ Cấp 2 (VIP Khóa)', icon: 'fa-shield-halved' },
+      { key: 'nengame', label: 'Nền Game & Khung Đất', icon: 'fa-image' },
+      { key: 'congcu',  label: 'Dụng Cụ Làm Vườn', icon: 'fa-toolbox' },
+      { key: 'nutgame', label: 'Nút Bấm Giao Diện', icon: 'fa-circle-dot' }
+    ];
+
+    let state = {
+      currentFolder: 'hoacap1',
+      cache: {} // Lưu cache dữ liệu quét: { 'hoacap1': [ { name, displayName, downloadUrl, rawUrl } ] }
+    };
+
+    function togglePasswordVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
+
+    function handleLogin() {
+      const u = document.getElementById('login-user').value.trim();
+      const p = document.getElementById('login-pass').value.trim();
+      const err = document.getElementById('login-error');
+
+      if (u === 'admin298' && p === '@dmjn298') {
+        sessionStorage.setItem('current_admin_user', u);
+        document.getElementById('login-modal').classList.add('hidden');
+        document.getElementById('admin-app').classList.remove('hidden');
+        initAdmin();
+      } else {
+        err.innerText = 'Tài khoản hoặc mật khẩu không chính xác!';
+        err.classList.remove('hidden');
+      }
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem('current_admin_user');
+      location.reload();
+    }
+
+    function initAdmin() {
+      renderFolderSidebar();
+      loadFolderAssets(state.currentFolder);
+    }
+
+    // Tự động chuyển đổi tên file thành Tên Hiển Thị (Ví dụ: tulip_hoa_cam.png -> Tulip Hoa Cam)
+    function formatDisplayName(fileName) {
+      const nameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
+      return nameWithoutExt
+        .replace(/[_-]+/g, ' ')
+        .replace(/\b\w/g, char => char.toUpperCase());
+    }
+
+    // Render danh sách thư mục bên trái
+    function renderFolderSidebar() {
+      const container = document.getElementById('folder-list-container');
+      container.innerHTML = TARGET_FOLDERS.map(f => {
+        const isActive = f.key === state.currentFolder;
+        const count = state.cache[f.key] ? state.cache[f.key].length : '...';
+        return `
+          <button onclick="switchFolder('${f.key}')" class="w-full px-3 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-between ${
+            isActive ? 'bg-emerald-600 text-white shadow-sm' : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-200'
+          }">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid ${f.icon}"></i>
+              <span>${f.label}</span>
+            </div>
+            <span class="text-[10px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-500'}">
+              ${count}
+            </span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function switchFolder(folderKey) {
+      state.currentFolder = folderKey;
+      document.getElementById('lbl-active-folder').innerText = folderKey;
+      document.getElementById('current-folder-title').innerText = folderKey;
+      renderFolderSidebar();
+      loadFolderAssets(folderKey);
+    }
+
+    // GỌI GITHUB REST API ĐỂ QUÉT TỰ ĐỘNG CÁC FILE TRONG THƯ MỤC
+    async function loadFolderAssets(folderKey, forceReload = false) {
+      const statusLbl = document.getElementById('folder-loading-status');
+      const grid = document.getElementById('asset-display-grid');
+
+      // Nếu đã có cache và không yêu cầu reload
+      if (state.cache[folderKey] && !forceReload) {
+        renderGrid(state.cache[folderKey]);
+        return;
+      }
+
+      statusLbl.classList.remove('hidden');
+      grid.innerHTML = `
+        <div class="col-span-full py-16 text-center text-slate-400">
+          <i class="fa-solid fa-spinner fa-spin text-3xl mb-2 text-emerald-600"></i>
+          <p class="text-xs font-bold">Đang quét thư mục [${folderKey}] từ GitHub...</p>
+        </div>
+      `;
+
+      const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${ASSETS_BASE_PATH}/${folderKey}`;
+
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+          throw new Error(`GitHub API báo lỗi (${response.status}): Thư mục chưa tồn tại hoặc bị giới hạn lượt gọi.`);
+        }
+        const data = await response.json();
+
+        // Lọc lấy các file ảnh hợp lệ (png, jpg, jpeg, svg, webp)
+        const imageFiles = data.filter(item => 
+          item.type === 'file' && /\.(png|jpe?g|svg|webp)$/i.test(item.name)
+        ).map(item => ({
+          fileName: item.name,
+          displayName: formatDisplayName(item.name),
+          path: item.path,
+          // Link raw chính xác để nhúng vào thẻ <img>
+          rawUrl: `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${item.path}`
+        }));
+
+        state.cache[folderKey] = imageFiles;
+        document.getElementById('lbl-total-files').innerText = imageFiles.length;
+        renderFolderSidebar();
+        renderGrid(imageFiles);
+
+      } catch (err) {
+        grid.innerHTML = `
+          <div class="col-span-full py-12 px-4 text-center bg-rose-50 border border-rose-200 rounded-2xl text-rose-600">
+            <i class="fa-solid fa-triangle-exclamation text-3xl mb-2"></i>
+            <p class="text-xs font-bold">${err.message}</p>
+            <p class="text-[11px] text-slate-500 mt-1">Đảm bảo thư mục <b>${ASSETS_BASE_PATH}/${folderKey}</b> đã có ít nhất 1 file ảnh trên repo.</p>
+          </div>
+        `;
+      } finally {
+        statusLbl.classList.add('hidden');
+      }
+    }
+
+    // HIỂN THỊ CÁC FILE QUÉT ĐƯỢC LÊN GIAO DIỆN PHẦN B
+    function renderGrid(files) {
+      const grid = document.getElementById('asset-display-grid');
+      document.getElementById('lbl-total-files').innerText = files.length;
+
+      if (!files || files.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-16 text-center bg-white border border-dashed border-slate-300 rounded-2xl text-slate-400">
+            <i class="fa-regular fa-image text-3xl mb-2"></i>
+            <p class="text-xs font-bold">Thư mục này hiện chưa có file ảnh nào.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = files.map(f => `
+        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition flex flex-col group p-2.5">
+          <div class="h-28 w-full bg-trans-grid rounded-xl flex items-center justify-center p-2 relative">
+            <img src="${f.rawUrl}" alt="${f.fileName}" class="max-h-full max-w-full object-contain filter drop-shadow">
+          </div>
+
+          <div class="mt-2 flex-1 flex flex-col justify-between">
+            <div>
+              <p class="text-xs font-black text-slate-800 truncate" title="${f.displayName}">${f.displayName}</p>
+              <p class="text-[10px] font-mono text-slate-400 truncate" title="${f.fileName}">${f.fileName}</p>
+            </div>
+            
+            <button onclick="copyText('${f.rawUrl}')" class="mt-2 w-full py-1 text-[10px] font-bold rounded-lg bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 transition flex items-center justify-center gap-1">
+              <i class="fa-regular fa-copy"></i> Copy Link
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function copyText(txt) {
+      navigator.clipboard.writeText(txt).then(() => alert('Đã sao chép link ảnh thành công!'));
+    }
+
+    // ĐỒNG BỘ LẠI TẤT CẢ CÁC THƯ MỤC
+    async function syncAllAssetsFromGitHub() {
+      const icon = document.getElementById('sync-icon');
+      icon.classList.add('fa-spin');
+      for (const f of TARGET_FOLDERS) {
+        await loadFolderAssets(f.key, true);
+      }
+      icon.classList.remove('fa-spin');
+      alert('Đã hoàn tất đồng bộ toàn bộ kho ảnh từ GitHub!');
+    }
+
+    function saveAndReload() {
+      ASSETS_BASE_PATH = document.getElementById('cfg-path').value.trim();
+      state.cache = {};
+      syncAllAssetsFromGitHub();
+    }
+
+    // TỰ ĐỘNG XUẤT MẢNG JAVASCRIPT CHO FILE INDEX.HTML
+    function copyGeneratedCode() {
+      const currentItems = state.cache[state.currentFolder] || [];
+      if (currentItems.length === 0) return alert('Chưa có dữ liệu để xuất code!');
+
+      const formattedArray = currentItems.map(item => {
+        const isLocked = state.currentFolder.includes('cap2');
+        const tier = isLocked ? 2 : 1;
+        return `  { id: '${item.fileName.replace(/\.[^/.]+$/, "")}', name: '${item.displayName}', src: 'assets/${state.currentFolder}/${item.fileName}', locked: ${isLocked}, tier: ${tier} }`;
+      }).join(',\n');
+
+      const fullCode = `const ${state.currentFolder}_items = [\n${formattedArray}\n];`;
+      navigator.clipboard.writeText(fullCode).then(() => {
+        alert(`Đã sao chép mảng JS cho [${state.currentFolder}]! Bạn chỉ cần dán vào file index.html.`);
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedUser = sessionStorage.getItem('current_admin_user');
+      if (savedUser === 'admin298') {
+        document.getElementById('login-modal').classList.add('hidden');
+        document.getElementById('admin-app').classList.remove('hidden');
+        initAdmin();
+      }
+    });
+  </script>
+</body>
+</html>
