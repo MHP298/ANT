@@ -9,21 +9,28 @@
   <style>
     /* Nền caro trong suốt */
     .bg-trans-grid {
-      background-color: #ffffff;
-      background-image: linear-gradient(45deg, #f1f5f9 25%, transparent 25%), 
-                        linear-gradient(-45deg, #f1f5f9 25%, transparent 25%), 
-                        linear-gradient(45deg, transparent 75%, #f1f5f9 75%), 
-                        linear-gradient(-45deg, transparent 75%, #f1f5f9 75%);
-      background-size: 14px 14px;
-      background-position: 0 0, 0 7px, 7px -7px, -7px 0px;
+      background-color: rgba(255, 255, 255, 0.85);
+      background-image: linear-gradient(45deg, #e2e8f0 25%, transparent 25%), 
+                        linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #e2e8f0 75%), 
+                        linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+      background-size: 12px 12px;
+      background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
     }
-    /* Thanh cuộn gọn gàng */
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: #f1f5f9; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     
-    /* Vật phẩm trên sân A */
+    /* Áp dụng nền vân gỗ nenungdung.jpg cho Phần B */
+    .bg-wood-panel {
+      background-image: url('assets/nengame/nenungdung.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+    ::-webkit-scrollbar-thumb { background: rgba(120, 53, 15, 0.4); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(120, 53, 15, 0.7); }
+    
     .garden-placed-item {
       position: absolute;
       touch-action: none;
@@ -37,11 +44,11 @@
 </head>
 <body class="bg-slate-900 text-slate-800 h-screen w-screen overflow-hidden flex flex-col font-sans select-none">
 
-  <!-- THANH TIÊU ĐỀ TRÊN CÙNG (GỌN GÀNG) -->
-  <header class="h-11 bg-white border-b border-slate-200 px-4 flex items-center justify-between z-30 shrink-0 shadow-sm">
+  <!-- THANH TIÊU ĐỀ TRÊN CÙNG -->
+  <header class="h-11 bg-white border-b border-amber-900/20 px-4 flex items-center justify-between z-30 shrink-0 shadow-sm">
     <div class="flex items-center gap-2">
       <span class="text-xl">🌸</span>
-      <h1 class="font-extrabold text-sm text-emerald-800 uppercase tracking-wide">Vườn Thi Đua Trồng Hoa</h1>
+      <h1 class="font-extrabold text-sm text-emerald-900 uppercase tracking-wide">Vườn Thi Đua Trồng Hoa</h1>
       <span class="text-[11px] px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-bold ml-2">Lớp 10A1</span>
     </div>
 
@@ -55,74 +62,72 @@
     </div>
   </header>
 
-  <!-- BỐ CỤC CHÍNH TOÀN MÀN HÌNH: PHẦN A (TRÁI) & PHẦN B (PHẢI) -->
+  <!-- BỐ CỤC CHÍNH TOÀN MÀN HÌNH -->
   <div class="flex-1 flex flex-row h-[calc(100vh-44px)] overflow-hidden">
     
-    <!-- ==================== PHẦN A: BÊN TRÁI (SÂN CHƠI NỀN GAME) ==================== -->
-    <section id="section-a" class="flex-1 relative bg-slate-950 overflow-hidden flex items-center justify-center border-r border-slate-300" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+    <!-- ==================== PHẦN A: BÊN TRÁI (SÂN NỀN GAME) ==================== -->
+    <section id="section-a" class="flex-1 relative bg-slate-950 overflow-hidden flex items-center justify-center border-r-4 border-amber-950/40" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
       
-      <!-- Lớp ảnh nền game -->
+      <!-- Ảnh nền game vuonlop.jpg -->
       <img id="game-bg-image" 
            src="assets/nengame/vuonlop.jpg" 
            alt="Nền Game" 
            onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/vuonlop.jpg'" 
            class="absolute inset-0 w-full h-full object-fill pointer-events-none transition-all duration-300">
 
-      <!-- Khung chứa các vật thể được kéo thả/đặt trên sân A -->
-      <div id="drop-container" class="absolute inset-0 w-full h-full z-10 pointer-events-auto">
-        <!-- Các cây, nụ, hoa, xẻng được thả vào đây -->
-      </div>
+      <!-- Khung chứa các vật phẩm đặt trên sân -->
+      <div id="drop-container" class="absolute inset-0 w-full h-full z-10 pointer-events-auto"></div>
 
-      <!-- Gợi ý thao tác khi sân trống -->
+      <!-- Hướng dẫn nhanh góc dưới -->
       <div id="empty-hint" class="absolute bottom-4 left-4 z-20 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 text-white text-xs pointer-events-none flex items-center gap-2">
         <i class="fa-solid fa-hand-pointer text-amber-400"></i>
-        <span>Kéo các vật phẩm từ <b>Phần B</b> thả vào đây để bài trí khu vườn!</span>
+        <span>Kéo các vật phẩm từ <b>Phần B</b> thả vào đây để trang trí khu vườn!</span>
       </div>
     </section>
 
-    <!-- ==================== PHẦN B: BÊN PHẢI (CÔNG CỤ & KHAY VẬT PHẨM) ==================== -->
-    <aside id="section-b" class="w-80 md:w-96 lg:w-[420px] bg-slate-50 flex flex-col h-full border-l border-slate-200 shadow-xl shrink-0">
+    <!-- ==================== PHẦN B: BÊN PHẢI (NỀN GỖ nenungdung.jpg) ==================== -->
+    <aside id="section-b" class="w-80 md:w-96 lg:w-[420px] bg-wood-panel flex flex-col h-full shadow-2xl shrink-0 border-l border-amber-900/30">
       
-      <!-- PHẦN B1: BỘ CHỌN NỀN & CÁC NÚT ĐIỀU KHIỂN CHÍNH -->
-      <div class="p-3 bg-white border-b border-slate-200 shadow-xs space-y-3 shrink-0">
+      <!-- PHẦN B1: BỘ CHỌN NỀN & CÁC NÚT ĐIỀU KHIỂN -->
+      <div class="p-3 bg-amber-950/20 backdrop-blur-xs border-b border-amber-900/30 shadow-sm space-y-2.5 shrink-0">
         
-        <!-- Chọn ảnh nền từ assets/nengame/ -->
-        <div class="flex items-center gap-2">
-          <label class="text-xs font-bold text-slate-600 whitespace-nowrap"><i class="fa-regular fa-image text-emerald-600"></i> Nền Game:</label>
-          <select id="bg-selector" onchange="changeGameBackground(this.value)" class="flex-1 px-2.5 py-1.5 text-xs font-semibold rounded-xl border border-slate-300 bg-slate-50 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        <!-- Chọn ảnh nền -->
+        <div class="flex items-center gap-2 bg-white/90 p-1.5 rounded-xl border border-amber-900/20 shadow-xs">
+          <label class="text-xs font-bold text-amber-950 whitespace-nowrap pl-1"><i class="fa-regular fa-image text-emerald-600"></i> Nền Game:</label>
+          <select id="bg-selector" onchange="changeGameBackground(this.value)" class="flex-1 px-2 py-1 text-xs font-semibold rounded-lg border border-amber-200 bg-amber-50/50 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
             <option value="vuonlop.jpg">Sân Trường Lớp Học (vuonlop.jpg)</option>
             <option value="nengame1.jpg">Khu Vườn Xanh (nengame1.jpg)</option>
             <option value="nengame2.jpg">Vườn Hoa Nắng (nengame2.jpg)</option>
           </select>
         </div>
 
-        <!-- 4 NÚT CHỨC NĂNG LẤY TỪ assets/nutgame/ -->
+        <!-- 4 Nút chức năng -->
         <div>
-          <div class="text-[11px] font-bold uppercase text-slate-400 mb-1.5">Chọn Thư Mục Vật Phẩm:</div>
+          <div class="text-[10px] font-black uppercase text-amber-950 tracking-wide mb-1 drop-shadow-[0_1px_1px_rgba(255,255,255,0.6)]">CHỌN THƯ MỤC VẬT PHẨM:</div>
           <div class="grid grid-cols-4 gap-2">
             
             <!-- Nút Hoa -->
-            <button onclick="switchCategory('hoa')" id="btn-nuthoa" class="group relative rounded-xl border-2 border-emerald-500 bg-emerald-50 p-1 hover:shadow-md transition flex flex-col items-center justify-center">
-              <img src="assets/nutgame/nuthoa.png" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/nut_hoa.png'; this.onerror=null;" alt="Nút Hoa" class="w-10 h-10 object-contain drop-shadow group-hover:scale-105 transition-transform">
+            <button onclick="switchCategory('hoa')" id="btn-nuthoa" class="group relative rounded-xl border-2 border-emerald-600 bg-white/95 p-1 shadow-sm transition flex flex-col items-center justify-center scale-105">
+              <img src="assets/nutgame/nuthoa.png" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/nut_hoa.png'; this.onerror=null;" alt="Nút Hoa" class="w-10 h-10 object-contain drop-shadow">
               <span class="text-[10px] font-black text-emerald-800 mt-0.5">HOA</span>
             </button>
 
             <!-- Nút Nụ -->
-            <button onclick="switchCategory('nu')" id="btn-nutnu" class="group relative rounded-xl border-2 border-slate-200 bg-white p-1 hover:border-emerald-400 hover:bg-emerald-50/50 transition flex flex-col items-center justify-center">
-              <img src="assets/nutgame/nutnu.png" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/nut_nu.png'; this.onerror=null;" alt="Nút Nụ" class="w-10 h-10 object-contain drop-shadow group-hover:scale-105 transition-transform">
-              <span class="text-[10px] font-bold text-slate-600 mt-0.5">NỤ</span>
+            <button onclick="switchCategory('nu')" id="btn-nutnu" class="group relative rounded-xl border border-amber-900/20 bg-white/80 hover:bg-white p-1 transition flex flex-col items-center justify-center">
+              <img src="assets/nutgame/nutnu.png" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/nut_nu.png'; this.onerror=null;" alt="Nút Nụ" class="w-10 h-10 object-contain drop-shadow">
+              <span class="text-[10px] font-bold text-amber-950 mt-0.5">NỤ</span>
             </button>
 
-            <!-- Nút Chữ Nhật (Khung đất) -->
-            <button onclick="switchCategory('chunhat')" id="btn-nutchunhat" class="group relative rounded-xl border-2 border-slate-200 bg-white p-1 hover:border-emerald-400 hover:bg-emerald-50/50 transition flex flex-col items-center justify-center">
-              <img src="assets/nutgame/nutchunhat.png" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/nut_dat.png'; this.onerror=null;" alt="Nút Đất" class="w-10 h-10 object-contain drop-shadow group-hover:scale-105 transition-transform">
-              <span class="text-[10px] font-bold text-slate-600 mt-0.5">ĐẤT</span>
+            <!-- Nút Đất -->
+            <button onclick="switchCategory('chunhat')" id="btn-nutchunhat" class="group relative rounded-xl border border-amber-900/20 bg-white/80 hover:bg-white p-1 transition flex flex-col items-center justify-center">
+              <img src="assets/nutgame/nutchunhat.png" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/nut_dat.png'; this.onerror=null;" alt="Nút Đất" class="w-10 h-10 object-contain drop-shadow">
+              <span class="text-[10px] font-bold text-amber-950 mt-0.5">ĐẤT</span>
             </button>
 
             <!-- Nút Xẻng (Công cụ) -->
-            <button onclick="switchCategory('xeng')" id="btn-nutxeng" class="group relative rounded-xl border-2 border-slate-200 bg-white p-1 hover:border-emerald-400 hover:bg-emerald-50/50 transition flex flex-col items-center justify-center">
-              <img src="assets/nutgame/nutxeng.png" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/nut_xeng.png'; this.onerror=null;" alt="Nút Xẻng" class="w-10 h-10 object-contain drop-shadow group-hover:scale-105 transition-transform">
-              <span class="text-[10px] font-bold text-slate-600 mt-0.5">CÔNG CỤ</span>
+            <button onclick="switchCategory('xeng')" id="btn-nutxeng" class="group relative rounded-xl border border-amber-900/20 bg-white/80 hover:bg-white p-1 transition flex flex-col items-center justify-center">
+              <img src="assets/nutgame/nutxeng.png" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/nut_xeng.png'; this.onerror=null;" alt="Nút Xẻng" class="w-10 h-10 object-contain drop-shadow">
+              <span class="text-[10px] font-bold text-amber-950 mt-0.5">CÔNG CỤ</span>
             </button>
 
           </div>
@@ -131,16 +136,14 @@
       </div>
 
       <!-- PHẦN B2: KHAY HIỂN THỊ CÁC ẢNH VẬT PHẨM (KÉO THẢ SANG PHẦN A) -->
-      <div class="flex-1 overflow-y-auto p-3 flex flex-col">
+      <div class="flex-1 overflow-y-auto p-3 flex flex-col bg-black/10 backdrop-blur-[2px]">
         <div class="flex items-center justify-between mb-2">
-          <span id="category-title" class="text-xs font-black uppercase text-emerald-800 tracking-wider">Danh mục: Hoa Cấp 1 & Cấp 2</span>
-          <span class="text-[10px] text-slate-400 font-semibold">Kéo hoặc nhấn để đặt</span>
+          <span id="category-title" class="text-xs font-black uppercase text-amber-950 tracking-wider drop-shadow-[0_1px_1px_rgba(255,255,255,0.7)]">DANH MỤC: HOA CẤP 1 & HOA CẤP 2 (VIP)</span>
+          <span class="text-[10px] text-amber-900/80 font-bold">Kéo hoặc nhấn để đặt</span>
         </div>
 
-        <!-- Lưới ảnh vật phẩm của phần B2 -->
-        <div id="tray-grid" class="grid grid-cols-2 gap-2.5">
-          <!-- Ảnh sẽ được nạp động từ JS bên dưới -->
-        </div>
+        <!-- Lưới ảnh vật phẩm -->
+        <div id="tray-grid" class="grid grid-cols-2 gap-2.5"></div>
       </div>
 
     </aside>
@@ -148,38 +151,33 @@
   </div>
 
   <script>
-    // ĐƯỜNG DẪN GỐC TỚI CÁC THƯ MỤC TRÊN REPOSITORY
     const BASE_URL = 'assets/';
 
-    // DANH MỤC CÁC ASSETS ĐÃ ĐƯỢC PHÂN THEO THƯ MỤC CỦA BẠN
+    // DANH MỤC ASSETS ĐỒNG BỘ TÊN FILE CHÍNH XÁC VỚI GITHUB
     const ASSET_LIBRARY = {
-      // 1. KHI BẤM NÚT HOA: load hoacap1 (mở) và hoacap2 (khóa & mờ)
       hoa: [
         { id: 'h1_tulip_cam', name: 'Tulip Cam', src: BASE_URL + 'hoacap1/tulip_hoa_cam.png', locked: false, tier: 1 },
         { id: 'h1_cuc_vang',  name: 'Cúc Vàng',   src: BASE_URL + 'hoacap1/cuc_vang.png',       locked: false, tier: 1 },
         { id: 'h1_hoa_hong',  name: 'Hoa Hồng Đỏ',src: BASE_URL + 'hoacap1/hoa_hong.png',       locked: false, tier: 1 },
-        // Hoa cấp 2: BỊ KHÓA & MỜ
+        // Hoa cấp 2 (Khóa & Mờ)
         { id: 'h2_huongduong',name: 'Hướng Dương VIP', src: BASE_URL + 'hoacap2/hoa_huongduong.png', locked: true, tier: 2 },
         { id: 'h2_sen_ngoc',  name: 'Sen Ngọc VIP',    src: BASE_URL + 'hoacap2/hoa_sen.png',         locked: true, tier: 2 }
       ],
 
-      // 2. KHI BẤM NÚT NỤ: load nucap1 (mở) và nucap2 (khóa & mờ)
       nu: [
         { id: 'n1_tulip_cam', name: 'Nụ Tulip Cam', src: BASE_URL + 'nucap1/tulip_nu_cam.png', locked: false, tier: 1 },
         { id: 'n1_nu_cuc',    name: 'Nụ Hoa Cúc',   src: BASE_URL + 'nucap1/nu_cuc.png',       locked: false, tier: 1 },
         { id: 'n1_nu_hong',   name: 'Nụ Hoa Hồng',  src: BASE_URL + 'nucap1/nu_hong.png',      locked: false, tier: 1 },
-        // Nụ cấp 2: BỊ KHÓA & MỜ
+        // Nụ cấp 2 (Khóa & Mờ)
         { id: 'n2_huongduong',name: 'Nụ Hướng Dương', src: BASE_URL + 'nucap2/nu_huongduong.png', locked: true, tier: 2 },
         { id: 'n2_sen_ngoc',  name: 'Nụ Sen Ngọc',    src: BASE_URL + 'nucap2/nu_sen.png',        locked: true, tier: 2 }
       ],
 
-      // 3. KHI BẤM NÚT CHỮ NHẬT: load khung ô đất
       chunhat: [
         { id: 'dat_nau',   name: 'Ô Đất 3 Luống', src: BASE_URL + 'nengame/khudatrieng_nau.png', locked: false, isGround: true },
         { id: 'dat_co',    name: 'Luống Cỏ Xanh', src: BASE_URL + 'nengame/o_dat_co.png',        locked: false, isGround: true }
       ],
 
-      // 4. KHI BẤM NÚT XẺNG: load công cụ từ congcu/
       xeng: [
         { id: 'cc_xeng',      name: 'Xẻng Làm Vườn', src: BASE_URL + 'congcu/xeng.png',      locked: false },
         { id: 'cc_binhtuoi',  name: 'Bình Tưới Nước',src: BASE_URL + 'congcu/binh_tuoi.png', locked: false },
@@ -190,85 +188,77 @@
     let currentCategory = 'hoa';
     let draggedItemData = null;
 
-    // THAY ĐỔI ẢNH NỀN PHẦN A
     function changeGameBackground(filename) {
-      const bgImg = document.getElementById('game-bg-image');
-      bgImg.src = BASE_URL + 'nengame/' + filename;
+      document.getElementById('game-bg-image').src = BASE_URL + 'nengame/' + filename;
     }
 
-    // CHUYỂN DANH MỤC TRÊN NÚT B1 VÀ RENDER KHAY B2
     function switchCategory(catKey) {
       currentCategory = catKey;
       
-      // Đổi kiểu active cho 4 nút
       ['hoa', 'nu', 'chunhat', 'xeng'].forEach(k => {
         const btn = document.getElementById(`btn-nut${k}`);
         if (k === catKey) {
-          btn.className = "group relative rounded-xl border-2 border-emerald-500 bg-emerald-50 p-1 shadow-sm transition flex flex-col items-center justify-center scale-105";
+          btn.className = "group relative rounded-xl border-2 border-emerald-600 bg-white p-1 shadow-md transition flex flex-col items-center justify-center scale-105";
         } else {
-          btn.className = "group relative rounded-xl border-2 border-slate-200 bg-white p-1 hover:border-emerald-400 hover:bg-emerald-50/50 transition flex flex-col items-center justify-center";
+          btn.className = "group relative rounded-xl border border-amber-900/20 bg-white/80 hover:bg-white p-1 transition flex flex-col items-center justify-center";
         }
       });
 
       const titleMap = {
-        hoa: 'Danh mục: Hoa Cấp 1 & Hoa Cấp 2 (VIP)',
-        nu: 'Danh mục: Nụ Cấp 1 & Nụ Cấp 2 (VIP)',
-        chunhat: 'Danh mục: Ô Đất & Bố Cục Vườn',
-        xeng: 'Danh mục: Công Cụ Làm Vườn'
+        hoa: 'DANH MỤC: HOA CẤP 1 & HOA CẤP 2 (VIP)',
+        nu: 'DANH MỤC: NỤ CẤP 1 & NỤ CẤP 2 (VIP)',
+        chunhat: 'DANH MỤC: Ô ĐẤT & BỐ CỤC VƯỜN',
+        xeng: 'DANH MỤC: CÔNG CỤ LÀM VƯỜN'
       };
       document.getElementById('category-title').innerText = titleMap[catKey];
 
       renderTrayItems();
     }
 
-    // HIỂN THỊ CÁC THẺ ẢNH TẠI B2 (CÓ CHE MỜ VÀ Ổ KHÓA NẾU CẤP 2)
     function renderTrayItems() {
       const tray = document.getElementById('tray-grid');
       const items = ASSET_LIBRARY[currentCategory] || [];
 
       tray.innerHTML = items.map(item => {
         if (item.locked) {
-          // GIAO DIỆN BỊ CHE MỜ VÀ CÓ BIỂU TƯỢNG KHÓA
           return `
-            <div class="relative bg-white rounded-2xl border border-slate-200 p-2 flex flex-col items-center justify-between shadow-xs overflow-hidden select-none cursor-not-allowed">
-              <div class="w-full h-24 bg-trans-grid rounded-xl flex items-center justify-center p-2 relative opacity-30 filter grayscale">
+            <div class="relative bg-white/80 rounded-2xl border border-amber-950/20 p-2 flex flex-col items-center justify-between shadow-xs overflow-hidden select-none cursor-not-allowed">
+              <div class="w-full h-24 bg-trans-grid rounded-xl flex items-center justify-center p-2 relative opacity-25 filter grayscale">
                 <img src="${item.src}" alt="${item.name}" class="max-h-full max-w-full object-contain">
               </div>
 
-              <!-- Lớp phủ mờ + Ổ khóa -->
+              <!-- Lớp mờ và ổ khóa -->
               <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-[1px] flex flex-col items-center justify-center text-white z-10">
-                <div class="w-8 h-8 rounded-full bg-slate-900/80 flex items-center justify-center shadow-lg border border-amber-400/60 mb-1">
+                <div class="w-8 h-8 rounded-full bg-slate-900/85 flex items-center justify-center shadow-lg border border-amber-400/80 mb-1">
                   <i class="fa-solid fa-lock text-amber-400 text-sm"></i>
                 </div>
                 <span class="text-[10px] font-black uppercase tracking-wider text-amber-300">Khóa Cấp 2</span>
               </div>
 
-              <span class="text-[11px] font-bold text-slate-400 mt-1 truncate w-full text-center">${item.name}</span>
+              <span class="text-[11px] font-bold text-slate-500 mt-1 truncate w-full text-center">${item.name}</span>
             </div>
           `;
         }
 
-        // GIAO DIỆN MỞ CHO PHÉP KÉO THẢ HOẶC BẤM ĐỂ ĐẶT
         return `
           <div draggable="true" 
                ondragstart="handleDragStart(event, '${item.id}')"
                onclick="placeItemInCenter('${item.id}')"
-               class="group relative bg-white hover:bg-emerald-50/50 rounded-2xl border-2 border-slate-200 hover:border-emerald-500 p-2 flex flex-col items-center justify-between shadow-xs hover:shadow-md transition cursor-grab active:cursor-grabbing">
+               class="group relative bg-white/90 hover:bg-white rounded-2xl border-2 border-amber-900/10 hover:border-emerald-500 p-2 flex flex-col items-center justify-between shadow-sm hover:shadow-md transition cursor-grab active:cursor-grabbing">
             
             <div class="w-full h-24 bg-trans-grid rounded-xl flex items-center justify-center p-2 relative">
               <img src="${item.src}" alt="${item.name}" class="max-h-full max-w-full object-contain filter drop-shadow group-hover:scale-110 transition-transform">
             </div>
 
             <div class="w-full flex items-center justify-between mt-1 px-1">
-              <span class="text-[11px] font-bold text-slate-700 truncate">${item.name}</span>
-              <i class="fa-solid fa-up-down-left-right text-[10px] text-slate-400 group-hover:text-emerald-600"></i>
+              <span class="text-[11px] font-bold text-slate-800 truncate">${item.name}</span>
+              <i class="fa-solid fa-up-down-left-right text-[10px] text-amber-800/40 group-hover:text-emerald-600"></i>
             </div>
           </div>
         `;
       }).join('');
     }
 
-    // ================= XỬ LÝ KÉO - THẢ (DRAG & DROP) SANG PHẦN A =================
     function handleDragStart(e, itemId) {
       draggedItemData = findItemById(itemId);
       e.dataTransfer.setData('text/plain', itemId);
@@ -289,7 +279,6 @@
       }
     }
 
-    // Bấm trực tiếp vào ảnh ở B2 để đặt ra giữa sân A
     function placeItemInCenter(itemId) {
       const item = findItemById(itemId);
       if (!item) return;
@@ -307,7 +296,6 @@
       return null;
     }
 
-    // ĐẶT VẬT THỂ LÊN SÂN VÀ CHO PHÉP DI CHUYỂN TỰ DO
     let placedItemCount = 0;
     function spawnItemOnCanvas(item, posX, posY) {
       document.getElementById('empty-hint').style.display = 'none';
@@ -316,7 +304,7 @@
       const uniqueId = 'placed_' + placedItemCount;
 
       const isGround = item.isGround;
-      const defaultSize = isGround ? 'w-52 h-44' : 'w-20 h-24';
+      const defaultSize = isGround ? 'w-56 h-48' : 'w-20 h-24';
 
       const el = document.createElement('div');
       el.id = uniqueId;
@@ -327,20 +315,16 @@
       el.innerHTML = `
         <div class="relative w-full h-full group flex items-center justify-center">
           <img src="${item.src}" class="max-h-full max-w-full object-contain filter drop-shadow-lg pointer-events-none">
-          
-          <!-- Nút xóa nhanh khi hover -->
           <button onclick="removePlacedItem('${uniqueId}', event)" class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-rose-500 hover:bg-rose-600 text-white text-[10px] font-bold shadow hidden group-hover:flex items-center justify-center">
             ✕
           </button>
         </div>
       `;
 
-      // Kích hoạt di chuyển vật phẩm trên sân
       makeDraggable(el);
       container.appendChild(el);
     }
 
-    // CƠ CHẾ KÉO DI CHUYỂN VẬT PHẨM TRÊN SÂN A
     function makeDraggable(element) {
       let isDragging = false;
       let startX, startY, initialLeft, initialTop;
@@ -378,13 +362,12 @@
     }
 
     function clearPlacedItems() {
-      if (confirm('Bạn có muốn xóa toàn bộ các vật phẩm đã đặt trên sân?')) {
+      if (confirm('Bạn có muốn dọn sạch các vật phẩm trên sân?')) {
         document.getElementById('drop-container').innerHTML = '';
         document.getElementById('empty-hint').style.display = 'flex';
       }
     }
 
-    // KHỞI ĐỘNG BAN ĐẦU
     window.addEventListener('DOMContentLoaded', () => {
       switchCategory('hoa');
     });
