@@ -106,36 +106,80 @@
       <!-- TAB 1: CẤU HÌNH GIAO DIỆN & MỞ KHÓA -->
       <div id="tab-panel-controls" class="flex-1 overflow-y-auto p-4 space-y-4">
         
-        <!-- MỤC 1: CẤU HÌNH NỀN GIAO DIỆN -->
+        <!-- MỤC 1: CẤU HÌNH NỀN GIAO DIỆN (CÓ NÚT CON MẮT XEM TRƯỚC) -->
         <div class="p-3.5 bg-white rounded-2xl border border-slate-200 space-y-2.5 shadow-2xs">
           <h4 class="text-xs font-black uppercase text-emerald-800 flex items-center gap-1.5">
             <i class="fa-regular fa-image"></i> Cấu Hình Nền Giao Diện
           </h4>
+          
+          <!-- Nền Toàn Game -->
           <div>
             <label class="block text-[11px] text-slate-600 font-bold mb-1">Nền Toàn Game:</label>
-            <select id="select-bg-global" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-slate-50 font-mono"></select>
+            <div class="flex gap-1.5 items-center">
+              <select id="select-bg-global" onchange="handleBackgroundSelectionChange('global', this.value)" class="flex-1 px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-slate-50 font-mono"></select>
+              <button onclick="viewBackgroundPreview('global')" class="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 transition" title="Xem trước ảnh này tại Phần B">
+                <i class="fa-solid fa-eye text-xs"></i>
+              </button>
+            </div>
           </div>
+
+          <!-- Nền Sân Vườn (Phần A) -->
           <div>
             <label class="block text-[11px] text-slate-600 font-bold mb-1">Nền Sân Vườn (Phần A):</label>
-            <select id="select-bg-a" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-slate-50 font-mono"></select>
+            <div class="flex gap-1.5 items-center">
+              <select id="select-bg-a" onchange="handleBackgroundSelectionChange('a', this.value)" class="flex-1 px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-slate-50 font-mono"></select>
+              <button onclick="viewBackgroundPreview('a')" class="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 transition" title="Xem trước ảnh này tại Phần B">
+                <i class="fa-solid fa-eye text-xs"></i>
+              </button>
+            </div>
           </div>
+
+          <!-- Nền Cột Khay Công Cụ (Phần B) -->
           <div>
             <label class="block text-[11px] text-slate-600 font-bold mb-1">Nền Cột Khay Công Cụ (Phần B):</label>
-            <select id="select-bg-b" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-slate-50 font-mono"></select>
+            <div class="flex gap-1.5 items-center">
+              <select id="select-bg-b" onchange="handleBackgroundSelectionChange('b', this.value)" class="flex-1 px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-slate-50 font-mono"></select>
+              <button onclick="viewBackgroundPreview('b')" class="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50 hover:bg-emerald-50 hover:text-emerald-700 text-slate-600 transition" title="Xem trước ảnh này tại Phần B">
+                <i class="fa-solid fa-eye text-xs"></i>
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- MỤC 2: CẤU HÌNH NÚT BẤM (Ô MENU MỞ THƯ MỤC CÓ CHECK MULTI-SELECT) -->
-        <div class="p-3.5 bg-white rounded-2xl border border-slate-200 space-y-2.5 shadow-2xs">
+        <!-- MỤC 2: GÁN TÍNH NĂNG NÚT (GỌN GÀNG, KHÔNG LIỆT KÊ TRÀN LAN) -->
+        <div class="p-3.5 bg-white rounded-2xl border border-slate-200 space-y-3 shadow-2xs">
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-black uppercase text-emerald-800 flex items-center gap-1.5">
-              <i class="fa-solid fa-shapes"></i> Cấu Hình Nút Bấm (Phần B1)
+              <i class="fa-solid fa-shapes"></i> Gán Tính Năng Nút
             </h4>
-            <button onclick="addNewCustomButton()" class="px-2.5 py-1 text-[11px] bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded-lg border border-emerald-200 transition flex items-center gap-1">
-              <i class="fa-solid fa-plus"></i> Thêm Nút
-            </button>
+            <span class="text-[10px] text-slate-400 font-semibold" id="lbl-button-binding-info">Gán thư mục mở cho nút</span>
           </div>
-          <div id="buttons-config-container" class="space-y-3"></div>
+
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+            <!-- Hàng 1: Chọn Nút (từ nutgame/) và Nhãn hiển thị -->
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Chọn Nút (nutgame/):</label>
+                <select id="select-active-button-icon" onchange="handleActiveButtonChange(this.value)" class="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-300 bg-white font-mono font-semibold"></select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Tên Nhãn Nút:</label>
+                <input type="text" id="input-active-button-label" onchange="handleActiveButtonLabelChange(this.value)" class="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-300 bg-white font-bold uppercase" placeholder="VD: HOA, NỤ...">
+              </div>
+            </div>
+
+            <!-- Hàng 2: Menu Mở thư mục dạng Dropdown Checkbox -->
+            <div class="relative folder-dropdown-container">
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Mở thư mục liên kết:</label>
+              <button type="button" onclick="toggleDropdownFolder('dropdown-btn-assigned-folders', event)" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white flex items-center justify-between font-bold text-slate-700 shadow-2xs">
+                <span id="lbl-assigned-folders-status" class="truncate">Chưa chọn thư mục</span>
+                <i class="fa-solid fa-chevron-down text-slate-400 text-[10px] ml-1"></i>
+              </button>
+
+              <!-- Menu sổ xuống chứa checkbox các thư mục -->
+              <div id="dropdown-btn-assigned-folders" class="hidden folder-dropdown-menu absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-40 p-2 space-y-1 max-h-52 overflow-y-auto"></div>
+            </div>
+          </div>
         </div>
 
         <!-- MỤC 3: MỞ KHÓA CẤP ĐỘ -->
@@ -190,7 +234,6 @@
               </select>
             </div>
 
-            <!-- Menu mở thư mục dạng Multi-Check cho Điều kiện mới -->
             <div class="relative">
               <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Chọn Thư mục Assets cần mở khóa:</label>
               <button type="button" onclick="toggleDropdownFolder('dropdown-cond-folders', event)" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white flex items-center justify-between font-bold text-slate-700">
@@ -266,16 +309,16 @@
 
     </aside>
 
-    <!-- PHẦN B (2/3 BÊN PHẢI): HIỂN THỊ CÁC THƯ MỤC ASSETS ĐÃ CHỌN -->
+    <!-- PHẦN B (2/3 BÊN PHẢI): HIỂN THỊ KHO ẢNH KHI CÓ LỰA CHỌN TỪ PHẦN A -->
     <main class="w-full md:w-2/3 flex flex-col h-full bg-slate-50 overflow-hidden">
       
       <div class="bg-white border-b border-slate-200 p-3 px-5 flex flex-wrap items-center justify-between gap-3 shadow-2xs shrink-0">
         <div class="flex items-center gap-2">
-          <b class="text-xs text-slate-800">Kho Ảnh Assets Đang Hiển Thị</b>
+          <b class="text-xs text-slate-800" id="section-b-title">Kho Ảnh Assets Đang Hiển Thị</b>
           <span class="text-[11px] text-slate-400" id="total-visible-images-count">(0 ảnh)</span>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2" id="toolbar-actions" style="display: none;">
           <button onclick="selectAllVisibleImages(true)" class="px-3 py-1 text-xs font-bold rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 transition flex items-center gap-1.5">
             <i class="fa-regular fa-square-check"></i> Chọn tất cả
           </button>
@@ -286,7 +329,10 @@
         </div>
       </div>
 
-      <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6" id="multi-folder-display-area"></div>
+      <!-- Vùng hiển thị ảnh Phần B -->
+      <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6" id="multi-folder-display-area">
+        <!-- Ban đầu để trống hoàn toàn -->
+      </div>
 
     </main>
 
@@ -298,19 +344,18 @@
     const ASSETS_PATH = 'Games/vuonthidua/assets';
     const ALL_FOLDERS = ['hoacap1', 'hoacap2', 'nucap1', 'nucap2', 'congcu', 'nengame', 'nutgame'];
 
-    // CẤU TRÚC MẶC ĐỊNH CHO MỘT LỚP HỌC MỚI
     const DEFAULT_CLASS_TEMPLATE = (className) => ({
       name: className,
       config: {
         bgGlobal: 'assets/nengame/nenungdung.jpg',
         bgA: 'assets/nengame/vuonlop.jpg',
         bgB: 'assets/nengame/nenungdung.jpg',
-        buttons: [
-          { id: 'btn_1', label: 'HOA', icon: 'assets/nutgame/nuthoa.png', targetFolders: ['hoacap1'] },
-          { id: 'btn_2', label: 'NỤ', icon: 'assets/nutgame/nutnu.png', targetFolders: ['nucap1'] },
-          { id: 'btn_3', label: 'ĐẤT', icon: 'assets/nutgame/nutchunhat.png', targetFolders: ['nengame'] },
-          { id: 'btn_4', label: 'CÔNG CỤ', icon: 'assets/nutgame/nutxeng.png', targetFolders: ['congcu'] }
-        ],
+        buttonMappings: {
+          'nuthoa.png': { label: 'HOA', targetFolders: ['hoacap1'] },
+          'nutnu.png': { label: 'NỤ', targetFolders: ['nucap1'] },
+          'nutchunhat.png': { label: 'ĐẤT', targetFolders: ['nengame'] },
+          'nutxeng.png': { label: 'CÔNG CỤ', targetFolders: ['congcu'] }
+        },
         unlockConditions: {
           'cond_top1': { id: 'cond_top1', name: 'Đạt Hạng 1 thi đua tuần', type: 'rank_top1', folders: ['hoacap2'] },
           'cond_top1_nu': { id: 'cond_top1_nu', name: 'Đạt Hạng 1 (Mở nụ VIP)', type: 'rank_top1', folders: ['nucap2'] },
@@ -330,7 +375,14 @@
       checkedImages: new Set(),
       currentSelectedConditionId: '',
       editingConditionId: null,
-      tempNewConditionFolders: ['hoacap2']
+      tempNewConditionFolders: ['hoacap2'],
+      currentActiveButtonIcon: 'nuthoa.png',
+      // Mảng lưu danh sách các thư mục hoặc danh sách ảnh đang được kích hoạt hiển thị ở Phần B
+      activeViewData: {
+        type: 'none', // 'none' | 'folders' | 'single_preview'
+        folders: [],
+        singleImage: null
+      }
     };
 
     function togglePasswordVisibility(id, iconId) {
@@ -386,46 +438,27 @@
       loadActiveClassConfig();
       renderClassesList();
       syncAllFromGitHub();
+      // Ban đầu không hiển thị ảnh nào tại Phần B
+      renderPartBEmptyState();
     }
 
     function loadSavedData() {
-      const saved = localStorage.getItem('garden_system_classes_v7');
+      const saved = localStorage.getItem('garden_system_classes_v8');
       if (saved) {
-        try { 
-          const parsed = JSON.parse(saved);
-          // Đảm bảo tương thích mảng targetFolders
-          Object.values(parsed).forEach(c => {
-            if (c.config && c.config.buttons) {
-              c.config.buttons.forEach(b => {
-                if (!b.targetFolders && b.targetFolder) b.targetFolders = [b.targetFolder];
-                if (!b.targetFolders) b.targetFolders = ['hoacap1'];
-              });
-            }
-            if (c.config && c.config.unlockConditions) {
-              Object.values(c.config.unlockConditions).forEach(u => {
-                if (!u.folders && u.folder) u.folders = [u.folder];
-                if (!u.folders) u.folders = ['hoacap2'];
-              });
-            }
-          });
-          state.classesData = parsed;
-        } catch (e) {}
+        try { state.classesData = JSON.parse(saved); } catch (e) {}
       }
-      const savedActive = localStorage.getItem('garden_active_class_v7');
+      const savedActive = localStorage.getItem('garden_active_class_v8');
       if (savedActive && state.classesData[savedActive]) {
         state.activeClass = savedActive;
-      } else {
-        const keys = Object.keys(state.classesData);
-        if (keys.length > 0) state.activeClass = keys[0];
       }
     }
 
     function saveStateToLocal() {
-      localStorage.setItem('garden_system_classes_v7', JSON.stringify(state.classesData));
-      localStorage.setItem('garden_active_class_v7', state.activeClass);
+      localStorage.setItem('garden_system_classes_v8', JSON.stringify(state.classesData));
+      localStorage.setItem('garden_active_class_v8', state.activeClass);
     }
 
-    // ================= QUẢN LÝ LỚP HỌC =================
+    // ================= QUẢN LÝ LỚP =================
     function renderClassDropdown() {
       const select = document.getElementById('select-active-class');
       const classKeys = Object.keys(state.classesData);
@@ -435,8 +468,10 @@
     function switchActiveClass(className) {
       state.activeClass = className;
       state.currentSelectedConditionId = '';
+      state.activeViewData = { type: 'none', folders: [], singleImage: null };
       saveStateToLocal();
       loadActiveClassConfig();
+      renderPartBEmptyState();
     }
 
     function openAddNewClassPrompt() {
@@ -448,10 +483,12 @@
 
       state.classesData[clean] = DEFAULT_CLASS_TEMPLATE(clean);
       state.activeClass = clean;
+      state.activeViewData = { type: 'none', folders: [], singleImage: null };
       saveStateToLocal();
       renderClassDropdown();
       loadActiveClassConfig();
       renderClassesList();
+      renderPartBEmptyState();
     }
 
     function loadActiveClassConfig() {
@@ -459,16 +496,14 @@
       if (!cls) return;
 
       populateBackgroundDropdowns();
-      renderButtonsConfigForm();
+      populateButtonIconsList();
       renderConditionsMenu();
-      renderMultiFolderView();
 
       [1, 2, 3, 4].forEach(t => {
         document.getElementById(`rank-val-${t}`).value = cls.weeklyRanking[t] || t;
       });
     }
 
-    // ================= ĐIỀU KHIỂN DROPDOWN MULTI-CHECK =================
     function closeAllFolderDropdowns(e) {
       if (!e.target.closest('.folder-dropdown-container') && !e.target.closest('.folder-dropdown-menu')) {
         document.querySelectorAll('.folder-dropdown-menu').forEach(el => el.classList.add('hidden'));
@@ -483,7 +518,7 @@
       if (isClosed) menu.classList.remove('hidden');
     }
 
-    // ================= 1. CẤU HÌNH NỀN =================
+    // ================= 1. CẤU HÌNH NỀN VỚI NÚT CON MẮT =================
     function populateBackgroundDropdowns() {
       const cls = state.classesData[state.activeClass];
       const bgImages = state.cachedAssets['nengame'] || [];
@@ -499,120 +534,142 @@
       document.getElementById('select-bg-b').innerHTML = generateOptions(cls.config.bgB);
     }
 
-    // ================= 2. CẤU HÌNH NÚT BẤM (Ô MENU MỞ THƯ MỤC CÓ CHECK MULTI-SELECT) =================
-    function renderButtonsConfigForm() {
+    // Khi chọn mới một ảnh nền -> Lập tức hiển thị tại Phần B để xem trước
+    function handleBackgroundSelectionChange(type, value) {
       const cls = state.classesData[state.activeClass];
-      const container = document.getElementById('buttons-config-container');
-      const nutImages = state.cachedAssets['nutgame'] || [];
-
-      container.innerHTML = cls.config.buttons.map((btn, index) => {
-        const selectedList = btn.targetFolders || [];
-        const labelText = selectedList.length === 0 ? 'Chưa chọn thư mục' : selectedList.join(', ');
-
-        return `
-          <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1.5 relative group">
-            <div class="flex items-center justify-between">
-              <span class="font-bold text-slate-700">Nút ${index + 1}:</span>
-              <div class="flex items-center gap-1.5">
-                <input type="text" value="${btn.label}" onchange="updateButtonProp(${index}, 'label', this.value)" class="w-20 px-1.5 py-0.5 text-center border rounded font-bold bg-white uppercase">
-                ${cls.config.buttons.length > 1 ? `
-                  <button onclick="removeCustomButton(${index})" class="text-rose-500 hover:text-rose-700 p-1" title="Xóa nút này">
-                    <i class="fa-solid fa-trash-can text-[11px]"></i>
-                  </button>
-                ` : ''}
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 text-[11px]">
-              <div>
-                <span class="text-slate-500 font-semibold block mb-0.5">Icon (nutgame/):</span>
-                <select onchange="updateButtonProp(${index}, 'icon', this.value)" class="w-full p-1 border rounded bg-white font-mono text-[10px]">
-                  ${nutImages.length > 0 
-                    ? nutImages.map(img => `<option value="${img.localPath}" ${img.localPath === btn.icon ? 'selected' : ''}>${img.fileName}</option>`).join('')
-                    : `<option value="${btn.icon}">${btn.icon}</option>`
-                  }
-                </select>
-              </div>
-
-              <!-- Ô MENU MỞ THƯ MỤC DẠNG DROPDOWN CHECKBOX -->
-              <div class="relative folder-dropdown-container">
-                <span class="text-slate-500 font-semibold block mb-0.5">Mở thư mục:</span>
-                <button type="button" onclick="toggleDropdownFolder('dropdown-btn-${index}', event)" class="w-full px-2 py-1 border rounded bg-white font-bold text-[10px] text-slate-700 flex items-center justify-between">
-                  <span class="truncate" id="lbl-btn-folder-${index}">${labelText}</span>
-                  <i class="fa-solid fa-chevron-down text-slate-400 text-[9px] ml-1"></i>
-                </button>
-
-                <!-- Menu Dropdown chứa danh sách check -->
-                <div id="dropdown-btn-${index}" class="hidden folder-dropdown-menu absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-40 p-2 space-y-1 max-h-48 overflow-y-auto">
-                  ${ALL_FOLDERS.map(f => {
-                    const isChecked = selectedList.includes(f);
-                    return `
-                      <label class="flex items-center justify-between px-2 py-1 rounded hover:bg-emerald-50 cursor-pointer text-[10px] font-bold text-slate-700" onclick="event.stopPropagation()">
-                        <span class="flex items-center gap-1.5">
-                          <i class="fa-solid fa-folder text-emerald-600 text-[9px]"></i>
-                          ${f}
-                        </span>
-                        <input type="checkbox" value="${f}" ${isChecked ? 'checked' : ''} onchange="toggleButtonFolderCheck(${index}, '${f}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5">
-                      </label>
-                    `;
-                  }).join('')}
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function toggleButtonFolderCheck(btnIndex, folder, isChecked) {
-      const cls = state.classesData[state.activeClass];
-      const btn = cls.config.buttons[btnIndex];
-      if (!btn.targetFolders) btn.targetFolders = [];
-
-      if (isChecked) {
-        if (!btn.targetFolders.includes(folder)) btn.targetFolders.push(folder);
-      } else {
-        btn.targetFolders = btn.targetFolders.filter(f => f !== folder);
-      }
-
-      const labelEl = document.getElementById(`lbl-btn-folder-${btnIndex}`);
-      if (labelEl) {
-        labelEl.innerText = btn.targetFolders.length === 0 ? 'Chưa chọn thư mục' : btn.targetFolders.join(', ');
-      }
+      if (type === 'global') cls.config.bgGlobal = value;
+      if (type === 'a') cls.config.bgA = value;
+      if (type === 'b') cls.config.bgB = value;
 
       saveStateToLocal();
-      // Tự động đồng bộ và hiển thị ngay các thư mục được chọn sang Phần B
-      renderMultiFolderView();
+      displaySingleImagePreview(value, `Xem trước ảnh nền (${type.toUpperCase()}): ${value}`);
     }
 
-    function updateButtonProp(index, prop, value) {
-      state.classesData[state.activeClass].config.buttons[index][prop] = value;
-    }
-
-    function addNewCustomButton() {
+    // Khi bấm nút Con Mắt -> Mới hiển thị ảnh tại Phần B
+    function viewBackgroundPreview(type) {
       const cls = state.classesData[state.activeClass];
-      const newIndex = cls.config.buttons.length + 1;
-      const defaultIcon = (state.cachedAssets['nutgame'] && state.cachedAssets['nutgame'][0]) 
-        ? state.cachedAssets['nutgame'][0].localPath 
-        : 'assets/nutgame/nuthoa.png';
+      let val = cls.config.bgGlobal;
+      if (type === 'a') val = cls.config.bgA;
+      if (type === 'b') val = cls.config.bgB;
 
-      cls.config.buttons.push({
-        id: 'btn_' + Date.now().toString(36),
-        label: `NÚT ${newIndex}`,
-        icon: defaultIcon,
-        targetFolders: ['hoacap1']
-      });
-
-      renderButtonsConfigForm();
-      renderMultiFolderView();
+      displaySingleImagePreview(val, `Ảnh nền hiện tại (${type.toUpperCase()}): ${val}`);
     }
 
-    function removeCustomButton(index) {
-      if (confirm('Xóa nút này khỏi giao diện game của lớp?')) {
-        state.classesData[state.activeClass].config.buttons.splice(index, 1);
-        renderButtonsConfigForm();
-        renderMultiFolderView();
+    function displaySingleImagePreview(imagePath, title) {
+      state.activeViewData = { type: 'single_preview', folders: [], singleImage: imagePath };
+      document.getElementById('section-b-title').innerText = title;
+      document.getElementById('toolbar-actions').style.display = 'none';
+      document.getElementById('total-visible-images-count').innerText = '(1 ảnh)';
+
+      const fullUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${imagePath}`;
+      const area = document.getElementById('multi-folder-display-area');
+      area.innerHTML = `
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col items-center justify-center shadow-xs max-w-xl mx-auto">
+          <div class="w-full aspect-video rounded-xl bg-slate-900 overflow-hidden flex items-center justify-center p-2 shadow-inner border border-slate-300">
+            <img src="${fullUrl}" class="max-h-full max-w-full object-contain">
+          </div>
+          <span class="text-xs font-mono font-bold text-slate-700 mt-3 text-center">${imagePath}</span>
+        </div>
+      `;
+    }
+
+    // ================= 2. GÁN TÍNH NĂNG NÚT =================
+    function populateButtonIconsList() {
+      const select = document.getElementById('select-active-button-icon');
+      const nutImages = state.cachedAssets['nutgame'] || [];
+      const cls = state.classesData[state.activeClass];
+
+      if (nutImages.length === 0) {
+        select.innerHTML = `<option value="nuthoa.png">nuthoa.png</option>`;
+      } else {
+        select.innerHTML = nutImages.map(img => 
+          `<option value="${img.fileName}" ${img.fileName === state.currentActiveButtonIcon ? 'selected' : ''}>${img.fileName}</option>`
+        ).join('');
       }
+
+      loadAssignedButtonDetails();
+    }
+
+    function handleActiveButtonChange(iconFileName) {
+      state.currentActiveButtonIcon = iconFileName;
+      loadAssignedButtonDetails();
+    }
+
+    function loadAssignedButtonDetails() {
+      const cls = state.classesData[state.activeClass];
+      if (!cls.config.buttonMappings) cls.config.buttonMappings = {};
+
+      const icon = state.currentActiveButtonIcon;
+      if (!cls.config.buttonMappings[icon]) {
+        // Tự động suy luận nhãn mặc định nếu chưa có
+        let autoLabel = icon.replace(/\.[^/.]+$/, "").replace('nut', '').toUpperCase() || 'NÚT';
+        cls.config.buttonMappings[icon] = { label: autoLabel, targetFolders: [] };
+      }
+
+      const mapping = cls.config.buttonMappings[icon];
+      document.getElementById('input-active-button-label').value = mapping.label;
+
+      renderAssignedFolderDropdownCheckboxes();
+      
+      // KHI CHỌN NÚT NÀO THÌ PHẦN B LẬP TỨC HIỂN THỊ CÁC THƯ MỤC CỦA NÚT ĐÓ
+      if (mapping.targetFolders && mapping.targetFolders.length > 0) {
+        setPartBActiveFolders(mapping.targetFolders, `Các thư mục gán cho nút [${icon}]`);
+      } else {
+        renderPartBEmptyState();
+      }
+    }
+
+    function handleActiveButtonLabelChange(newLabel) {
+      const cls = state.classesData[state.activeClass];
+      const icon = state.currentActiveButtonIcon;
+      if (cls.config.buttonMappings[icon]) {
+        cls.config.buttonMappings[icon].label = newLabel.trim();
+        saveStateToLocal();
+      }
+    }
+
+    function renderAssignedFolderDropdownCheckboxes() {
+      const cls = state.classesData[state.activeClass];
+      const mapping = cls.config.buttonMappings[state.currentActiveButtonIcon] || { targetFolders: [] };
+      const container = document.getElementById('dropdown-btn-assigned-folders');
+
+      container.innerHTML = ALL_FOLDERS.map(f => {
+        const isChecked = mapping.targetFolders.includes(f);
+        return `
+          <label class="flex items-center justify-between px-2.5 py-1.5 rounded hover:bg-emerald-50 cursor-pointer text-xs font-bold text-slate-700" onclick="event.stopPropagation()">
+            <span class="flex items-center gap-1.5">
+              <i class="fa-solid fa-folder text-emerald-600 text-[10px]"></i>
+              ${f}
+            </span>
+            <input type="checkbox" value="${f}" ${isChecked ? 'checked' : ''} onchange="toggleAssignedFolderCheck('${f}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5">
+          </label>
+        `;
+      }).join('');
+
+      updateAssignedFoldersLabel();
+    }
+
+    function toggleAssignedFolderCheck(folder, isChecked) {
+      const cls = state.classesData[state.activeClass];
+      const mapping = cls.config.buttonMappings[state.currentActiveButtonIcon];
+
+      if (isChecked) {
+        if (!mapping.targetFolders.includes(folder)) mapping.targetFolders.push(folder);
+      } else {
+        mapping.targetFolders = mapping.targetFolders.filter(f => f !== folder);
+      }
+
+      updateAssignedFoldersLabel();
+      saveStateToLocal();
+      // Hiển thị cập nhật ngay sang Phần B
+      setPartBActiveFolders(mapping.targetFolders, `Các thư mục gán cho nút [${state.currentActiveButtonIcon}]`);
+    }
+
+    function updateAssignedFoldersLabel() {
+      const cls = state.classesData[state.activeClass];
+      const mapping = cls.config.buttonMappings[state.currentActiveButtonIcon] || { targetFolders: [] };
+      const el = document.getElementById('lbl-assigned-folders-status');
+      el.innerText = mapping.targetFolders.length === 0 ? 'Chưa chọn thư mục' : mapping.targetFolders.join(', ');
     }
 
     // ================= 3. MỞ KHÓA CẤP ĐỘ =================
@@ -635,7 +692,15 @@
         state.currentSelectedConditionId = val;
         document.getElementById('new-condition-box').classList.add('hidden');
         updateLinkedFolderBox();
-        renderMultiFolderView();
+
+        // KHI CHỌN ĐIỀU KIỆN THÌ PHẦN B HIỂN THỊ CÁC THƯ MỤC CỦA ĐIỀU KIỆN ĐÓ
+        const cls = state.classesData[state.activeClass];
+        const cond = cls.config.unlockConditions[val];
+        if (cond && cond.folders && cond.folders.length > 0) {
+          setPartBActiveFolders(cond.folders, `Thư mục liên kết mở khóa: [${cond.name}]`);
+        } else {
+          renderPartBEmptyState();
+        }
       }
     }
 
@@ -646,7 +711,6 @@
       const cond = cls.config.unlockConditions[state.currentSelectedConditionId];
 
       if (!cond) {
-        // Đúng yêu cầu: khi chưa chọn điều kiện thì ẩn hoàn toàn khung thư mục liên kết
         wrapper.classList.add('hidden');
         box.innerHTML = '';
         return;
@@ -691,9 +755,7 @@
     function updateCondFolderLabel() {
       const el = document.getElementById('lbl-cond-folders-selected');
       if (el) {
-        el.innerText = state.tempNewConditionFolders.length === 0 
-          ? 'Chưa chọn thư mục' 
-          : state.tempNewConditionFolders.join(', ');
+        el.innerText = state.tempNewConditionFolders.length === 0 ? 'Chưa chọn thư mục' : state.tempNewConditionFolders.join(', ');
       }
     }
 
@@ -746,7 +808,7 @@
       document.getElementById('new-condition-box').classList.add('hidden');
       renderConditionsMenu();
       saveStateToLocal();
-      renderMultiFolderView();
+      setPartBActiveFolders(cls.config.unlockConditions[id].folders, `Thư mục liên kết mở khóa: [${name}]`);
       alert('Đã lưu điều kiện mở khóa cho lớp!');
     }
 
@@ -764,36 +826,43 @@
         state.currentSelectedConditionId = '';
         renderConditionsMenu();
         saveStateToLocal();
-        renderMultiFolderView();
+        renderPartBEmptyState();
       }
     }
 
-    // ================= 4. HIỂN THỊ PHẦN B =================
-    // Tự động thu thập tất cả thư mục đang được các Nút hoặc Điều kiện mở cấp độ chọn
-    function getActiveVisibleFolders() {
-      const cls = state.classesData[state.activeClass];
-      const folderSet = new Set();
+    // ================= 4. HIỂN THỊ PHẦN B (CHỈ KHI CÓ LỰA CHỌN) =================
+    function renderPartBEmptyState() {
+      state.activeViewData = { type: 'none', folders: [], singleImage: null };
+      document.getElementById('section-b-title').innerText = 'Kho Ảnh Assets Đang Hiển Thị';
+      document.getElementById('total-visible-images-count').innerText = '(0 ảnh)';
+      document.getElementById('toolbar-actions').style.display = 'none';
 
-      if (cls && cls.config && cls.config.buttons) {
-        cls.config.buttons.forEach(b => {
-          (b.targetFolders || []).forEach(f => folderSet.add(f));
-        });
+      document.getElementById('multi-folder-display-area').innerHTML = `
+        <div class="py-24 text-center text-slate-400 bg-white rounded-2xl border border-dashed border-slate-300">
+          <i class="fa-regular fa-hand-pointer text-3xl mb-2 text-slate-300"></i>
+          <p class="text-xs font-bold text-slate-500">Chưa có lựa chọn nào từ Phần A</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">Chọn một nút, xem ảnh nền hoặc chọn điều kiện để hiển thị các ảnh tương ứng tại đây.</p>
+        </div>
+      `;
+    }
+
+    function setPartBActiveFolders(folders, customTitle) {
+      if (!folders || folders.length === 0) {
+        renderPartBEmptyState();
+        return;
       }
 
-      if (state.currentSelectedConditionId && cls.config.unlockConditions[state.currentSelectedConditionId]) {
-        const cond = cls.config.unlockConditions[state.currentSelectedConditionId];
-        (cond.folders || []).forEach(f => folderSet.add(f));
-      }
-
-      // Nếu chưa có thư mục nào được gán thì mặc định hiển thị hoacap1
-      if (folderSet.size === 0) folderSet.add('hoacap1');
-
-      return Array.from(folderSet);
+      state.activeViewData = { type: 'folders', folders: [...folders], singleImage: null };
+      document.getElementById('section-b-title').innerText = customTitle || 'Kho Ảnh Assets Đang Hiển Thị';
+      document.getElementById('toolbar-actions').style.display = 'flex';
+      renderMultiFolderView();
     }
 
     function renderMultiFolderView() {
+      if (state.activeViewData.type !== 'folders') return;
+
       const area = document.getElementById('multi-folder-display-area');
-      const folders = getActiveVisibleFolders();
+      const folders = state.activeViewData.folders;
 
       let totalCount = 0;
       area.innerHTML = folders.map(f => {
@@ -855,8 +924,8 @@
     }
 
     function selectAllVisibleImages(isChecked) {
-      const folders = getActiveVisibleFolders();
-      folders.forEach(f => {
+      if (state.activeViewData.type !== 'folders') return;
+      state.activeViewData.folders.forEach(f => {
         const items = state.cachedAssets[f] || [];
         items.forEach(i => {
           if (isChecked) state.checkedImages.add(i.rawUrl);
@@ -895,11 +964,10 @@
 
       icon.classList.remove('fa-spin');
       populateBackgroundDropdowns();
-      renderButtonsConfigForm();
-      renderMultiFolderView();
+      populateButtonIconsList();
     }
 
-    // ================= 6. QUẢN LÝ CSV & XẾP HẠNG =================
+    // ================= 6. CSV & KẾT QUẢ THI ĐUA =================
     function generatePasswordFromNameAndSTT(fullName, stt) {
       if (!fullName) return `hs${stt}`;
       let clean = fullName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd');
@@ -982,6 +1050,7 @@
         renderClassDropdown();
         loadActiveClassConfig();
         renderClassesList();
+        renderPartBEmptyState();
       }
     }
 
@@ -998,15 +1067,9 @@
       alert(`Đã lưu kết quả thi đua tuần cho Lớp ${state.activeClass}!`);
     }
 
-    // ================= 7. LƯU CẤU HÌNH LỚP HIỆN TẠI =================
     function saveAndApplyCurrentClass() {
-      const cls = state.classesData[state.activeClass];
-      cls.config.bgGlobal = document.getElementById('select-bg-global').value;
-      cls.config.bgA = document.getElementById('select-bg-a').value;
-      cls.config.bgB = document.getElementById('select-bg-b').value;
-
       saveStateToLocal();
-      alert(`ĐÃ LƯU THÀNH CÔNG CHO LỚP ${state.activeClass}!\nKhi học sinh lớp ${state.activeClass} đăng nhập vào index.html, game sẽ tự động nạp đúng cấu hình này.`);
+      alert(`ĐÃ LƯU THÀNH CÔNG CHO LỚP ${state.activeClass}!\nToàn bộ cài đặt nền, gán nút và điều kiện mở khóa đã được đồng bộ sang game index.html.`);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
