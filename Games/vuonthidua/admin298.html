@@ -146,7 +146,7 @@
           </div>
         </div>
 
-        <!-- MỤC 2: GÁN TÍNH NĂNG NÚT (GỌN GÀNG, KHÔNG LIỆT KÊ TRÀN LAN) -->
+        <!-- MỤC 2: GÁN TÍNH NĂNG NÚT (BAN ĐẦU ĐỂ TRỐNG, CHỈ HIỆN KHI CHỌN NÚT) -->
         <div class="p-3.5 bg-white rounded-2xl border border-slate-200 space-y-3 shadow-2xs">
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-black uppercase text-emerald-800 flex items-center gap-1.5">
@@ -155,29 +155,33 @@
             <span class="text-[10px] text-slate-400 font-semibold" id="lbl-button-binding-info">Gán thư mục mở cho nút</span>
           </div>
 
-          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
-            <!-- Hàng 1: Chọn Nút (từ nutgame/) và Nhãn hiển thị -->
-            <div class="grid grid-cols-2 gap-2 text-xs">
-              <div>
-                <label class="block text-[11px] font-bold text-slate-600 mb-1">Chọn Nút (nutgame/):</label>
-                <select id="select-active-button-icon" onchange="handleActiveButtonChange(this.value)" class="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-300 bg-white font-mono font-semibold"></select>
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-slate-600 mb-1">Tên Nhãn Nút:</label>
-                <input type="text" id="input-active-button-label" onchange="handleActiveButtonLabelChange(this.value)" class="w-full px-2 py-1.5 text-xs rounded-lg border border-slate-300 bg-white font-bold uppercase" placeholder="VD: HOA, NỤ...">
-              </div>
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
+            <!-- Ô Chọn Nút (nutgame/): Mặc định là chuỗi rỗng -->
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 mb-1">Chọn Nút (nutgame/):</label>
+              <select id="select-active-button-icon" onchange="handleActiveButtonChange(this.value)" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white font-mono font-semibold">
+                <option value="">-- Chọn nút --</option>
+              </select>
             </div>
 
-            <!-- Hàng 2: Menu Mở thư mục dạng Dropdown Checkbox -->
-            <div class="relative folder-dropdown-container">
-              <label class="block text-[11px] font-bold text-slate-600 mb-1">Mở thư mục liên kết:</label>
-              <button type="button" onclick="toggleDropdownFolder('dropdown-btn-assigned-folders', event)" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white flex items-center justify-between font-bold text-slate-700 shadow-2xs">
-                <span id="lbl-assigned-folders-status" class="truncate">Chưa chọn thư mục</span>
-                <i class="fa-solid fa-chevron-down text-slate-400 text-[10px] ml-1"></i>
-              </button>
+            <!-- Khung chi tiết: Mặc định ẩn hoàn toàn, chỉ hiện khi đã chọn nút hợp lệ -->
+            <div id="button-detail-settings" class="hidden space-y-2.5 border-t border-slate-200 pt-2.5">
+              <div>
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Tên Nhãn Nút:</label>
+                <input type="text" id="input-active-button-label" onchange="handleActiveButtonLabelChange(this.value)" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white font-bold uppercase" placeholder="VD: HOA, NỤ, ĐẤT...">
+              </div>
 
-              <!-- Menu sổ xuống chứa checkbox các thư mục -->
-              <div id="dropdown-btn-assigned-folders" class="hidden folder-dropdown-menu absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-40 p-2 space-y-1 max-h-52 overflow-y-auto"></div>
+              <!-- Menu Mở thư mục dạng Dropdown Checkbox -->
+              <div class="relative folder-dropdown-container">
+                <label class="block text-[11px] font-bold text-slate-600 mb-1">Mở thư mục liên kết:</label>
+                <button type="button" onclick="toggleDropdownFolder('dropdown-btn-assigned-folders', event)" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white flex items-center justify-between font-bold text-slate-700 shadow-2xs">
+                  <span id="lbl-assigned-folders-status" class="truncate">Chưa chọn thư mục</span>
+                  <i class="fa-solid fa-chevron-down text-slate-400 text-[10px] ml-1"></i>
+                </button>
+
+                <!-- Menu sổ xuống chứa checkbox các thư mục -->
+                <div id="dropdown-btn-assigned-folders" class="hidden folder-dropdown-menu absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-40 p-2 space-y-1 max-h-52 overflow-y-auto"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -376,10 +380,9 @@
       currentSelectedConditionId: '',
       editingConditionId: null,
       tempNewConditionFolders: ['hoacap2'],
-      currentActiveButtonIcon: 'nuthoa.png',
-      // Mảng lưu danh sách các thư mục hoặc danh sách ảnh đang được kích hoạt hiển thị ở Phần B
+      currentActiveButtonIcon: '', // MẶC ĐỊNH LÀ RỖNG KHI MỚI VÀO
       activeViewData: {
-        type: 'none', // 'none' | 'folders' | 'single_preview'
+        type: 'none',
         folders: [],
         singleImage: null
       }
@@ -438,7 +441,7 @@
       loadActiveClassConfig();
       renderClassesList();
       syncAllFromGitHub();
-      // Ban đầu không hiển thị ảnh nào tại Phần B
+      // Mới vào để trống hoàn toàn ở Phần B
       renderPartBEmptyState();
     }
 
@@ -468,6 +471,7 @@
     function switchActiveClass(className) {
       state.activeClass = className;
       state.currentSelectedConditionId = '';
+      state.currentActiveButtonIcon = ''; // Reset nút về trống
       state.activeViewData = { type: 'none', folders: [], singleImage: null };
       saveStateToLocal();
       loadActiveClassConfig();
@@ -483,6 +487,7 @@
 
       state.classesData[clean] = DEFAULT_CLASS_TEMPLATE(clean);
       state.activeClass = clean;
+      state.currentActiveButtonIcon = '';
       state.activeViewData = { type: 'none', folders: [], singleImage: null };
       saveStateToLocal();
       renderClassDropdown();
@@ -534,7 +539,6 @@
       document.getElementById('select-bg-b').innerHTML = generateOptions(cls.config.bgB);
     }
 
-    // Khi chọn mới một ảnh nền -> Lập tức hiển thị tại Phần B để xem trước
     function handleBackgroundSelectionChange(type, value) {
       const cls = state.classesData[state.activeClass];
       if (type === 'global') cls.config.bgGlobal = value;
@@ -545,7 +549,6 @@
       displaySingleImagePreview(value, `Xem trước ảnh nền (${type.toUpperCase()}): ${value}`);
     }
 
-    // Khi bấm nút Con Mắt -> Mới hiển thị ảnh tại Phần B
     function viewBackgroundPreview(type) {
       const cls = state.classesData[state.activeClass];
       let val = cls.config.bgGlobal;
@@ -577,15 +580,15 @@
     function populateButtonIconsList() {
       const select = document.getElementById('select-active-button-icon');
       const nutImages = state.cachedAssets['nutgame'] || [];
-      const cls = state.classesData[state.activeClass];
 
-      if (nutImages.length === 0) {
-        select.innerHTML = `<option value="nuthoa.png">nuthoa.png</option>`;
-      } else {
-        select.innerHTML = nutImages.map(img => 
+      // Mặc định luôn có tùy chọn rỗng đầu tiên
+      let html = `<option value="">-- Chọn nút --</option>`;
+      if (nutImages.length > 0) {
+        html += nutImages.map(img => 
           `<option value="${img.fileName}" ${img.fileName === state.currentActiveButtonIcon ? 'selected' : ''}>${img.fileName}</option>`
         ).join('');
       }
+      select.innerHTML = html;
 
       loadAssignedButtonDetails();
     }
@@ -596,12 +599,25 @@
     }
 
     function loadAssignedButtonDetails() {
+      const detailBox = document.getElementById('button-detail-settings');
+      const icon = state.currentActiveButtonIcon;
+
+      // NẾU CHƯA CHỌN NÚT (RỖNG) -> ẨN TOÀN BỘ VÀ XÓA PHẦN B
+      if (!icon) {
+        detailBox.classList.add('hidden');
+        document.getElementById('input-active-button-label').value = '';
+        document.getElementById('lbl-assigned-folders-status').innerText = 'Chưa chọn thư mục';
+        renderPartBEmptyState();
+        return;
+      }
+
+      // NẾU ĐÃ CHỌN NÚT -> HIỂN THỊ KHUNG CHI TIẾT
+      detailBox.classList.remove('hidden');
+
       const cls = state.classesData[state.activeClass];
       if (!cls.config.buttonMappings) cls.config.buttonMappings = {};
 
-      const icon = state.currentActiveButtonIcon;
       if (!cls.config.buttonMappings[icon]) {
-        // Tự động suy luận nhãn mặc định nếu chưa có
         let autoLabel = icon.replace(/\.[^/.]+$/, "").replace('nut', '').toUpperCase() || 'NÚT';
         cls.config.buttonMappings[icon] = { label: autoLabel, targetFolders: [] };
       }
@@ -611,7 +627,7 @@
 
       renderAssignedFolderDropdownCheckboxes();
       
-      // KHI CHỌN NÚT NÀO THÌ PHẦN B LẬP TỨC HIỂN THỊ CÁC THƯ MỤC CỦA NÚT ĐÓ
+      // HIỂN THỊ CÁC THƯ MỤC LIÊN KẾT ĐÃ CÓ CỦA NÚT SANG PHẦN B
       if (mapping.targetFolders && mapping.targetFolders.length > 0) {
         setPartBActiveFolders(mapping.targetFolders, `Các thư mục gán cho nút [${icon}]`);
       } else {
@@ -622,7 +638,7 @@
     function handleActiveButtonLabelChange(newLabel) {
       const cls = state.classesData[state.activeClass];
       const icon = state.currentActiveButtonIcon;
-      if (cls.config.buttonMappings[icon]) {
+      if (icon && cls.config.buttonMappings[icon]) {
         cls.config.buttonMappings[icon].label = newLabel.trim();
         saveStateToLocal();
       }
@@ -661,7 +677,6 @@
 
       updateAssignedFoldersLabel();
       saveStateToLocal();
-      // Hiển thị cập nhật ngay sang Phần B
       setPartBActiveFolders(mapping.targetFolders, `Các thư mục gán cho nút [${state.currentActiveButtonIcon}]`);
     }
 
@@ -693,7 +708,6 @@
         document.getElementById('new-condition-box').classList.add('hidden');
         updateLinkedFolderBox();
 
-        // KHI CHỌN ĐIỀU KIỆN THÌ PHẦN B HIỂN THỊ CÁC THƯ MỤC CỦA ĐIỀU KIỆN ĐÓ
         const cls = state.classesData[state.activeClass];
         const cond = cls.config.unlockConditions[val];
         if (cond && cond.folders && cond.folders.length > 0) {
@@ -830,7 +844,7 @@
       }
     }
 
-    // ================= 4. HIỂN THỊ PHẦN B (CHỈ KHI CÓ LỰA CHỌN) =================
+    // ================= 4. HIỂN THỊ PHẦN B =================
     function renderPartBEmptyState() {
       state.activeViewData = { type: 'none', folders: [], singleImage: null };
       document.getElementById('section-b-title').innerText = 'Kho Ảnh Assets Đang Hiển Thị';
