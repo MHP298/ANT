@@ -752,23 +752,14 @@
                 renderApp();
             }, err => console.log("Lỗi albums:", err));
 
-            // 4. BIỂU MẪU: Đọc từ collection "forms" độc lập
-            db.collection("forms").onSnapshot(snapshot => {
-                formsList = [];
-                snapshot.forEach(doc => {
-                    formsList.push({ ...doc.data(), docId: doc.id });
-                });
-                renderApp();
-            }, err => console.log("Lỗi forms collection:", err));
-
-            // 5. Thùng rác
+            // 4. Thùng rác
             db.collection("trashBin").onSnapshot(snapshot => {
                 trashBin = [];
                 snapshot.forEach(doc => trashBin.push({ ...doc.data(), docId: doc.id }));
                 renderApp();
             }, err => console.log("Lỗi trashBin:", err));
 
-            // 6. Tài khoản
+            // 5. Tài khoản
             db.collection("subAccounts").onSnapshot(snapshot => {
                 subAccounts = [];
                 snapshot.forEach(doc => subAccounts.push({ ...doc.data(), docId: doc.id }));
@@ -779,26 +770,31 @@
                 renderApp();
             }, err => console.log("Lỗi subAccounts:", err));
 
-            // 7. Đồng bộ TKB và Banner từ settings/general và main_store
+            // 6. ĐỒNG BỘ CHUẨN XÁC TKB, BIỂU MẪU VÀ BANNER TỪ SETTINGS/GENERAL
             const syncSettings = (data) => {
                 if (data.scheduleUrl) scheduleUrl = data.scheduleUrl;
                 if (data.banners && data.banners.length > 0) banners = data.banners;
+                if (data.formsList && Array.isArray(data.formsList)) {
+                    formsList = data.formsList;
+                }
                 renderApp();
             };
 
+            // Lắng nghe trực tiếp document settings/general (nơi Thầy đang lưu trữ thực tế)
             db.collection("settings").doc("general").onSnapshot(doc => {
                 if (doc.exists) syncSettings(doc.data());
             }, err => console.log("Lỗi settings/general:", err));
 
+            // Dự phòng đọc từ class_data/main_store
             db.collection("class_data").doc("main_store").onSnapshot(doc => {
                 if (doc.exists) syncSettings(doc.data());
             }, err => console.log("Lỗi main_store:", err));
         }
 
         function saveSettingsToFirebase() {
-            let payload = { banners, scheduleUrl };
-            db.collection("class_data").doc("main_store").set(payload, { merge: true });
+            let payload = { banners, formsList, scheduleUrl };
             db.collection("settings").doc("general").set(payload, { merge: true });
+            db.collection("class_data").doc("main_store").set(payload, { merge: true });
         }
 
         function checkDirectFileSizeLimit(input) {
@@ -1218,7 +1214,7 @@
                         </div>
                         <div class="pagination-bar" style="margin-top:8px;">
                             <button class="menu-btn" style="padding:6px 14px; font-size:0.82rem;" onclick="changeAlbum(-1)" ${albumIndex === 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>⬅️ Ảnh trước</button>
-                            <button class="menu-btn" style="padding:6px 14px; font-size:0.82rem;" onclick="changeAlbum(1)" ${albumIndex === albums.length - 1 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>Ảnh sau ➡️</button>
+                            <button class="menu-btn" style="padding:6px 14px; font-size:0.82rem;" onclick="changeAlbum(1)" ${albumIndex === albums.length - 1 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>Ảnh sau ➡️️</button>
                         </div>
                     `;
                 }
@@ -1581,29 +1577,25 @@
             }
         }
 
-        // --- CÁC HÀM XỬ LÝ BIỂU MẪU (CHUẨN HÓA VÀ CẬP NHẬT TỨC THÌ) ---
+        // --- CÁC HÀM XỬ LÝ BIỂU MẪU (LƯU TRỰC TIẾP VÀO SETTINGS/GENERAL VÀ MAIN_STORE) ---
         async function submitNewForm() {
             let title = document.getElementById('formTitleInput').value.trim();
             let url = document.getElementById('formUrlInput').value.trim();
             if (!title || !url) { alert("Vui lòng nhập tên biểu mẫu và đường dẫn URL!"); return; }
 
             let parsedUrl = parseGoogleDriveLink(url);
-            let newId = Date.now();
+            let maxId = (formsList && formsList.length > 0) ? Math.max(...formsList.map(f => f.id || 0)) : 0;
             let newFormObj = {
-                id: newId,
+                id: maxId + 1,
                 title: title,
                 url: parsedUrl,
-                author: currentUser.name,
-                timestamp: Date.now()
+                author: currentUser.name
             };
 
             try {
-                // Đẩy vào mảng hiển thị ngay để không bị giật lag
-                formsList.unshift({ ...newFormObj, docId: "form_" + newId });
-                renderAdminFormsList();
-
-                // Lưu lên Firebase Collection "forms"
-                await db.collection("forms").doc("form_" + newId).set(newFormObj);
+                if (!Array.isArray(formsList)) formsList = [];
+                formsList.unshift(newFormObj);
+                saveSettingsToFirebase(); // Ghi trực tiếp vào settings/general và main_store
                 alert("Đăng biểu mẫu thành công!");
                 switchView('admin_forms');
             } catch (err) {
@@ -1611,15 +1603,11 @@
             }
         }
 
-        async function deleteFormItem(docId) {
+        function deleteFormItem(id) {
             if (confirm("Bạn có chắc chắn muốn xóa biểu mẫu này?")) {
-                try {
-                    formsList = formsList.filter(f => f.docId !== docId);
-                    renderAdminFormsList();
-                    await db.collection("forms").doc(docId).delete();
-                } catch (err) {
-                    alert("Lỗi khi xóa: " + err.message);
-                }
+                formsList = formsList.filter(f => f.id !== id);
+                saveSettingsToFirebase();
+                renderAdminFormsList();
             }
         }
 
@@ -1632,14 +1620,13 @@
                 return;
             }
             formsList.forEach(form => {
-                let dId = form.docId || ("form_" + form.id);
                 container.innerHTML += `
                     <div class="card-item" style="padding:6px 10px;">
                         <div class="card-info" style="flex:1;">
                             <h4 style="font-size:0.82rem;">📄 ${form.title}</h4>
                             <span style="font-size:0.68rem;">🔗 ${form.url}</span>
                         </div>
-                        <button class="menu-btn btn-del" style="padding:3px 6px; font-size:0.7rem;" onclick="deleteFormItem('${dId}')">Xóa</button>
+                        <button class="menu-btn btn-del" style="padding:3px 6px; font-size:0.7rem;" onclick="deleteFormItem(${form.id})">Xóa</button>
                     </div>
                 `;
             });
