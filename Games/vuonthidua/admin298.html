@@ -56,7 +56,7 @@
     .draggable-text-box:active { cursor: grabbing; }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans select-none" onclick="closeAllFolderDropdowns(event)">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans select-none">
 
   <!-- POPUP ĐĂNG NHẬP -->
   <div id="login-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -142,8 +142,8 @@
       <div id="tab-panel-controls" class="flex-1 overflow-y-auto p-3 space-y-2.5">
         
         <!-- MỤC 1: CẤU HÌNH NỀN GIAO DIỆN -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-          <button type="button" onclick="toggleAccordionSection('sec-bg')" class="w-full p-3 bg-slate-50 hover:bg-emerald-50/60 flex items-center justify-between transition cursor-pointer">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs">
+          <button type="button" onclick="toggleAccordionSection('sec-bg')" class="w-full p-3 bg-slate-50 hover:bg-emerald-50/60 flex items-center justify-between transition cursor-pointer rounded-2xl">
             <span class="text-xs font-black uppercase text-emerald-800 flex items-center gap-2">
               <i class="fa-regular fa-image text-emerald-600"></i> Cấu Hình Nền Giao Diện
             </span>
@@ -178,8 +178,8 @@
         </div>
 
         <!-- MỤC 2: GÁN TÍNH NĂNG NÚT -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-          <button type="button" onclick="toggleAccordionSection('sec-btn')" class="w-full p-3 bg-slate-50 hover:bg-emerald-50/60 flex items-center justify-between transition cursor-pointer">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs relative">
+          <button type="button" onclick="toggleAccordionSection('sec-btn')" class="w-full p-3 bg-slate-50 hover:bg-emerald-50/60 flex items-center justify-between transition cursor-pointer rounded-2xl">
             <span class="text-xs font-black uppercase text-emerald-800 flex items-center gap-2">
               <i class="fa-solid fa-shapes text-emerald-600"></i> Gán Tính Năng Nút
             </span>
@@ -200,21 +200,25 @@
                 <input type="text" id="input-active-button-label" onchange="handleActiveButtonLabelChange(this.value)" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white font-bold uppercase" placeholder="VD: HOA, NỤ, ĐẤT...">
               </div>
 
-              <div class="relative folder-dropdown-container">
+              <!-- KHỐI CHỌN THƯ MỤC LIÊN KẾT: ĐƯỢC TỐI ƯU HIỂN THỊ RÕ RÀNG KHÔNG BỊ CHE KHUẤT -->
+              <div>
                 <label class="block text-[11px] font-bold text-slate-600 mb-1">Mở thư mục liên kết:</label>
-                <button type="button" onclick="toggleDropdownFolder('dropdown-btn-assigned-folders', event)" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white flex items-center justify-between font-bold text-slate-700 shadow-2xs">
+                <button type="button" onclick="toggleFolderDropdownMenu()" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white flex items-center justify-between font-bold text-slate-700 shadow-2xs hover:border-emerald-500">
                   <span id="lbl-assigned-folders-status" class="truncate">Chưa chọn thư mục</span>
                   <i class="fa-solid fa-chevron-down text-slate-400 text-[10px] ml-1"></i>
                 </button>
-                <div id="dropdown-btn-assigned-folders" class="hidden folder-dropdown-menu absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-40 p-2 space-y-1 max-h-52 overflow-y-auto"></div>
+                
+                <div id="dropdown-btn-assigned-folders" class="hidden mt-1.5 bg-slate-50 border border-slate-300 rounded-xl p-2 space-y-1 max-h-48 overflow-y-auto shadow-inner">
+                  <!-- Checkbox nạp tại đây -->
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- MỤC 3: MỞ KHÓA CẤP ĐỘ -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-          <button type="button" onclick="toggleAccordionSection('sec-cond')" class="w-full p-3 bg-slate-50 hover:bg-emerald-50/60 flex items-center justify-between transition cursor-pointer">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs">
+          <button type="button" onclick="toggleAccordionSection('sec-cond')" class="w-full p-3 bg-slate-50 hover:bg-emerald-50/60 flex items-center justify-between transition cursor-pointer rounded-2xl">
             <span class="text-xs font-black uppercase text-emerald-900 flex items-center gap-2">
               <i class="fa-solid fa-key text-amber-500"></i> Mở Khóa Cấp Độ
               <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold ml-1" id="badge-total-rules">0 Luật</span>
@@ -272,8 +276,8 @@
         </div>
 
         <!-- MỤC 4: CẤU HÌNH ÂM THANH -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
-          <button type="button" onclick="toggleAccordionSection('sec-audio')" class="w-full p-3 bg-slate-50 hover:bg-emerald-50/60 flex items-center justify-between transition cursor-pointer">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs">
+          <button type="button" onclick="toggleAccordionSection('sec-audio')" class="w-full p-3 bg-slate-50 hover:bg-emerald-50/60 flex items-center justify-between transition cursor-pointer rounded-2xl">
             <span class="text-xs font-black uppercase text-indigo-900 flex items-center gap-2">
               <i class="fa-solid fa-music text-indigo-600"></i> Cấu Hình Âm Thanh
             </span>
@@ -377,7 +381,7 @@
         <span class="text-xl">📐</span>
         <div>
           <h3 class="font-extrabold text-sm text-white uppercase tracking-wide">Trình Thiết Kế Sân Vườn & Căn Chỉnh Vùng Đất</h3>
-          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Nắn 4 góc lưới • Chọn ảnh mẫu đất và Lưu tỉ lệ cho từng ô đất</p>
+          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Nắn 4 góc lưới • Kéo rê di chuyển ô đất • Chọn ảnh mẫu đất và Lưu lại</p>
         </div>
       </div>
 
@@ -401,7 +405,7 @@
         <span id="lbl-active-editing-plot" class="font-bold text-amber-300 bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700">Đang chọn: Khu đất 1</span>
         <span>🌾 <b>Chọn ảnh đất mẫu:</b></span>
         <select id="select-editor-soil-asset" onchange="previewSoilAssetForActiveSlot(this.value)" class="px-3 py-1.5 rounded-xl bg-slate-800 text-amber-200 border border-slate-700 font-mono text-xs max-w-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
-          <!-- Load tự động danh sách ảnh mẫu đất -->
+          <!-- Load tự động danh sách ảnh hàng rào đất -->
         </select>
         <button onclick="saveSoilAssetForActiveSlot()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition shadow flex items-center gap-1">
           <i class="fa-solid fa-check"></i> Lưu Tỉ Lệ Ô Này
@@ -602,20 +606,6 @@
       [1, 2, 3, 4].forEach(t => { document.getElementById(`rank-val-${t}`).value = cls.weeklyRanking[t] || t; });
     }
 
-    function closeAllFolderDropdowns(e) {
-      if (!e.target.closest('.folder-dropdown-container') && !e.target.closest('.folder-dropdown-menu')) {
-        document.querySelectorAll('.folder-dropdown-menu').forEach(el => el.classList.add('hidden'));
-      }
-    }
-
-    function toggleDropdownFolder(id, event) {
-      event.stopPropagation();
-      const menu = document.getElementById(id);
-      const isClosed = menu.classList.contains('hidden');
-      document.querySelectorAll('.folder-dropdown-menu').forEach(el => el.classList.add('hidden'));
-      if (isClosed) menu.classList.remove('hidden');
-    }
-
     function populateBackgroundDropdowns() {
       const cls = state.classesData[state.activeClass];
       const bgImages = state.cachedAssets['nengame'] || [];
@@ -692,7 +682,7 @@
       }
       const mapping = cls.config.buttonMappings[icon];
       document.getElementById('input-active-button-label').value = mapping.label;
-      renderAssignedFolderDropdownCheckboxes();
+      renderAssignedFolderCheckboxes();
       if (mapping.targetFolders.length > 0) setPartBActiveFolders(mapping.targetFolders, `Các thư mục gán cho nút [${icon}]`, 'button', icon);
       else renderPartBEmptyState();
     }
@@ -703,13 +693,25 @@
       if (icon && cls.config.buttonMappings[icon]) { cls.config.buttonMappings[icon].label = newLabel.trim(); saveStateToLocal(); }
     }
 
-    function renderAssignedFolderDropdownCheckboxes() {
+    // ĐÃ SỬA: BẬT TẮT MENU CHỌN THƯ MỤC TRỰC QUAN KHÔNG BỊ CHE KHUẤT
+    function toggleFolderDropdownMenu() {
+      const menu = document.getElementById('dropdown-btn-assigned-folders');
+      if (menu.classList.contains('hidden')) {
+        menu.classList.remove('hidden');
+      } else {
+        menu.classList.add('hidden');
+      }
+    }
+
+    function renderAssignedFolderCheckboxes() {
       const cls = state.classesData[state.activeClass];
       const mapping = cls.config.buttonMappings[state.currentActiveButtonIcon] || { targetFolders: [] };
-      document.getElementById('dropdown-btn-assigned-folders').innerHTML = ALL_FOLDERS.filter(f => f !== 'amthanh').map(f => `
-        <label class="flex items-center justify-between px-2.5 py-1.5 rounded hover:bg-emerald-50 cursor-pointer text-xs font-bold text-slate-700" onclick="event.stopPropagation()">
+      const container = document.getElementById('dropdown-btn-assigned-folders');
+      
+      container.innerHTML = ALL_FOLDERS.filter(f => f !== 'amthanh').map(f => `
+        <label class="flex items-center justify-between px-2.5 py-1.5 rounded-lg hover:bg-emerald-100/60 cursor-pointer text-xs font-bold text-slate-700 bg-white border border-slate-200 shadow-2xs">
           <span class="flex items-center gap-1.5"><i class="fa-solid fa-folder text-emerald-600 text-[10px]"></i> ${f}</span>
-          <input type="checkbox" value="${f}" ${mapping.targetFolders.includes(f) ? 'checked' : ''} onchange="toggleAssignedFolderCheck('${f}', this.checked)" class="rounded text-emerald-600 w-3.5 h-3.5">
+          <input type="checkbox" value="${f}" ${mapping.targetFolders.includes(f) ? 'checked' : ''} onchange="toggleAssignedFolderCheck('${f}', this.checked)" class="rounded text-emerald-600 w-4 h-4 cursor-pointer">
         </label>
       `).join('');
       updateAssignedFoldersLabel();
@@ -1035,7 +1037,7 @@
 
     function openFullscreenEditor(imagePath) {
       const cls = state.classesData[state.activeClass];
-      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Nắn 4 góc lưới • Chọn ô đất để gán ảnh mẫu đất`;
+      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Nắn 4 góc lưới • Kéo rê di chuyển ô đất • Chọn ảnh mẫu đất và Lưu lại`;
       document.getElementById('editor-canvas-bg').src = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${imagePath}`;
       state.currentBgToneStyle = detectBackgroundTone(imagePath);
 
@@ -1043,20 +1045,19 @@
       reIndexPlotSlots();
       state.tempTextOverlays = JSON.parse(JSON.stringify(cls.config.textOverlays || []));
       
-      // Nạp danh mục ảnh đất
       populateEditorSoilAssetsDropdown();
 
       document.getElementById('fullscreen-editor-modal').classList.remove('hidden');
       requestAnimationFrame(() => renderPerspectiveSlotsAndTexts());
     }
 
-    // NẠP ĐẦY ĐỦ VÀ CHÍNH XÁC DANH SÁCH ẢNH ĐẤT
+    // ĐÃ SỬA: CHỈ LẤY CÁC ẢNH HÀNG RÀO ĐẤT THỰC TẾ (LOẠI BỎ HẲN NENUNGDUNG, VUONLOP)
     function populateEditorSoilAssetsDropdown() {
       const select = document.getElementById('select-editor-soil-asset');
       const cls = state.classesData[state.activeClass];
       const nengameList = state.cachedAssets['nengame'] || [];
 
-      // 1. Quét tìm tất cả các file ảnh đất được gán ở bất kỳ nút nào có liên kết nengame
+      // 1. Quét tìm các file đã chọn trong nút Đất (thư mục nengame)
       let selectedSoilFiles = [];
       Object.values(cls.config.buttonMappings || {}).forEach(m => {
         if (m.targetFolders && m.targetFolders.includes('nengame') && m.selectedImages) {
@@ -1064,27 +1065,22 @@
         }
       });
 
-      // 2. Tìm các ảnh phù hợp (ưu tiên các file khudatrieng_*, đất, hoặc file đã được tick)
+      // 2. Lọc dứt điểm chỉ lấy ảnh hàng rào đất (chứa chữ 'khudat' hoặc bắt đầu bằng 'khudatrieng')
       let validSoilItems = nengameList.filter(img => {
         const name = img.fileName.toLowerCase();
-        const isSoilPattern = name.includes('khudat') || name.includes('dat') || name.includes('hangrao');
+        const isFencePattern = name.includes('khudat') || name.includes('hangrao') || (name.includes('dat') && !name.includes('nen'));
         if (selectedSoilFiles.length > 0) {
-          return selectedSoilFiles.includes(img.fileName);
+          return selectedSoilFiles.includes(img.fileName) && isFencePattern;
         }
-        return isSoilPattern;
+        return isFencePattern;
       });
 
-      // 3. Fallback: Nếu không lọc được gì, hiển thị tất cả các file trong nengame (ngoại trừ ảnh nền lớn nenungdung, vuonlop)
+      // 3. Fallback an toàn: Loại bỏ tuyệt đối các ảnh nền lớn nếu danh sách trống
       if (validSoilItems.length === 0) {
         validSoilItems = nengameList.filter(img => {
           const name = img.fileName.toLowerCase();
           return !name.includes('nenungdung') && !name.includes('vuonlop');
         });
-      }
-
-      // 4. Fallback cuối cùng: Nếu vẫn rỗng (do chưa kịp quét GitHub), lấy toàn bộ nengameList
-      if (validSoilItems.length === 0) {
-        validSoilItems = nengameList;
       }
 
       select.innerHTML = validSoilItems.map(img => `<option value="${img.rawUrl}">${img.fileName}</option>`).join('');
@@ -1095,7 +1091,6 @@
       }
     }
 
-    // Cập nhật ảnh trực tiếp lên canvas khi đổi lựa chọn trong dropdown
     function previewSoilAssetForActiveSlot(url) {
       const slotIdx = state.activeEditingSlotIndex;
       if (state.tempEditorSlots[slotIdx]) {
@@ -1135,22 +1130,39 @@
       });
     }
 
+    // ĐÃ SỬA: COPY XONG TỰ ĐỘNG CHUYỂN CHỌN SANG Ô MỚI ĐỂ RÊ CHUỘT KÉO ĐI DỄ DÀNG
     function copyPlotSlot(sourceIndex, event) {
       if (event) event.stopPropagation();
       const sourceSlot = state.tempEditorSlots[sourceIndex];
       if (!sourceSlot) return;
+      
       const nextNum = state.tempEditorSlots.length + 1;
-      const clonedCorners = sourceSlot.corners.map(c => ({ x: Math.min(97, c.x + 8), y: Math.min(97, c.y + 6) }));
-      state.tempEditorSlots.push({ id: `slot_${nextNum}`, name: `Khu đất ${nextNum}`, teamId: nextNum, corners: clonedCorners, soilImage: sourceSlot.soilImage || null });
+      const clonedCorners = sourceSlot.corners.map(c => ({ 
+        x: Math.min(96, parseFloat((c.x + 8).toFixed(2))), 
+        y: Math.min(96, parseFloat((c.y + 6).toFixed(2))) 
+      }));
+
+      state.tempEditorSlots.push({ 
+        id: `slot_${nextNum}`, 
+        name: `Khu đất ${nextNum}`, 
+        teamId: nextNum, 
+        corners: clonedCorners, 
+        soilImage: sourceSlot.soilImage || null 
+      });
+
       reIndexPlotSlots();
+      state.activeEditingSlotIndex = state.tempEditorSlots.length - 1; // Chọn ngay ô mới tạo
       renderPerspectiveSlotsAndTexts();
     }
 
     function removePerspectiveSlot(sIdx, event) {
       if (event) event.stopPropagation();
       state.tempEditorSlots.splice(sIdx, 1);
-      if (state.tempEditorSlots.length === 0) state.tempEditorSlots = [{ id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }] }];
+      if (state.tempEditorSlots.length === 0) {
+        state.tempEditorSlots = [{ id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }] }];
+      }
       reIndexPlotSlots();
+      state.activeEditingSlotIndex = Math.max(0, state.tempEditorSlots.length - 1);
       renderPerspectiveSlotsAndTexts();
     }
 
@@ -1165,10 +1177,12 @@
       if (updated !== null && updated.trim()) { state.tempTextOverlays[tIdx].content = updated.trim(); renderPerspectiveSlotsAndTexts(); }
     }
 
+    // ĐÃ SỬA: GẮN SỰ KIỆN KÉO RÊ TRỰC TIẾP LÊN MẶT ĐẤT SVG ĐỂ KÉO ĐƯỢC MỌI Ô SAU KHI COPY
     function renderPerspectiveSlotsAndTexts() {
       const container = document.getElementById('editor-slots-layer');
       const canvas = document.getElementById('editor-canvas-box');
       const cW = canvas.clientWidth || 900, cH = canvas.clientHeight || 600;
+      
       document.getElementById('lbl-total-slots-count').innerText = `Đã bố trí: ${state.tempEditorSlots.length} vùng đất`;
       document.getElementById('lbl-active-editing-plot').innerText = `Đang chọn: ${state.tempEditorSlots[state.activeEditingSlotIndex]?.name || 'Khu đất 1'}`;
 
@@ -1182,10 +1196,18 @@
           ${state.tempEditorSlots.map((slot, sIdx) => {
             const xs = slot.corners.map(c => (c.x / 100) * cW), ys = slot.corners.map(c => (c.y / 100) * cH);
             const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+            const isSelected = state.activeEditingSlotIndex === sIdx;
+
             return `
-              <g id="svg-group-${sIdx}" onclick="selectSlotForEditing(${sIdx})">
-                <polygon points="${slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ')}" id="polygon-body-${sIdx}" class="plot-polygon-shape" fill="rgba(16, 185, 129, 0.35)" stroke="#059669" stroke-width="3" stroke-dasharray="8,6"/>
-                ${slot.soilImage ? `<image href="${slot.soilImage}" x="${minX}" y="${minY}" width="${maxX - minX}" height="${maxY - minY}" preserveAspectRatio="none" clip-path="url(#editor-clip-${sIdx})" opacity="0.95"/>` : ''}
+              <g id="svg-group-${sIdx}">
+                <polygon points="${slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ')}" 
+                         id="polygon-body-${sIdx}" 
+                         class="plot-polygon-shape" 
+                         fill="${isSelected ? 'rgba(245, 158, 11, 0.45)' : 'rgba(16, 185, 129, 0.35)'}" 
+                         stroke="${isSelected ? '#f59e0b' : '#059669'}" 
+                         stroke-width="${isSelected ? '3.5' : '2.5'}" 
+                         stroke-dasharray="8,6" />
+                ${slot.soilImage ? `<image href="${slot.soilImage}" x="${minX}" y="${minY}" width="${maxX - minX}" height="${maxY - minY}" preserveAspectRatio="none" clip-path="url(#editor-clip-${sIdx})" opacity="0.95" style="pointer-events: none;"/>` : ''}
               </g>
             `;
           }).join('')}
@@ -1194,13 +1216,23 @@
         ${state.tempEditorSlots.map((slot, sIdx) => {
           const centerX = (slot.corners[0].x + slot.corners[1].x + slot.corners[2].x + slot.corners[3].x) / 4;
           const centerY = (slot.corners[0].y + slot.corners[1].y + slot.corners[2].y + slot.corners[3].y) / 4;
+          const isSelected = state.activeEditingSlotIndex === sIdx;
+
           return `
             <div class="absolute inset-0 pointer-events-none">
-              <div style="left: ${centerX}\%; top:${centerY}%; transform: translate(-50%, -50%);" class="absolute px-3 py-1 bg-amber-950/90 text-amber-200 border border-amber-600/60 rounded-full font-black text-xs shadow-lg pointer-events-none">🌾 ${slot.name}</div>
-              <div style="left: ${slot.corners[0].x}\%; top:${slot.corners[0].y}%; transform: translate(-110%, -125%);" class="absolute flex items-center gap-1.5 pointer-events-auto z-50">
-                <button onclick="copyPlotSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-emerald-600 text-white text-[11px] font-bold flex items-center justify-center shadow-lg"><i class="fa-solid fa-copy"></i></button>
-                <button onclick="removePerspectiveSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-rose-600 text-white text-xs font-bold flex items-center justify-center shadow-lg">✕</button>
+              <!-- BẢNG TÊN Ô ĐẤT (CÓ THỂ BẤM CHUỘT VÀO ĐỂ KÉO RÊ CẢ Ô ĐẤT) -->
+              <div id="drag-badge-${sIdx}" style="left: ${centerX}\%; top:${centerY}%; transform: translate(-50%, -50%);" 
+                   class="absolute px-3 py-1 ${isSelected ? 'bg-amber-600 text-white ring-2 ring-white' : 'bg-amber-950/90 text-amber-200'} border border-amber-600/60 rounded-full font-black text-xs shadow-lg pointer-events-auto cursor-grab active:cursor-grabbing">
+                🌾 ${slot.name}
               </div>
+
+              <!-- CÁC NÚT COPY VÀ XÓA -->
+              <div style="left: ${slot.corners[0].x}\%; top:${slot.corners[0].y}%; transform: translate(-110%, -125%);" class="absolute flex items-center gap-1.5 pointer-events-auto z-50">
+                <button onclick="copyPlotSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-emerald-600 text-white text-[11px] font-bold flex items-center justify-center shadow-lg hover:scale-110 transition" title="Copy ô đất này"><i class="fa-solid fa-copy"></i></button>
+                <button onclick="removePerspectiveSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-rose-600 text-white text-xs font-bold flex items-center justify-center shadow-lg hover:scale-110 transition" title="Xóa ô đất">✕</button>
+              </div>
+
+              <!-- 4 ĐIỂM NEO GÓC -->
               <div id="handle-${sIdx}-0" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[0].x}\%; top:${slot.corners[0].y}%;"></div>
               <div id="handle-${sIdx}-1" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[1].x}\%; top:${slot.corners[1].y}%;"></div>
               <div id="handle-${sIdx}-2" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[2].x}\%; top:${slot.corners[2].y}%;"></div>
@@ -1219,17 +1251,23 @@
         `).join('')}
       `;
 
+      // GẮN SỰ KIỆN KÉO RÊ CHO TOÀN BỘ CÁC Ô (BAO GỒM CẢ Ô MỚI COPY)
       state.tempEditorSlots.forEach((slot, sIdx) => {
         const polyEl = document.getElementById(`polygon-body-${sIdx}`);
-        if (polyEl) {
-          polyEl.addEventListener('mousedown', (e) => { selectSlotForEditing(sIdx); });
-        }
+        const badgeEl = document.getElementById(`drag-badge-${sIdx}`);
+        
+        if (polyEl) makePlotElementDraggable(polyEl, sIdx);
+        if (badgeEl) makePlotElementDraggable(badgeEl, sIdx);
+
         for (let cIdx = 0; cIdx < 4; cIdx++) {
           const handle = document.getElementById(`handle-${sIdx}-${cIdx}`);
           if (handle) makeCornerHandleDraggable(handle, sIdx, cIdx);
         }
       });
-      state.tempTextOverlays.forEach((txt, tIdx) => { makeTextOverlayDraggable(document.getElementById(`text-overlay-${tIdx}`), tIdx); });
+
+      state.tempTextOverlays.forEach((txt, tIdx) => { 
+        makeTextOverlayDraggable(document.getElementById(`text-overlay-${tIdx}`), tIdx); 
+      });
     }
 
     function selectSlotForEditing(sIdx) {
@@ -1238,9 +1276,46 @@
       if (!slot) return;
       document.getElementById('lbl-active-editing-plot').innerText = `Đang chọn: ${slot.name}`;
       const select = document.getElementById('select-editor-soil-asset');
-      if (slot.soilImage) {
-        select.value = slot.soilImage;
-      }
+      if (slot.soilImage) select.value = slot.soilImage;
+    }
+
+    // ĐÃ SỬA: HÀM KÉO RÊ TOÀN BỘ Ô ĐẤT DÙNG CHUNG CHO CẢ MẶT ĐA GIÁC VÀ BẢNG TÊN
+    function makePlotElementDraggable(dragTargetEl, slotIndex) {
+      let isDragging = false, startMouseX = 0, startMouseY = 0, originalCorners = [];
+
+      dragTargetEl.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        selectSlotForEditing(slotIndex);
+        isDragging = true;
+        startMouseX = e.clientX; 
+        startMouseY = e.clientY;
+        originalCorners = JSON.parse(JSON.stringify(state.tempEditorSlots[slotIndex].corners));
+        e.stopPropagation();
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const rect = document.getElementById('editor-canvas-box').getBoundingClientRect();
+        const deltaX = ((e.clientX - startMouseX) / rect.width) * 100;
+        const deltaY = ((e.clientY - startMouseY) / rect.height) * 100;
+
+        let minX = Math.min(...originalCorners.map(c => c.x)), maxX = Math.max(...originalCorners.map(c => c.x));
+        let minY = Math.min(...originalCorners.map(c => c.y)), maxY = Math.max(...originalCorners.map(c => c.y));
+        let clampedX = deltaX, clampedY = deltaY;
+
+        if (minX + clampedX < 2) clampedX = 2 - minX;
+        if (maxX + clampedX > 98) clampedX = 98 - maxX;
+        if (minY + clampedY < 2) clampedY = 2 - minY;
+        if (maxY + clampedY > 98) clampedY = 98 - maxY;
+
+        for (let i = 0; i < 4; i++) {
+          state.tempEditorSlots[slotIndex].corners[i].x = parseFloat((originalCorners[i].x + clampedX).toFixed(2));
+          state.tempEditorSlots[slotIndex].corners[i].y = parseFloat((originalCorners[i].y + clampedY).toFixed(2));
+        }
+        renderPerspectiveSlotsAndTexts();
+      });
+
+      window.addEventListener('mouseup', () => { if (isDragging) isDragging = false; });
     }
 
     function makeCornerHandleDraggable(handleEl, slotIndex, cornerIndex) {
