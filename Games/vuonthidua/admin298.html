@@ -23,8 +23,8 @@
     /* NÚT NEO CỦA VÙNG CHỌN ĐA GIÁC (XANH LÁ) */
     .perspective-handle {
       position: absolute;
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       background: #10b981;
       border: 3px solid #ffffff;
       border-radius: 50%;
@@ -36,31 +36,24 @@
     }
     .perspective-handle:hover {
       transform: translate(-50%, -50%) scale(1.35);
-      background: #f59e0b;
+      background: #059669;
     }
 
-    /* KHUNG ĐIỀU KHIỂN CO GIÃN ẢNH ĐẤT (HƯỚNG A) */
-    .soil-image-transform-box {
+    /* NÚT NEO BIẾN DẠNG 4 GÓC ẢNH ĐẤT (HƯỚNG B - MÀU VÀNG CAM) */
+    .soil-quad-handle {
       position: absolute;
-      border: 2px dashed #f59e0b;
-      cursor: move;
-      z-index: 55;
-      touch-action: none;
-      user-select: none;
-    }
-    .soil-scale-handle {
-      position: absolute;
-      width: 14px;
-      height: 14px;
+      width: 18px;
+      height: 18px;
       background: #f59e0b;
-      border: 2px solid #ffffff;
+      border: 3px solid #ffffff;
       border-radius: 50%;
-      box-shadow: 0 0 6px rgba(0,0,0,0.6);
+      box-shadow: 0 0 8px rgba(0,0,0,0.8);
       transform: translate(-50%, -50%);
-      z-index: 56;
+      cursor: crosshair;
+      z-index: 65;
       transition: transform 0.1s;
     }
-    .soil-scale-handle:hover {
+    .soil-quad-handle:hover {
       transform: translate(-50%, -50%) scale(1.35);
       background: #ef4444;
     }
@@ -133,7 +126,6 @@
             <button onclick="selectAllDeleteClasses(false)" class="text-[11px] font-bold text-slate-400 hover:underline">Bỏ chọn</button>
           </div>
         </div>
-        
         <div id="delete-classes-list-box" class="space-y-1.5 max-h-60 overflow-y-auto pr-1"></div>
       </div>
 
@@ -437,14 +429,14 @@
 
   </div>
 
-  <!-- MODAL THIẾT KẾ SÂN VƯỜN & CĂN CHỈNH TỈ LỆ ẢNH ĐẤT CHO TỪNG Ô -->
+  <!-- MODAL THIẾT KẾ SÂN VƯỜN (HƯỚNG B: BIẾN DẠNG 4 GÓC ẢNH ĐẤT ĐỘC LẬP) -->
   <div id="fullscreen-editor-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col">
     <div class="h-14 bg-slate-900 border-b border-slate-800 px-6 flex items-center justify-between shrink-0 shadow-lg">
       <div class="flex items-center gap-3">
         <span class="text-xl">📐</span>
         <div>
           <h3 class="font-extrabold text-sm text-white uppercase tracking-wide">Trình Thiết Kế Sân Vườn & Căn Chỉnh Vùng Đất</h3>
-          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Nắn 4 góc lưới • Kéo rê di chuyển ô đất • Chỉnh kích thước ảnh mẫu (Hướng A) và Lưu lại</p>
+          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Nắn 4 góc lưới (Xanh lá) • Nắn 4 góc ảnh đất (Cam) • Kéo rê di chuyển độc lập</p>
         </div>
       </div>
 
@@ -517,7 +509,7 @@
             id: 'slot_1', name: 'Khu đất 1', teamId: 1,
             corners: [{ x: 19, y: 31 }, { x: 35, y: 31 }, { x: 34, y: 50 }, { x: 18, y: 50 }],
             soilImage: null,
-            imageTransform: null
+            soilCorners: null // 4 GÓC BIẾN DẠNG PHỐI CẢNH 3D RIÊNG CỦA ẢNH ĐẤT (HƯỚNG B)
           }
         ],
         textOverlays: [],
@@ -715,9 +707,7 @@
         return;
       }
 
-      chks.forEach(c => {
-        delete state.classesData[c];
-      });
+      chks.forEach(c => { delete state.classesData[c]; });
 
       if (chks.includes(state.activeClass)) {
         state.activeClass = Object.keys(state.classesData)[0];
@@ -1158,7 +1148,7 @@
     }
     function updateSelectedImageCount() { document.getElementById('lbl-selected-img-count').innerText = `Đã chọn: ${getContextSelectedImages().length}`; }
 
-    // ================= TRÌNH THIẾT KẾ SÂN VƯỜN & HƯỚNG A ĐIỀU KHIỂN ẢNH ĐẤT =================
+    // ================= TRÌNH THIẾT KẾ SÂN VƯỜN (HƯỚNG B: BIẾN DẠNG 4 GÓC ẢNH ĐẤT ĐỘC LẬP) =================
     function detectBackgroundTone(imagePath) {
       const lower = imagePath.toLowerCase();
       if (lower.includes('vuonlop') || lower.includes('go') || lower.includes('nau')) return { textColor: '#451a03', textShadow: '0 1px 2px rgba(254, 243, 199, 0.9)', bgColor: 'rgba(254, 243, 199, 0.75)', borderColor: '#b45309' };
@@ -1167,7 +1157,7 @@
 
     function openFullscreenEditor(imagePath) {
       const cls = state.classesData[state.activeClass];
-      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Nắn 4 góc lưới • Kéo rê di chuyển ô đất • Chỉnh kích thước ảnh mẫu (Hướng A) và Lưu lại`;
+      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Nắn 4 góc lưới (Xanh lá) • Nắn 4 góc ảnh đất (Cam) • Kéo rê di chuyển độc lập`;
       document.getElementById('editor-canvas-bg').src = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${imagePath}`;
       state.currentBgToneStyle = detectBackgroundTone(imagePath);
 
@@ -1186,20 +1176,19 @@
       populateFilesForSelectedFolder(folderName);
     }
 
+    // CHỈ NẠP DANH SÁCH FILE VÀO DROPDOWN, KHÔNG TỰ ĐỘNG GÁN ẢNH NẾU CHƯA ĐƯỢC CHỌN
     function populateFilesForSelectedFolder(folderName) {
       const select = document.getElementById('select-editor-soil-asset');
       let items = state.cachedAssets[folderName] || [];
 
-      if (items.length === 0) {
-        if (folderName === 'nengame') {
-          items = [
-            'khudatrieng_cam.png', 'khudatrieng_dohong.png', 'khudatrieng_tim.png',
-            'khudatrieng_trắng.png', 'khudatrieng_xanhduong.png', 'khudatrieng_xanhla.png'
-          ].map(f => ({
-            fileName: f,
-            rawUrl: `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/assets/nengame/${f}`
-          }));
-        }
+      if (items.length === 0 && folderName === 'nengame') {
+        items = [
+          'khudatrieng_cam.png', 'khudatrieng_dohong.png', 'khudatrieng_tim.png',
+          'khudatrieng_trắng.png', 'khudatrieng_xanhduong.png', 'khudatrieng_xanhla.png'
+        ].map(f => ({
+          fileName: f,
+          rawUrl: `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/assets/nengame/${f}`
+        }));
       }
 
       if (items.length === 0) {
@@ -1207,41 +1196,49 @@
         return;
       }
 
-      select.innerHTML = items.map(img => `<option value="${img.rawUrl}">${img.fileName}</option>`).join('');
+      let optionsHtml = `<option value="">-- Chọn ảnh mẫu --</option>`;
+      optionsHtml += items.map(img => `<option value="${img.rawUrl}">${img.fileName}</option>`).join('');
+      select.innerHTML = optionsHtml;
 
       const activeSlot = state.tempEditorSlots[state.activeEditingSlotIndex];
-      if (activeSlot && !activeSlot.soilImage && items.length > 0) {
-        activeSlot.soilImage = items[0].rawUrl;
-        select.value = items[0].rawUrl;
-        initDefaultImageTransformForSlot(activeSlot);
-        renderPerspectiveSlotsAndTexts();
-      } else if (activeSlot && activeSlot.soilImage) {
+      if (activeSlot && activeSlot.soilImage) {
         select.value = activeSlot.soilImage;
+      } else {
+        select.value = "";
       }
     }
 
-    function initDefaultImageTransformForSlot(slot) {
-      if (!slot.imageTransform) {
-        const xs = slot.corners.map(c => c.x);
-        const ys = slot.corners.map(c => c.y);
-        const minX = Math.min(...xs), maxX = Math.max(...xs);
-        const minY = Math.min(...ys), maxY = Math.max(...ys);
-        slot.imageTransform = {
-          x: minX,
-          y: minY,
-          w: Math.max(10, maxX - minX),
-          h: Math.max(10, maxY - minY)
-        };
+    // KHỞI TẠO 4 GÓC RIÊNG CHO ẢNH ĐẤT (HƯỚNG B) DỰA THEO 4 GÓC VÙNG CHỌN
+    function initDefaultSoilCornersForSlot(slot) {
+      if (!slot.soilCorners || slot.soilCorners.length !== 4) {
+        slot.soilCorners = JSON.parse(JSON.stringify(slot.corners));
       }
     }
 
+    // KHI CHỦ ĐỘNG CHỌN FILE TỪ DROPDOWN THÌ ẢNH MẪU MỚI XUẤT HIỆN
     function previewSoilAssetForActiveSlot(url) {
-      if (!url) return;
       const slotIdx = state.activeEditingSlotIndex;
       const slot = state.tempEditorSlots[slotIdx];
-      if (slot) {
+      if (!slot) return;
+
+      if (!url) {
+        slot.soilImage = null;
+        slot.soilCorners = null;
+      } else {
         slot.soilImage = url;
-        initDefaultImageTransformForSlot(slot);
+        initDefaultSoilCornersForSlot(slot);
+      }
+      renderPerspectiveSlotsAndTexts();
+    }
+
+    // NÚT XÓA ẢNH ĐI KÈM TRÊN ẢNH MẪU
+    function removeSoilImageFromActiveSlot(slotIndex, event) {
+      if (event) event.stopPropagation();
+      const slot = state.tempEditorSlots[slotIndex];
+      if (slot) {
+        slot.soilImage = null;
+        slot.soilCorners = null;
+        document.getElementById('select-editor-soil-asset').value = "";
         renderPerspectiveSlotsAndTexts();
       }
     }
@@ -1255,18 +1252,18 @@
       cls.config.textOverlays = JSON.parse(JSON.stringify(state.tempTextOverlays));
       saveStateToLocal();
       closeFullscreenEditor();
-      alert(`Đã lưu toàn bộ ${cls.config.plotSlots.length} vùng đất kèm tỉ lệ ảnh mẫu độc lập!`);
+      alert(`Đã lưu toàn bộ ${cls.config.plotSlots.length} vùng đất kèm 4 góc ảnh mẫu độc lập!`);
     }
 
     function saveSoilAssetForActiveSlot() {
       const slotIdx = state.activeEditingSlotIndex;
       const slot = state.tempEditorSlots[slotIdx];
       const selectVal = document.getElementById('select-editor-soil-asset').value;
-      if (slot && selectVal) {
-        slot.soilImage = selectVal;
-        initDefaultImageTransformForSlot(slot);
+      if (slot) {
+        slot.soilImage = selectVal || null;
+        if (slot.soilImage) initDefaultSoilCornersForSlot(slot);
         renderPerspectiveSlotsAndTexts();
-        alert(`Đã lưu tỉ lệ độc lập cho ${slot.name}! (Không ghi đè các ô khác)`);
+        alert(`Đã lưu tỉ lệ và 4 góc phối cảnh độc lập cho ${slot.name}!`);
       }
     }
 
@@ -1290,14 +1287,12 @@
         y: Math.min(96, parseFloat((c.y + 6).toFixed(2))) 
       }));
 
-      let clonedTransform = null;
-      if (sourceSlot.imageTransform) {
-        clonedTransform = {
-          x: Math.min(96, sourceSlot.imageTransform.x + 8),
-          y: Math.min(96, sourceSlot.imageTransform.y + 6),
-          w: sourceSlot.imageTransform.w,
-          h: sourceSlot.imageTransform.h
-        };
+      let clonedSoilCorners = null;
+      if (sourceSlot.soilCorners) {
+        clonedSoilCorners = sourceSlot.soilCorners.map(c => ({
+          x: Math.min(96, parseFloat((c.x + 8).toFixed(2))),
+          y: Math.min(96, parseFloat((c.y + 6).toFixed(2)))
+        }));
       }
 
       state.tempEditorSlots.push({ 
@@ -1306,7 +1301,7 @@
         teamId: nextNum, 
         corners: clonedCorners, 
         soilImage: sourceSlot.soilImage || null,
-        imageTransform: clonedTransform
+        soilCorners: clonedSoilCorners
       });
 
       reIndexPlotSlots();
@@ -1318,7 +1313,7 @@
       if (event) event.stopPropagation();
       state.tempEditorSlots.splice(sIdx, 1);
       if (state.tempEditorSlots.length === 0) {
-        state.tempEditorSlots = [{ id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }], soilImage: null, imageTransform: null }];
+        state.tempEditorSlots = [{ id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }], soilImage: null, soilCorners: null }];
       }
       reIndexPlotSlots();
       state.activeEditingSlotIndex = Math.max(0, state.tempEditorSlots.length - 1);
@@ -1336,7 +1331,7 @@
       if (updated !== null && updated.trim()) { state.tempTextOverlays[tIdx].content = updated.trim(); renderPerspectiveSlotsAndTexts(); }
     }
 
-    // ================= RENDER TOÀN BỘ GIAO DIỆN SÂN VƯỜN (SVG + HƯỚNG A) =================
+    // ================= RENDER TOÀN BỘ GIAO DIỆN SÂN VƯỜN (SVG + HƯỚNG B PHỐI CẢNH 3D) =================
     function renderPerspectiveSlotsAndTexts() {
       const container = document.getElementById('editor-slots-layer');
       const canvas = document.getElementById('editor-canvas-box');
@@ -1349,6 +1344,17 @@
 
       container.innerHTML = `
         <svg class="absolute inset-0 w-full h-full pointer-events-auto" style="overflow: visible;" viewBox="0 0 ${cW} ${cH}">
+          <defs>
+            ${state.tempEditorSlots.map((slot, sIdx) => {
+              if (!slot.soilImage) return '';
+              initDefaultSoilCornersForSlot(slot);
+              const sc = slot.soilCorners;
+              const pts = sc.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ');
+              return `<clipPath id="soil-clip-${sIdx}"><polygon points="${pts}" /></clipPath>`;
+            }).join('')}
+          </defs>
+
+          <!-- 1. VÙNG CHỌN ĐA GIÁC (XANH LÁ) -->
           ${state.tempEditorSlots.map((slot, sIdx) => {
             const isSelected = state.activeEditingSlotIndex === sIdx;
             return `
@@ -1356,39 +1362,79 @@
                 <polygon points="${slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ')}" 
                          id="polygon-body-${sIdx}" 
                          class="plot-polygon-shape" 
-                         fill="${isSelected ? 'rgba(245, 158, 11, 0.45)' : 'rgba(16, 185, 129, 0.35)'}" 
+                         fill="${isSelected ? 'rgba(245, 158, 11, 0.4)' : 'rgba(16, 185, 129, 0.3)'}" 
                          stroke="${isSelected ? '#f59e0b' : '#059669'}" 
-                         stroke-width="${isSelected ? '3.5' : '2.5'}" 
+                         stroke-width="${isSelected ? '3' : '2'}" 
                          stroke-dasharray="8,6" />
+              </g>
+            `;
+          }).join('')}
+
+          <!-- 2. HƯỚNG B: HIỂN THỊ ẢNH ĐẤT PHỐI CẢNH 3D CẮT THEO 4 GÓC SOILCORNERS -->
+          ${state.tempEditorSlots.map((slot, sIdx) => {
+            if (!slot.soilImage) return '';
+            initDefaultSoilCornersForSlot(slot);
+            const sc = slot.soilCorners;
+            const xs = sc.map(c => (c.x / 100) * cW);
+            const ys = sc.map(c => (c.y / 100) * cH);
+            const minX = Math.min(...xs), maxX = Math.max(...xs);
+            const minY = Math.min(...ys), maxY = Math.max(...ys);
+            const isSelected = state.activeEditingSlotIndex === sIdx;
+
+            return `
+              <g id="soil-quad-group-${sIdx}" class="cursor-grab active:cursor-grabbing">
+                <image href="${slot.soilImage}" 
+                       x="${minX}" y="${minY}" 
+                       width="${maxX - minX}" height="${maxY - minY}" 
+                       preserveAspectRatio="none" 
+                       clip-path="url(#soil-clip-${sIdx})" 
+                       opacity="${isSelected ? '0.98' : '0.88'}" />
+                
+                <!-- VIỀN VÀNG CAM NỐI 4 GÓC ẢNH ĐẤT -->
+                ${isSelected ? `
+                  <polygon points="${sc.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ')}" 
+                           fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="4,3" pointer-events="none" />
+                ` : ''}
               </g>
             `;
           }).join('')}
         </svg>
 
-        <!-- HƯỚNG A: HIỂN THỊ ẢNH ĐẤT VỚI KHUNG TRANSFORMATION HANDLES ĐỘC LẬP CHO TỪNG Ô -->
+        <!-- NÚT XÓA ẢNH ĐI KÈM TRÊN ẢNH MẪU (HƯỚNG B) -->
         ${state.tempEditorSlots.map((slot, sIdx) => {
           if (!slot.soilImage) return '';
-          initDefaultImageTransformForSlot(slot);
-          const t = slot.imageTransform;
+          initDefaultSoilCornersForSlot(slot);
+          const tr = slot.soilCorners[1]; // Góc trên phải của ảnh đất
           const isSelected = state.activeEditingSlotIndex === sIdx;
+          if (!isSelected) return '';
 
           return `
-            <div id="soil-img-box-${sIdx}" 
-                 style="left: ${t.x}%; top: ${t.y}%; width: ${t.w}%; height: ${t.h}%;" 
-                 class="soil-image-transform-box ${isSelected ? 'ring-2 ring-amber-400' : 'opacity-85'}">
-              <img src="${slot.soilImage}" class="w-full h-full object-fill pointer-events-none select-none filter drop-shadow">
-              
-              ${isSelected ? `
-                <div id="scale-handle-${sIdx}-tl" class="soil-scale-handle" style="left: 0%; top: 0%; cursor: nwse-resize;"></div>
-                <div id="scale-handle-${sIdx}-tr" class="soil-scale-handle" style="left: 100%; top: 0%; cursor: nesw-resize;"></div>
-                <div id="scale-handle-${sIdx}-br" class="soil-scale-handle" style="left: 100%; top: 100%; cursor: nwse-resize;"></div>
-                <div id="scale-handle-${sIdx}-bl" class="soil-scale-handle" style="left: 0%; top: 100%; cursor: nesw-resize;"></div>
-              ` : ''}
+            <div style="left: ${tr.x}%; top: ${tr.y}%; transform: translate(50%, -120%);" class="absolute pointer-events-auto z-60">
+              <button onclick="removeSoilImageFromActiveSlot(${sIdx}, event)" 
+                      class="w-6 h-6 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-black text-xs flex items-center justify-center shadow-lg hover:scale-110 transition" 
+                      title="Xóa ảnh mẫu khỏi ô này">✕</button>
             </div>
           `;
         }).join('')}
 
-        <!-- NHÃN TÊN, NÚT COPY/XÓA VÀ 4 ĐIỂM NEO GÓC ĐA GIÁC -->
+        <!-- 4 ĐIỂM NEO VÀNG CAM BIẾN DẠNG ẢNH ĐẤT (HƯỚNG B) -->
+        ${state.tempEditorSlots.map((slot, sIdx) => {
+          if (!slot.soilImage) return '';
+          initDefaultSoilCornersForSlot(slot);
+          const isSelected = state.activeEditingSlotIndex === sIdx;
+          if (!isSelected) return '';
+
+          return `
+            <div class="absolute inset-0 pointer-events-none">
+              <div id="soil-handle-${sIdx}-0" class="soil-quad-handle pointer-events-auto" style="left: ${slot.soilCorners[0].x}%; top: ${slot.soilCorners[0].y}%;"></div>
+              <div id="soil-handle-${sIdx}-1" class="soil-quad-handle pointer-events-auto" style="left: ${slot.soilCorners[1].x}%; top: ${slot.soilCorners[1].y}%;"></div>
+              <div id="soil-handle-${sIdx}-2" class="soil-quad-handle pointer-events-auto" style="left: ${slot.soilCorners[2].x}%; top: ${slot.soilCorners[2].y}%;"></div>
+              <div id="soil-handle-${sIdx}-3" class="soil-quad-handle pointer-events-auto" style="left: ${slot.soilCorners[3].x}%; top: ${slot.soilCorners[3].y}%;"></div>
+            </div>
+          `;
+        }).join('')}
+
+        <!-- NHÃN TÊN, NÚT COPY/XÓA VÀ 4 ĐIỂM NEO GÓC VÙNG CHỌN ĐA GIÁC (XANH LÁ) -->
         ${state.tempEditorSlots.map((slot, sIdx) => {
           const centerX = (slot.corners[0].x + slot.corners[1].x + slot.corners[2].x + slot.corners[3].x) / 4;
           const centerY = (slot.corners[0].y + slot.corners[1].y + slot.corners[2].y + slot.corners[3].y) / 4;
@@ -1406,6 +1452,7 @@
                 <button onclick="removePerspectiveSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-rose-600 text-white text-xs font-bold flex items-center justify-center shadow-lg hover:scale-110 transition" title="Xóa ô đất">✕</button>
               </div>
 
+              <!-- 4 GÓC XANH LÁ CỦA VÙNG CHỌN -->
               <div id="handle-${sIdx}-0" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%;"></div>
               <div id="handle-${sIdx}-1" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[1].x}%; top: ${slot.corners[1].y}%;"></div>
               <div id="handle-${sIdx}-2" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[2].x}%; top: ${slot.corners[2].y}%;"></div>
@@ -1425,26 +1472,28 @@
         `).join('')}
       `;
 
-      // GẮN SỰ KIỆN KÉO RÊ Ô ĐẤT & CO GIÃN ẢNH ĐẤT THEO HƯỚNG A
+      // GẮN SỰ KIỆN KÉO RÊ Ô ĐẤT & NẮN 4 GÓC ẢNH ĐẤT (HƯỚNG B)
       state.tempEditorSlots.forEach((slot, sIdx) => {
         const polyEl = document.getElementById(`polygon-body-${sIdx}`);
         const badgeEl = document.getElementById(`drag-badge-${sIdx}`);
+        const soilGroupEl = document.getElementById(`soil-quad-group-${sIdx}`);
+
         if (polyEl) makePlotElementDraggable(polyEl, sIdx);
         if (badgeEl) makePlotElementDraggable(badgeEl, sIdx);
+        if (soilGroupEl) makeSoilQuadDraggable(soilGroupEl, sIdx);
 
+        // 4 ĐIỂM NEO XANH LÁ (VÙNG CHỌN ĐA GIÁC)
         for (let cIdx = 0; cIdx < 4; cIdx++) {
           const handle = document.getElementById(`handle-${sIdx}-${cIdx}`);
           if (handle) makeCornerHandleDraggable(handle, sIdx, cIdx);
         }
 
-        // GẮN SỰ KIỆN RÊ THÂN ẢNH VÀ 4 GÓC SCALE CỦA ẢNH ĐẤT
-        const imgBoxEl = document.getElementById(`soil-img-box-${sIdx}`);
-        if (imgBoxEl) {
-          makeSoilImageBoxDraggable(imgBoxEl, sIdx);
-          ['tl', 'tr', 'br', 'bl'].forEach(dir => {
-            const scaleHandle = document.getElementById(`scale-handle-${sIdx}-${dir}`);
-            if (scaleHandle) makeSoilImageScalable(scaleHandle, sIdx, dir);
-          });
+        // 4 ĐIỂM NEO VÀNG CAM (BIẾN DẠNG ẢNH ĐẤT HƯỚNG B)
+        if (slot.soilImage && slot.soilCorners) {
+          for (let cIdx = 0; cIdx < 4; cIdx++) {
+            const soilHandle = document.getElementById(`soil-handle-${sIdx}-${cIdx}`);
+            if (soilHandle) makeSoilCornerHandleDraggable(soilHandle, sIdx, cIdx);
+          }
         }
       });
 
@@ -1459,106 +1508,79 @@
       if (!slot) return;
       document.getElementById('lbl-active-editing-plot').innerText = `Đang chọn: ${slot.name}`;
       const select = document.getElementById('select-editor-soil-asset');
-      if (slot.soilImage) select.value = slot.soilImage;
+      if (slot.soilImage) {
+        select.value = slot.soilImage;
+      } else {
+        select.value = "";
+      }
       renderPerspectiveSlotsAndTexts();
     }
 
-    // ================= XỬ LÝ HƯỚNG A: RÊ ẢNH ĐẤT & CO GIÃN 4 GÓC =================
-    function makeSoilImageBoxDraggable(imgBoxEl, slotIndex) {
-      let isDragging = false, startX = 0, startY = 0, origX = 0, origY = 0;
+    // ================= XỬ LÝ HƯỚNG B: RÊ TOÀN BỘ ẢNH ĐẤT MƯỢT MÀ =================
+    function makeSoilQuadDraggable(dragTargetEl, slotIndex) {
+      let isDragging = false, startMouseX = 0, startMouseY = 0, originalSoilCorners = [];
 
-      imgBoxEl.addEventListener('mousedown', (e) => {
-        if (e.target.classList.contains('soil-scale-handle')) return;
+      dragTargetEl.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
         selectSlotForEditing(slotIndex);
         isDragging = true;
-        startX = e.clientX; 
-        startY = e.clientY;
-        const t = state.tempEditorSlots[slotIndex].imageTransform;
-        origX = t.x; 
-        origY = t.y;
+        startMouseX = e.clientX; 
+        startMouseY = e.clientY;
+        initDefaultSoilCornersForSlot(state.tempEditorSlots[slotIndex]);
+        originalSoilCorners = JSON.parse(JSON.stringify(state.tempEditorSlots[slotIndex].soilCorners));
         e.stopPropagation();
       });
 
       window.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         const rect = document.getElementById('editor-canvas-box').getBoundingClientRect();
-        const deltaX = ((e.clientX - startX) / rect.width) * 100;
-        const deltaY = ((e.clientY - startY) / rect.height) * 100;
+        const deltaX = ((e.clientX - startMouseX) / rect.width) * 100;
+        const deltaY = ((e.clientY - startMouseY) / rect.height) * 100;
 
-        const t = state.tempEditorSlots[slotIndex].imageTransform;
-        t.x = parseFloat(Math.max(0, Math.min(100 - t.w, origX + deltaX)).toFixed(2));
-        t.y = parseFloat(Math.max(0, Math.min(100 - t.h, origY + deltaY)).toFixed(2));
+        let minX = Math.min(...originalSoilCorners.map(c => c.x)), maxX = Math.max(...originalSoilCorners.map(c => c.x));
+        let minY = Math.min(...originalSoilCorners.map(c => c.y)), maxY = Math.max(...originalSoilCorners.map(c => c.y));
+        let clampedX = deltaX, clampedY = deltaY;
 
-        imgBoxEl.style.left = `${t.x}%`;
-        imgBoxEl.style.top = `${t.y}%`;
-      });
+        if (minX + clampedX < 1) clampedX = 1 - minX;
+        if (maxX + clampedX > 99) clampedX = 99 - maxX;
+        if (minY + clampedY < 1) clampedY = 1 - minY;
+        if (maxY + clampedY > 99) clampedY = 99 - maxY;
 
-      window.addEventListener('mouseup', () => { 
-        if (isDragging) {
-          isDragging = false;
-          renderPerspectiveSlotsAndTexts();
+        for (let i = 0; i < 4; i++) {
+          state.tempEditorSlots[slotIndex].soilCorners[i].x = parseFloat((originalSoilCorners[i].x + clampedX).toFixed(2));
+          state.tempEditorSlots[slotIndex].soilCorners[i].y = parseFloat((originalSoilCorners[i].y + clampedY).toFixed(2));
         }
+        renderPerspectiveSlotsAndTexts();
       });
+
+      window.addEventListener('mouseup', () => { if (isDragging) isDragging = false; });
     }
 
-    function makeSoilImageScalable(handleEl, slotIndex, dir) {
-      let isScaling = false, startX = 0, startY = 0, origTransform = {};
-
-      handleEl.addEventListener('mousedown', (e) => {
-        selectSlotForEditing(slotIndex);
-        isScaling = true;
-        startX = e.clientX; 
-        startY = e.clientY;
-        origTransform = { ...state.tempEditorSlots[slotIndex].imageTransform };
-        e.stopPropagation();
+    // ================= NẮN TỰ DO TỪNG GÓC ẢNH ĐẤT (HƯỚNG B: SOIL CORNER HANDLE) =================
+    function makeSoilCornerHandleDraggable(handleEl, slotIndex, cornerIndex) {
+      let isDragging = false;
+      handleEl.addEventListener('mousedown', (e) => { 
+        selectSlotForEditing(slotIndex); 
+        isDragging = true; 
+        e.stopPropagation(); 
       });
 
       window.addEventListener('mousemove', (e) => {
-        if (!isScaling) return;
+        if (!isDragging) return;
         const rect = document.getElementById('editor-canvas-box').getBoundingClientRect();
-        const deltaX = ((e.clientX - startX) / rect.width) * 100;
-        const deltaY = ((e.clientY - startY) / rect.height) * 100;
-
-        const t = state.tempEditorSlots[slotIndex].imageTransform;
-
-        if (dir === 'br') {
-          t.w = parseFloat(Math.max(5, origTransform.w + deltaX).toFixed(2));
-          t.h = parseFloat(Math.max(5, origTransform.h + deltaY).toFixed(2));
-        } else if (dir === 'tr') {
-          t.w = parseFloat(Math.max(5, origTransform.w + deltaX).toFixed(2));
-          t.y = parseFloat((origTransform.y + deltaY).toFixed(2));
-          t.h = parseFloat(Math.max(5, origTransform.h - deltaY).toFixed(2));
-        } else if (dir === 'bl') {
-          t.x = parseFloat((origTransform.x + deltaX).toFixed(2));
-          t.w = parseFloat(Math.max(5, origTransform.w - deltaX).toFixed(2));
-          t.h = parseFloat(Math.max(5, origTransform.h + deltaY).toFixed(2));
-        } else if (dir === 'tl') {
-          t.x = parseFloat((origTransform.x + deltaX).toFixed(2));
-          t.y = parseFloat((origTransform.y + deltaY).toFixed(2));
-          t.w = parseFloat(Math.max(5, origTransform.w - deltaX).toFixed(2));
-          t.h = parseFloat(Math.max(5, origTransform.h - deltaY).toFixed(2));
-        }
-
-        const boxEl = document.getElementById(`soil-img-box-${slotIndex}`);
-        if (boxEl) {
-          boxEl.style.left = `${t.x}%`;
-          boxEl.style.top = `${t.y}%`;
-          boxEl.style.width = `${t.w}%`;
-          boxEl.style.height = `${t.h}%`;
-        }
+        state.tempEditorSlots[slotIndex].soilCorners[cornerIndex] = {
+          x: parseFloat((Math.max(0, Math.min(rect.width, e.clientX - rect.left)) / rect.width * 100).toFixed(2)),
+          y: parseFloat((Math.max(0, Math.min(rect.height, e.clientY - rect.top)) / rect.height * 100).toFixed(2))
+        };
+        renderPerspectiveSlotsAndTexts();
       });
 
-      window.addEventListener('mouseup', () => { 
-        if (isScaling) {
-          isScaling = false;
-          renderPerspectiveSlotsAndTexts();
-        }
-      });
+      window.addEventListener('mouseup', () => { if (isDragging) isDragging = false; });
     }
 
-    // ================= XỬ LÝ RÊ ĐA GIÁC VÙNG ĐẤT =================
+    // ================= XỬ LÝ RÊ VÙNG CHỌN ĐA GIÁC =================
     function makePlotElementDraggable(dragTargetEl, slotIndex) {
-      let isDragging = false, startMouseX = 0, startMouseY = 0, originalCorners = [];
+      let isDragging = false, startMouseX = 0, startMouseY = 0, originalCorners = [], originalSoilCorners = [];
 
       dragTargetEl.addEventListener('mousedown', (e) => {
         if (e.button !== 0) return;
@@ -1567,6 +1589,9 @@
         startMouseX = e.clientX; 
         startMouseY = e.clientY;
         originalCorners = JSON.parse(JSON.stringify(state.tempEditorSlots[slotIndex].corners));
+        if (state.tempEditorSlots[slotIndex].soilCorners) {
+          originalSoilCorners = JSON.parse(JSON.stringify(state.tempEditorSlots[slotIndex].soilCorners));
+        }
         e.stopPropagation();
       });
 
@@ -1588,6 +1613,10 @@
         for (let i = 0; i < 4; i++) {
           state.tempEditorSlots[slotIndex].corners[i].x = parseFloat((originalCorners[i].x + clampedX).toFixed(2));
           state.tempEditorSlots[slotIndex].corners[i].y = parseFloat((originalCorners[i].y + clampedY).toFixed(2));
+          if (originalSoilCorners.length === 4) {
+            state.tempEditorSlots[slotIndex].soilCorners[i].x = parseFloat((originalSoilCorners[i].x + clampedX).toFixed(2));
+            state.tempEditorSlots[slotIndex].soilCorners[i].y = parseFloat((originalSoilCorners[i].y + clampedY).toFixed(2));
+          }
         }
         renderPerspectiveSlotsAndTexts();
       });
@@ -1751,7 +1780,7 @@
 
     function saveAndApplyCurrentClass() {
       saveStateToLocal();
-      alert(`ĐÃ LƯU THÀNH CÔNG CHO LỚP ${state.activeClass}!\nToàn bộ cài đặt nền, scale ảnh, cấp độ khóa, ảnh mẫu khu đất và phân quyền đã đồng bộ.`);
+      alert(`ĐÃ LƯU THÀNH CÔNG CHO LỚP ${state.activeClass}!\nToàn bộ cài đặt nền, scale ảnh, cấp độ khóa, 4 góc phối cảnh ảnh đất và phân quyền đã đồng bộ.`);
     }
 
     window.addEventListener('DOMContentLoaded', () => {
