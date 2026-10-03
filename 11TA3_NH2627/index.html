@@ -45,7 +45,7 @@
             background: var(--bg-gradient);
         }
 
-        /* PHẦN C (HEADER CỐ ĐỊNH) */
+        /* PHẦN C (HEADER) */
         header {
             padding: 8px 15px;
             background: rgba(13, 27, 42, 0.96);
@@ -740,7 +740,7 @@
                 renderApp();
             }, err => console.log("Lỗi homeworks:", err));
 
-            // 3. Góc kỷ niệm (Chỉ lưu ảnh kỷ niệm thuần túy, không lẫn Banner)
+            // 3. Góc kỷ niệm
             db.collection("albums").onSnapshot(snapshot => {
                 albums = [];
                 snapshot.forEach(doc => {
@@ -752,12 +752,14 @@
                 renderApp();
             }, err => console.log("Lỗi albums:", err));
 
-            // 4. Biểu mẫu (Lưu trữ theo Collection độc lập)
+            // 4. BIỂU MẪU: Đọc từ collection "forms" độc lập
             db.collection("forms").onSnapshot(snapshot => {
                 formsList = [];
-                snapshot.forEach(doc => formsList.push({ ...doc.data(), docId: doc.id }));
+                snapshot.forEach(doc => {
+                    formsList.push({ ...doc.data(), docId: doc.id });
+                });
                 renderApp();
-            }, err => console.log("Lỗi forms:", err));
+            }, err => console.log("Lỗi forms collection:", err));
 
             // 5. Thùng rác
             db.collection("trashBin").onSnapshot(snapshot => {
@@ -777,20 +779,20 @@
                 renderApp();
             }, err => console.log("Lỗi subAccounts:", err));
 
-            // 7. Đồng bộ TKB và Banner song song từ cả hai document Firestore
+            // 7. Đồng bộ TKB và Banner từ settings/general và main_store
             const syncSettings = (data) => {
                 if (data.scheduleUrl) scheduleUrl = data.scheduleUrl;
                 if (data.banners && data.banners.length > 0) banners = data.banners;
                 renderApp();
             };
 
-            db.collection("class_data").doc("main_store").onSnapshot(doc => {
-                if (doc.exists) syncSettings(doc.data());
-            }, err => console.log("Lỗi main_store:", err));
-
             db.collection("settings").doc("general").onSnapshot(doc => {
                 if (doc.exists) syncSettings(doc.data());
             }, err => console.log("Lỗi settings/general:", err));
+
+            db.collection("class_data").doc("main_store").onSnapshot(doc => {
+                if (doc.exists) syncSettings(doc.data());
+            }, err => console.log("Lỗi main_store:", err));
         }
 
         function saveSettingsToFirebase() {
@@ -835,7 +837,7 @@
 
                 html = `
                     <div style="font-size:0.75rem; padding:4px; background:#e0fbfc; border-radius:5px; font-weight:bold; color:#1d3557;">👑 ${currentUser.name}</div>
-                    <button class="menu-btn" onclick="switchView('admin_post')">✍️️ Đăng thông báo mới</button>
+                    <button class="menu-btn" onclick="switchView('admin_post')">✍ Đăng thông báo mới</button>
                     <button class="menu-btn" onclick="switchView('admin_homework')">📖 Đăng báo bài mới</button>
                     <button class="menu-btn" onclick="switchView('admin_schedule')">📅 Đăng TKB</button>
 
@@ -866,7 +868,7 @@
             } else {
                 html = `
                     <div style="font-size:0.75rem; padding:4px; background:#e0fbfc; border-radius:5px; font-weight:bold; color:#1d3557;">👤 ${currentUser.name}</div>
-                    <button class="menu-btn" onclick="switchView('sub_post')">✍️️ Đăng thông báo mới</button>
+                    <button class="menu-btn" onclick="switchView('sub_post')">✍ Đăng thông báo mới</button>
                     <button class="menu-btn" onclick="switchView('admin_homework')">📖 Đăng báo bài mới</button>
                     <button class="menu-btn" onclick="switchView('admin_schedule')">📅 Đăng TKB</button>
                     <button class="menu-btn" onclick="switchView('sub_album')">📷 Đăng ảnh kỷ niệm</button>
@@ -1579,7 +1581,7 @@
             }
         }
 
-        // --- CÁC HÀM XỬ LÝ BIỂU MẪU (CHUẨN HÓA THEO COLLECTION FORMS) ---
+        // --- CÁC HÀM XỬ LÝ BIỂU MẪU (CHUẨN HÓA VÀ CẬP NHẬT TỨC THÌ) ---
         async function submitNewForm() {
             let title = document.getElementById('formTitleInput').value.trim();
             let url = document.getElementById('formUrlInput').value.trim();
@@ -1596,6 +1598,11 @@
             };
 
             try {
+                // Đẩy vào mảng hiển thị ngay để không bị giật lag
+                formsList.unshift({ ...newFormObj, docId: "form_" + newId });
+                renderAdminFormsList();
+
+                // Lưu lên Firebase Collection "forms"
                 await db.collection("forms").doc("form_" + newId).set(newFormObj);
                 alert("Đăng biểu mẫu thành công!");
                 switchView('admin_forms');
@@ -1607,9 +1614,11 @@
         async function deleteFormItem(docId) {
             if (confirm("Bạn có chắc chắn muốn xóa biểu mẫu này?")) {
                 try {
+                    formsList = formsList.filter(f => f.docId !== docId);
+                    renderAdminFormsList();
                     await db.collection("forms").doc(docId).delete();
                 } catch (err) {
-                    alert("Lỗi khi xóa biểu mẫu: " + err.message);
+                    alert("Lỗi khi xóa: " + err.message);
                 }
             }
         }
@@ -1623,13 +1632,14 @@
                 return;
             }
             formsList.forEach(form => {
+                let dId = form.docId || ("form_" + form.id);
                 container.innerHTML += `
                     <div class="card-item" style="padding:6px 10px;">
                         <div class="card-info" style="flex:1;">
                             <h4 style="font-size:0.82rem;">📄 ${form.title}</h4>
                             <span style="font-size:0.68rem;">🔗 ${form.url}</span>
                         </div>
-                        <button class="menu-btn btn-del" style="padding:3px 6px; font-size:0.7rem;" onclick="deleteFormItem('${form.docId || ('form_' + form.id)}')">Xóa</button>
+                        <button class="menu-btn btn-del" style="padding:3px 6px; font-size:0.7rem;" onclick="deleteFormItem('${dId}')">Xóa</button>
                     </div>
                 `;
             });
