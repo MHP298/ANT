@@ -88,6 +88,42 @@
     </div>
   </div>
 
+  <!-- POPUP XÓA LỚP HỌC HÀNG LOẠT -->
+  <div id="delete-class-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border border-slate-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="font-extrabold text-sm text-rose-700 uppercase flex items-center gap-2">
+          <i class="fa-solid fa-trash-can text-rose-600"></i> Quản Lý Xóa Lớp Học
+        </h3>
+        <button onclick="closeDeleteClassModal()" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold flex items-center justify-center">✕</button>
+      </div>
+
+      <div class="py-3">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs text-slate-500 font-semibold">Chọn lớp cần xóa khỏi hệ thống:</span>
+          <div class="flex gap-2">
+            <button onclick="selectAllDeleteClasses(true)" class="text-[11px] font-bold text-emerald-600 hover:underline">Chọn tất cả</button>
+            <button onclick="selectAllDeleteClasses(false)" class="text-[11px] font-bold text-slate-400 hover:underline">Bỏ chọn</button>
+          </div>
+        </div>
+        
+        <div id="delete-classes-list-box" class="space-y-1.5 max-h-60 overflow-y-auto pr-1">
+          <!-- Render danh sách lớp với checkbox -->
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+        <span class="text-[11px] text-rose-500 font-medium leading-tight">⚠️ Khi xóa, toàn bộ cấu hình và dữ liệu học sinh của lớp đó sẽ bị xóa sạch.</span>
+        <div class="flex gap-2 shrink-0">
+          <button onclick="closeDeleteClassModal()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">Hủy</button>
+          <button onclick="confirmBatchDeleteClasses()" class="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center gap-1.5">
+            <i class="fa-solid fa-trash"></i> Xác Nhận Xóa
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- HEADER -->
   <header class="bg-white border-b border-slate-200 px-6 py-2.5 sticky top-0 z-30 flex items-center justify-between shadow-xs">
     <div class="flex items-center gap-3">
@@ -116,16 +152,21 @@
     <!-- PHẦN A (1/3 BÊN TRÁI): BẢNG ĐIỀU KHIỂN ACCORDION -->
     <aside class="w-full md:w-1/3 border-r border-slate-200 bg-white flex flex-col h-full shadow-sm">
       
-      <!-- BỘ CHỌN & QUẢN LÝ LỚP HỌC -->
+      <!-- BỘ CHỌN & QUẢN LÝ LỚP HỌC (THÊM NÚT XÓA LỚP) -->
       <div class="p-3 bg-emerald-50/70 border-b border-emerald-200 flex items-center justify-between gap-2 shrink-0">
-        <div class="flex items-center gap-1.5 flex-1">
+        <div class="flex items-center gap-1.5 flex-1 min-w-0">
           <i class="fa-solid fa-graduation-cap text-emerald-700 text-sm"></i>
-          <span class="text-xs font-black uppercase text-emerald-900">Lớp:</span>
-          <select id="select-active-class" onchange="switchActiveClass(this.value)" class="flex-1 px-2.5 py-1 text-xs rounded-lg border border-emerald-300 font-bold bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"></select>
+          <span class="text-xs font-black uppercase text-emerald-900 shrink-0">Lớp:</span>
+          <select id="select-active-class" onchange="switchActiveClass(this.value)" class="w-full px-2 py-1 text-xs rounded-lg border border-emerald-300 font-bold bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 truncate"></select>
         </div>
-        <button onclick="openAddNewClassPrompt()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center gap-1">
-          <i class="fa-solid fa-plus"></i> Thêm Lớp
-        </button>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button onclick="openAddNewClassPrompt()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center gap-1" title="Thêm lớp mới">
+            <i class="fa-solid fa-plus"></i> Thêm Lớp
+          </button>
+          <button onclick="openDeleteClassModal()" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center gap-1" title="Xóa lớp học">
+            <i class="fa-solid fa-trash-can"></i> Xóa Lớp
+          </button>
+        </div>
       </div>
 
       <!-- Tab Chuyển Đổi Nội Dung -->
@@ -200,7 +241,7 @@
                 <input type="text" id="input-active-button-label" onchange="handleActiveButtonLabelChange(this.value)" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white font-bold uppercase" placeholder="VD: HOA, NỤ, ĐẤT...">
               </div>
 
-              <!-- KHỐI CHỌN THƯ MỤC LIÊN KẾT: ĐƯỢC TỐI ƯU HIỂN THỊ RÕ RÀNG KHÔNG BỊ CHE KHUẤT -->
+              <!-- KHỐI CHỌN THƯ MỤC LIÊN KẾT: TÍCH HỢP TRỰC TIẾP KHÔNG BỊ TRÀN HAY CHE KHUẤT -->
               <div>
                 <label class="block text-[11px] font-bold text-slate-600 mb-1">Mở thư mục liên kết:</label>
                 <button type="button" onclick="toggleFolderDropdownMenu()" class="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-300 bg-white flex items-center justify-between font-bold text-slate-700 shadow-2xs hover:border-emerald-500">
@@ -399,14 +440,29 @@
       </div>
     </div>
 
-    <!-- THANH CÔNG CỤ PHỤ: CHỌN ẢNH ĐẤT THỰC TẾ & LƯU TỈ LỆ CHO TỪNG Ô -->
+    <!-- THANH CÔNG CỤ PHỤ: BỘ CHỌN ẢNH MẪU ĐẤT 2 TẦNG (THƯ MỤC -> FILE ẢNH) -->
     <div class="h-14 bg-slate-900 border-t border-slate-800 px-6 flex items-center justify-between text-xs text-slate-300 shrink-0">
       <div class="flex items-center gap-3">
         <span id="lbl-active-editing-plot" class="font-bold text-amber-300 bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700">Đang chọn: Khu đất 1</span>
-        <span>🌾 <b>Chọn ảnh đất mẫu:</b></span>
-        <select id="select-editor-soil-asset" onchange="previewSoilAssetForActiveSlot(this.value)" class="px-3 py-1.5 rounded-xl bg-slate-800 text-amber-200 border border-slate-700 font-mono text-xs max-w-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
-          <!-- Load tự động danh sách ảnh hàng rào đất -->
+        
+        <!-- Ô 1: CHỌN THƯ MỤC -->
+        <span class="flex items-center gap-1 font-bold text-slate-400">📁 Thư mục:</span>
+        <select id="select-editor-folder-source" onchange="onEditorFolderSourceChange(this.value)" class="px-2.5 py-1.5 rounded-xl bg-slate-800 text-emerald-300 border border-slate-700 font-mono text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <option value="nengame" selected>nengame</option>
+          <option value="hoacap1">hoacap1</option>
+          <option value="hoacap2">hoacap2</option>
+          <option value="nucap1">nucap1</option>
+          <option value="nucap2">nucap2</option>
+          <option value="congcu">congcu</option>
+          <option value="nutgame">nutgame</option>
         </select>
+
+        <!-- Ô 2: CHỌN FILE ẢNH TRONG THƯ MỤC ĐÓ -->
+        <span class="flex items-center gap-1 font-bold text-slate-400">🌾 Ảnh mẫu:</span>
+        <select id="select-editor-soil-asset" onchange="previewSoilAssetForActiveSlot(this.value)" class="px-3 py-1.5 rounded-xl bg-slate-800 text-amber-200 border border-slate-700 font-mono text-xs max-w-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <!-- Load tự động toàn bộ file ảnh có trong thư mục -->
+        </select>
+
         <button onclick="saveSoilAssetForActiveSlot()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition shadow flex items-center gap-1">
           <i class="fa-solid fa-check"></i> Lưu Tỉ Lệ Ô Này
         </button>
@@ -597,6 +653,66 @@
       renderPartBEmptyState();
     }
 
+    // ================= QUẢN LÝ POPUP XÓA LỚP =================
+    function openDeleteClassModal() {
+      const box = document.getElementById('delete-classes-list-box');
+      const classKeys = Object.keys(state.classesData);
+
+      box.innerHTML = classKeys.map(c => {
+        const studentCount = Object.keys(state.classesData[c].students || {}).length;
+        return `
+          <label class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 hover:bg-rose-50/50 cursor-pointer text-xs font-bold text-slate-700 bg-white shadow-2xs">
+            <div class="flex items-center gap-2">
+              <input type="checkbox" value="${c}" class="delete-class-chk rounded text-rose-600 w-4 h-4 cursor-pointer">
+              <span class="text-sm font-black text-slate-800">Lớp ${c}</span>
+            </div>
+            <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-semibold">${studentCount} học sinh</span>
+          </label>
+        `;
+      }).join('');
+
+      document.getElementById('delete-class-modal').classList.remove('hidden');
+    }
+
+    function closeDeleteClassModal() {
+      document.getElementById('delete-class-modal').classList.add('hidden');
+    }
+
+    function selectAllDeleteClasses(isChecked) {
+      document.querySelectorAll('.delete-class-chk').forEach(chk => chk.checked = isChecked);
+    }
+
+    function confirmBatchDeleteClasses() {
+      const chks = Array.from(document.querySelectorAll('.delete-class-chk:checked')).map(c => c.value);
+      if (chks.length === 0) return alert('Vui lòng tick chọn ít nhất 1 lớp cần xóa!');
+
+      const totalClasses = Object.keys(state.classesData).length;
+      if (chks.length >= totalClasses) {
+        return alert('Không thể xóa toàn bộ lớp! Hệ thống cần giữ lại ít nhất 1 lớp hoạt động.');
+      }
+
+      if (!confirm(`Bạn có chắc chắn muốn xóa vĩnh viễn ${chks.length} lớp đã chọn (${chks.join(', ')})?\nToàn bộ dữ liệu của các lớp này sẽ bị xóa sạch.`)) {
+        return;
+      }
+
+      chks.forEach(c => {
+        delete state.classesData[c];
+      });
+
+      // Nếu lớp đang chọn bị xóa, tự động chuyển về lớp đầu tiên còn lại
+      if (chks.includes(state.activeClass)) {
+        state.activeClass = Object.keys(state.classesData)[0];
+      }
+
+      saveStateToLocal();
+      closeDeleteClassModal();
+      renderClassDropdown();
+      loadActiveClassConfig();
+      renderClassesList();
+      renderPartBEmptyState();
+      alert(`Đã xóa thành công ${chks.length} lớp!`);
+    }
+
     function loadActiveClassConfig() {
       const cls = state.classesData[state.activeClass];
       if (!cls) return;
@@ -693,7 +809,6 @@
       if (icon && cls.config.buttonMappings[icon]) { cls.config.buttonMappings[icon].label = newLabel.trim(); saveStateToLocal(); }
     }
 
-    // ĐÃ SỬA: BẬT TẮT MENU CHỌN THƯ MỤC TRỰC QUAN KHÔNG BỊ CHE KHUẤT
     function toggleFolderDropdownMenu() {
       const menu = document.getElementById('dropdown-btn-assigned-folders');
       if (menu.classList.contains('hidden')) {
@@ -1028,7 +1143,7 @@
     }
     function updateSelectedImageCount() { document.getElementById('lbl-selected-img-count').innerText = `Đã chọn: ${getContextSelectedImages().length}`; }
 
-    // ================= TRÌNH THIẾT KẾ SÂN VƯỜN & ẢNH MẪU ĐẤT =================
+    // ================= TRÌNH THIẾT KẾ SÂN VƯỜN & CHỌN ẢNH 2 TẦNG =================
     function detectBackgroundTone(imagePath) {
       const lower = imagePath.toLowerCase();
       if (lower.includes('vuonlop') || lower.includes('go') || lower.includes('nau')) return { textColor: '#451a03', textShadow: '0 1px 2px rgba(254, 243, 199, 0.9)', bgColor: 'rgba(254, 243, 199, 0.75)', borderColor: '#b45309' };
@@ -1045,53 +1160,58 @@
       reIndexPlotSlots();
       state.tempTextOverlays = JSON.parse(JSON.stringify(cls.config.textOverlays || []));
       
-      populateEditorSoilAssetsDropdown();
+      // Nạp danh sách file ảnh dựa theo thư mục đang chọn (mặc định nengame)
+      const currentFolder = document.getElementById('select-editor-folder-source').value || 'nengame';
+      populateFilesForSelectedFolder(currentFolder);
 
       document.getElementById('fullscreen-editor-modal').classList.remove('hidden');
       requestAnimationFrame(() => renderPerspectiveSlotsAndTexts());
     }
 
-    // ĐÃ SỬA: CHỈ LẤY CÁC ẢNH HÀNG RÀO ĐẤT THỰC TẾ (LOẠI BỎ HẲN NENUNGDUNG, VUONLOP)
-    function populateEditorSoilAssetsDropdown() {
+    // KHI ADMIN ĐỔI THƯ MỤC Ở Ô 1 -> TỰ ĐỘNG NẠP DANH SÁCH FILE ẢNH Ở Ô 2
+    function onEditorFolderSourceChange(folderName) {
+      populateFilesForSelectedFolder(folderName);
+    }
+
+    // HÀM NẠP FILE ẢNH VÀO Ô 2: ĐẢM BẢO LUÔN CÓ ẢNH VÀ KHÔNG BAO GIỜ BỊ RỖNG
+    function populateFilesForSelectedFolder(folderName) {
       const select = document.getElementById('select-editor-soil-asset');
-      const cls = state.classesData[state.activeClass];
-      const nengameList = state.cachedAssets['nengame'] || [];
+      let items = state.cachedAssets[folderName] || [];
 
-      // 1. Quét tìm các file đã chọn trong nút Đất (thư mục nengame)
-      let selectedSoilFiles = [];
-      Object.values(cls.config.buttonMappings || {}).forEach(m => {
-        if (m.targetFolders && m.targetFolders.includes('nengame') && m.selectedImages) {
-          selectedSoilFiles = selectedSoilFiles.concat(m.selectedImages);
+      // Nếu chưa có trong cache, tạo ngay fallback link dựa theo quy chuẩn GitHub
+      if (items.length === 0) {
+        if (folderName === 'nengame') {
+          items = [
+            'khudatrieng_cam.png', 'khudatrieng_dohong.png', 'khudatrieng_tim.png',
+            'khudatrieng_trắng.png', 'khudatrieng_xanhduong.png', 'khudatrieng_xanhla.png'
+          ].map(f => ({
+            fileName: f,
+            rawUrl: `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/assets/nengame/${f}`
+          }));
         }
-      });
-
-      // 2. Lọc dứt điểm chỉ lấy ảnh hàng rào đất (chứa chữ 'khudat' hoặc bắt đầu bằng 'khudatrieng')
-      let validSoilItems = nengameList.filter(img => {
-        const name = img.fileName.toLowerCase();
-        const isFencePattern = name.includes('khudat') || name.includes('hangrao') || (name.includes('dat') && !name.includes('nen'));
-        if (selectedSoilFiles.length > 0) {
-          return selectedSoilFiles.includes(img.fileName) && isFencePattern;
-        }
-        return isFencePattern;
-      });
-
-      // 3. Fallback an toàn: Loại bỏ tuyệt đối các ảnh nền lớn nếu danh sách trống
-      if (validSoilItems.length === 0) {
-        validSoilItems = nengameList.filter(img => {
-          const name = img.fileName.toLowerCase();
-          return !name.includes('nenungdung') && !name.includes('vuonlop');
-        });
       }
 
-      select.innerHTML = validSoilItems.map(img => `<option value="${img.rawUrl}">${img.fileName}</option>`).join('');
+      if (items.length === 0) {
+        select.innerHTML = `<option value="">(Không có ảnh trong thư mục)</option>`;
+        return;
+      }
 
-      // Đồng bộ ảnh xem trước ngay nếu ô đang chọn đã có soilImage
-      if (state.tempEditorSlots[state.activeEditingSlotIndex]?.soilImage) {
-        select.value = state.tempEditorSlots[state.activeEditingSlotIndex].soilImage;
+      select.innerHTML = items.map(img => `<option value="${img.rawUrl}">${img.fileName}</option>`).join('');
+
+      // Cập nhật ngay ảnh đầu tiên vào ô đang chọn nếu ô đó chưa có ảnh
+      const activeSlot = state.tempEditorSlots[state.activeEditingSlotIndex];
+      if (activeSlot && !activeSlot.soilImage && items.length > 0) {
+        activeSlot.soilImage = items[0].rawUrl;
+        select.value = items[0].rawUrl;
+        renderPerspectiveSlotsAndTexts();
+      } else if (activeSlot && activeSlot.soilImage) {
+        select.value = activeSlot.soilImage;
       }
     }
 
+    // KHI CHỌN FILE ẢNH Ở Ô 2 -> CẬP NHẬT TRỰC TIẾP LÊN MÀN HÌNH ĐỂ ADMIN QUAN SÁT
     function previewSoilAssetForActiveSlot(url) {
+      if (!url) return;
       const slotIdx = state.activeEditingSlotIndex;
       if (state.tempEditorSlots[slotIdx]) {
         state.tempEditorSlots[slotIdx].soilImage = url;
@@ -1130,7 +1250,7 @@
       });
     }
 
-    // ĐÃ SỬA: COPY XONG TỰ ĐỘNG CHUYỂN CHỌN SANG Ô MỚI ĐỂ RÊ CHUỘT KÉO ĐI DỄ DÀNG
+    // COPY XONG TỰ ĐỘNG CHUYỂN CHỌN SANG Ô MỚI ĐỂ RÊ CHUỘT KÉO ĐI DỄ DÀNG
     function copyPlotSlot(sourceIndex, event) {
       if (event) event.stopPropagation();
       const sourceSlot = state.tempEditorSlots[sourceIndex];
@@ -1177,7 +1297,7 @@
       if (updated !== null && updated.trim()) { state.tempTextOverlays[tIdx].content = updated.trim(); renderPerspectiveSlotsAndTexts(); }
     }
 
-    // ĐÃ SỬA: GẮN SỰ KIỆN KÉO RÊ TRỰC TIẾP LÊN MẶT ĐẤT SVG ĐỂ KÉO ĐƯỢC MỌI Ô SAU KHI COPY
+    // GẮN SỰ KIỆN KÉO RÊ TRỰC TIẾP LÊN MẶT ĐẤT SVG ĐỂ KÉO ĐƯỢC MỌI Ô SAU KHI COPY
     function renderPerspectiveSlotsAndTexts() {
       const container = document.getElementById('editor-slots-layer');
       const canvas = document.getElementById('editor-canvas-box');
@@ -1220,13 +1340,13 @@
 
           return `
             <div class="absolute inset-0 pointer-events-none">
-              <!-- BẢNG TÊN Ô ĐẤT (CÓ THỂ BẤM CHUỘT VÀO ĐỂ KÉO RÊ CẢ Ô ĐẤT) -->
+              <!-- BẢNG TÊN Ô ĐẤT: KÉO RÊ CẢ Ô ĐẤT BẰNG CHUỘT -->
               <div id="drag-badge-${sIdx}" style="left: ${centerX}\%; top:${centerY}%; transform: translate(-50%, -50%);" 
                    class="absolute px-3 py-1 ${isSelected ? 'bg-amber-600 text-white ring-2 ring-white' : 'bg-amber-950/90 text-amber-200'} border border-amber-600/60 rounded-full font-black text-xs shadow-lg pointer-events-auto cursor-grab active:cursor-grabbing">
                 🌾 ${slot.name}
               </div>
 
-              <!-- CÁC NÚT COPY VÀ XÓA -->
+              <!-- NÚT COPY VÀ XÓA -->
               <div style="left: ${slot.corners[0].x}\%; top:${slot.corners[0].y}%; transform: translate(-110%, -125%);" class="absolute flex items-center gap-1.5 pointer-events-auto z-50">
                 <button onclick="copyPlotSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-emerald-600 text-white text-[11px] font-bold flex items-center justify-center shadow-lg hover:scale-110 transition" title="Copy ô đất này"><i class="fa-solid fa-copy"></i></button>
                 <button onclick="removePerspectiveSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-rose-600 text-white text-xs font-bold flex items-center justify-center shadow-lg hover:scale-110 transition" title="Xóa ô đất">✕</button>
@@ -1279,7 +1399,7 @@
       if (slot.soilImage) select.value = slot.soilImage;
     }
 
-    // ĐÃ SỬA: HÀM KÉO RÊ TOÀN BỘ Ô ĐẤT DÙNG CHUNG CHO CẢ MẶT ĐA GIÁC VÀ BẢNG TÊN
+    // HÀM KÉO RÊ TOÀN BỘ Ô ĐẤT DÙNG CHUNG CHO CẢ MẶT ĐA GIÁC VÀ BẢNG TÊN
     function makePlotElementDraggable(dragTargetEl, slotIndex) {
       let isDragging = false, startMouseX = 0, startMouseY = 0, originalCorners = [];
 
@@ -1368,7 +1488,9 @@
       icon.classList.remove('fa-spin');
       populateBackgroundDropdowns();
       populateButtonIconsList();
-      populateEditorSoilAssetsDropdown();
+
+      const currentFolder = document.getElementById('select-editor-folder-source')?.value || 'nengame';
+      populateFilesForSelectedFolder(currentFolder);
     }
 
     function generatePasswordFromNameAndSTT(fullName, stt) {
@@ -1439,14 +1561,14 @@
             </div>
             <div class="flex items-center gap-1">
               ${!isActive ? `<button onclick="switchActiveClass('${cls}')" class="px-2 py-0.5 bg-slate-100 hover:bg-emerald-100 text-slate-700 text-[10px] font-bold rounded">Chọn</button>` : ''}
-              ${classKeys.length > 1 ? `<button onclick="deleteClass('${cls}')" class="text-rose-500 hover:text-rose-700 p-1" title="Xóa lớp"><i class="fa-solid fa-trash"></i></button>` : ''}
+              ${classKeys.length > 1 ? `<button onclick="deleteSingleClassDirect('${cls}')" class="text-rose-500 hover:text-rose-700 p-1" title="Xóa lớp"><i class="fa-solid fa-trash"></i></button>` : ''}
             </div>
           </div>
         `;
       }).join('');
     }
 
-    function deleteClass(cls) {
+    function deleteSingleClassDirect(cls) {
       if (confirm(`Xóa toàn bộ dữ liệu của Lớp ${cls}?`)) {
         delete state.classesData[cls];
         state.activeClass = Object.keys(state.classesData)[0];
