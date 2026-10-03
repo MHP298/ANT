@@ -49,11 +49,11 @@
       cursor: pointer;
     }
     .plot-group-hover:hover, .plot-group-hover:active {
-      transform: scale(1.02);
+      transform: scale(1.015);
       filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35));
     }
 
-    /* TOOLTIP POPUP CHO VẬT PHẨM BỊ KHÓA */
+    /* TOOLTIP POPUP VẬT PHẨM BỊ KHÓA */
     .lock-tooltip {
       visibility: hidden;
       opacity: 0;
@@ -108,7 +108,7 @@
       </div>
 
       <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400">
-        Tài khoản <b>hocsinh</b> có đặc quyền Test toàn bộ tính năng.
+        Tài khoản test: <b>hocsinh</b> / Mật khẩu: <b>hs1234</b>
       </div>
     </div>
   </div>
@@ -134,7 +134,7 @@
       <div class="text-[11px] md:text-xs text-slate-700 font-semibold border-l pl-2.5 border-slate-300 flex items-center gap-1.5">
         <span id="hdr-student-name">Đang tải...</span>
         <span class="text-[9px] md:text-[10px] px-1.5 py-0.5 rounded font-black uppercase" id="hdr-role-badge">Tổ trưởng</span>
-        <span class="text-[9px] md:text-[10px] px-1.5 py-0.5 rounded font-black uppercase text-amber-900 bg-amber-100" id="hdr-rank-badge">Hạng 1 ★</span>
+        <span class="text-[9px] md:text-[10px] px-1.5 py-0.5 rounded font-black uppercase text-amber-900 bg-amber-100" id="hdr-rank-badge">Hạng 1 Tuần ★</span>
       </div>
 
       <button onclick="requestFullScreenLandscape()" class="text-slate-500 hover:text-emerald-700 text-xs p-1" title="Toàn màn hình">
@@ -153,7 +153,7 @@
     <section id="section-a" class="w-3/4 h-full relative bg-slate-950 overflow-hidden flex items-center justify-center border-r-2 border-black/20" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
       <img id="game-bg-image" src="assets/nengame/vuonlop.jpg" alt="Nền Game" onerror="this.src='https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/anhnen/vuonlop.jpg'" class="absolute inset-0 w-full h-full object-fill pointer-events-none select-none transition-all duration-300">
       
-      <!-- LỚP CHỨA CÁC VÙNG ĐẤT SVG (TỰ ĐỘNG ẨN KHUNG CAM KHI ĐÃ CÓ ĐẤT) -->
+      <!-- LỚP CHỨA CÁC VÙNG ĐẤT SVG (ẨN VÙNG CAM VÀ TÊN KHI CÓ ĐẤT) -->
       <div id="perspective-plots-layer" class="absolute inset-0 w-full h-full pointer-events-auto z-10"></div>
       
       <!-- LỚP CHỨA CÁC VÙNG CHỮ TỰ NHIÊN HÒA HỢP VỚI BẢNG GỖ -->
@@ -226,7 +226,7 @@
       },
       students: {
         '11TA3stt1_To1': { username: '11TA3stt1_To1', name: 'Học sinh 1', stt: '1', team: 1, class: '11TA3', password: 'hs1', role: 'TT1', isQuestDone: true },
-        'hocsinh': { username: 'hocsinh', name: 'Tài Khoản Test', stt: '99', team: 1, class: '11TA3', password: '123', role: 'SUPER_TESTER', isQuestDone: true }
+        'hocsinh': { username: 'hocsinh', name: 'Tài Khoản Test', stt: '99', team: 1, class: '11TA3', password: 'hs1234', role: 'SUPER_TESTER', isQuestDone: true }
       },
       weeklyRanking: { 1: 1, 2: 2, 3: 3, 4: 4 }
     };
@@ -251,7 +251,7 @@
     let bgmAudio = null;
     let isBgmPlaying = false;
 
-    // ================= 1. NẠP DỮ LIỆU ĐỒNG BỘ THỜI GIAN THỰC TỪ ADMIN298 =================
+    // ================= 1. NẠP DỮ LIỆU ĐỒNG BỘ THỜI GIAN THỰC TỪ LOCALSTORAGE =================
     function loadAdminSystemData() {
       const rawClasses = localStorage.getItem('garden_system_classes_v14') || 
                          localStorage.getItem('garden_system_classes_v13') || 
@@ -317,11 +317,19 @@
         return;
       }
 
-      // ĐẶC QUYỀN TOÀN DIỆN CHO TÀI KHOẢN HOCSINH
+      // ĐĂNG NHẬP TÀI KHOẢN TEST TOÀN QUYỀN: PASS CHUẨN hs1234
       if (user.toLowerCase() === 'hocsinh') {
+        if (pass !== 'hs1234') {
+          err.innerText = 'Sai mật khẩu tài khoản test! (Mật khẩu: hs1234)';
+          err.classList.remove('hidden');
+          return;
+        }
+
+        err.classList.add('hidden');
         currentStudent = {
           username: 'hocsinh',
           name: 'Tài Khoản Test',
+          stt: '99',
           team: 1,
           class: activeClassName,
           role: 'SUPER_TESTER',
@@ -329,11 +337,13 @@
         };
         sessionStorage.setItem('current_garden_student', JSON.stringify(currentStudent));
         document.getElementById('student-login-modal').classList.add('hidden');
-        applyClassConfiguration();
-        initBackgroundMusic();
+        
+        try { applyClassConfiguration(); } catch (e) { console.error(e); }
+        try { initBackgroundMusic(); } catch (e) { console.error(e); }
         return;
       }
 
+      // ĐĂNG NHẬP HỌC SINH THƯỜNG
       let matchedClass = null;
       for (let cName in globalClassesData) {
         if (user.toUpperCase().startsWith(cName.toUpperCase())) {
@@ -367,10 +377,12 @@
         };
       }
 
+      err.classList.add('hidden');
       sessionStorage.setItem('current_garden_student', JSON.stringify(currentStudent));
       document.getElementById('student-login-modal').classList.add('hidden');
-      applyClassConfiguration();
-      initBackgroundMusic();
+      
+      try { applyClassConfiguration(); } catch (e) { console.error(e); }
+      try { initBackgroundMusic(); } catch (e) { console.error(e); }
     }
 
     function handleStudentLogout() {
@@ -441,7 +453,7 @@
       switchButtonCategory(initialKey);
     }
 
-    // ================= DỰNG VÙNG ĐẤT SVG & TỰ ĐỘNG ẨN/HIỆN KHUNG KHI CÓ SOIL =================
+    // ================= DỰNG VÙNG ĐẤT SVG: ẨN CẢ VÙNG CAM LẪN TÊN KHI CÓ ĐẤT & BỎ NGÔI SAO =================
     function renderPerspectivePlotsOnCanvas() {
       const container = document.getElementById('perspective-plots-layer');
       const slots = currentClass.config.plotSlots || [];
@@ -470,54 +482,58 @@
             const centerY = (slot.corners[0].y + slot.corners[1].y + slot.corners[2].y + slot.corners[3].y) / 4;
             
             const isMyTeamPlot = (currentStudent.role === 'SUPER_TESTER' || currentStudent.username === 'hocsinh') ? true : (slot.teamId === currentStudent.team);
-            const hasSoil = !!slot.soilImage; // Kiểm tra xem ô này đã được đặt đất chưa
+            const hasSoil = !!slot.soilImage; // Đã thả đất hay chưa
 
             return `
-              <g id="plot-group-${slot.id}" class="plot-group-hover"
+              <g id="plot-group-${slot.id}" class="plot-group-hover group"
                  data-plot-id="${slot.id}" data-team-id="${slot.teamId}"
                  ondragover="handleDragOver(event)" 
                  ondrop="handleDropOnPlot(event, '${slot.id}',${slot.teamId})">
                 
-                <!-- KHI CHƯA CÓ ĐẤT: HIỂN THỊ RÕ KHUNG VÙNG CHỌN CAM/XANH; KHI CÓ ĐẤT: KHUNG CAM ẨN ĐI HOÀN TOÀN -->
-                <polygon points="${ptsPixel}" 
-                         fill="${hasSoil ? 'transparent' : (isMyTeamPlot ? 'rgba(180, 83, 9, 0.3)' : 'rgba(16, 185, 129, 0.22)')}" 
-                         stroke="${hasSoil ? 'transparent' : (isMyTeamPlot ? '#f59e0b' : '#10b981')}" 
-                         stroke-width="${hasSoil ? '0' : (isMyTeamPlot ? '3.5' : '2')}" 
-                         stroke-dasharray="${isMyTeamPlot ? 'none' : '6,4'}"
-                         style="transition: fill 0.2s ease, stroke 0.2s ease;">
-                  <title>${slot.name}</title>
-                </polygon>
+                <!-- 1. VÙNG CAM NÉT ĐỨT (CHỈ HIỂN THỊ KHI CHƯA CÓ ĐẤT) -->
+                ${!hasSoil ? `
+                  <polygon points="${ptsPixel}" 
+                           fill="${isMyTeamPlot ? 'rgba(180, 83, 9, 0.3)' : 'rgba(16, 185, 129, 0.22)'}" 
+                           stroke="${isMyTeamPlot ? '#f59e0b' : '#10b981'}" 
+                           stroke-width="${isMyTeamPlot ? '3.5' : '2'}" 
+                           stroke-dasharray="${isMyTeamPlot ? 'none' : '6,4'}">
+                    <title>${slot.name}</title>
+                  </polygon>
+                ` : ''}
 
-                <!-- ẢNH KHU ĐẤT ĐÃ ĐẶT VÀO VÙNG CHỌN -->
+                <!-- 2. ẢNH KHU ĐẤT ĐÃ ĐẶT (LINH HOẠT, THẢ MẪU ĐẤT KHÁC VÀO SẼ ĐỔI NGAY) -->
                 ${hasSoil ? `
                   <image href="${slot.soilImage}" 
                          x="${minX}" y="${minY}" width="${boxW}" height="${boxH}" 
                          preserveAspectRatio="none"
                          clip-path="url(#clip-slot-${slot.id})"
                          opacity="0.98" />
+                  
+                  <!-- NÚT GỠ ĐẤT (✕) XUẤT HIỆN KHI RÊ CHUỘT ĐỂ TRẢ LẠI VÙNG CAM VÀ TÊN BAN ĐẦU -->
+                  ${isMyTeamPlot ? `
+                    <g onclick="clearSoilFromSlot('${slot.id}',${slot.teamId}, event)" class="cursor-pointer" opacity="0.85">
+                      <circle cx="${maxX - 14}" cy="${minY + 14}" r="11" fill="#e11d48" stroke="#ffffff" stroke-width="2" />
+                      <text x="${maxX - 14}" y="${minY + 15}" text-anchor="middle" dominant-baseline="central" fill="#ffffff" font-size="11" font-weight="bold">✕</text>
+                    </g>
+                  ` : ''}
                 ` : ''}
 
-                <!-- VIỀN ĐƯỢC ẨN ĐI NẾU ĐÃ CÓ ĐẤT -->
-                <polygon points="${ptsPixel}" 
-                         fill="none" 
-                         stroke="${hasSoil ? 'transparent' : (isMyTeamPlot ? '#f59e0b' : '#10b981')}" 
-                         stroke-width="${hasSoil ? '0' : (isMyTeamPlot ? '3.5' : '2')}" 
-                         stroke-dasharray="${isMyTeamPlot ? 'none' : '6,4'}" />
-
-                <!-- NHÃN TÊN KHU ĐẤT -->
-                <g style="pointer-events: none;">
-                  <rect x="${(centerX / 100) * cW}" y="${(centerY / 100) * cH}" width="110" height="26" rx="13" 
-                        transform="translate(-55, -13)" 
-                        fill="rgba(69, 26, 3, 0.88)" 
-                        stroke="${isMyTeamPlot ? '#fbbf24' : '#b45309'}" 
-                        stroke-width="1.5" />
-                  <text x="${(centerX / 100) * cW}" y="${(centerY / 100) * cH}" 
-                        text-anchor="middle" dominant-baseline="central" 
-                        fill="${isMyTeamPlot ? '#fef08a' : '#fef3c7'}" 
-                        font-size="11" font-weight="900" font-family="sans-serif">
-                    🌾 ${slot.name}${isMyTeamPlot ? '★' : ''}
-                  </text>
-                </g>
+                <!-- 3. TÊN KHU ĐẤT (CHỈ HIỆN KHI CHƯA CÓ ĐẤT, ĐÃ BỎ HOÀN TOÀN BIỂU TƯỢNG NGÔI SAO) -->
+                ${!hasSoil ? `
+                  <g style="pointer-events: none;">
+                    <rect x="${(centerX / 100) * cW}" y="${(centerY / 100) * cH}" width="105" height="26" rx="13" 
+                          transform="translate(-52.5, -13)" 
+                          fill="rgba(69, 26, 3, 0.88)" 
+                          stroke="${isMyTeamPlot ? '#fbbf24' : '#b45309'}" 
+                          stroke-width="1.5" />
+                    <text x="${(centerX / 100) * cW}" y="${(centerY / 100) * cH}" 
+                          text-anchor="middle" dominant-baseline="central" 
+                          fill="${isMyTeamPlot ? '#fef08a' : '#fef3c7'}" 
+                          font-size="11" font-weight="900" font-family="sans-serif">
+                      🌾 ${slot.name}
+                    </text>
+                  </g>
+                ` : ''}
               </g>
             `;
           }).join('')}
@@ -812,6 +828,7 @@
         return;
       }
 
+      // THẢ MẪU ĐẤT MỚI VÀO SẼ THAY THẾ LUÔN MẪU ĐẤT CŨ TRƯỚC ĐÓ
       if (draggedItemData.isSoilItem) {
         playSfx('plant_pop');
         applySoilToSlot(plotId, draggedItemData.rawUrl);
@@ -847,12 +864,12 @@
     function applySoilToSlot(plotId, soilUrl) {
       const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
       if (slot) {
-        slot.soilImage = soilUrl;
-        renderPerspectivePlotsOnCanvas(); // Cập nhật lại: Khung cam sẽ tự động biến mất
+        slot.soilImage = soilUrl; // Cập nhật mẫu đất mới linh hoạt
+        renderPerspectivePlotsOnCanvas(); // Tự động ẩn cả viền cam lẫn tên
       }
     }
 
-    // NÚT DỌN ĐẤT / XÓA ĐẤT (ĐỂ KHUNG VÙNG CHỌN CAM HIỆN TRỞ LẠI)
+    // GỠ ĐẤT ĐỂ TRẢ LẠI VÙNG CAM VÀ TÊN KHU ĐẤT NHƯ BAN ĐẦU
     function clearSoilFromSlot(plotId, teamId, event) {
       if (event) event.stopPropagation();
       const perm = checkPermissionOnPlot(teamId);
@@ -863,8 +880,8 @@
       playSfx('delete_item');
       const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
       if (slot) {
-        slot.soilImage = null;
-        renderPerspectivePlotsOnCanvas(); // Cập nhật lại: Khung cam sẽ hiện trở lại
+        slot.soilImage = null; // Gỡ đất
+        renderPerspectivePlotsOnCanvas(); // Hiện lại khung cam và tên
       }
     }
 
@@ -1066,6 +1083,14 @@
         } catch (e) {}
       }
     }
+
+    // ================= SỰ KIỆN ENTER ĐĂNG NHẬP NHANH =================
+    document.getElementById('input-student-pass').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleStudentLogin();
+    });
+    document.getElementById('input-student-user').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleStudentLogin();
+    });
 
     // ================= ĐỒNG BỘ THỜI GIAN THỰC TỪ LOCALSTORAGE =================
     window.addEventListener('storage', (e) => {
