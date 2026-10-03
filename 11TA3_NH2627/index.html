@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang Thông Tin Lớp 11TA3 - 2026-2027</title>
-    <!-- Thư viện Firebase SDK -->
+    <!-- Firebase SDK v10.8.0 -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
-    <!-- Font chữ nghệ thuật Dancing Script mềm mại, hỗ trợ tiếng Việt chuẩn -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
@@ -22,13 +21,8 @@
             --text-main: #1d3557;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* KHÓA CỨNG TOÀN BỘ KHUNG NGOÀI ĐỂ KHÔNG BAO GIỜ BỊ CUỘN TRÔI TRANG */
         html, body {
             height: 100%;
             height: 100dvh;
@@ -51,7 +45,7 @@
             background: var(--bg-gradient);
         }
 
-        /* PHẦN C (HEADER) CỐ ĐỊNH HOÀN TOÀN, ĐỦ ĐỘ RỘNG KHÔNG MẤT CHỮ */
+        /* PHẦN C (HEADER CỐ ĐỊNH) */
         header {
             padding: 8px 15px;
             background: rgba(13, 27, 42, 0.96);
@@ -106,7 +100,6 @@
         }
         #dynamicBannerContainer img.active { opacity: 1; }
 
-        /* KHUNG CHỨA A VÀ B CHIẾM TOÀN BỘ PHẦN CÒN LẠI DƯỚI HEADER */
         .main-container {
             display: grid;
             grid-template-columns: 24% 76%;
@@ -117,7 +110,6 @@
             gap: 10px;
         }
 
-        /* PHẦN A (SIDEBAR) CUỘN ĐỘC LẬP */
         .sidebar-a {
             background: var(--card-bg);
             backdrop-filter: blur(10px);
@@ -173,7 +165,6 @@
             margin: 2px 0;
         }
 
-        /* PHẦN B (CONTENT) CUỘN ĐỘC LẬP */
         .content-b {
             background: var(--card-bg);
             backdrop-filter: blur(10px);
@@ -263,10 +254,7 @@
             margin-bottom: 6px;
         }
 
-        .form-group label {
-            font-weight: 600;
-            font-size: 0.75rem;
-        }
+        .form-group label { font-weight: 600; font-size: 0.75rem; }
 
         .form-group input, .form-group select, .form-group textarea {
             padding: 5px 7px;
@@ -350,10 +338,7 @@
             display: flex;
             align-items: center;
         }
-        .password-wrapper input {
-            width: 100%;
-            padding-right: 35px;
-        }
+        .password-wrapper input { width: 100%; padding-right: 35px; }
         .toggle-password {
             position: absolute;
             right: 8px;
@@ -363,9 +348,6 @@
             font-size: 0.9rem;
             color: #6c757d;
             padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .modal {
@@ -533,18 +515,11 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* RESPONSIVE DỌC: Phần A hiện đủ tất cả các nút chức năng */
+        /* RESPONSIVE DỌC: Phần A mở rộng vừa vặn hiển thị đầy đủ các nút */
         @media screen and (max-width: 768px) and (orientation: portrait) {
-            header {
-                padding: 6px 10px;
-                min-height: 60px;
-            }
-            header h1 {
-                font-size: 0.98rem;
-            }
-            header .gvcn {
-                font-size: 0.7rem;
-            }
+            header { padding: 6px 10px; min-height: 60px; }
+            header h1 { font-size: 0.98rem; }
+            header .gvcn { font-size: 0.7rem; }
             .main-container {
                 display: flex;
                 flex-direction: column;
@@ -554,45 +529,23 @@
                 overflow: hidden;
             }
             .sidebar-a {
-                max-height: 34%;
+                max-height: 35%;
                 flex-shrink: 0;
                 overflow-y: auto;
                 padding: 6px 8px;
                 gap: 4px;
             }
-            .sidebar-a .menu-btn {
-                padding: 5px 8px;
-                font-size: 0.78rem;
-                gap: 5px;
-            }
-            .sidebar-a h3 {
-                font-size: 0.78rem;
-                margin-bottom: 1px;
-                padding-bottom: 2px;
-            }
-            .content-b {
-                flex: 1;
-                min-height: 0;
-                overflow: hidden;
-                padding: 8px;
-            }
+            .sidebar-a .menu-btn { padding: 5px 8px; font-size: 0.78rem; gap: 5px; }
+            .sidebar-a h3 { font-size: 0.78rem; margin-bottom: 1px; padding-bottom: 2px; }
+            .content-b { flex: 1; min-height: 0; overflow: hidden; padding: 8px; }
             .pdf-iframe { height: 260px; }
             .welcome-greeting-text { font-size: 2.1rem; }
         }
 
-        /* RESPONSIVE NGANG */
         @media screen and (max-height: 520px) and (orientation: landscape) {
-            header {
-                padding: 4px 10px;
-                min-height: 50px;
-            }
-            header h1 {
-                font-size: 0.92rem;
-                line-height: 1.2;
-            }
-            header .gvcn {
-                font-size: 0.68rem;
-            }
+            header { padding: 4px 10px; min-height: 50px; }
+            header h1 { font-size: 0.92rem; line-height: 1.2; }
+            header .gvcn { font-size: 0.68rem; }
             .main-container {
                 grid-template-columns: 32% 68%;
                 padding: 5px;
@@ -600,26 +553,10 @@
                 height: calc(100dvh - 50px);
                 overflow: hidden;
             }
-            .sidebar-a {
-                height: 100%;
-                max-height: 100%;
-                overflow-y: auto;
-                padding: 6px;
-                gap: 4px;
-            }
-            .menu-btn {
-                padding: 5px 8px;
-                font-size: 0.75rem;
-            }
-            .content-b {
-                height: 100%;
-                max-height: 100%;
-                overflow: hidden;
-                padding: 8px;
-            }
-            .content-scroll {
-                padding-right: 3px;
-            }
+            .sidebar-a { height: 100%; max-height: 100%; overflow-y: auto; padding: 6px; gap: 4px; }
+            .menu-btn { padding: 5px 8px; font-size: 0.75rem; }
+            .content-b { height: 100%; max-height: 100%; overflow: hidden; padding: 8px; }
+            .content-scroll { padding-right: 3px; }
             .pdf-iframe { height: 220px; }
             .welcome-greeting-text { font-size: 1.85rem; }
         }
@@ -629,17 +566,13 @@
 
     <canvas id="bgCanvas"></canvas>
 
-    <!-- PHẦN C: HEADER GHIM CHẮC CHẮN -->
     <header>
         <h1>Trang thông tin của lớp 11TA3<br><span style="font-size: 0.85rem;">Niên khóa 2026-2027</span></h1>
         <div class="gvcn">GVCN: Trung Hiếu (Mr.Z)</div>
     </header>
 
-    <!-- KHUNG CHỨA CHÍNH: CHỨA A VÀ B -->
     <div class="main-container">
-        <!-- PHẦN A: MENU BÊN TRÁI -->
         <div class="sidebar-a" id="sidebarA"></div>
-        <!-- PHẦN B: NỘI DUNG CHÍNH -->
         <div class="content-b">
             <div id="dynamicBannerContainer"></div>
             <div class="content-scroll" id="contentB"></div>
@@ -670,7 +603,7 @@
         </div>
     </div>
 
-    <!-- POPUP ZOOM & PAN ẢNH TOÀN DIỆN CHO DI ĐỘNG -->
+    <!-- POPUP ZOOM ẢNH -->
     <div id="zoomModal" onclick="closeZoomModal(event)">
         <img id="zoomedImg" src="" alt="Zoom Image">
         <div class="zoom-controls" onclick="event.stopPropagation()">
@@ -682,7 +615,6 @@
     </div>
 
     <script>
-        // --- CHẶN PHÍM F12 VÀ CHUỘT PHẢI ---
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('keydown', e => {
             if (e.keyCode === 123 || e.key === 'F12') e.preventDefault();
@@ -765,7 +697,6 @@
             if (!url) return "";
             url = url.trim();
             if (url.startsWith('data:')) return url;
-
             let match = url.match(/(?:\/d\/|id=)([a-zA-Z0-9_-]+)/);
             if (match && match[1]) {
                 return `https://lh3.googleusercontent.com/d/${match[1]}`;
@@ -793,105 +724,77 @@
             return url;
         }
 
-        // --- CẤU TRÚC KẾT NỐI REALTIME BẢO VỆ DỮ LIỆU CŨ VÀ MỚI ĐỒNG BỘ 100% ---
+        // --- CƠ CHẾ KẾT NỐI REALTIME BẢO ĐẢM TOÀN VẸN CƠ SỞ DỮ LIỆU ---
         function initRealtimeDatabase() {
-            // 1. Lắng nghe Thông Báo theo Collections độc lập
+            // 1. Thông báo
             db.collection("notifications").onSnapshot(snapshot => {
-                if (!snapshot.empty) {
-                    notifications = [];
-                    snapshot.forEach(doc => {
-                        notifications.push({ ...doc.data(), docId: doc.id });
-                    });
-                    renderApp();
-                }
-            }, err => console.log("Lỗi snapshot notifications: ", err));
+                notifications = [];
+                snapshot.forEach(doc => notifications.push({ ...doc.data(), docId: doc.id }));
+                renderApp();
+            }, err => console.log("Lỗi notifications:", err));
 
-            // 2. Lắng nghe Báo Bài
+            // 2. Báo bài
             db.collection("homeworks").onSnapshot(snapshot => {
-                if (!snapshot.empty) {
-                    homeworks = [];
-                    snapshot.forEach(doc => {
-                        homeworks.push({ ...doc.data(), docId: doc.id });
-                    });
-                    renderApp();
-                }
-            }, err => console.log("Lỗi snapshot homeworks: ", err));
+                homeworks = [];
+                snapshot.forEach(doc => homeworks.push({ ...doc.data(), docId: doc.id }));
+                renderApp();
+            }, err => console.log("Lỗi homeworks:", err));
 
-            // 3. Lắng nghe Albums
+            // 3. Góc kỷ niệm (Chỉ lưu ảnh kỷ niệm thuần túy, không lẫn Banner)
             db.collection("albums").onSnapshot(snapshot => {
-                if (!snapshot.empty) {
-                    albums = [];
-                    snapshot.forEach(doc => {
-                        albums.push({ ...doc.data(), docId: doc.id });
-                    });
-                    renderApp();
-                }
-            }, err => console.log("Lỗi snapshot albums: ", err));
-
-            // 4. Lắng nghe Thùng Rác
-            db.collection("trashBin").onSnapshot(snapshot => {
-                trashBin = [];
+                albums = [];
                 snapshot.forEach(doc => {
-                    trashBin.push({ ...doc.data(), docId: doc.id });
+                    let d = doc.data();
+                    if (d.title !== "Album banner") {
+                        albums.push({ ...d, docId: doc.id });
+                    }
                 });
                 renderApp();
-            }, err => console.log("Lỗi snapshot trashBin: ", err));
+            }, err => console.log("Lỗi albums:", err));
 
-            // 5. Lắng nghe Tài Khoản Phụ
+            // 4. Biểu mẫu (Lưu trữ theo Collection độc lập)
+            db.collection("forms").onSnapshot(snapshot => {
+                formsList = [];
+                snapshot.forEach(doc => formsList.push({ ...doc.data(), docId: doc.id }));
+                renderApp();
+            }, err => console.log("Lỗi forms:", err));
+
+            // 5. Thùng rác
+            db.collection("trashBin").onSnapshot(snapshot => {
+                trashBin = [];
+                snapshot.forEach(doc => trashBin.push({ ...doc.data(), docId: doc.id }));
+                renderApp();
+            }, err => console.log("Lỗi trashBin:", err));
+
+            // 6. Tài khoản
             db.collection("subAccounts").onSnapshot(snapshot => {
-                if (!snapshot.empty) {
-                    subAccounts = [];
-                    snapshot.forEach(doc => {
-                        subAccounts.push({ ...doc.data(), docId: doc.id });
-                    });
-                }
-                let hasAdminSub = subAccounts.find(acc => acc.name === "admin");
-                if (!hasAdminSub) {
+                subAccounts = [];
+                snapshot.forEach(doc => subAccounts.push({ ...doc.data(), docId: doc.id }));
+                let hasAdmin = subAccounts.find(a => a.name === "admin");
+                if (!hasAdmin) {
                     subAccounts.push({ name: "admin", pass: "ad1234", studentName: "Quản Trị Viên Phụ", isAdmin: true });
                 }
                 renderApp();
-            }, err => console.log("Lỗi snapshot subAccounts: ", err));
+            }, err => console.log("Lỗi subAccounts:", err));
 
-            // 6. KHÔI PHỤC VÀ LẮNG NGHE TKB, BIỂU MẪU VÀ BANNER TỪ KHO GỐC CLASS_DATA/MAIN_STORE
+            // 7. Đồng bộ TKB và Banner song song từ cả hai document Firestore
+            const syncSettings = (data) => {
+                if (data.scheduleUrl) scheduleUrl = data.scheduleUrl;
+                if (data.banners && data.banners.length > 0) banners = data.banners;
+                renderApp();
+            };
+
             db.collection("class_data").doc("main_store").onSnapshot(doc => {
-                if (doc.exists) {
-                    let data = doc.data();
-                    if (data.scheduleUrl) scheduleUrl = data.scheduleUrl;
-                    if (data.formsList && data.formsList.length > 0) formsList = data.formsList;
-                    if (data.banners && data.banners.length > 0) banners = data.banners;
-                    
-                    // Nếu các collection mới chưa có thông báo/báo bài, nạp từ kho gốc sang
-                    if (notifications.length === 0 && data.notifications) {
-                        notifications = data.notifications;
-                    }
-                    if (homeworks.length === 0 && data.homeworks) {
-                        homeworks = data.homeworks;
-                    }
-                    if (albums.length === 0 && data.albums) {
-                        albums = data.albums;
-                    }
-                    if (subAccounts.length <= 1 && data.subAccounts) {
-                        subAccounts = data.subAccounts;
-                    }
-                    renderApp();
-                }
-            }, err => console.log("Lỗi snapshot main_store: ", err));
+                if (doc.exists) syncSettings(doc.data());
+            }, err => console.log("Lỗi main_store:", err));
 
-            // Lắng nghe thêm document settings/general phòng trường hợp thầy cập nhật sau này
             db.collection("settings").doc("general").onSnapshot(doc => {
-                if (doc.exists) {
-                    let data = doc.data();
-                    if (data.scheduleUrl) scheduleUrl = data.scheduleUrl;
-                    if (data.formsList && data.formsList.length > 0) formsList = data.formsList;
-                    if (data.banners && data.banners.length > 0) banners = data.banners;
-                    renderApp();
-                }
-            }, err => console.log("Lỗi snapshot settings/general: ", err));
+                if (doc.exists) syncSettings(doc.data());
+            }, err => console.log("Lỗi settings/general:", err));
         }
 
-        // Lưu cài đặt chung: Lưu đồng thời vào cả kho gốc `class_data/main_store` và `settings/general` để đảm bảo 100% không bao giờ mất liên kết
         function saveSettingsToFirebase() {
-            let payload = { banners, formsList, scheduleUrl };
+            let payload = { banners, scheduleUrl };
             db.collection("class_data").doc("main_store").set(payload, { merge: true });
             db.collection("settings").doc("general").set(payload, { merge: true });
         }
@@ -899,9 +802,7 @@
         function checkDirectFileSizeLimit(input) {
             if (input.files && input.files.length > 0) {
                 let totalBytes = 0;
-                for (let i = 0; i < input.files.length; i++) {
-                    totalBytes += input.files[i].size;
-                }
+                for (let i = 0; i < input.files.length; i++) totalBytes += input.files[i].size;
                 if (totalBytes > 750 * 1024) {
                     alert("⚠️ CẢNH BÁO DUNG LƯỢNG:\nTổng dung lượng các ảnh tải lên vượt quá mức cho phép trực tiếp (tối đa 1MB khi lưu trữ)!\n\nVui lòng sử dụng tính năng 'Dán link Google Drive / URL của ảnh' bên cạnh để lưu trữ an toàn, chất lượng ảnh nét nhất và không giới hạn dung lượng!");
                     input.value = "";
@@ -934,13 +835,13 @@
 
                 html = `
                     <div style="font-size:0.75rem; padding:4px; background:#e0fbfc; border-radius:5px; font-weight:bold; color:#1d3557;">👑 ${currentUser.name}</div>
-                    <button class="menu-btn" onclick="switchView('admin_post')">✍️ Đăng thông báo mới</button>
+                    <button class="menu-btn" onclick="switchView('admin_post')">✍️️ Đăng thông báo mới</button>
                     <button class="menu-btn" onclick="switchView('admin_homework')">📖 Đăng báo bài mới</button>
                     <button class="menu-btn" onclick="switchView('admin_schedule')">📅 Đăng TKB</button>
 
                     <button class="menu-btn" onclick="toggleSubMenu('adminMediaSub')">✨ Quản lý ảnh</button>
                     <div id="adminMediaSub" class="sub-menu" style="display:${mediaSubDisplay};">
-                        <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_album')">📷 Đăng ảnh/clip kỷ niệm</button>
+                        <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_album')">📷 Đăng ảnh kỷ niệm</button>
                         <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_banner')">✨ Đăng ảnh banner</button>
                         <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_manage_album')">📁 Danh sách album</button>
                     </div>
@@ -948,7 +849,7 @@
                     <button class="menu-btn" onclick="toggleSubMenu('adminAccSub')">👥 Quản lý tài khoản</button>
                     <div id="adminAccSub" class="sub-menu" style="display:${accSubDisplay};">
                         <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_create_acc')">➕ Tạo tài khoản/pass mới</button>
-                        <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_del_acc')">🗑️️ Danh sách tài khoản</button>
+                        <button class="menu-btn" style="background:#457b9d; font-size:0.75rem;" onclick="switchView('admin_del_acc')">🗑️ Danh sách tài khoản</button>
                     </div>
 
                     <button class="menu-btn" onclick="toggleSubMenu('adminNotiSub')">📋 Quản lý thông báo/báo bài</button>
@@ -965,10 +866,10 @@
             } else {
                 html = `
                     <div style="font-size:0.75rem; padding:4px; background:#e0fbfc; border-radius:5px; font-weight:bold; color:#1d3557;">👤 ${currentUser.name}</div>
-                    <button class="menu-btn" onclick="switchView('sub_post')">✍️ Đăng thông báo mới</button>
+                    <button class="menu-btn" onclick="switchView('sub_post')">✍️️ Đăng thông báo mới</button>
                     <button class="menu-btn" onclick="switchView('admin_homework')">📖 Đăng báo bài mới</button>
                     <button class="menu-btn" onclick="switchView('admin_schedule')">📅 Đăng TKB</button>
-                    <button class="menu-btn" onclick="switchView('sub_album')">📷 Đăng ảnh/clip kỷ niệm</button>
+                    <button class="menu-btn" onclick="switchView('sub_album')">📷 Đăng ảnh kỷ niệm</button>
                     <button class="menu-btn" onclick="switchView('sub_manage_noti')">📋 Thông Báo & Báo Bài Đã Đăng</button>
                     <button class="menu-btn" onclick="switchView('forms_user_list')">📂 Danh sách biểu mẫu</button>
                     <button class="menu-btn" onclick="logout()" style="background:#e63946; margin-top:4px;">🚪 Đăng xuất</button>
@@ -1025,14 +926,11 @@
             
             if (view !== 'admin_post' && view !== 'sub_post' && view !== 'admin_multi_noti') {
                 editingNotiId = null;
-                tempPostTitle = "";
-                tempPostContent = "";
-                tempPostPdf = "";
+                tempPostTitle = ""; tempPostContent = ""; tempPostPdf = "";
                 currentMultiLinks = [];
             }
             if (view !== 'admin_homework' && view !== 'admin_multi_hw') {
-                tempHwContent = "";
-                tempHwPdf = "";
+                tempHwContent = ""; tempHwPdf = "";
                 currentHwMultiLinks = [];
             }
             if (view !== 'admin_album' && view !== 'sub_album') {
@@ -1054,23 +952,9 @@
                 let hour = new Date().getHours();
                 let isTeacher = (currentUser && (currentUser.role === 'admin' || currentUser.name === 'GVCN' || currentUser.name.includes('admin')));
                 let x = isTeacher ? 'thầy/cô' : 'bạn';
-                let y = '';
-                let bgStyle = '';
-                let textColor = '';
-
-                if (hour < 12) {
-                    y = 'ngày tràn đầy năng lượng và vui vẻ!';
-                    bgStyle = 'linear-gradient(135deg, #fff9db 0%, #ffe8cc 50%, #d8f5a2 100%)';
-                    textColor = '#d9480f';
-                } else if (hour < 18) {
-                    y = 'buổi chiều đầy phấn khởi, tươi vui!';
-                    bgStyle = 'linear-gradient(135deg, #e3fafc 0%, #c5f6fa 50%, #d0ebff 100%)';
-                    textColor = '#0c8599';
-                } else {
-                    y = 'buổi tối bình an và một giấc ngủ ngon!';
-                    bgStyle = 'linear-gradient(135deg, #f3f0ff 0%, #e5dbff 50%, #dbe4ff 100%)';
-                    textColor = '#5f3dc4';
-                }
+                let y = (hour < 12) ? 'ngày tràn đầy năng lượng và vui vẻ!' : (hour < 18 ? 'buổi chiều đầy phấn khởi, tươi vui!' : 'buổi tối bình an và một giấc ngủ ngon!');
+                let bgStyle = (hour < 12) ? 'linear-gradient(135deg, #fff9db 0%, #ffe8cc 50%, #d8f5a2 100%)' : (hour < 18 ? 'linear-gradient(135deg, #e3fafc 0%, #c5f6fa 50%, #d0ebff 100%)' : 'linear-gradient(135deg, #f3f0ff 0%, #e5dbff 50%, #dbe4ff 100%)');
+                let textColor = (hour < 12) ? '#d9480f' : (hour < 18 ? '#0c8599' : '#5f3dc4');
 
                 b.innerHTML = `
                     <div class="welcome-card-box" style="background:${bgStyle};">
@@ -1087,26 +971,12 @@
                 let sliceNotis = sorted.slice(notiPageOffset, notiPageOffset + 5);
 
                 let currentHour = new Date().getHours();
-                let visitorGreeting = "";
-                let visitorBg = "";
-                let visitorColor = "";
-
-                if (currentHour < 12) {
-                    visitorGreeting = "Chào buổi sáng! Chúc bạn và gia đình một ngày mới ngập tràn niềm vui, năng lượng tích cực và thật nhiều may mắn!";
-                    visitorBg = "linear-gradient(135deg, #fff9db 0%, #ffe8cc 100%)";
-                    visitorColor = "#d9480f";
-                } else if (currentHour < 18) {
-                    visitorGreeting = "Chúc bạn một buổi chiều ấm áp, công việc thuận lợi và luôn giữ trọn nụ cười rạng rỡ trên môi!";
-                    visitorBg = "linear-gradient(135deg, #e3fafc 0%, #c5f6fa 100%)";
-                    visitorColor = "#0c8599";
-                } else {
-                    visitorGreeting = "Chúc bạn một buổi tối an lành, thảnh thơi bên người thân và có một giấc ngủ thật ngon!";
-                    visitorBg = "linear-gradient(135deg, #f3f0ff 0%, #e5dbff 100%)";
-                    visitorColor = "#5f3dc4";
-                }
+                let visitorGreeting = (currentHour < 12) ? "Chào buổi sáng! Chúc bạn và gia đình một ngày mới ngập tràn niềm vui, năng lượng tích cực và thật nhiều may mắn!" : (currentHour < 18 ? "Chúc bạn một buổi chiều ấm áp, công việc thuận lợi và luôn giữ trọn nụ cười rạng rỡ trên môi!" : "Chúc bạn một buổi tối an lành, thảnh thơi bên người thân và có một giấc ngủ thật ngon!");
+                let visitorBg = (currentHour < 12) ? "linear-gradient(135deg, #fff9db 0%, #ffe8cc 100%)" : (currentHour < 18 ? "linear-gradient(135deg, #e3fafc 0%, #c5f6fa 100%)" : "linear-gradient(135deg, #f3f0ff 0%, #e5dbff 100%)");
+                let visitorColor = (currentHour < 12) ? "#d9480f" : (currentHour < 18 ? "#0c8599" : "#5f3dc4");
 
                 b.innerHTML += `
-                    <div style="background:${visitorBg}; color:${visitorColor}; padding:8px 14px; border-radius:8px; margin-bottom:8px; font-family:'Dancing Script', cursive; font-size:1.35rem; font-weight:700; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.04); letter-spacing:0.3px;">
+                    <div style="background:${visitorBg}; color:${visitorColor}; padding:8px 14px; border-radius:8px; margin-bottom:8px; font-family:'Dancing Script', cursive; font-size:1.35rem; font-weight:700; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.04);">
                         ✨ ${visitorGreeting}
                     </div>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
@@ -1132,12 +1002,8 @@
 
                     let pageNav = document.createElement('div');
                     pageNav.className = 'pagination-bar';
-                    if (notiPageOffset > 0) {
-                        pageNav.innerHTML += `<button class="menu-btn" style="padding:4px 8px; font-size:0.75rem;" onclick="changePage(-5)">⬅️ Trở về</button>`;
-                    }
-                    if (notiPageOffset + 5 < sorted.length) {
-                        pageNav.innerHTML += `<button class="menu-btn" style="padding:4px 8px; font-size:0.75rem;" onclick="changePage(5)">Xem tiếp ➡️</button>`;
-                    }
+                    if (notiPageOffset > 0) pageNav.innerHTML += `<button class="menu-btn" style="padding:4px 8px; font-size:0.75rem;" onclick="changePage(-5)">⬅️ Trở về</button>`;
+                    if (notiPageOffset + 5 < sorted.length) pageNav.innerHTML += `<button class="menu-btn" style="padding:4px 8px; font-size:0.75rem;" onclick="changePage(5)">Xem tiếp ➡️</button>`;
                     b.appendChild(pageNav);
                 }
             }
@@ -1148,13 +1014,9 @@
                 } else {
                     formsList.forEach(form => {
                         let isWebForm = form.url.includes('.html') || (form.url.includes('http') && !form.url.includes('drive.google.com/file') && !form.url.includes('uc?export=download'));
-                        let btnHtml = '';
-                        if (isWebForm) {
-                            btnHtml = `<a href="${form.url}" target="_blank" class="menu-btn" style="background:#2a9d8f; padding:5px 12px; font-size:0.78rem; text-decoration:none;">👁️ Duyệt biểu mẫu</a>`;
-                        } else {
-                            let dlUrl = parseGoogleDrivePdfDownload(form.url) || form.url;
-                            btnHtml = `<a href="${dlUrl}" target="_blank" class="menu-btn" style="background:#457b9d; padding:5px 12px; font-size:0.78rem; text-decoration:none;">📥 Tải biểu mẫu</a>`;
-                        }
+                        let btnHtml = isWebForm 
+                            ? `<a href="${form.url}" target="_blank" class="menu-btn" style="background:#2a9d8f; padding:5px 12px; font-size:0.78rem; text-decoration:none;">👁️ Duyệt biểu mẫu</a>`
+                            : `<a href="${parseGoogleDrivePdfDownload(form.url) || form.url}" target="_blank" class="menu-btn" style="background:#457b9d; padding:5px 12px; font-size:0.78rem; text-decoration:none;">📥 Tải biểu mẫu</a>`;
 
                         b.innerHTML += `
                             <div class="card-item">
@@ -1191,12 +1053,7 @@
                 renderAdminFormsList();
             }
             else if (currentView === 'schedule_view') {
-                b.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                        <h3 style="color:var(--primary); font-size: 0.95rem;">📅 Thời khóa biểu lớp</h3>
-                    </div>
-                `;
-
+                b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">📅 Thời khóa biểu lớp</h3>`;
                 if (!scheduleUrl) {
                     b.innerHTML += '<p style="color:#6c757d; text-align:center; margin-top:20px;">Chưa cập nhật Thời khóa biểu.</p>';
                 } else {
@@ -1245,12 +1102,7 @@
                 let sortedHw = [...homeworks].sort((a,b) => b.id - a.id);
                 let sliceHw = sortedHw.slice(homeworkPageOffset, homeworkPageOffset + 5);
 
-                b.innerHTML += `
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                        <h3 style="color:var(--primary); font-size: 0.95rem;">📚 Danh sách báo bài</h3>
-                    </div>
-                `;
-
+                b.innerHTML += `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">📚 Danh sách báo bài</h3>`;
                 if (sliceHw.length === 0) {
                     b.innerHTML += '<p style="color:#6c757d; text-align:center; margin-top:20px;">Chưa có nội dung báo bài nào.</p>';
                 } else {
@@ -1268,12 +1120,8 @@
 
                     let pageNav = document.createElement('div');
                     pageNav.className = 'pagination-bar';
-                    if (homeworkPageOffset > 0) {
-                        pageNav.innerHTML += `<button class="menu-btn" style="padding:4px 8px; font-size:0.75rem;" onclick="changeHwPage(-5)">⬅️ Trở về</button>`;
-                    }
-                    if (homeworkPageOffset + 5 < sortedHw.length) {
-                        pageNav.innerHTML += `<button class="menu-btn" style="padding:4px 8px; font-size:0.75rem;" onclick="changeHwPage(5)">Xem tiếp ➡️</button>`;
-                    }
+                    if (homeworkPageOffset > 0) pageNav.innerHTML += `<button class="menu-btn" style="padding:4px 8px; font-size:0.75rem;" onclick="changeHwPage(-5)">⬅️ Trở về</button>`;
+                    if (homeworkPageOffset + 5 < sortedHw.length) pageNav.innerHTML += `<button class="menu-btn" style="padding:4px 8px; font-size:0.75rem;" onclick="changeHwPage(5)">Xem tiếp ➡️</button>`;
                     b.appendChild(pageNav);
                 }
             }
@@ -1281,20 +1129,14 @@
                 let item = homeworks.find(h => h.id === window.currentHwId);
                 if (!item) { switchView('homework_list'); return; }
 
-                let pdfSection = '';
-                if (item.pdfUrl) {
-                    let pdfPreview = parseGoogleDrivePdfEmbed(item.pdfUrl);
-                    let pdfDownload = parseGoogleDrivePdfDownload(item.pdfUrl);
-                    pdfSection = `
-                        <div class="pdf-viewer-container">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-weight:bold; font-size:0.85rem; color:var(--primary);">📄 Tài liệu PDF đính kèm:</span>
-                                <a href="${pdfDownload}" target="_blank" class="btn-download">📥 Tải về file PDF</a>
-                            </div>
-                            <iframe src="${pdfPreview}" class="pdf-iframe" allow="autoplay"></iframe>
+                let pdfSection = item.pdfUrl ? `
+                    <div class="pdf-viewer-container">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-weight:bold; font-size:0.85rem; color:var(--primary);">📄 Tài liệu PDF đính kèm:</span>
+                            <a href="${parseGoogleDrivePdfDownload(item.pdfUrl)}" target="_blank" class="btn-download">📥 Tải về file PDF</a>
                         </div>
-                    `;
-                }
+                        <iframe src="${parseGoogleDrivePdfEmbed(item.pdfUrl)}" class="pdf-iframe" allow="autoplay"></iframe>
+                    </div>` : '';
 
                 b.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -1314,45 +1156,27 @@
                 let item = notifications.find(n => n.id === window.currentDetailId);
                 if (!item) { switchView('noti_list'); return; }
 
-                let urls = [];
-                if (Array.isArray(item.mediaUrl)) {
-                    urls = item.mediaUrl;
-                } else if (typeof item.mediaUrl === 'string' && item.mediaUrl.trim().length > 0) {
-                    urls = item.mediaUrl.split('\n').filter(u => u.trim().length > 0);
-                }
-
-                let pagesHtml = '';
-                if (urls.length > 0) {
-                    pagesHtml = `<div class="doc-page-container">`;
-                    urls.forEach((u, idx) => {
-                        let parsedU = parseGoogleDriveLink(u.trim());
-                        pagesHtml += `
-                            <div class="doc-page-item">
-                                <img src="${parsedU}" class="doc-page-img" onclick="openZoomModal('${parsedU}')" title="Click để phóng to ảnh trang ${idx + 1}">
-                                <div class="doc-page-footer">
-                                    <span style="font-size:0.75rem; font-weight:bold; color:var(--primary);">Trang ${idx + 1} / ${urls.length}</span>
-                                    <a href="${parsedU}" download="anh_${item.id}_trang_${idx + 1}.png" class="btn-download" target="_blank">📥 Download Trang ${idx + 1}</a>
-                                </div>
+                let urls = Array.isArray(item.mediaUrl) ? item.mediaUrl : (typeof item.mediaUrl === 'string' && item.mediaUrl ? item.mediaUrl.split('\n').filter(u => u.trim()) : []);
+                let pagesHtml = urls.length > 0 ? `<div class="doc-page-container">` + urls.map((u, idx) => {
+                    let parsedU = parseGoogleDriveLink(u.trim());
+                    return `
+                        <div class="doc-page-item">
+                            <img src="${parsedU}" class="doc-page-img" onclick="openZoomModal('${parsedU}')" title="Click để phóng to ảnh trang ${idx + 1}">
+                            <div class="doc-page-footer">
+                                <span style="font-size:0.75rem; font-weight:bold; color:var(--primary);">Trang ${idx + 1} / ${urls.length}</span>
+                                <a href="${parsedU}" download="anh_${item.id}_trang_${idx + 1}.png" class="btn-download" target="_blank">📥 Download Trang ${idx + 1}</a>
                             </div>
-                        `;
-                    });
-                    pagesHtml += `</div>`;
-                }
+                        </div>`;
+                }).join('') + `</div>` : '';
 
-                let pdfSection = '';
-                if (item.pdfUrl) {
-                    let pdfPreview = parseGoogleDrivePdfEmbed(item.pdfUrl);
-                    let pdfDownload = parseGoogleDrivePdfDownload(item.pdfUrl);
-                    pdfSection = `
-                        <div class="pdf-viewer-container">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-weight:bold; font-size:0.85rem; color:var(--primary);">📄 Tài liệu PDF đính kèm:</span>
-                                <a href="${pdfDownload}" target="_blank" class="btn-download">📥 Tải về file PDF</a>
-                            </div>
-                            <iframe src="${pdfPreview}" class="pdf-iframe" allow="autoplay"></iframe>
+                let pdfSection = item.pdfUrl ? `
+                    <div class="pdf-viewer-container">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-weight:bold; font-size:0.85rem; color:var(--primary);">📄 Tài liệu PDF đính kèm:</span>
+                            <a href="${parseGoogleDrivePdfDownload(item.pdfUrl)}" target="_blank" class="btn-download">📥 Tải về file PDF</a>
                         </div>
-                    `;
-                }
+                        <iframe src="${parseGoogleDrivePdfEmbed(item.pdfUrl)}" class="pdf-iframe" allow="autoplay"></iframe>
+                    </div>` : '';
 
                 b.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -1371,31 +1195,28 @@
             }
             else if (currentView === 'album_list') {
                 b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">🖼️ Góc kỷ niệm</h3>`;
-                let pureAlbums = albums.filter(a => a.title && !a.title.includes("Thông báo"));
-                if (pureAlbums.length === 0) {
-                    b.innerHTML += '<p style="color:#6c757d;">Chưa có nội dung nào được đăng.</p>';
+                if (albums.length === 0) {
+                    b.innerHTML += '<p style="color:#6c757d; text-align:center; margin-top:20px;">Chưa có ảnh kỷ niệm nào được đăng.</p>';
                 } else {
-                    if (albumIndex >= pureAlbums.length) albumIndex = 0;
-                    let alb = pureAlbums[albumIndex];
-                    let mediaRender = '';
+                    if (albumIndex >= albums.length) albumIndex = 0;
+                    if (albumIndex < 0) albumIndex = albums.length - 1;
+                    let alb = albums[albumIndex];
                     let parsedAlbumUrl = parseGoogleDriveLink(alb.mediaUrl);
-                    if (alb.type === 'video' || (alb.mediaUrl && alb.mediaUrl.endsWith('.mp4'))) {
-                        mediaRender = `<video controls style="width:100%; max-height:480px; border-radius:6px; object-fit:contain;"><source src="${parsedAlbumUrl}" type="video/mp4">Trình duyệt không hỗ trợ video.</video>`;
-                    } else {
-                        mediaRender = `<img src="${parsedAlbumUrl}" alt="Ảnh kỷ niệm" style="width:100%; max-height:480px; object-fit:contain; border-radius:6px; cursor:pointer;" onclick="openZoomModal('${parsedAlbumUrl}')" title="Click để phóng to ảnh">`;
-                    }
+                    let mediaRender = (alb.type === 'video' || (alb.mediaUrl && alb.mediaUrl.endsWith('.mp4')))
+                        ? `<video controls style="width:100%; max-height:480px; border-radius:6px; object-fit:contain;"><source src="${parsedAlbumUrl}" type="video/mp4"></video>`
+                        : `<img src="${parsedAlbumUrl}" alt="Ảnh kỷ niệm" style="width:100%; max-height:480px; object-fit:contain; border-radius:6px; cursor:pointer;" onclick="openZoomModal('${parsedAlbumUrl}')" title="Click để phóng to ảnh">`;
 
                     b.innerHTML += `
                         <div style="background:white; padding:12px; border-radius:8px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.04); display:flex; flex-direction:column; align-items:center;">
                             <h4 style="color:var(--primary); margin-bottom:4px; font-size:0.95rem;">${alb.title}</h4>
-                            <p style="font-size:0.75rem; color:#6c757d; margin-bottom:8px;">Đăng bởi: ${alb.author} (Ảnh ${albumIndex + 1} / ${pureAlbums.length})</p>
+                            <p style="font-size:0.75rem; color:#6c757d; margin-bottom:8px;">Đăng bởi: ${alb.author} (Ảnh ${albumIndex + 1} / ${albums.length})</p>
                             <div style="width:100%; display:flex; align-items:center; justify-content:center; overflow:hidden;">
                                 ${mediaRender}
                             </div>
                         </div>
                         <div class="pagination-bar" style="margin-top:8px;">
                             <button class="menu-btn" style="padding:6px 14px; font-size:0.82rem;" onclick="changeAlbum(-1)" ${albumIndex === 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>⬅️ Ảnh trước</button>
-                            <button class="menu-btn" style="padding:6px 14px; font-size:0.82rem;" onclick="changeAlbum(1)" ${albumIndex === pureAlbums.length - 1 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>Ảnh sau ➡️</button>
+                            <button class="menu-btn" style="padding:6px 14px; font-size:0.82rem;" onclick="changeAlbum(1)" ${albumIndex === albums.length - 1 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>Ảnh sau ➡️</button>
                         </div>
                     `;
                 }
@@ -1421,21 +1242,12 @@
             }
             else if (currentView === 'admin_post' || currentView === 'sub_post') {
                 let isEditing = editingNotiId !== null;
-                let editTitle = tempPostTitle; 
-                let editContent = tempPostContent; 
-                let editPdf = tempPostPdf;
-
+                let editTitle = tempPostTitle, editContent = tempPostContent, editPdf = tempPostPdf;
                 if (isEditing && !tempPostTitle && !tempPostContent) {
                     let item = notifications.find(n => n.id === editingNotiId);
                     if (item) { 
-                        editTitle = item.title; 
-                        editContent = item.content; 
-                        editPdf = item.pdfUrl || "";
-                        if (Array.isArray(item.mediaUrl)) {
-                            currentMultiLinks = [...item.mediaUrl];
-                        } else if (typeof item.mediaUrl === 'string' && item.mediaUrl.trim().length > 0) {
-                            currentMultiLinks = item.mediaUrl.split('\n').filter(l => l.trim().length > 0);
-                        }
+                        editTitle = item.title; editContent = item.content; editPdf = item.pdfUrl || "";
+                        currentMultiLinks = Array.isArray(item.mediaUrl) ? [...item.mediaUrl] : (item.mediaUrl ? item.mediaUrl.split('\n').filter(l => l.trim()) : []);
                     }
                 }
 
@@ -1464,19 +1276,18 @@
                     </div>
                     <div class="form-group" style="display:flex; flex-direction:row; align-items:center; gap:8px;">
                         <div style="flex:1; display:flex; flex-direction:column; gap:3px;">
-                            <label>Tải lên từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Tổng dung lượng các ảnh tải lên tối đa không quá 1MB. Nếu dung lượng hơn 1MB hoặc nhiều ảnh thì dùng tính năng tải link drive/URL bên cạnh!)</span>:</label>
+                            <label>Tải lên từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Tối đa 1MB/ảnh)</span>:</label>
                             <input type="file" id="postMediaFile" accept="image/*,video/mp4" multiple onchange="checkDirectFileSizeLimit(this)">
                         </div>
-                        <button type="button" class="menu-btn" style="background:#2a9d8f; margin-top:16px; padding:6px 10px; font-size:0.75rem; white-space:nowrap;" onclick="switchView('admin_multi_noti')">🖼️ Dán link Drive / URL của ảnh</button>
+                        <button type="button" class="menu-btn" style="background:#2a9d8f; margin-top:16px; padding:6px 10px; font-size:0.75rem; white-space:nowrap;" onclick="switchView('admin_multi_noti')">🖼️ Dán link Drive / URL</button>
                     </div>
                     <div class="form-group">
                         <label>Đường dẫn Google Drive của file PDF:</label>
-                        <input type="text" id="postPdfInput" value="${editPdf}" placeholder="Dán link Google Drive file PDF vào đây...">
+                        <input type="text" id="postPdfInput" value="${editPdf}" placeholder="Dán link Google Drive file PDF...">
                     </div>
                     <div style="display:flex; justify-content:center; gap:12px; margin-top:6px;">
                         <button class="menu-btn" style="width:140px; justify-content:center; background:#2a9d8f;" onclick="submitNotification()">${isEditing ? 'Lưu Thay Đổi' : 'Đăng Ngay'}</button>
                         <button class="menu-btn" style="width:140px; justify-content:center; background:#6c757d;" onclick="switchView('home')">Hủy</button>
-                        ${isEditing ? `<button class="menu-btn" style="width:140px; background:#6c757d; justify-content:center;" onclick="cancelEdit()">Hủy chỉnh sửa</button>` : ''}
                     </div>
                 `;
             }
@@ -1505,15 +1316,11 @@
                 initMultiNotiRows();
             }
             else if (currentView === 'admin_homework') {
-                let computedHwTitle = getCalculatedHomeworkTitle();
-                let hwContentVal = tempHwContent;
-                let hwPdfVal = tempHwPdf;
-
                 b.innerHTML = `
                     <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">📖 Đăng Báo Bài Mới</h3>
                     <div class="form-group">
                         <label>Tiêu đề (Tự động hiển thị):</label>
-                        <input type="text" id="hwTitle" value="${computedHwTitle}" readonly style="background:#f1f1f1; font-weight:bold; color:var(--primary);">
+                        <input type="text" id="hwTitle" value="${getCalculatedHomeworkTitle()}" readonly style="background:#f1f1f1; font-weight:bold; color:var(--primary);">
                     </div>
                     <div class="form-group">
                         <label>Nội dung báo bài:</label>
@@ -1530,18 +1337,18 @@
                                 <input type="color" onchange="changeTextColor(this.value)" value="#1d3557">
                             </label>
                         </div>
-                        <div id="hwContent" class="rich-editor" contenteditable="true">${hwContentVal}</div>
+                        <div id="hwContent" class="rich-editor" contenteditable="true">${tempHwContent}</div>
                     </div>
                     <div class="form-group" style="display:flex; flex-direction:row; align-items:center; gap:8px;">
                         <div style="flex:1; display:flex; flex-direction:column; gap:3px;">
-                            <label>Tải lên từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Tổng dung lượng các ảnh tải lên tối đa không quá 1MB. Nếu dung lượng hơn 1MB hoặc nhiều ảnh thì dùng tính năng tải link drive/URL bên cạnh!)</span>:</label>
+                            <label>Tải lên từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Tối đa 1MB/ảnh)</span>:</label>
                             <input type="file" id="hwMediaFile" accept="image/*,video/mp4" multiple onchange="checkDirectFileSizeLimit(this)">
                         </div>
-                        <button type="button" class="menu-btn" style="background:#2a9d8f; margin-top:16px; padding:6px 10px; font-size:0.75rem; white-space:nowrap;" onclick="switchView('admin_multi_hw')">🖼️ Dán link Drive / URL của ảnh</button>
+                        <button type="button" class="menu-btn" style="background:#2a9d8f; margin-top:16px; padding:6px 10px; font-size:0.75rem; white-space:nowrap;" onclick="switchView('admin_multi_hw')">🖼️ Dán link Drive / URL</button>
                     </div>
                     <div class="form-group">
                         <label>Đường dẫn Google Drive của file PDF:</label>
-                        <input type="text" id="hwPdfInput" value="${hwPdfVal}" placeholder="Dán link Google Drive file PDF vào đây...">
+                        <input type="text" id="hwPdfInput" value="${tempHwPdf}" placeholder="Dán link Google Drive file PDF...">
                     </div>
                     <div style="display:flex; justify-content:center; gap:12px; margin-top:6px;">
                         <button class="menu-btn" style="width:140px; justify-content:center; background:#2a9d8f;" onclick="submitHomework()">Đăng</button>
@@ -1577,22 +1384,22 @@
                 let isAlbEditing = editingAlbumId !== null;
                 let albTitleVal = tempAlbumTitle; 
                 if (isAlbEditing && !tempAlbumTitle) {
-                    let albItem = albums.find(a => a.id === editingAlbumId || a.docId === editingAlbumId);
+                    let albItem = albums.find(a => a.docId === editingAlbumId || a.id === editingAlbumId);
                     if (albItem) { 
                         albTitleVal = albItem.title.replace(/\s\(\d+\/\d+\)$/, ''); 
-                        if (albItem.mediaUrl) currentAlbumLinks = [albItem.mediaUrl]; 
+                        currentAlbumLinks = [albItem.mediaUrl]; 
                     }
                 }
 
                 b.innerHTML = `
-                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">📷 ${isAlbEditing ? 'Chỉnh Sửa Album Kỷ Niệm' : 'Đăng Ảnh/Clip Kỷ Niệm'}</h3>
+                    <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">📷 ${isAlbEditing ? 'Chỉnh Sửa Album Kỷ Niệm' : 'Đăng Ảnh Kỷ Niệm'}</h3>
                     <div class="form-group" style="margin-bottom:8px;">
                         <label>Tên Album:</label>
                         <input type="text" id="albumBatchTitle" value="${albTitleVal}" placeholder="Nhập tên album...">
                     </div>
                     <div style="display:flex; flex:1; gap:12px; overflow:hidden; min-height:0;">
                         <div style="flex:1.2; display:flex; flex-direction:column; background:white; padding:10px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03); overflow-y:auto; gap:6px;">
-                            <label style="font-weight:600; font-size:0.75rem;">Danh sách đường dẫn ảnh kỷ niệm (Google Drive / URL):</label>
+                            <label style="font-weight:600; font-size:0.75rem;">Danh sách link ảnh kỷ niệm (Google Drive / URL):</label>
                             <div id="multiAlbumLinksContainer" style="display:flex; flex-direction:column; gap:6px; flex:1; max-height:230px; overflow-y:auto; padding-right:4px;"></div>
                         </div>
                         <div style="flex:1; border-radius:8px; border:1px solid #ced4da; background:#f8f9fa; display:flex; flex-direction:column; overflow:hidden;">
@@ -1614,12 +1421,12 @@
                 b.innerHTML = `
                     <h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:6px;">✨ Đăng Ảnh Banner</h3>
                     <div class="form-group" style="margin-bottom:8px;">
-                        <label>Hoặc tải ảnh banner từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Dung lượng tối đa không quá 1MB)</span>:</label>
+                        <label>Hoặc tải ảnh banner từ máy <span style="color:#e63946; font-size:0.7rem;">(⚠️ Tối đa 1MB)</span>:</label>
                         <input type="file" id="bannerFileInput" accept="image/*" onchange="previewBannerFileWithCheck(this)">
                     </div>
                     <div style="display:flex; flex:1; gap:12px; overflow:hidden; min-height:0;">
                         <div style="flex:1.2; display:flex; flex-direction:column; background:white; padding:10px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03); overflow-y:auto; gap:6px;">
-                            <label style="font-weight:600; font-size:0.75rem;">Danh sách đường dẫn ảnh banner (Google Drive / URL):</label>
+                            <label style="font-weight:600; font-size:0.75rem;">Danh sách link ảnh banner (Google Drive / URL):</label>
                             <div id="multiBannerLinksContainer" style="display:flex; flex-direction:column; gap:6px; flex:1; max-height:230px; overflow-y:auto; padding-right:4px;"></div>
                         </div>
                         <div style="flex:1; border-radius:8px; border:1px solid #ced4da; background:#f8f9fa; display:flex; flex-direction:column; overflow:hidden;">
@@ -1635,19 +1442,15 @@
                         <button class="menu-btn" style="flex:1; max-width:180px; justify-content:center; background:#6c757d;" onclick="switchView('home')">Hủy</button>
                     </div>
                 `;
-                if (banners.length > 0 && currentBannerLinks.length === 0) {
-                    currentBannerLinks = [...banners];
-                }
+                currentBannerLinks = banners.length > 0 ? [...banners] : [];
                 initMultiBannerRows();
             }
             else if (currentView === 'admin_manage_album') {
-                b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">📁 Danh Sách Album (Kỷ Niệm & Banner)</h3>`;
-                let pureAlbums = albums.filter(a => a.title && !a.title.includes("Thông báo"));
-                if (pureAlbums.length === 0) {
-                    b.innerHTML += '<p style="color:#6c757d;">Chưa có album nào.</p>';
+                b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">📁 Danh Sách Album Kỷ Niệm</h3>`;
+                if (albums.length === 0) {
+                    b.innerHTML += '<p style="color:#6c757d; text-align:center; margin-top:20px;">Chưa có album nào.</p>';
                 } else {
-                    pureAlbums.forEach((alb, idx) => {
-                        let isBannerAlbum = (alb.title === "Album banner");
+                    albums.forEach((alb, idx) => {
                         b.innerHTML += `
                             <div class="card-item">
                                 <div class="card-info" style="flex:1;">
@@ -1655,7 +1458,7 @@
                                     <span>✍️ Đăng bởi: ${alb.author}</span>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:5px;">
-                                    <button class="menu-btn btn-edit" onclick="startEditAlbum('${alb.docId}', ${isBannerAlbum})">Sửa</button>
+                                    <button class="menu-btn btn-edit" onclick="startEditAlbum('${alb.docId}')">Sửa</button>
                                     <button class="menu-btn btn-del" onclick="deleteAlbumItem('${alb.docId}')">Xóa</button>
                                 </div>
                             </div>
@@ -1683,7 +1486,7 @@
                             <label style="font-weight:600; font-size:0.75rem; color:var(--primary);">Thông tin tài khoản:</label>
                             <div style="display:flex; align-items:center; gap:6px; margin-top:2px;">
                                 <input type="text" id="resAccountInfo" readonly value="${lastCreatedAccountInfo}" style="flex:1; background:#f9f9f9; font-weight:bold; color:#e63946; padding:6px 8px; border:1px solid #ced4da; border-radius:6px; font-size:0.82rem;">
-                                <button class="menu-btn" style="padding:6px 10px; background:#2a9d8f; font-size:0.78rem;" onclick="copyAccountInfo()" title="Copy thông tin">📋 Copy</button>
+                                <button class="menu-btn" style="padding:6px 10px; background:#2a9d8f; font-size:0.78rem;" onclick="copyAccountInfo()">📋 Copy</button>
                             </div>
                         </div>
                     </div>
@@ -1716,10 +1519,9 @@
                 let hwList = [...homeworks].sort((a,b) => b.id - a.id);
 
                 b.innerHTML = `<h3 style="color:var(--primary); font-size: 0.95rem; margin-bottom:8px;">📜 Thông Báo & Báo Bài Đã Đăng</h3>`;
-                
                 let combinedList = [
-                    ...notiList.map(item => ({ ...item, displayHeader: `[📢 Thông báo số ${item.id}] ${item.title}`, uniqueKey: 'n_' + item.id, isHomework: false })),
-                    ...hwList.map(item => ({ ...item, displayHeader: `[📚 Báo bài] ${item.title}`, uniqueKey: 'h_' + item.id, isHomework: true }))
+                    ...notiList.map(item => ({ ...item, displayHeader: `[📢 Thông báo số ${item.id}] ${item.title}`, isHomework: false })),
+                    ...hwList.map(item => ({ ...item, displayHeader: `[📚 Báo bài] ${item.title}`, isHomework: true }))
                 ];
 
                 if (combinedList.length === 0) {
@@ -1777,30 +1579,38 @@
             }
         }
 
-        function submitNewForm() {
+        // --- CÁC HÀM XỬ LÝ BIỂU MẪU (CHUẨN HÓA THEO COLLECTION FORMS) ---
+        async function submitNewForm() {
             let title = document.getElementById('formTitleInput').value.trim();
             let url = document.getElementById('formUrlInput').value.trim();
             if (!title || !url) { alert("Vui lòng nhập tên biểu mẫu và đường dẫn URL!"); return; }
 
             let parsedUrl = parseGoogleDriveLink(url);
-            let maxId = formsList.length > 0 ? Math.max(...formsList.map(f => f.id || 0)) : 0;
-            formsList.push({
-                id: maxId + 1,
+            let newId = Date.now();
+            let newFormObj = {
+                id: newId,
                 title: title,
                 url: parsedUrl,
-                author: currentUser.name
-            });
+                author: currentUser.name,
+                timestamp: Date.now()
+            };
 
-            saveSettingsToFirebase();
-            alert("Đăng biểu mẫu thành công!");
-            switchView('admin_forms');
+            try {
+                await db.collection("forms").doc("form_" + newId).set(newFormObj);
+                alert("Đăng biểu mẫu thành công!");
+                switchView('admin_forms');
+            } catch (err) {
+                alert("Lỗi khi lưu biểu mẫu: " + err.message);
+            }
         }
 
-        function deleteFormItem(id) {
+        async function deleteFormItem(docId) {
             if (confirm("Bạn có chắc chắn muốn xóa biểu mẫu này?")) {
-                formsList = formsList.filter(f => f.id !== id);
-                saveSettingsToFirebase();
-                renderContentB();
+                try {
+                    await db.collection("forms").doc(docId).delete();
+                } catch (err) {
+                    alert("Lỗi khi xóa biểu mẫu: " + err.message);
+                }
             }
         }
 
@@ -1808,7 +1618,7 @@
             let container = document.getElementById('adminFormsListContainer');
             if (!container) return;
             container.innerHTML = '';
-            if (formsList.length === 0) {
+            if (!formsList || formsList.length === 0) {
                 container.innerHTML = '<p style="color:#6c757d; font-size:0.8rem;">Chưa có biểu mẫu nào.</p>';
                 return;
             }
@@ -1819,7 +1629,7 @@
                             <h4 style="font-size:0.82rem;">📄 ${form.title}</h4>
                             <span style="font-size:0.68rem;">🔗 ${form.url}</span>
                         </div>
-                        <button class="menu-btn btn-del" style="padding:3px 6px; font-size:0.7rem;" onclick="deleteFormItem(${form.id})">Xóa</button>
+                        <button class="menu-btn btn-del" style="padding:3px 6px; font-size:0.7rem;" onclick="deleteFormItem('${form.docId || ('form_' + form.id)}')">Xóa</button>
                     </div>
                 `;
             });
@@ -1854,7 +1664,7 @@
                 row.style.cssText = 'display:flex; gap:6px; align-items:center;';
                 row.innerHTML = `
                     <input type="text" class="multi-hw-input" value="${link}" placeholder="Dán link ảnh báo bài..." style="flex:1;" oninput="autoPreviewMultiHw(this)">
-                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiHwLink(this)">👁️️ Xem lại</button>
+                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiHwLink(this)">👁️ Xem lại</button>
                     <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeMultiHwRow(this)">❌</button>
                 `;
                 container.appendChild(row);
@@ -1901,14 +1711,13 @@
             let row = inputElem.closest('.multi-link-row');
             let container = document.getElementById('multiNotiLinksContainer');
             let allRows = container.querySelectorAll('.multi-link-row');
-            let lastRow = allRows[allRows.length - 1];
-            if (row === lastRow && inputElem.value.trim().length > 0) {
+            if (row === allRows[allRows.length - 1] && inputElem.value.trim().length > 0) {
                 let newRow = document.createElement('div');
                 newRow.className = 'multi-link-row';
                 newRow.style.cssText = 'display:flex; gap:6px; align-items:center;';
                 newRow.innerHTML = `
                     <input type="text" class="multi-input-link" placeholder="Dán link ảnh tiếp theo..." style="flex:1;" oninput="autoPreviewMultiNoti(this)">
-                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiNotiLink(this)">👁️️ Xem lại</button>
+                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewMultiNotiLink(this)">👁️ Xem lại</button>
                     <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeMultiNotiRow(this)">❌</button>
                 `;
                 container.appendChild(newRow);
@@ -1919,8 +1728,7 @@
             let row = inputElem.closest('.multi-hw-row');
             let container = document.getElementById('multiHwLinksContainer');
             let allRows = container.querySelectorAll('.multi-hw-row');
-            let lastRow = allRows[allRows.length - 1];
-            if (row === lastRow && inputElem.value.trim().length > 0) {
+            if (row === allRows[allRows.length - 1] && inputElem.value.trim().length > 0) {
                 let newRow = document.createElement('div');
                 newRow.className = 'multi-hw-row';
                 newRow.style.cssText = 'display:flex; gap:6px; align-items:center;';
@@ -1937,8 +1745,7 @@
             let row = inputElem.closest('.multi-album-row');
             let container = document.getElementById('multiAlbumLinksContainer');
             let allRows = container.querySelectorAll('.multi-album-row');
-            let lastRow = allRows[allRows.length - 1];
-            if (row === lastRow && inputElem.value.trim().length > 0) {
+            if (row === allRows[allRows.length - 1] && inputElem.value.trim().length > 0) {
                 let newRow = document.createElement('div');
                 newRow.className = 'multi-album-row';
                 newRow.style.cssText = 'display:flex; gap:6px; align-items:center;';
@@ -1955,14 +1762,13 @@
             let row = inputElem.closest('.multi-banner-row');
             let container = document.getElementById('multiBannerLinksContainer');
             let allRows = container.querySelectorAll('.multi-banner-row');
-            let lastRow = allRows[allRows.length - 1];
-            if (row === lastRow && inputElem.value.trim().length > 0) {
+            if (row === allRows[allRows.length - 1] && inputElem.value.trim().length > 0) {
                 let newRow = document.createElement('div');
                 newRow.className = 'multi-banner-row';
                 newRow.style.cssText = 'display:flex; gap:6px; align-items:center;';
                 newRow.innerHTML = `
                     <input type="text" class="multi-banner-input" placeholder="Dán link ảnh banner tiếp theo..." style="flex:1;" oninput="autoPreviewMultiBanner(this)">
-                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleBannerLink(this)">👁️️ Xem lại</button>
+                    <button type="button" class="menu-btn" style="padding:5px 8px; font-size:0.75rem; background:#457b9d;" onclick="previewSingleBannerLink(this)">👁️ Xem lại</button>
                     <button type="button" class="menu-btn btn-del" style="padding:5px 8px; font-size:0.75rem;" onclick="removeMultiBannerRow(this)">❌</button>
                 `;
                 container.appendChild(newRow);
@@ -1973,12 +1779,7 @@
             let link = inputElem.value.trim();
             let previewBox = document.getElementById('multiNotiPreviewBox');
             if (!previewBox) return;
-            if (link) {
-                let parsed = parseGoogleDriveLink(link);
-                previewBox.innerHTML = `<img src="${parsed}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parsed}')">`;
-            } else {
-                previewBox.innerHTML = `<span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>`;
-            }
+            previewBox.innerHTML = link ? `<img src="${parseGoogleDriveLink(link)}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parseGoogleDriveLink(link)}')">` : `<span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>`;
             handleMultiNotiInput(inputElem);
         }
 
@@ -1986,12 +1787,7 @@
             let link = inputElem.value.trim();
             let previewBox = document.getElementById('multiHwPreviewBox');
             if (!previewBox) return;
-            if (link) {
-                let parsed = parseGoogleDriveLink(link);
-                previewBox.innerHTML = `<img src="${parsed}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parsed}')">`;
-            } else {
-                previewBox.innerHTML = `<span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>`;
-            }
+            previewBox.innerHTML = link ? `<img src="${parseGoogleDriveLink(link)}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parseGoogleDriveLink(link)}')">` : `<span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>`;
             handleMultiHwInput(inputElem);
         }
 
@@ -1999,12 +1795,7 @@
             let link = inputElem.value.trim();
             let previewBox = document.getElementById('multiAlbumPreviewBox');
             if (!previewBox) return;
-            if (link) {
-                let parsed = parseGoogleDriveLink(link);
-                previewBox.innerHTML = `<img src="${parsed}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parsed}')">`;
-            } else {
-                previewBox.innerHTML = `<span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>`;
-            }
+            previewBox.innerHTML = link ? `<img src="${parseGoogleDriveLink(link)}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parseGoogleDriveLink(link)}')">` : `<span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>`;
             handleMultiAlbumInput(inputElem);
         }
 
@@ -2012,57 +1803,30 @@
             let link = inputElem.value.trim();
             let previewBox = document.getElementById('multiBannerPreviewBox');
             if (!previewBox) return;
-            if (link) {
-                let parsed = parseGoogleDriveLink(link);
-                previewBox.innerHTML = `<img src="${parsed}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parsed}')">`;
-            } else {
-                previewBox.innerHTML = `<span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>`;
-            }
+            previewBox.innerHTML = link ? `<img src="${parseGoogleDriveLink(link)}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parseGoogleDriveLink(link)}')">` : `<span style="font-size:0.8rem; color:#aaa;">Chưa có ảnh xem trước</span>`;
             handleMultiBannerInput(inputElem);
         }
 
-        function previewMultiNotiLink(btn) {
-            let row = btn.closest('.multi-link-row');
-            autoPreviewMultiNoti(row.querySelector('.multi-input-link'));
-        }
-
-        function previewMultiHwLink(btn) {
-            let row = btn.closest('.multi-hw-row');
-            autoPreviewMultiHw(row.querySelector('.multi-hw-input'));
-        }
-
-        function previewSingleAlbumLink(btn) {
-            let row = btn.closest('.multi-album-row');
-            autoPreviewMultiAlbum(row.querySelector('.multi-album-input'));
-        }
-
-        function previewSingleBannerLink(btn) {
-            let row = btn.closest('.multi-banner-row');
-            autoPreviewMultiBanner(row.querySelector('.multi-banner-input'));
-        }
+        function previewMultiNotiLink(btn) { autoPreviewMultiNoti(btn.closest('.multi-link-row').querySelector('.multi-input-link')); }
+        function previewMultiHwLink(btn) { autoPreviewMultiHw(btn.closest('.multi-hw-row').querySelector('.multi-hw-input')); }
+        function previewSingleAlbumLink(btn) { autoPreviewMultiAlbum(btn.closest('.multi-album-row').querySelector('.multi-album-input')); }
+        function previewSingleBannerLink(btn) { autoPreviewMultiBanner(btn.closest('.multi-banner-row').querySelector('.multi-banner-input')); }
 
         function removeMultiNotiRow(btn) {
             let row = btn.closest('.multi-link-row');
-            let container = document.getElementById('multiNotiLinksContainer');
-            if (container.querySelectorAll('.multi-link-row').length > 1) row.remove(); else row.querySelector('.multi-input-link').value = '';
+            if (document.querySelectorAll('.multi-link-row').length > 1) row.remove(); else row.querySelector('.multi-input-link').value = '';
         }
-
         function removeMultiHwRow(btn) {
             let row = btn.closest('.multi-hw-row');
-            let container = document.getElementById('multiHwLinksContainer');
-            if (container.querySelectorAll('.multi-hw-row').length > 1) row.remove(); else row.querySelector('.multi-hw-input').value = '';
+            if (document.querySelectorAll('.multi-hw-row').length > 1) row.remove(); else row.querySelector('.multi-hw-input').value = '';
         }
-
         function removeMultiAlbumRow(btn) {
             let row = btn.closest('.multi-album-row');
-            let container = document.getElementById('multiAlbumLinksContainer');
-            if (container.querySelectorAll('.multi-album-row').length > 1) row.remove(); else row.querySelector('.multi-album-input').value = '';
+            if (document.querySelectorAll('.multi-album-row').length > 1) row.remove(); else row.querySelector('.multi-album-input').value = '';
         }
-
         function removeMultiBannerRow(btn) {
             let row = btn.closest('.multi-banner-row');
-            let container = document.getElementById('multiBannerLinksContainer');
-            if (container.querySelectorAll('.multi-banner-row').length > 1) row.remove(); else row.querySelector('.multi-banner-input').value = '';
+            if (document.querySelectorAll('.multi-banner-row').length > 1) row.remove(); else row.querySelector('.multi-banner-input').value = '';
         }
 
         function clearAlbumInputs() {
@@ -2135,22 +1899,14 @@
             let link = document.getElementById('scheduleLinkInput').value.trim();
             let box = document.getElementById('schedulePreviewArea');
             if (!box) return;
-            if (link) {
-                let parsed = parseGoogleDriveLink(link);
-                box.innerHTML = `<img src="${parsed}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parsed}')">`;
-            } else {
-                box.innerHTML = scheduleUrl ? `<img src="${scheduleUrl}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${scheduleUrl}')">` : '<span style="color:#6c757d; font-size:0.8rem;">Chưa có ảnh TKB.</span>';
-            }
+            box.innerHTML = link ? `<img src="${parseGoogleDriveLink(link)}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${parseGoogleDriveLink(link)}')">` : (scheduleUrl ? `<img src="${scheduleUrl}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:4px; cursor:pointer;" onclick="openZoomModal('${scheduleUrl}')">` : '<span style="color:#6c757d; font-size:0.8rem;">Chưa có ảnh TKB.</span>');
         }
 
         async function submitNotification() {
-            let titleElem = document.getElementById('postTitle');
-            let contentElem = document.getElementById('postContent');
-            let pdfElem = document.getElementById('postPdfInput');
+            let title = document.getElementById('postTitle').value.trim();
+            let content = document.getElementById('postContent').innerHTML.trim();
+            let pdfUrl = document.getElementById('postPdfInput').value.trim();
             let fileInput = document.getElementById('postMediaFile');
-            let title = titleElem ? titleElem.value.trim() : tempPostTitle;
-            let content = contentElem ? contentElem.innerHTML.trim() : tempPostContent;
-            let pdfUrl = pdfElem ? pdfElem.value.trim() : tempPostPdf;
 
             if (!title) { alert("Vui lòng nhập tiêu đề!"); return; }
 
@@ -2191,9 +1947,7 @@
 
                     editingNotiId = null;
                     currentMultiLinks = [];
-                    tempPostTitle = "";
-                    tempPostContent = "";
-                    tempPostPdf = "";
+                    tempPostTitle = ""; tempPostContent = ""; tempPostPdf = "";
                     switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti');
                 } catch (err) {
                     alert("Lỗi khi lưu thông báo: " + err.message);
@@ -2204,9 +1958,7 @@
                 processSave(currentMultiLinks, 'image');
             } else if (fileInput && fileInput.files && fileInput.files[0]) {
                 let reader = new FileReader();
-                reader.onload = (e) => {
-                    processSave([e.target.result], 'image');
-                };
+                reader.onload = (e) => processSave([e.target.result], 'image');
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
                 let existingMediaUrl = [];
@@ -2224,16 +1976,11 @@
 
         async function submitHomework() {
             let title = document.getElementById('hwTitle').value.trim();
-            let contentElem = document.getElementById('hwContent');
-            let pdfElem = document.getElementById('hwPdfInput');
+            let content = document.getElementById('hwContent').innerHTML.trim();
+            let pdfUrl = document.getElementById('hwPdfInput').value.trim();
             let fileInput = document.getElementById('hwMediaFile');
-            let content = contentElem ? contentElem.innerHTML.trim() : tempHwContent;
-            let pdfUrl = pdfElem ? pdfElem.value.trim() : tempHwPdf;
 
-            if (!content || content === "<br>") {
-                alert("Vui lòng nhập nội dung báo bài!");
-                return;
-            }
+            if (!content || content === "<br>") { alert("Vui lòng nhập nội dung báo bài!"); return; }
 
             let processHwSave = async (mediaUrls) => {
                 try {
@@ -2262,8 +2009,7 @@
                     await db.collection("homeworks").doc("hw_" + newId).set(newHw);
                     alert("Đăng báo bài thành công!");
                     currentHwMultiLinks = [];
-                    tempHwContent = "";
-                    tempHwPdf = "";
+                    tempHwContent = ""; tempHwPdf = "";
                     switchView('homework_list');
                 } catch (err) {
                     alert("Lỗi khi đăng báo bài: " + err.message);
@@ -2274,9 +2020,7 @@
                 processHwSave(currentHwMultiLinks);
             } else if (fileInput && fileInput.files && fileInput.files[0]) {
                 let reader = new FileReader();
-                reader.onload = (e) => {
-                    processHwSave([e.target.result]);
-                };
+                reader.onload = (e) => processHwSave([e.target.result]);
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
                 processHwSave([]);
@@ -2284,45 +2028,35 @@
         }
 
         async function submitDynamicBatchAlbum() {
-            let titleInput = document.getElementById('albumBatchTitle');
-            let title = titleInput ? titleInput.value.trim() : tempAlbumTitle;
-
+            let title = document.getElementById('albumBatchTitle').value.trim();
             let linksArray = [];
             document.querySelectorAll('.multi-album-input').forEach(inp => {
                 let val = inp.value.trim();
                 if (val) linksArray.push(parseGoogleDriveLink(val));
             });
 
-            if (!title) {
-                alert("Vui lòng nhập tên Album!");
-                return;
-            }
-            if (linksArray.length === 0) {
-                alert("Vui lòng dán ít nhất một đường dẫn ảnh hợp lệ!");
-                return;
-            }
+            if (!title) { alert("Vui lòng nhập tên Album!"); return; }
+            if (linksArray.length === 0) { alert("Vui lòng dán ít nhất một đường dẫn ảnh hợp lệ!"); return; }
 
             try {
                 if (editingAlbumId !== null) {
-                    let albItem = albums.find(a => a.id === editingAlbumId || a.docId === editingAlbumId);
+                    let albItem = albums.find(a => a.docId === editingAlbumId || a.id === editingAlbumId);
                     if (albItem && albItem.docId) {
-                        await db.collection("albums").doc(albItem.docId).update({
-                            title, mediaUrl: linksArray[0]
-                        });
+                        await db.collection("albums").doc(albItem.docId).update({ title, mediaUrl: linksArray[0] });
                         alert("Đã cập nhật album thành công!");
                     }
                 } else {
                     let batch = db.batch();
                     linksArray.forEach((link, index) => {
-                        let docRef = db.collection("albums").doc();
-                        let albData = {
+                        let newDocId = "alb_" + (Date.now() + index);
+                        let docRef = db.collection("albums").doc(newDocId);
+                        batch.set(docRef, {
                             id: Date.now() + index,
                             title: linksArray.length > 1 ? `${title} (${index + 1}/${linksArray.length})` : title,
                             mediaUrl: link,
                             type: 'image',
                             author: currentUser.name
-                        };
-                        batch.set(docRef, albData);
+                        });
                     });
                     await batch.commit();
                     alert(`Đã đăng thành công ${linksArray.length} ảnh kỷ niệm!`);
@@ -2337,11 +2071,7 @@
             }
         }
 
-        function startEditAlbum(docId, isBanner = false) {
-            if (isBanner) {
-                switchView('admin_banner');
-                return;
-            }
+        function startEditAlbum(docId) {
             editingAlbumId = docId;
             let albItem = albums.find(a => a.docId === docId || a.id === docId);
             if (albItem) {
@@ -2352,13 +2082,21 @@
         }
 
         async function deleteAlbumItem(docId) {
-            if (confirm("Bạn có chắc chắn muốn xóa album này?")) {
+            if (confirm("Bạn có chắc chắn muốn xóa ảnh này?")) {
                 try {
                     await db.collection("albums").doc(docId).delete();
                 } catch (err) {
-                    alert("Lỗi khi xóa album: " + err.message);
+                    alert("Lỗi khi xóa: " + err.message);
                 }
             }
+        }
+
+        function changeAlbum(step) {
+            if (albums.length === 0) return;
+            albumIndex += step;
+            if (albumIndex < 0) albumIndex = albums.length - 1;
+            if (albumIndex >= albums.length) albumIndex = 0;
+            renderContentB();
         }
 
         async function saveDynamicBanners() {
@@ -2383,17 +2121,6 @@
 
             if (linksArray.length > 0) {
                 banners = [...linksArray];
-                let albBanner = albums.find(a => a.title === "Album banner");
-                if (albBanner && albBanner.docId) {
-                    db.collection("albums").doc(albBanner.docId).update({ mediaUrl: banners[0] });
-                } else {
-                    db.collection("albums").add({
-                        title: "Album banner",
-                        mediaUrl: banners[0],
-                        type: 'image',
-                        author: currentUser.name
-                    });
-                }
                 saveSettingsToFirebase();
                 alert("Đã lưu danh sách banner thành công!");
                 renderBannerSlideshow();
@@ -2413,27 +2140,14 @@
                         await db.collection("homeworks").doc(docId).delete();
                     }
                 } catch (err) {
-                    alert("Lỗi khi xóa báo bài: " + err.message);
+                    alert("Lỗi khi xóa: " + err.message);
                 }
             }
         }
 
-        function showHwDetail(id) {
-            window.currentHwId = id;
-            currentView = 'homework_detail';
-            renderContentB();
-        }
-
-        function changeHwPage(step) {
-            homeworkPageOffset += step;
-            renderContentB();
-        }
-
-        function showFullDetail(id) {
-            window.currentDetailId = id;
-            currentView = 'full_detail';
-            renderContentB();
-        }
+        function showHwDetail(id) { window.currentHwId = id; currentView = 'homework_detail'; renderContentB(); }
+        function changeHwPage(step) { homeworkPageOffset += step; renderContentB(); }
+        function showFullDetail(id) { window.currentDetailId = id; currentView = 'full_detail'; renderContentB(); }
 
         function showTrashDetail(idx) {
             let item = trashBin[idx];
@@ -2441,10 +2155,12 @@
             if (item.isHomework || (item.title && item.title.startsWith("BÁO BÀI"))) {
                 window.currentHwId = item.id;
                 currentView = 'homework_detail';
+                if (!homeworks.find(h => h.id === item.id)) homeworks.push(item);
                 renderContentB();
             } else {
                 window.currentDetailId = item.id;
                 currentView = 'full_detail';
+                if (!notifications.find(n => n.id === item.id)) notifications.push(item);
                 renderContentB();
             }
         }
@@ -2457,9 +2173,8 @@
             container.style.display = 'block';
             container.innerHTML = '';
             banners.forEach((src) => {
-                let parsedSrc = parseGoogleDriveLink(src);
                 let img = document.createElement('img');
-                img.src = parsedSrc;
+                img.src = parseGoogleDriveLink(src);
                 if (container.children.length === 0) img.className = 'active';
                 container.appendChild(img);
             });
@@ -2475,14 +2190,6 @@
                     imgs[currentIdx].classList.add('active');
                 }, 6000);
             }
-        }
-
-        function changeAlbum(step) {
-            let pureAlbums = albums.filter(a => a.title && !a.title.includes("Thông báo"));
-            albumIndex += step;
-            if (albumIndex < 0) albumIndex = 0;
-            if (albumIndex >= pureAlbums.length) albumIndex = pureAlbums.length - 1;
-            renderContentB();
         }
 
         function togglePasswordVisibility() {
@@ -2530,15 +2237,12 @@
         function logout() { currentUser = null; switchView('home'); }
 
         async function deleteAccountByName(accName, docId) {
-            if (accName.toLowerCase() === 'admin') {
-                alert("Không thể xóa tài khoản admin chính!");
-                return;
-            }
+            if (accName.toLowerCase() === 'admin') { alert("Không thể xóa tài khoản admin chính!"); return; }
             if (confirm("Xóa tài khoản này?")) {
                 try {
                     await db.collection("subAccounts").doc(docId).delete();
                 } catch (err) {
-                    alert("Lỗi khi xóa tài khoản: " + err.message);
+                    alert("Lỗi khi xóa: " + err.message);
                 }
             }
         }
@@ -2551,11 +2255,7 @@
                 tempPostTitle = item.title;
                 tempPostContent = item.content;
                 tempPostPdf = item.pdfUrl || "";
-                if (Array.isArray(item.mediaUrl)) {
-                    currentMultiLinks = [...item.mediaUrl];
-                } else if (typeof item.mediaUrl === 'string' && item.mediaUrl.trim().length > 0) {
-                    currentMultiLinks = item.mediaUrl.split('\n').filter(l => l.trim().length > 0);
-                }
+                currentMultiLinks = Array.isArray(item.mediaUrl) ? [...item.mediaUrl] : (item.mediaUrl ? item.mediaUrl.split('\n').filter(l => l.trim()) : []);
             }
             switchView(currentUser.role === 'admin' ? 'admin_post' : 'sub_post'); 
         }
@@ -2563,9 +2263,7 @@
         function cancelEdit() { 
             editingNotiId = null; 
             currentMultiLinks = [];
-            tempPostTitle = "";
-            tempPostContent = "";
-            tempPostPdf = "";
+            tempPostTitle = ""; tempPostContent = ""; tempPostPdf = "";
             switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti'); 
         }
 
@@ -2580,7 +2278,7 @@
                         await db.collection("notifications").doc(item.docId).delete();
                     }
                 } catch (err) {
-                    alert("Lỗi khi xóa thông báo: " + err.message);
+                    alert("Lỗi khi xóa: " + err.message);
                 }
             }
         }
@@ -2590,9 +2288,7 @@
                 let item = trashBin.find(t => t.docId === docId);
                 if (item) {
                     let restoreData = { ...item };
-                    delete restoreData.docId;
-                    delete restoreData.deletedBy;
-                    delete restoreData.deletedAt;
+                    delete restoreData.docId; delete restoreData.deletedBy; delete restoreData.deletedAt;
 
                     if (restoreData.isHomework || (restoreData.title && restoreData.title.startsWith("BÁO BÀI"))) {
                         delete restoreData.isHomework;
@@ -2615,22 +2311,15 @@
                 let batch = db.batch();
                 checkboxes.forEach(cb => {
                     let dId = cb.dataset.docid;
-                    if (dId) {
-                        batch.delete(db.collection("trashBin").doc(dId));
-                    }
+                    if (dId) batch.delete(db.collection("trashBin").doc(dId));
                 });
                 await batch.commit();
                 alert("Đã xóa vĩnh viễn các mục đã chọn!");
             }
         }
 
-        /* BỘ XỬ LÝ PHÓNG TO, THU NHỎ & KÉO DI CHUYỂN ẢNH */
-        let currentScale = 1;
-        let panX = 0, panY = 0;
-        let isDragging = false;
-        let startX = 0, startY = 0;
-        let initialDistance = 0;
-        let initialScale = 1;
+        /* ZOOM & PAN */
+        let currentScale = 1, panX = 0, panY = 0, isDragging = false, startX = 0, startY = 0, initialDistance = 0, initialScale = 1;
 
         function openZoomModal(imgSrc) {
             let modal = document.getElementById('zoomModal');
@@ -2640,67 +2329,28 @@
             modal.style.display = 'flex';
         }
 
-        function closeZoomModal() { 
-            document.getElementById('zoomModal').style.display = 'none'; 
-        }
-
-        function zoomIn() { 
-            currentScale = Math.min(currentScale + 0.4, 5); 
-            updateImageTransform(); 
-        }
-
-        function zoomOut() { 
-            currentScale = Math.max(currentScale - 0.4, 0.6); 
-            updateImageTransform(); 
-        }
-
-        function resetZoom() { 
-            currentScale = 1; 
-            panX = 0; 
-            panY = 0; 
-            updateImageTransform(); 
-        }
+        function closeZoomModal() { document.getElementById('zoomModal').style.display = 'none'; }
+        function zoomIn() { currentScale = Math.min(currentScale + 0.4, 5); updateImageTransform(); }
+        function zoomOut() { currentScale = Math.max(currentScale - 0.4, 0.6); updateImageTransform(); }
+        function resetZoom() { currentScale = 1; panX = 0; panY = 0; updateImageTransform(); }
 
         function updateImageTransform() {
             let img = document.getElementById('zoomedImg');
-            if (img) {
-                img.style.transform = `translate(${panX}px, ${panY}px) scale(${currentScale})`;
-            }
+            if (img) img.style.transform = `translate(${panX}px, ${panY}px) scale(${currentScale})`;
         }
 
         const zoomModalEl = document.getElementById('zoomModal');
-
-        zoomModalEl.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            startX = e.clientX - panX;
-            startY = e.clientY - panY;
-        });
-
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            panX = e.clientX - startX;
-            panY = e.clientY - startY;
-            updateImageTransform();
-        });
-
+        zoomModalEl.addEventListener('mousedown', (e) => { isDragging = true; startX = e.clientX - panX; startY = e.clientY - panY; });
+        window.addEventListener('mousemove', (e) => { if (!isDragging) return; panX = e.clientX - startX; panY = e.clientY - startY; updateImageTransform(); });
         window.addEventListener('mouseup', () => { isDragging = false; });
-
-        zoomModalEl.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            if (e.deltaY < 0) zoomIn(); else zoomOut();
-        }, { passive: false });
+        zoomModalEl.addEventListener('wheel', (e) => { e.preventDefault(); if (e.deltaY < 0) zoomIn(); else zoomOut(); }, { passive: false });
 
         zoomModalEl.addEventListener('touchstart', (e) => {
             if (e.touches.length === 1) {
-                isDragging = true;
-                startX = e.touches[0].clientX - panX;
-                startY = e.touches[0].clientY - panY;
+                isDragging = true; startX = e.touches[0].clientX - panX; startY = e.touches[0].clientY - panY;
             } else if (e.touches.length === 2) {
                 isDragging = false;
-                initialDistance = Math.hypot(
-                    e.touches[0].clientX - e.touches[1].clientX,
-                    e.touches[0].clientY - e.touches[1].clientY
-                );
+                initialDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
                 initialScale = currentScale;
             }
         }, { passive: false });
@@ -2708,30 +2358,19 @@
         zoomModalEl.addEventListener('touchmove', (e) => {
             e.preventDefault();
             if (e.touches.length === 1 && isDragging) {
-                panX = e.touches[0].clientX - startX;
-                panY = e.touches[0].clientY - startY;
-                updateImageTransform();
+                panX = e.touches[0].clientX - startX; panY = e.touches[0].clientY - startY; updateImageTransform();
             } else if (e.touches.length === 2) {
-                let currentDistance = Math.hypot(
-                    e.touches[0].clientX - e.touches[1].clientX,
-                    e.touches[0].clientY - e.touches[1].clientY
-                );
+                let dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
                 if (initialDistance > 0) {
-                    let newScale = initialScale * (currentDistance / initialDistance);
-                    currentScale = Math.min(Math.max(newScale, 0.6), 5);
+                    currentScale = Math.min(Math.max(initialScale * (dist / initialDistance), 0.6), 5);
                     updateImageTransform();
                 }
             }
         }, { passive: false });
 
         zoomModalEl.addEventListener('touchend', (e) => {
-            if (e.touches.length === 0) {
-                isDragging = false;
-            } else if (e.touches.length === 1) {
-                isDragging = true;
-                startX = e.touches[0].clientX - panX;
-                startY = e.touches[0].clientY - panY;
-            }
+            if (e.touches.length === 0) isDragging = false;
+            else if (e.touches.length === 1) { isDragging = true; startX = e.touches[0].clientX - panX; startY = e.touches[0].clientY - panY; }
         });
 
         function openSearchModal() { document.getElementById('searchModal').style.display = 'flex'; }
@@ -2842,7 +2481,6 @@
             let toolbar = btn.closest('.editor-toolbar');
             let alignBtns = toolbar.querySelectorAll('button[data-align]');
             let wasActive = btn.classList.contains('active');
-            
             alignBtns.forEach(b => b.classList.remove('active'));
             if (!wasActive) {
                 document.execCommand(cmd, false, null);
@@ -2852,9 +2490,7 @@
             }
         }
 
-        function changeTextColor(color) {
-            document.execCommand('foreColor', false, color);
-        }
+        function changeTextColor(color) { document.execCommand('foreColor', false, color); }
 
         function getCalculatedHomeworkTitle() {
             let targetDate = new Date();
@@ -2871,7 +2507,6 @@
             return `BÁO BÀI thứ ${dName} ngày ${dayNum}/${monthNum}/${yearNum}`;
         }
 
-        // Khởi động đồng bộ cơ sở dữ liệu thời gian thực
         initRealtimeDatabase();
     </script>
 </body>
