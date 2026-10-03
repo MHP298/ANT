@@ -118,7 +118,11 @@
     <div class="flex items-center gap-2">
       <span class="text-lg">🌸</span>
       <h1 class="font-extrabold text-xs md:text-sm text-slate-800 uppercase tracking-wide">Vườn Thi Đua Trồng Hoa</h1>
-      <span class="text-[10px] md:text-[11px] px-2 py-0.5 bg-emerald-100 text-emerald-900 rounded-full font-bold ml-1" id="hdr-class-badge">Lớp 11TA3</span>
+      
+      <!-- KHU VỰC HIỂN THỊ / CHỌN LỚP (TÀI KHOẢN TEST SẼ ĐƯỢC CHỌN LỚP TẠI ĐÂY) -->
+      <div id="hdr-class-container" class="ml-1">
+        <span class="text-[10px] md:text-[11px] px-2 py-0.5 bg-emerald-100 text-emerald-900 rounded-full font-bold" id="hdr-class-badge">Lớp 11TA3</span>
+      </div>
     </div>
 
     <div class="flex items-center gap-2.5">
@@ -281,7 +285,7 @@
         if (keys.length > 0) activeClassName = keys[0];
       }
 
-      // Nếu đang có phiên học sinh, ưu tiên nạp lớp của học sinh đó
+      // Ưu tiên nạp đúng lớp của học sinh đang đăng nhập
       if (currentStudent && currentStudent.class && globalClassesData[currentStudent.class]) {
         currentClass = globalClassesData[currentStudent.class];
       } else {
@@ -417,15 +421,49 @@
       };
     }
 
-    // ================= 4. ÁP DỤNG CẤU HÌNH GIAO DIỆN & VÙNG ĐẤT =================
+    // ================= 4. ĐỔI LỚP TEST TRỰC TIẾP TỪ HEADER CHO TÀI KHOẢN HOCSINH =================
+    function switchTestClass(newClassName) {
+      if (!globalClassesData[newClassName]) return;
+      currentClass = globalClassesData[newClassName];
+      currentStudent.class = newClassName;
+      sessionStorage.setItem('current_garden_student', JSON.stringify(currentStudent));
+      
+      // Dọn sạch các hoa đang cắm tạm của lớp cũ trên canvas
+      document.getElementById('drop-flowers-layer').innerHTML = '';
+      document.getElementById('empty-hint').style.display = 'flex';
+
+      playSfx('tab_click');
+      applyClassConfiguration();
+      initBackgroundMusic();
+    }
+
+    // ================= 5. ÁP DỤNG CẤU HÌNH GIAO DIỆN & VÙNG ĐẤT =================
     function applyClassConfiguration() {
       const cfg = currentClass.config;
 
-      document.getElementById('hdr-class-badge').innerText = `Lớp ${currentClass.name}`;
+      // XỬ LÝ KHU VỰC HIỂN THỊ / CHỌN LỚP TRÊN HEADER
+      const classContainer = document.getElementById('hdr-class-container');
+      const isTester = (currentStudent.role === 'SUPER_TESTER' || currentStudent.username === 'hocsinh');
+
+      if (isTester) {
+        // TÀI KHOẢN HOCSINH: BIẾN HUY HIỆU THÀNH DROPDOWN CHỌN LỚP TEST
+        const classKeys = Object.keys(globalClassesData);
+        classContainer.innerHTML = `
+          <select onchange="switchTestClass(this.value)" class="text-[10px] md:text-[11px] px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-950 border border-emerald-300 rounded-full font-black cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-500 transition">
+            ${classKeys.map(cName => `<option value="${cName}" ${cName === currentClass.name ? 'selected' : ''}>Lớp ${cName}</option>`).join('')}
+          </select>
+        `;
+      } else {
+        // HỌC SINH THƯỜNG: HIỆN HUY HIỆU DẠNG TEXT CỐ ĐỊNH
+        classContainer.innerHTML = `
+          <span class="text-[10px] md:text-[11px] px-2 py-0.5 bg-emerald-100 text-emerald-900 rounded-full font-bold" id="hdr-class-badge">Lớp ${currentClass.name}</span>
+        `;
+      }
+
       document.getElementById('hdr-student-name').innerText = `${currentStudent.name} (Tổ ${currentStudent.team})`;
       
       const roleBadge = document.getElementById('hdr-role-badge');
-      if (currentStudent.role === 'SUPER_TESTER' || currentStudent.username === 'hocsinh') {
+      if (isTester) {
         roleBadge.className = "text-[9px] md:text-[10px] px-1.5 py-0.5 rounded font-black uppercase text-purple-900 bg-purple-200 border border-purple-300";
         roleBadge.innerText = "Test Toàn Quyền";
       } else if (currentStudent.role && currentStudent.role.startsWith('TT')) {
@@ -490,7 +528,7 @@
             const centerY = (slot.corners[0].y + slot.corners[1].y + slot.corners[2].y + slot.corners[3].y) / 4;
             
             const isMyTeamPlot = (currentStudent.role === 'SUPER_TESTER' || currentStudent.username === 'hocsinh') ? true : (slot.teamId === currentStudent.team);
-            const hasSoil = !!slot.soilImage; // Đã thả đất hay chưa
+            const hasSoil = !!slot.soilImage;
 
             return `
               <g id="plot-group-${slot.id}" class="plot-group-hover group"
