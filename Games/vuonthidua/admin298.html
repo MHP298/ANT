@@ -31,7 +31,7 @@
       box-shadow: 0 0 8px rgba(0,0,0,0.7);
       transform: translate(-50%, -50%);
       cursor: crosshair;
-      z-index: 80;
+      z-index: 60;
       touch-action: none;
       transition: transform 0.1s;
     }
@@ -40,7 +40,7 @@
       background: #059669;
     }
 
-    /* 4 ĐIỂM NEO CHÂN ĐẤT 3D (CAM) - BẮT BUỘC Z-INDEX CAO NHẤT ĐỂ LUÔN KÉO ĐƯỢC */
+    /* 4 ĐIỂM NEO CHÂN ĐẤT 3D (VÀNG CAM) */
     .soil-quad-handle {
       position: absolute;
       width: 22px;
@@ -142,7 +142,7 @@
       </div>
 
       <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
-        <span class="text-[11px] text-rose-500 font-medium leading-tight">⚠️ Khi xóa, toàn bộ cấu hình và dữ liệu học sinh của lớp đó sẽ bị xóa sạch.</span>
+        <span class="text-[11px] text-rose-500 font-medium leading-tight">⚠️️ Khi xóa, toàn bộ cấu hình và dữ liệu học sinh của lớp đó sẽ bị xóa sạch.</span>
         <div class="flex gap-2 shrink-0">
           <button onclick="closeDeleteClassModal()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">Hủy</button>
           <button onclick="confirmBatchDeleteClasses()" class="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center gap-1.5">
@@ -441,18 +441,22 @@
 
   </div>
 
-  <!-- MODAL THIẾT KẾ SÂN VƯỜN (CHẤM 4 ĐIỂM NEO CHÂN HÀNG RÀO PHỐI CẢNH 3D) -->
+  <!-- MODAL THIẾT KẾ SÂN VƯỜN (CHẤM 4 ĐIỂM NEO, KHÓA VÙNG CHỌN & HOÀN TÁC CTRL+Z) -->
   <div id="fullscreen-editor-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 hidden flex flex-col">
     <div class="h-14 bg-slate-900 border-b border-slate-800 px-6 flex items-center justify-between shrink-0 shadow-lg">
       <div class="flex items-center gap-3">
         <span class="text-xl">📐</span>
         <div>
           <h3 class="font-extrabold text-sm text-white uppercase tracking-wide">Trình Thiết Kế Sân Vườn & Căn Chỉnh Vùng Đất</h3>
-          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Nắn 4 góc lưới (Xanh lá) • Kéo 4 góc chân đất (Vàng cam) • Kéo rê thân ảnh mượt mà</p>
+          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Nắn 4 góc lưới (Xanh) • Kéo 4 góc chân đất (Cam) • Khóa vùng chọn & Ctrl+Z</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2.5">
+        <!-- NÚT HOÀN TÁC UNDO (CTRL+Z) -->
+        <button onclick="undoEditorState()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 text-xs font-bold flex items-center gap-1.5 shadow-md transition" title="Phím tắt: Ctrl + Z">
+          <i class="fa-solid fa-rotate-left"></i> Hoàn Tác (Ctrl+Z)
+        </button>
         <button onclick="addNewTextOverlay()" class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition"><i class="fa-solid fa-font"></i> + Thêm Vùng Chữ</button>
         <button onclick="saveAndCloseFullscreenEditor()" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition"><i class="fa-solid fa-floppy-disk"></i> Lưu Toàn Bộ Thiết Kế</button>
         <button onclick="closeFullscreenEditor()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-rose-600 text-white text-sm font-bold flex items-center justify-center transition">✕</button>
@@ -468,7 +472,7 @@
       </div>
     </div>
 
-    <!-- THANH CÔNG CỤ PHỤ: BỘ CHỌN ẢNH MẪU ĐẤT 2 TẦNG & NAM CHÂM HÚT KHỚP -->
+    <!-- THANH CÔNG CỤ PHỤ: BỘ CHỌN ẢNH MẪU ĐẤT 2 TẦNG (ĐÃ BỎ NÚT NAM CHÂM) -->
     <div class="h-14 bg-slate-900 border-t border-slate-800 px-6 flex items-center justify-between text-xs text-slate-300 shrink-0">
       <div class="flex items-center gap-3">
         <span id="lbl-active-editing-plot" class="font-bold text-amber-300 bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-700">Đang chọn: Khu đất 1</span>
@@ -488,11 +492,6 @@
         <!-- Ô 2: CHỌN FILE ẢNH TRONG THƯ MỤC ĐÓ -->
         <span class="flex items-center gap-1 font-bold text-slate-400">🌾 Ảnh mẫu:</span>
         <select id="select-editor-soil-asset" onchange="previewSoilAssetForActiveSlot(this.value)" class="px-3 py-1.5 rounded-xl bg-slate-800 text-amber-200 border border-slate-700 font-mono text-xs max-w-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"></select>
-
-        <!-- NÚT NAM CHÂM HÚT KHỚP CHÂN HÀNG RÀO VÀO 4 GÓC VÙNG CHỌN -->
-        <button onclick="snapSoilCornersToCurrentSlot()" class="px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold transition shadow flex items-center gap-1.5" title="Hút 4 điểm chân đất vào đúng 4 góc vùng chọn">
-          <i class="fa-solid fa-magnet text-amber-200"></i> Hút Khớp Chân
-        </button>
 
         <button onclick="saveSoilAssetForActiveSlot()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition shadow flex items-center gap-1">
           <i class="fa-solid fa-check"></i> Lưu Tỉ Lệ Ô Này
@@ -528,7 +527,8 @@
             id: 'slot_1', name: 'Khu đất 1', teamId: 1,
             corners: [{ x: 19, y: 31 }, { x: 35, y: 31 }, { x: 34, y: 50 }, { x: 18, y: 50 }],
             soilImage: null,
-            soilCorners: null
+            soilCorners: null,
+            isLocked: false // KHÓA VÙNG CHỌN
           }
         ],
         textOverlays: [],
@@ -561,7 +561,8 @@
       currentAudioTab: 'bgm',
       previewAudioInstance: null,
       selectedLockImagesForBatch: [],
-      activeEditingSlotIndex: 0
+      activeEditingSlotIndex: 0,
+      undoHistory: [] // NGĂN XẾP LỊCH SỬ CTRL + Z
     };
 
     function toggleAccordionSection(secKey) {
@@ -1167,7 +1168,38 @@
     }
     function updateSelectedImageCount() { document.getElementById('lbl-selected-img-count').innerText = `Đã chọn: ${getContextSelectedImages().length}`; }
 
-    // ================= TRÌNH THIẾT KẾ SÂN VƯỜN (CHẤM 4 ĐIỂM NEO PHỐI CẢNH 3D CHUẨN XÁC) =================
+    // ================= QUẢN LÝ LỊCH SỬ THAO TÁC (CTRL + Z) =================
+    function pushHistorySnapshot() {
+      const snapshot = {
+        slots: JSON.parse(JSON.stringify(state.tempEditorSlots)),
+        texts: JSON.parse(JSON.stringify(state.tempTextOverlays)),
+        activeIdx: state.activeEditingSlotIndex
+      };
+      state.undoHistory.push(snapshot);
+      if (state.undoHistory.length > 30) state.undoHistory.shift(); // Giữ tối đa 30 bước
+    }
+
+    function undoEditorState() {
+      if (state.undoHistory.length === 0) return alert('Không còn bước nào để hoàn tác!');
+      const last = state.undoHistory.pop();
+      state.tempEditorSlots = last.slots;
+      state.tempTextOverlays = last.texts;
+      state.activeEditingSlotIndex = last.activeIdx || 0;
+      renderPerspectiveSlotsAndTexts();
+    }
+
+    // LẮNG NGHE PHÍM TẮT CTRL + Z
+    window.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('fullscreen-editor-modal');
+      if (modal && !modal.classList.contains('hidden')) {
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) {
+          e.preventDefault();
+          undoEditorState();
+        }
+      }
+    });
+
+    // ================= TRÌNH THIẾT KẾ SÂN VƯỜN =================
     function detectBackgroundTone(imagePath) {
       const lower = imagePath.toLowerCase();
       if (lower.includes('vuonlop') || lower.includes('go') || lower.includes('nau')) return { textColor: '#451a03', textShadow: '0 1px 2px rgba(254, 243, 199, 0.9)', bgColor: 'rgba(254, 243, 199, 0.75)', borderColor: '#b45309' };
@@ -1176,13 +1208,14 @@
 
     function openFullscreenEditor(imagePath) {
       const cls = state.classesData[state.activeClass];
-      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Nắn 4 góc lưới (Xanh lá) • Kéo 4 góc chân đất (Vàng cam) • Kéo rê thân ảnh mượt mà`;
+      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Nắn 4 góc lưới (Xanh) • Kéo 4 góc chân đất (Cam) • Khóa vùng chọn & Ctrl+Z`;
       document.getElementById('editor-canvas-bg').src = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${imagePath}`;
       state.currentBgToneStyle = detectBackgroundTone(imagePath);
 
-      state.tempEditorSlots = JSON.parse(JSON.stringify(cls.config.plotSlots || [{ id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }] }]));
+      state.tempEditorSlots = JSON.parse(JSON.stringify(cls.config.plotSlots || [{ id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }], isLocked: false }]));
       reIndexPlotSlots();
       state.tempTextOverlays = JSON.parse(JSON.stringify(cls.config.textOverlays || []));
+      state.undoHistory = []; // Reset lịch sử khi mở mới
       
       const currentFolder = document.getElementById('select-editor-folder-source').value || 'nengame';
       populateFilesForSelectedFolder(currentFolder);
@@ -1233,6 +1266,7 @@
     }
 
     function previewSoilAssetForActiveSlot(url) {
+      pushHistorySnapshot();
       const slotIdx = state.activeEditingSlotIndex;
       const slot = state.tempEditorSlots[slotIdx];
       if (!slot) return;
@@ -1247,20 +1281,20 @@
       renderPerspectiveSlotsAndTexts();
     }
 
-    // NAM CHÂM HÚT 4 CHÂN ĐẤT VÀO ĐÚNG 4 GÓC VÙNG CHỌN
-    function snapSoilCornersToCurrentSlot() {
-      const slotIdx = state.activeEditingSlotIndex;
-      const slot = state.tempEditorSlots[slotIdx];
-      if (!slot) return;
-      if (!slot.soilImage) return alert('Vui lòng chọn ảnh mẫu trước khi bấm hút khớp chân đất!');
-
-      slot.soilCorners = JSON.parse(JSON.stringify(slot.corners));
-      renderPerspectiveSlotsAndTexts();
-      alert('Đã hút khớp chính xác 4 chân hàng rào vào 4 góc vùng chọn!');
+    // TÍNH NĂNG KHÓA / MỞ KHÓA VÙNG CHỌN
+    function toggleSlotLockState(slotIndex, event) {
+      if (event) event.stopPropagation();
+      pushHistorySnapshot();
+      const slot = state.tempEditorSlots[slotIndex];
+      if (slot) {
+        slot.isLocked = !slot.isLocked;
+        renderPerspectiveSlotsAndTexts();
+      }
     }
 
     function removeSoilImageFromActiveSlot(slotIndex, event) {
       if (event) event.stopPropagation();
+      pushHistorySnapshot();
       const slot = state.tempEditorSlots[slotIndex];
       if (slot) {
         slot.soilImage = null;
@@ -1300,11 +1334,13 @@
         slot.teamId = orderNum;
         slot.name = `Khu đất ${orderNum}`;
         slot.id = `slot_${orderNum}`;
+        if (slot.isLocked === undefined) slot.isLocked = false;
       });
     }
 
     function copyPlotSlot(sourceIndex, event) {
       if (event) event.stopPropagation();
+      pushHistorySnapshot();
       const sourceSlot = state.tempEditorSlots[sourceIndex];
       if (!sourceSlot) return;
       
@@ -1328,7 +1364,8 @@
         teamId: nextNum, 
         corners: clonedCorners, 
         soilImage: sourceSlot.soilImage || null,
-        soilCorners: clonedSoilCorners
+        soilCorners: clonedSoilCorners,
+        isLocked: false
       });
 
       reIndexPlotSlots();
@@ -1338,9 +1375,10 @@
 
     function removePerspectiveSlot(sIdx, event) {
       if (event) event.stopPropagation();
+      pushHistorySnapshot();
       state.tempEditorSlots.splice(sIdx, 1);
       if (state.tempEditorSlots.length === 0) {
-        state.tempEditorSlots = [{ id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }], soilImage: null, soilCorners: null }];
+        state.tempEditorSlots = [{ id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 30, y: 35 }, { x: 70, y: 35 }, { x: 75, y: 65 }, { x: 25, y: 65 }], soilImage: null, soilCorners: null, isLocked: false }];
       }
       reIndexPlotSlots();
       state.activeEditingSlotIndex = Math.max(0, state.tempEditorSlots.length - 1);
@@ -1348,17 +1386,28 @@
     }
 
     function addNewTextOverlay() {
+      pushHistorySnapshot();
       state.tempTextOverlays.push({ id: 'txt_' + Date.now().toString(36), content: `Vườn Lớp ${state.activeClass}`, x: 50, y: 18, fontSize: 16 });
       renderPerspectiveSlotsAndTexts();
     }
 
-    function removeTextOverlay(tIdx, event) { event.stopPropagation(); state.tempTextOverlays.splice(tIdx, 1); renderPerspectiveSlotsAndTexts(); }
+    function removeTextOverlay(tIdx, event) { 
+      event.stopPropagation(); 
+      pushHistorySnapshot();
+      state.tempTextOverlays.splice(tIdx, 1); 
+      renderPerspectiveSlotsAndTexts(); 
+    }
+    
     function editTextContent(tIdx) {
       const updated = prompt('Nội dung chữ:', state.tempTextOverlays[tIdx].content);
-      if (updated !== null && updated.trim()) { state.tempTextOverlays[tIdx].content = updated.trim(); renderPerspectiveSlotsAndTexts(); }
+      if (updated !== null && updated.trim()) { 
+        pushHistorySnapshot();
+        state.tempTextOverlays[tIdx].content = updated.trim(); 
+        renderPerspectiveSlotsAndTexts(); 
+      }
     }
 
-    // ================= RENDER TOÀN BỘ GIAO DIỆN SÂN VƯỜN (SVG CẢNH QUAN & CHÂN ĐẤT) =================
+    // ================= RENDER TOÀN BỘ GIAO DIỆN SÂN VƯỜN =================
     function renderPerspectiveSlotsAndTexts() {
       const container = document.getElementById('editor-slots-layer');
       const canvas = document.getElementById('editor-canvas-box');
@@ -1385,15 +1434,17 @@
           <!-- VÙNG CHỌN ĐA GIÁC (XANH LÁ) -->
           ${state.tempEditorSlots.map((slot, sIdx) => {
             const isSelected = state.activeEditingSlotIndex === sIdx;
+            const isLocked = !!slot.isLocked;
             return `
               <g id="svg-group-${sIdx}">
                 <polygon points="${slot.corners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ')}" 
                          id="polygon-body-${sIdx}" 
-                         class="plot-polygon-shape" 
+                         class="${isLocked ? '' : 'plot-polygon-shape'}" 
                          fill="${isSelected ? 'rgba(245, 158, 11, 0.35)' : 'rgba(16, 185, 129, 0.25)'}" 
-                         stroke="${isSelected ? '#f59e0b' : '#059669'}" 
+                         stroke="${isLocked ? '#64748b' : (isSelected ? '#f59e0b' : '#059669')}" 
                          stroke-width="${isSelected ? '3' : '2'}" 
-                         stroke-dasharray="8,6" />
+                         stroke-dasharray="${isLocked ? 'none' : '8,6'}" 
+                         style="${isLocked ? 'pointer-events: none;' : ''}" />
               </g>
             `;
           }).join('')}
@@ -1420,7 +1471,7 @@
                        opacity="${isSelected ? '0.98' : '0.88'}" 
                        pointer-events="none" />
                 
-                <!-- MẶT TRONG SUỐT BẮT SỰ KIỆN RÊ TOÀN BỘ ẢNH ĐẤT -->
+                <!-- MẶT BẮT SỰ KIỆN RÊ TOÀN BỘ ẢNH ĐẤT -->
                 <polygon points="${sc.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ')}" 
                          id="soil-drag-poly-${sIdx}"
                          class="soil-drag-surface"
@@ -1450,34 +1501,45 @@
           `;
         }).join('')}
 
-        <!-- 3. BẢNG TÊN & NÚT COPY/XÓA CỦA VÙNG CHỌN -->
+        <!-- 3. BẢNG TÊN & NÚT COPY / KHÓA / XÓA CỦA VÙNG CHỌN -->
         ${state.tempEditorSlots.map((slot, sIdx) => {
           const centerX = (slot.corners[0].x + slot.corners[1].x + slot.corners[2].x + slot.corners[3].x) / 4;
           const centerY = (slot.corners[0].y + slot.corners[1].y + slot.corners[2].y + slot.corners[3].y) / 4;
           const isSelected = state.activeEditingSlotIndex === sIdx;
+          const isLocked = !!slot.isLocked;
 
           return `
             <div class="absolute inset-0 pointer-events-none">
+              <!-- BẢNG TÊN Ô ĐẤT -->
               <div id="drag-badge-${sIdx}" style="left: ${centerX}%; top: ${centerY}%; transform: translate(-50%, -50%);" 
-                   class="absolute px-3 py-1 ${isSelected ? 'bg-amber-600 text-white ring-2 ring-white' : 'bg-amber-950/90 text-amber-200'} border border-amber-600/60 rounded-full font-black text-xs shadow-lg pointer-events-auto cursor-grab active:cursor-grabbing z-75">
-                🌾 ${slot.name}
+                   class="absolute px-3 py-1 ${isSelected ? 'bg-amber-600 text-white ring-2 ring-white' : 'bg-amber-950/90 text-amber-200'} border border-amber-600/60 rounded-full font-black text-xs shadow-lg pointer-events-auto ${isLocked ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'} z-75">
+                🌾 ${slot.name} ${isLocked ? '🔒' : ''}
               </div>
 
+              <!-- CỤM NÚT ĐIỀU KHIỂN: COPY, KHÓA VÙNG CHỌN, XÓA -->
               <div style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%; transform: translate(-110%, -125%);" class="absolute flex items-center gap-1.5 pointer-events-auto z-85">
                 <button onclick="copyPlotSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-emerald-600 text-white text-[11px] font-bold flex items-center justify-center shadow-lg hover:scale-110 transition" title="Copy ô đất này"><i class="fa-solid fa-copy"></i></button>
+                
+                <!-- NÚT Ổ KHÓA VÙNG CHỌN -->
+                <button onclick="toggleSlotLockState(${sIdx}, event)" class="w-6 h-6 rounded-full ${isLocked ? 'bg-amber-500 text-white' : 'bg-slate-700 text-slate-200'} text-xs font-bold flex items-center justify-center shadow-lg hover:scale-110 transition" title="${isLocked ? 'Mở khóa vùng chọn' : 'Khóa vùng chọn (để không chạm nhầm)'}">
+                  <i class="fa-solid ${isLocked ? 'fa-lock' : 'fa-lock-open'} text-[10px]"></i>
+                </button>
+
                 <button onclick="removePerspectiveSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-rose-600 text-white text-xs font-bold flex items-center justify-center shadow-lg hover:scale-110 transition" title="Xóa ô đất">✕</button>
               </div>
 
-              <!-- 4 GÓC XANH LÁ (VÙNG CHỌN) -->
-              <div id="handle-${sIdx}-0" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%;"></div>
-              <div id="handle-${sIdx}-1" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[1].x}%; top: ${slot.corners[1].y}%;"></div>
-              <div id="handle-${sIdx}-2" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[2].x}%; top: ${slot.corners[2].y}%;"></div>
-              <div id="handle-${sIdx}-3" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[3].x}%; top: ${slot.corners[3].y}%;"></div>
+              <!-- 4 GÓC XANH LÁ (CHỈ HIỂN THỊ KHI CHƯA KHÓA) -->
+              ${!isLocked ? `
+                <div id="handle-${sIdx}-0" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%;"></div>
+                <div id="handle-${sIdx}-1" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[1].x}%; top: ${slot.corners[1].y}%;"></div>
+                <div id="handle-${sIdx}-2" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[2].x}%; top: ${slot.corners[2].y}%;"></div>
+                <div id="handle-${sIdx}-3" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[3].x}%; top: ${slot.corners[3].y}%;"></div>
+              ` : ''}
             </div>
           `;
         }).join('')}
 
-        <!-- 4. 4 ĐIỂM NEO VÀNG CAM CỦA ẢNH ĐẤT (ĐẶT Ở LỚP CAO NHẤT ĐỂ LUÔN BẮT ĐƯỢC CHUỘT) -->
+        <!-- 4. 4 ĐIỂM NEO VÀNG CAM CỦA ẢNH ĐẤT (LUÔN BẮT ĐƯỢC CHUỘT Ở TẦNG CAO NHẤT) -->
         ${state.tempEditorSlots.map((slot, sIdx) => {
           if (!slot.soilImage) return '';
           initDefaultSoilCornersForSlot(slot);
@@ -1505,23 +1567,26 @@
         `).join('')}
       `;
 
-      // GẮN SỰ KIỆN KÉO RÊ CHUẨN XÁC
+      // GẮN SỰ KIỆN KÉO RÊ
       state.tempEditorSlots.forEach((slot, sIdx) => {
         const polyEl = document.getElementById(`polygon-body-${sIdx}`);
         const badgeEl = document.getElementById(`drag-badge-${sIdx}`);
         const soilDragPoly = document.getElementById(`soil-drag-poly-${sIdx}`);
 
-        if (polyEl) makePlotElementDraggable(polyEl, sIdx);
-        if (badgeEl) makePlotElementDraggable(badgeEl, sIdx);
-        if (soilDragPoly) makeSoilQuadDraggable(soilDragPoly, sIdx);
+        // Chỉ cho kéo vùng chọn khi chưa khóa
+        if (!slot.isLocked) {
+          if (polyEl) makePlotElementDraggable(polyEl, sIdx);
+          if (badgeEl) makePlotElementDraggable(badgeEl, sIdx);
 
-        // 4 GÓC XANH LÁ
-        for (let cIdx = 0; cIdx < 4; cIdx++) {
-          const handle = document.getElementById(`handle-${sIdx}-${cIdx}`);
-          if (handle) makeCornerHandleDraggable(handle, sIdx, cIdx);
+          for (let cIdx = 0; cIdx < 4; cIdx++) {
+            const handle = document.getElementById(`handle-${sIdx}-${cIdx}`);
+            if (handle) makeCornerHandleDraggable(handle, sIdx, cIdx);
+          }
         }
 
-        // 4 GÓC VÀNG CAM (ĐIỀU CHỈNH CHÂN ĐẤT)
+        // Ảnh đất vẫn luôn cho kéo nắn bình thường
+        if (soilDragPoly) makeSoilQuadDraggable(soilDragPoly, sIdx);
+
         if (slot.soilImage && slot.soilCorners) {
           for (let cIdx = 0; cIdx < 4; cIdx++) {
             const soilHandle = document.getElementById(`soil-handle-${sIdx}-${cIdx}`);
@@ -1549,11 +1614,12 @@
       renderPerspectiveSlotsAndTexts();
     }
 
-    // ================= KÉO 4 ĐIỂM NEO VÀNG CAM CỦA ẢNH ĐẤT (MƯỢT MÀ, BẮT CHUỘT 100%) =================
+    // ================= KÉO 4 ĐIỂM NEO VÀNG CAM CỦA ẢNH ĐẤT (CÓ LƯU UNDO) =================
     function makeSoilCornerHandleDraggable(handleEl, slotIndex, cornerIndex) {
       let isDragging = false;
 
       const onMouseDown = (e) => {
+        pushHistorySnapshot(); // Lưu lịch sử trước khi kéo
         selectSlotForEditing(slotIndex);
         isDragging = true;
         e.stopPropagation();
@@ -1573,11 +1639,7 @@
         renderPerspectiveSlotsAndTexts();
       };
 
-      const onMouseUp = () => {
-        if (isDragging) {
-          isDragging = false;
-        }
-      };
+      const onMouseUp = () => { if (isDragging) isDragging = false; };
 
       handleEl.addEventListener('mousedown', onMouseDown);
       window.addEventListener('mousemove', onMouseMove);
@@ -1594,6 +1656,7 @@
 
       dragTargetEl.addEventListener('mousedown', (e) => {
         if (e.button !== 0) return;
+        pushHistorySnapshot(); // Lưu lịch sử trước khi rê
         selectSlotForEditing(slotIndex);
         isDragging = true;
         startMouseX = e.clientX; 
@@ -1628,12 +1691,13 @@
       window.addEventListener('mouseup', () => { if (isDragging) isDragging = false; });
     }
 
-    // ================= XỬ LÝ RÊ VÙNG CHỌN ĐA GIÁC (RÊ ĐỒNG BỘ CẢ CHÂN ĐẤT) =================
+    // ================= XỬ LÝ RÊ VÙNG CHỌN ĐA GIÁC =================
     function makePlotElementDraggable(dragTargetEl, slotIndex) {
       let isDragging = false, startMouseX = 0, startMouseY = 0, originalCorners = [], originalSoilCorners = [];
 
       dragTargetEl.addEventListener('mousedown', (e) => {
         if (e.button !== 0) return;
+        pushHistorySnapshot();
         selectSlotForEditing(slotIndex);
         isDragging = true;
         startMouseX = e.clientX; 
@@ -1676,7 +1740,13 @@
 
     function makeCornerHandleDraggable(handleEl, slotIndex, cornerIndex) {
       let isDragging = false;
-      handleEl.addEventListener('mousedown', (e) => { selectSlotForEditing(slotIndex); isDragging = true; e.stopPropagation(); });
+      handleEl.addEventListener('mousedown', (e) => { 
+        pushHistorySnapshot();
+        selectSlotForEditing(slotIndex); 
+        isDragging = true; 
+        e.stopPropagation(); 
+      });
+
       window.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         const rect = document.getElementById('editor-canvas-box').getBoundingClientRect();
@@ -1686,13 +1756,15 @@
         };
         renderPerspectiveSlotsAndTexts();
       });
-      window.addEventListener('mouseup', () => { isDragging = false; });
+
+      window.addEventListener('mouseup', () => { if (isDragging) isDragging = false; });
     }
 
     function makeTextOverlayDraggable(txtEl, tIdx) {
       let isDragging = false, startX = 0, startY = 0, origX = 0, origY = 0;
       txtEl.addEventListener('mousedown', (e) => {
         if (e.target.tagName === 'BUTTON') return;
+        pushHistorySnapshot();
         isDragging = true; startX = e.clientX; startY = e.clientY;
         origX = state.tempTextOverlays[tIdx].x; origY = state.tempTextOverlays[tIdx].y;
         e.stopPropagation();
@@ -1704,7 +1776,7 @@
         state.tempTextOverlays[tIdx].y = parseFloat(Math.max(5, Math.min(95, origY + (e.clientY - startY) / rect.height * 100)).toFixed(2));
         txtEl.style.left = `${state.tempTextOverlays[tIdx].x}%`; txtEl.style.top = `${state.tempTextOverlays[tIdx].y}%`;
       });
-      window.addEventListener('mouseup', () => { isDragging = false; });
+      window.addEventListener('mouseup', () => { if (isDragging) isDragging = false; });
     }
 
     // ================= QUÉT GITHUB & CSV =================
