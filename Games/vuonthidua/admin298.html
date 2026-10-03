@@ -40,7 +40,7 @@
       background: #059669;
     }
 
-    /* 4 ĐIỂM NEO CHÂN ĐẤT 3D (VÀNG CAM) */
+    /* 4 ĐIỂM NEO CHÂN ĐẤT 3D (VÀNG CAM) - ƯU TIÊN CAO NHẤT */
     .soil-quad-handle {
       position: absolute;
       width: 22px;
@@ -48,17 +48,17 @@
       background: #f59e0b;
       border: 3.5px solid #ffffff;
       border-radius: 50%;
-      box-shadow: 0 0 10px rgba(0,0,0,0.85);
+      box-shadow: 0 0 10px rgba(0,0,0,0.9);
       transform: translate(-50%, -50%);
       cursor: crosshair;
-      z-index: 100 !important;
+      z-index: 120 !important;
       touch-action: none;
       user-select: none;
       pointer-events: auto !important;
       transition: transform 0.08s;
     }
     .soil-quad-handle:hover {
-      transform: translate(-50%, -50%) scale(1.4);
+      transform: translate(-50%, -50%) scale(1.45);
       background: #ef4444;
     }
 
@@ -142,7 +142,7 @@
       </div>
 
       <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
-        <span class="text-[11px] text-rose-500 font-medium leading-tight">⚠ Khi xóa, toàn bộ cấu hình và dữ liệu học sinh của lớp đó sẽ bị xóa sạch.</span>
+        <span class="text-[11px] text-rose-500 font-medium leading-tight">⚠️ Khi xóa, toàn bộ cấu hình và dữ liệu học sinh của lớp đó sẽ bị xóa sạch.</span>
         <div class="flex gap-2 shrink-0">
           <button onclick="closeDeleteClassModal()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">Hủy</button>
           <button onclick="confirmBatchDeleteClasses()" class="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-md transition flex items-center gap-1.5">
