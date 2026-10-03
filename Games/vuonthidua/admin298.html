@@ -40,7 +40,7 @@
       background: #059669;
     }
 
-    /* 4 ĐIỂM NEO TỰ DO CỦA ẢNH ĐẤT (VÀNG CAM) - Z-INDEX CAO NHẤT ĐỂ KÉO MƯỢT */
+    /* 4 ĐIỂM NEO CHÂN ĐẤT (VÀNG CAM) DO ADMIN TỰ CHẤM & ĐIỀU CHỈNH */
     .soil-quad-handle {
       position: absolute;
       width: 22px;
@@ -181,7 +181,7 @@
   <!-- BỐ CỤC CHÍNH 2 PHẦN -->
   <div id="admin-app" class="hidden flex-1 flex flex-col md:flex-row h-[calc(100vh-53px)] overflow-hidden">
     
-    <!-- PHẦN A (1/3 BÊN TRÁI): BẢNG ĐIỀU KHIỂN ACCORDION -->
+    <!-- PHẦN A (1/3 BÊN TRÁI): BẢNG ĐIỀU KHIỂN ACCORDION HOÀN CHỈNH -->
     <aside class="w-full md:w-1/3 border-r border-slate-200 bg-white flex flex-col h-full shadow-sm">
       
       <!-- BỘ CHỌN & QUẢN LÝ LỚP HỌC -->
@@ -515,6 +515,39 @@
     const ASSETS_PATH = 'Games/vuonthidua/assets';
     const ALL_FOLDERS = ['hoacap1', 'hoacap2', 'nucap1', 'nucap2', 'congcu', 'nengame', 'nutgame', 'amthanh'];
 
+    // DANH SÁCH FILE DỰ PHÒNG CHUẨN XÁC NẾU GITHUB API CHƯA PHẢN HỒI
+    const FALLBACK_SCANNED_ASSETS = {
+      'hoacap1': [
+        { fileName: 'tulip_cam.png', localPath: 'assets/hoacap1/tulip_cam.png', rawUrl: 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/hoacap1/tulip_cam.png' },
+        { fileName: 'tulip_do.png', localPath: 'assets/hoacap1/tulip_do.png', rawUrl: 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/hoacap1/tulip_do.png' }
+      ],
+      'hoacap2': [],
+      'nucap1': [
+        { fileName: 'tulip_nu_cam.png', localPath: 'assets/nucap1/tulip_nu_cam.png', rawUrl: 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/nucap1/tulip_nu_cam.png' }
+      ],
+      'nucap2': [],
+      'congcu': [
+        { fileName: 'xeng.png', localPath: 'assets/congcu/xeng.png', rawUrl: 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/congcu/xeng.png' }
+      ],
+      'nengame': [
+        { fileName: 'vuonlop.jpg', localPath: 'assets/nengame/vuonlop.jpg', rawUrl: 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/nengame/vuonlop.jpg' },
+        { fileName: 'nenungdung.jpg', localPath: 'assets/nengame/nenungdung.jpg', rawUrl: 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/nengame/nenungdung.jpg' },
+        { fileName: 'khudatrieng_cam.png', localPath: 'assets/nengame/khudatrieng_cam.png', rawUrl: 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/nengame/khudatrieng_cam.png' },
+        { fileName: 'khudatrieng_dohong.png', localPath: 'assets/nengame/khudatrieng_dohong.png', rawUrl: 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/nengame/khudatrieng_dohong.png' },
+        { fileName: 'khudatrieng_tim.png', localPath: 'assets/nengame/khudatrieng_tim.png', rawUrl: 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/nengame/khudatrieng_tim.png' },
+        { fileName: 'khudatrieng_trắng.png', localPath: 'assets/nengame/khudatrieng_trắng.png', rawUrl: 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/nengame/khudatrieng_trắng.png' },
+        { fileName: 'khudatrieng_xanhduong.png', localPath: 'assets/nengame/khudatrieng_xanhduong.png', rawUrl: 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/nengame/khudatrieng_xanhduong.png' },
+        { fileName: 'khudatrieng_xanhla.png', localPath: 'assets/nengame/khudatrieng_xanhla.png', rawUrl: 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/nengame/khudatrieng_xanhla.png' }
+      ],
+      'nutgame': [
+        { fileName: 'nuthoa.png', localPath: 'assets/nutgame/nuthoa.png', rawUrl: 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/nutgame/nuthoa.png' },
+        { fileName: 'nutnu.png', localPath: 'assets/nutgame/nutnu.png', rawUrl: 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/nutgame/nutnu.png' },
+        { fileName: 'nutchunhat.png', localPath: 'assets/nutgame/nutchunhat.png', rawUrl: 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/nutgame/nutchunhat.png' },
+        { fileName: 'nutxeng.png', localPath: 'assets/nutgame/nutxeng.png', rawUrl: 'https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/nutgame/nutxeng.png' }
+      ],
+      'amthanh': []
+    };
+
     const DEFAULT_CLASS_TEMPLATE = (className) => ({
       name: className,
       config: {
@@ -558,7 +591,7 @@
     let state = {
       activeClass: '11TA3',
       classesData: { '11TA3': DEFAULT_CLASS_TEMPLATE('11TA3') },
-      cachedAssets: {},
+      cachedAssets: JSON.parse(JSON.stringify(FALLBACK_SCANNED_ASSETS)),
       currentActiveButtonIcon: '',
       currentSelectedConditionId: '',
       activeViewData: { type: 'none', folders: [], singleImage: null, contextType: 'button', contextKey: '' },
@@ -1239,16 +1272,6 @@
       const select = document.getElementById('select-editor-soil-asset');
       let items = state.cachedAssets[folderName] || [];
 
-      if (items.length === 0 && folderName === 'nengame') {
-        items = [
-          'khudatrieng_cam.png', 'khudatrieng_dohong.png', 'khudatrieng_tim.png',
-          'khudatrieng_trắng.png', 'khudatrieng_xanhduong.png', 'khudatrieng_xanhla.png'
-        ].map(f => ({
-          fileName: f,
-          rawUrl: `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/assets/nengame/${f}`
-        }));
-      }
-
       if (items.length === 0) {
         select.innerHTML = `<option value="">(Không có ảnh trong thư mục)</option>`;
         return;
@@ -1266,6 +1289,7 @@
       }
     }
 
+    // 4 ĐIỂM NEO DO ADMIN TỰ ĐỊNH VỊ CHO KHU ĐẤT MẪU
     function initDefaultSoilCornersForSlot(slot) {
       if (!slot.soilCorners || slot.soilCorners.length !== 4) {
         slot.soilCorners = JSON.parse(JSON.stringify(slot.corners));
@@ -1441,16 +1465,6 @@
       container.innerHTML = `
         <!-- 1. SVG: ĐA GIÁC VÙNG CHỌN & ẢNH ĐẤT NỀN -->
         <svg class="absolute inset-0 w-full h-full pointer-events-auto" style="overflow: visible;" viewBox="0 0 ${cW} ${cH}">
-          <defs>
-            ${state.tempEditorSlots.map((slot, sIdx) => {
-              if (!slot.soilImage) return '';
-              initDefaultSoilCornersForSlot(slot);
-              const sc = slot.soilCorners;
-              const pts = sc.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ');
-              return `<clipPath id="soil-clip-${sIdx}"><polygon points="${pts}" /></clipPath>`;
-            }).join('')}
-          </defs>
-
           <!-- VÙNG CHỌN ĐA GIÁC (XANH LÁ) -->
           ${state.tempEditorSlots.map((slot, sIdx) => {
             const isSelected = state.activeEditingSlotIndex === sIdx;
@@ -1469,7 +1483,7 @@
             `;
           }).join('')}
 
-          <!-- ẢNH ĐẤT VÀ KHUNG NÉT ĐỨT CAM THEO 4 NÚT CAM TỰ DO -->
+          <!-- ẢNH ĐẤT VÀ KHUNG NÉT ĐỨT CAM THEO 4 NÚT CAM TỰ DO (KHÔNG BỊ CẮT XÉN CLIPPATH) -->
           ${state.tempEditorSlots.map((slot, sIdx) => {
             if (!slot.soilImage) return '';
             initDefaultSoilCornersForSlot(slot);
@@ -1482,16 +1496,15 @@
 
             return `
               <g id="soil-visual-group-${sIdx}">
-                <!-- ẢNH ĐẤT TỰ CO GIÃN THEO 4 GÓC TỰ DO -->
+                <!-- ẢNH ĐẤT HIỂN THỊ NGUYÊN BẢN VÀ CO GIÃN TỰ NHIÊN THEO 4 ĐIỂM CHẤM -->
                 <image href="${slot.soilImage}" 
                        x="${minX}" y="${minY}" 
-                       width="${Math.max(10, maxX - minX)}" height="${Math.max(10, maxY - minY)}" 
+                       width="${Math.max(20, maxX - minX)}" height="${Math.max(20, maxY - minY)}" 
                        preserveAspectRatio="none" 
-                       clip-path="url(#soil-clip-${sIdx})" 
                        opacity="${isSelected ? '0.98' : '0.88'}" 
                        pointer-events="none" />
                 
-                <!-- MẶT TRONG SUỐT ĐỂ BẤM GIỮ RÊ TOÀN BỘ ẢNH ĐẤT -->
+                <!-- MẶT BẮT SỰ KIỆN RÊ TOÀN BỘ ẢNH ĐẤT -->
                 <polygon points="${sc.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ')}" 
                          id="soil-drag-poly-${sIdx}"
                          class="soil-drag-surface"
@@ -1593,7 +1606,6 @@
         const badgeEl = document.getElementById(`drag-badge-${sIdx}`);
         const soilDragPoly = document.getElementById(`soil-drag-poly-${sIdx}`);
 
-        // Chỉ cho kéo vùng chọn khi chưa khóa
         if (!slot.isLocked) {
           if (polyEl) makePlotElementDraggable(polyEl, sIdx);
           if (badgeEl) makePlotElementDraggable(badgeEl, sIdx);
@@ -1604,10 +1616,8 @@
           }
         }
 
-        // Ảnh đất vẫn luôn cho kéo rê thân ảnh
         if (soilDragPoly) makeSoilQuadDraggable(soilDragPoly, sIdx);
 
-        // 4 nút cam tự do của ảnh đất
         if (slot.soilImage && slot.soilCorners) {
           for (let cIdx = 0; cIdx < 4; cIdx++) {
             const soilHandle = document.getElementById(`soil-handle-${sIdx}-${cIdx}`);
@@ -1635,7 +1645,7 @@
       renderPerspectiveSlotsAndTexts();
     }
 
-    // ================= KÉO NẮN TỰ DO 4 NÚT CAM TRÊN ẢNH ĐẤT (CÓ UNDO) =================
+    // ================= KÉO NẮN TỰ DO 4 NÚT CAM TRÊN ẢNH ĐẤT =================
     function makeSoilCornerHandleDraggable(handleEl, slotIndex, cornerIndex) {
       let isDragging = false;
 
@@ -1653,7 +1663,6 @@
         const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
         const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
 
-        // Tính toán tọa độ phần trăm tự do không bị giới hạn bởi bất kỳ khung hộp nào
         const newX = parseFloat(((Math.max(0, Math.min(rect.width, clientX - rect.left)) / rect.width) * 100).toFixed(2));
         const newY = parseFloat(((Math.max(0, Math.min(rect.height, clientY - rect.top)) / rect.height) * 100).toFixed(2));
 
@@ -1672,7 +1681,7 @@
       window.addEventListener('touchend', onMouseUp);
     }
 
-    // ================= RÊ TOÀN BỘ ẢNH ĐẤT (KÉO GIỮ VÙNG THÂN ẢNH) =================
+    // ================= RÊ TOÀN BỘ ẢNH ĐẤT =================
     function makeSoilQuadDraggable(dragTargetEl, slotIndex) {
       let isDragging = false, startMouseX = 0, startMouseY = 0, originalSoilCorners = [];
 
@@ -1810,8 +1819,11 @@
           const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${ASSETS_PATH}/${folder}`);
           if (res.ok) {
             const data = await res.json();
-            state.cachedAssets[folder] = data.filter(item => item.type === 'file' && /\.(png|jpe?g|webp|svg|mp3|wav|ogg|m4a)$/i.test(item.name))
+            const validFiles = data.filter(item => item.type === 'file' && /\.(png|jpe?g|webp|svg|mp3|wav|ogg|m4a)$/i.test(item.name))
               .map(item => ({ fileName: item.name, localPath: `assets/${folder}/${item.name}`, rawUrl: `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${item.path}` }));
+            if (validFiles.length > 0) {
+              state.cachedAssets[folder] = validFiles;
+            }
           }
         } catch (e) {}
       }
