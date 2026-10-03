@@ -20,38 +20,42 @@
     ::-webkit-scrollbar-track { background: #f8fafc; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
-    /* NÚT NEO CỦA VÙNG CHỌN ĐA GIÁC (XANH LÁ) */
+    /* 4 ĐIỂM NEO VÙNG CHỌN (XANH LÁ) */
     .perspective-handle {
       position: absolute;
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       background: #10b981;
       border: 3px solid #ffffff;
       border-radius: 50%;
-      box-shadow: 0 0 10px rgba(0,0,0,0.7);
+      box-shadow: 0 0 8px rgba(0,0,0,0.7);
       transform: translate(-50%, -50%);
       cursor: crosshair;
-      z-index: 60;
-      transition: transform 0.1s, background-color 0.1s;
+      z-index: 80;
+      touch-action: none;
+      transition: transform 0.1s;
     }
     .perspective-handle:hover {
       transform: translate(-50%, -50%) scale(1.35);
       background: #059669;
     }
 
-    /* 4 ĐIỂM NEO ĐỊNH VỊ CHÂN HÀNG RÀO PHỐI CẢNH 3D (VÀNG CAM) */
+    /* 4 ĐIỂM NEO CHÂN ĐẤT 3D (CAM) - BẮT BUỘC Z-INDEX CAO NHẤT ĐỂ LUÔN KÉO ĐƯỢC */
     .soil-quad-handle {
       position: absolute;
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       background: #f59e0b;
-      border: 3px solid #ffffff;
+      border: 3.5px solid #ffffff;
       border-radius: 50%;
-      box-shadow: 0 0 10px rgba(0,0,0,0.8);
+      box-shadow: 0 0 10px rgba(0,0,0,0.85);
       transform: translate(-50%, -50%);
       cursor: crosshair;
-      z-index: 70;
-      transition: transform 0.1s;
+      z-index: 100 !important;
+      touch-action: none;
+      user-select: none;
+      pointer-events: auto !important;
+      transition: transform 0.08s;
     }
     .soil-quad-handle:hover {
       transform: translate(-50%, -50%) scale(1.4);
@@ -64,6 +68,14 @@
       user-select: none;
     }
     .plot-polygon-shape:active { cursor: grabbing; }
+
+    .soil-drag-surface {
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      pointer-events: auto;
+    }
+    .soil-drag-surface:active { cursor: grabbing; }
 
     .draggable-text-box {
       position: absolute;
@@ -436,7 +448,7 @@
         <span class="text-xl">📐</span>
         <div>
           <h3 class="font-extrabold text-sm text-white uppercase tracking-wide">Trình Thiết Kế Sân Vườn & Căn Chỉnh Vùng Đất</h3>
-          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Nắn 4 góc lưới (Xanh lá) • Chấm 4 điểm neo chân hàng rào (Vàng cam) • Hút khớp tự động</p>
+          <p class="text-[11px] text-emerald-400 font-semibold" id="lbl-editor-class-title">Nắn 4 góc lưới (Xanh lá) • Kéo 4 góc chân đất (Vàng cam) • Kéo rê thân ảnh mượt mà</p>
         </div>
       </div>
 
@@ -450,6 +462,8 @@
     <div class="flex-1 overflow-hidden p-4 flex items-center justify-center relative">
       <div id="editor-canvas-box" class="relative max-w-full max-h-full aspect-[3/2] w-full rounded-2xl overflow-hidden shadow-2xl border-4 border-slate-800 bg-black flex items-center justify-center">
         <img id="editor-canvas-bg" src="" class="w-full h-full object-fill pointer-events-none select-none">
+        
+        <!-- LỚP CHỨA CÁC ĐỐI TƯỢNG -->
         <div id="editor-slots-layer" class="absolute inset-0 w-full h-full z-10 pointer-events-auto"></div>
       </div>
     </div>
@@ -1153,7 +1167,7 @@
     }
     function updateSelectedImageCount() { document.getElementById('lbl-selected-img-count').innerText = `Đã chọn: ${getContextSelectedImages().length}`; }
 
-    // ================= TRÌNH THIẾT KẾ SÂN VƯỜN & CHẤM 4 ĐIỂM NEO PHỐI CẢNH 3D =================
+    // ================= TRÌNH THIẾT KẾ SÂN VƯỜN (CHẤM 4 ĐIỂM NEO PHỐI CẢNH 3D CHUẨN XÁC) =================
     function detectBackgroundTone(imagePath) {
       const lower = imagePath.toLowerCase();
       if (lower.includes('vuonlop') || lower.includes('go') || lower.includes('nau')) return { textColor: '#451a03', textShadow: '0 1px 2px rgba(254, 243, 199, 0.9)', bgColor: 'rgba(254, 243, 199, 0.75)', borderColor: '#b45309' };
@@ -1162,7 +1176,7 @@
 
     function openFullscreenEditor(imagePath) {
       const cls = state.classesData[state.activeClass];
-      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Nắn 4 góc lưới (Xanh lá) • Chấm 4 điểm neo chân hàng rào (Vàng cam) • Hút khớp tự động`;
+      document.getElementById('lbl-editor-class-title').innerText = `Lớp ${state.activeClass} • Nắn 4 góc lưới (Xanh lá) • Kéo 4 góc chân đất (Vàng cam) • Kéo rê thân ảnh mượt mà`;
       document.getElementById('editor-canvas-bg').src = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/${imagePath}`;
       state.currentBgToneStyle = detectBackgroundTone(imagePath);
 
@@ -1344,34 +1358,7 @@
       if (updated !== null && updated.trim()) { state.tempTextOverlays[tIdx].content = updated.trim(); renderPerspectiveSlotsAndTexts(); }
     }
 
-    // ================= GIẢI HỆ MA TRẬN PHỐI CẢNH 3D (CSS MATRIX3D TRANSFORM) =================
-    function getTransformMatrix3D(w, h, sc, cW, cH) {
-      const p1 = { x: (sc[0].x / 100) * cW, y: (sc[0].y / 100) * cH };
-      const p2 = { x: (sc[1].x / 100) * cW, y: (sc[1].y / 100) * cH };
-      const p3 = { x: (sc[2].x / 100) * cW, y: (sc[2].y / 100) * cH };
-      const p4 = { x: (sc[3].x / 100) * cW, y: (sc[3].y / 100) * cH };
-
-      const dx1 = p2.x - p3.x, dy1 = p2.y - p3.y;
-      const dx2 = p4.x - p3.x, dy2 = p4.y - p3.y;
-      const dx3 = p1.x - p2.x + p3.x - p4.x;
-      const dy3 = p1.y - p2.y + p3.y - p4.y;
-
-      let g = 0, h_term = 0;
-      const det = dx1 * dy2 - dx2 * dy1;
-      if (det !== 0) {
-        g = (dx3 * dy2 - dx2 * dy3) / det;
-        h_term = (dx1 * dy3 - dx3 * dy1) / det;
-      }
-
-      const a = (p2.x - p1.x + g * p2.x) / w;
-      const b = (p2.y - p1.y + g * p2.y) / w;
-      const c = (p4.x - p1.x + h_term * p4.x) / h;
-      const d = (p4.y - p1.y + h_term * p4.y) / h;
-
-      return `matrix3d(${a.toFixed(6)}, ${b.toFixed(6)}, 0, ${(g / w).toFixed(8)}, ${c.toFixed(6)}, ${d.toFixed(6)}, 0, ${(h_term / h).toFixed(8)}, 0, 0, 1, 0, ${p1.x.toFixed(2)}, ${p1.y.toFixed(2)}, 0, 1)`;
-    }
-
-    // ================= RENDER TOÀN BỘ GIAO DIỆN SÂN VƯỜN (SVG + 3D HOMOGRAPHY) =================
+    // ================= RENDER TOÀN BỘ GIAO DIỆN SÂN VƯỜN (SVG CẢNH QUAN & CHÂN ĐẤT) =================
     function renderPerspectiveSlotsAndTexts() {
       const container = document.getElementById('editor-slots-layer');
       const canvas = document.getElementById('editor-canvas-box');
@@ -1383,8 +1370,19 @@
       const tone = state.currentBgToneStyle || detectBackgroundTone('');
 
       container.innerHTML = `
-        <!-- LỚP SVG: VÙNG CHỌN ĐA GIÁC (XANH LÁ) -->
+        <!-- 1. SVG: ĐA GIÁC VÙNG CHỌN & ẢNH ĐẤT NỀN -->
         <svg class="absolute inset-0 w-full h-full pointer-events-auto" style="overflow: visible;" viewBox="0 0 ${cW} ${cH}">
+          <defs>
+            ${state.tempEditorSlots.map((slot, sIdx) => {
+              if (!slot.soilImage) return '';
+              initDefaultSoilCornersForSlot(slot);
+              const sc = slot.soilCorners;
+              const pts = sc.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ');
+              return `<clipPath id="soil-clip-${sIdx}"><polygon points="${pts}" /></clipPath>`;
+            }).join('')}
+          </defs>
+
+          <!-- VÙNG CHỌN ĐA GIÁC (XANH LÁ) -->
           ${state.tempEditorSlots.map((slot, sIdx) => {
             const isSelected = state.activeEditingSlotIndex === sIdx;
             return `
@@ -1396,34 +1394,46 @@
                          stroke="${isSelected ? '#f59e0b' : '#059669'}" 
                          stroke-width="${isSelected ? '3' : '2'}" 
                          stroke-dasharray="8,6" />
+              </g>
+            `;
+          }).join('')}
+
+          <!-- ẢNH ĐẤT VÀ KHUNG NÉT ĐỨT CAM PHỐI CẢNH 3D -->
+          ${state.tempEditorSlots.map((slot, sIdx) => {
+            if (!slot.soilImage) return '';
+            initDefaultSoilCornersForSlot(slot);
+            const sc = slot.soilCorners;
+            const xs = sc.map(c => (c.x / 100) * cW);
+            const ys = sc.map(c => (c.y / 100) * cH);
+            const minX = Math.min(...xs), maxX = Math.max(...xs);
+            const minY = Math.min(...ys), maxY = Math.max(...ys);
+            const isSelected = state.activeEditingSlotIndex === sIdx;
+
+            return `
+              <g id="soil-visual-group-${sIdx}">
+                <!-- ẢNH ĐẤT CẮT KHỚP THEO ĐA GIÁC 4 GÓC -->
+                <image href="${slot.soilImage}" 
+                       x="${minX}" y="${minY}" 
+                       width="${maxX - minX}" height="${maxY - minY}" 
+                       preserveAspectRatio="none" 
+                       clip-path="url(#soil-clip-${sIdx})" 
+                       opacity="${isSelected ? '0.98' : '0.88'}" 
+                       pointer-events="none" />
                 
-                ${(slot.soilImage && slot.soilCorners) ? `
-                  <!-- KHUNG NÉT ĐỨT CAM NỐI 4 CHÂN ĐẤT -->
-                  <polygon points="${slot.soilCorners.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ')}" 
-                           fill="none" stroke="#f59e0b" stroke-width="${isSelected ? '2.5' : '1.5'}" stroke-dasharray="5,4" pointer-events="none" />
-                ` : ''}
+                <!-- MẶT TRONG SUỐT BẮT SỰ KIỆN RÊ TOÀN BỘ ẢNH ĐẤT -->
+                <polygon points="${sc.map(c => `${(c.x / 100) * cW},${(c.y / 100) * cH}`).join(' ')}" 
+                         id="soil-drag-poly-${sIdx}"
+                         class="soil-drag-surface"
+                         fill="transparent" 
+                         stroke="#f59e0b" 
+                         stroke-width="${isSelected ? '2.5' : '1.5'}" 
+                         stroke-dasharray="6,4" />
               </g>
             `;
           }).join('')}
         </svg>
 
-        <!-- LỚP DOM: ẢNH ĐẤT ĐƯỢC BIẾN DẠNG PHỐI CẢNH 3D BẰNG MATRIX3D -->
-        ${state.tempEditorSlots.map((slot, sIdx) => {
-          if (!slot.soilImage) return '';
-          initDefaultSoilCornersForSlot(slot);
-          const isSelected = state.activeEditingSlotIndex === sIdx;
-          const trMatrix = getTransformMatrix3D(200, 160, slot.soilCorners, cW, cH);
-
-          return `
-            <div id="soil-matrix3d-box-${sIdx}"
-                 style="position: absolute; left: 0px; top: 0px; width: 200px; height: 160px; transform-origin: 0 0; transform: ${trMatrix}; opacity: ${isSelected ? '0.98' : '0.85'}; z-index: 52;"
-                 class="pointer-events-none select-none">
-              <img src="${slot.soilImage}" class="w-full h-full object-fill pointer-events-none filter drop-shadow">
-            </div>
-          `;
-        }).join('')}
-
-        <!-- NÚT XÓA ẢNH ĐI KÈM TRÊN ẢNH MẪU -->
+        <!-- 2. NÚT XÓA ẢNH MẪU ĐI KÈM TRÊN Ô ĐẤT -->
         ${state.tempEditorSlots.map((slot, sIdx) => {
           if (!slot.soilImage) return '';
           initDefaultSoilCornersForSlot(slot);
@@ -1432,7 +1442,7 @@
           if (!isSelected) return '';
 
           return `
-            <div style="left: ${tr.x}%; top: ${tr.y}%; transform: translate(50%, -120%);" class="absolute pointer-events-auto z-70">
+            <div style="left: ${tr.x}%; top: ${tr.y}%; transform: translate(50%, -120%);" class="absolute pointer-events-auto z-90">
               <button onclick="removeSoilImageFromActiveSlot(${sIdx}, event)" 
                       class="w-6 h-6 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-black text-xs flex items-center justify-center shadow-lg hover:scale-110 transition" 
                       title="Xóa ảnh mẫu khỏi ô này">✕</button>
@@ -1440,24 +1450,7 @@
           `;
         }).join('')}
 
-        <!-- 4 ĐIỂM NEO VÀNG CAM ĐỊNH VỊ CHÂN HÀNG RÀO PHỐI CẢNH 3D -->
-        ${state.tempEditorSlots.map((slot, sIdx) => {
-          if (!slot.soilImage) return '';
-          initDefaultSoilCornersForSlot(slot);
-          const isSelected = state.activeEditingSlotIndex === sIdx;
-          if (!isSelected) return '';
-
-          return `
-            <div class="absolute inset-0 pointer-events-none">
-              <div id="soil-handle-${sIdx}-0" class="soil-quad-handle pointer-events-auto" style="left: ${slot.soilCorners[0].x}%; top: ${slot.soilCorners[0].y}%;" title="Chân hàng rào: Trên-Trái"></div>
-              <div id="soil-handle-${sIdx}-1" class="soil-quad-handle pointer-events-auto" style="left: ${slot.soilCorners[1].x}%; top: ${slot.soilCorners[1].y}%;" title="Chân hàng rào: Trên-Phải"></div>
-              <div id="soil-handle-${sIdx}-2" class="soil-quad-handle pointer-events-auto" style="left: ${slot.soilCorners[2].x}%; top: ${slot.soilCorners[2].y}%;" title="Chân hàng rào: Dưới-Phải"></div>
-              <div id="soil-handle-${sIdx}-3" class="soil-quad-handle pointer-events-auto" style="left: ${slot.soilCorners[3].x}%; top: ${slot.soilCorners[3].y}%;" title="Chân hàng rào: Dưới-Trái"></div>
-            </div>
-          `;
-        }).join('')}
-
-        <!-- NHÃN TÊN, NÚT COPY/XÓA VÀ 4 ĐIỂM NEO GÓC VÙNG CHỌN (XANH LÁ) -->
+        <!-- 3. BẢNG TÊN & NÚT COPY/XÓA CỦA VÙNG CHỌN -->
         ${state.tempEditorSlots.map((slot, sIdx) => {
           const centerX = (slot.corners[0].x + slot.corners[1].x + slot.corners[2].x + slot.corners[3].x) / 4;
           const centerY = (slot.corners[0].y + slot.corners[1].y + slot.corners[2].y + slot.corners[3].y) / 4;
@@ -1466,15 +1459,16 @@
           return `
             <div class="absolute inset-0 pointer-events-none">
               <div id="drag-badge-${sIdx}" style="left: ${centerX}%; top: ${centerY}%; transform: translate(-50%, -50%);" 
-                   class="absolute px-3 py-1 ${isSelected ? 'bg-amber-600 text-white ring-2 ring-white' : 'bg-amber-950/90 text-amber-200'} border border-amber-600/60 rounded-full font-black text-xs shadow-lg pointer-events-auto cursor-grab active:cursor-grabbing">
+                   class="absolute px-3 py-1 ${isSelected ? 'bg-amber-600 text-white ring-2 ring-white' : 'bg-amber-950/90 text-amber-200'} border border-amber-600/60 rounded-full font-black text-xs shadow-lg pointer-events-auto cursor-grab active:cursor-grabbing z-75">
                 🌾 ${slot.name}
               </div>
 
-              <div style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%; transform: translate(-110%, -125%);" class="absolute flex items-center gap-1.5 pointer-events-auto z-50">
+              <div style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%; transform: translate(-110%, -125%);" class="absolute flex items-center gap-1.5 pointer-events-auto z-85">
                 <button onclick="copyPlotSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-emerald-600 text-white text-[11px] font-bold flex items-center justify-center shadow-lg hover:scale-110 transition" title="Copy ô đất này"><i class="fa-solid fa-copy"></i></button>
                 <button onclick="removePerspectiveSlot(${sIdx}, event)" class="w-6 h-6 rounded-full bg-rose-600 text-white text-xs font-bold flex items-center justify-center shadow-lg hover:scale-110 transition" title="Xóa ô đất">✕</button>
               </div>
 
+              <!-- 4 GÓC XANH LÁ (VÙNG CHỌN) -->
               <div id="handle-${sIdx}-0" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[0].x}%; top: ${slot.corners[0].y}%;"></div>
               <div id="handle-${sIdx}-1" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[1].x}%; top: ${slot.corners[1].y}%;"></div>
               <div id="handle-${sIdx}-2" class="perspective-handle pointer-events-auto" style="left: ${slot.corners[2].x}%; top: ${slot.corners[2].y}%;"></div>
@@ -1483,10 +1477,27 @@
           `;
         }).join('')}
 
+        <!-- 4. 4 ĐIỂM NEO VÀNG CAM CỦA ẢNH ĐẤT (ĐẶT Ở LỚP CAO NHẤT ĐỂ LUÔN BẮT ĐƯỢC CHUỘT) -->
+        ${state.tempEditorSlots.map((slot, sIdx) => {
+          if (!slot.soilImage) return '';
+          initDefaultSoilCornersForSlot(slot);
+          const isSelected = state.activeEditingSlotIndex === sIdx;
+          if (!isSelected) return '';
+
+          return `
+            <div id="soil-handles-container-${sIdx}" class="absolute inset-0 pointer-events-none z-100">
+              <div id="soil-handle-${sIdx}-0" class="soil-quad-handle pointer-events-auto" style="left: ${slot.soilCorners[0].x}%; top: ${slot.soilCorners[0].y}%;" title="Kéo chân hàng rào Trên-Trái"></div>
+              <div id="soil-handle-${sIdx}-1" class="soil-quad-handle pointer-events-auto" style="left: ${slot.soilCorners[1].x}%; top: ${slot.soilCorners[1].y}%;" title="Kéo chân hàng rào Trên-Phải"></div>
+              <div id="soil-handle-${sIdx}-2" class="soil-quad-handle pointer-events-auto" style="left: ${slot.soilCorners[2].x}%; top: ${slot.soilCorners[2].y}%;" title="Kéo chân hàng rào Dưới-Phải"></div>
+              <div id="soil-handle-${sIdx}-3" class="soil-quad-handle pointer-events-auto" style="left: ${slot.soilCorners[3].x}%; top: ${slot.soilCorners[3].y}%;" title="Kéo chân hàng rào Dưới-Trái"></div>
+            </div>
+          `;
+        }).join('')}
+
         <!-- CHỮ TRÊN BẢNG GỖ -->
         ${state.tempTextOverlays.map((txt, tIdx) => `
-          <div id="text-overlay-${tIdx}" style="left: ${txt.x}\%; top:${txt.y}%;" class="draggable-text-box group pointer-events-auto">
-            <div ondblclick="editTextContent(${tIdx})" style="color: ${tone.textColor}; text-shadow: ${tone.textShadow}; background:${tone.bgColor}; border: 1.5px dashed ${tone.borderColor}; font-size:${txt.fontSize}px;" class="px-3.5 py-1.5 rounded-xl font-extrabold flex items-center gap-2 shadow-md">
+          <div id="text-overlay-${tIdx}" style="left: ${txt.x}%; top: ${txt.y}%;" class="draggable-text-box group pointer-events-auto">
+            <div ondblclick="editTextContent(${tIdx})" style="color: ${tone.textColor}; text-shadow: ${tone.textShadow}; background: ${tone.bgColor}; border: 1.5px dashed ${tone.borderColor}; font-size: ${txt.fontSize}px;" class="px-3.5 py-1.5 rounded-xl font-extrabold flex items-center gap-2 shadow-md">
               <span>${txt.content}</span>
               <button onclick="removeTextOverlay(${tIdx}, event)" class="w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-bold opacity-0 group-hover:opacity-100 flex items-center justify-center">✕</button>
             </div>
@@ -1494,21 +1505,23 @@
         `).join('')}
       `;
 
-      // GẮN SỰ KIỆN KÉO RÊ VÙNG CHỌN & CHẤM 4 ĐIỂM CHÂN ĐẤT PHỐI CẢNH 3D
+      // GẮN SỰ KIỆN KÉO RÊ CHUẨN XÁC
       state.tempEditorSlots.forEach((slot, sIdx) => {
         const polyEl = document.getElementById(`polygon-body-${sIdx}`);
         const badgeEl = document.getElementById(`drag-badge-${sIdx}`);
+        const soilDragPoly = document.getElementById(`soil-drag-poly-${sIdx}`);
 
         if (polyEl) makePlotElementDraggable(polyEl, sIdx);
         if (badgeEl) makePlotElementDraggable(badgeEl, sIdx);
+        if (soilDragPoly) makeSoilQuadDraggable(soilDragPoly, sIdx);
 
-        // 4 ĐIỂM NEO XANH LÁ (VÙNG CHỌN ĐA GIÁC)
+        // 4 GÓC XANH LÁ
         for (let cIdx = 0; cIdx < 4; cIdx++) {
           const handle = document.getElementById(`handle-${sIdx}-${cIdx}`);
           if (handle) makeCornerHandleDraggable(handle, sIdx, cIdx);
         }
 
-        // 4 ĐIỂM NEO VÀNG CAM (ĐỊNH VỊ CHÂN HÀNG RÀO PHỐI CẢNH 3D)
+        // 4 GÓC VÀNG CAM (ĐIỀU CHỈNH CHÂN ĐẤT)
         if (slot.soilImage && slot.soilCorners) {
           for (let cIdx = 0; cIdx < 4; cIdx++) {
             const soilHandle = document.getElementById(`soil-handle-${sIdx}-${cIdx}`);
@@ -1536,22 +1549,79 @@
       renderPerspectiveSlotsAndTexts();
     }
 
-    // ================= NẮN TỰ DO TỪNG CHÂN HÀNG RÀO PHỐI CẢNH 3D =================
+    // ================= KÉO 4 ĐIỂM NEO VÀNG CAM CỦA ẢNH ĐẤT (MƯỢT MÀ, BẮT CHUỘT 100%) =================
     function makeSoilCornerHandleDraggable(handleEl, slotIndex, cornerIndex) {
       let isDragging = false;
-      handleEl.addEventListener('mousedown', (e) => { 
-        selectSlotForEditing(slotIndex); 
-        isDragging = true; 
-        e.stopPropagation(); 
+
+      const onMouseDown = (e) => {
+        selectSlotForEditing(slotIndex);
+        isDragging = true;
+        e.stopPropagation();
+        e.preventDefault();
+      };
+
+      const onMouseMove = (e) => {
+        if (!isDragging) return;
+        const rect = document.getElementById('editor-canvas-box').getBoundingClientRect();
+        const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+        const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+
+        const newX = parseFloat(((Math.max(0, Math.min(rect.width, clientX - rect.left)) / rect.width) * 100).toFixed(2));
+        const newY = parseFloat(((Math.max(0, Math.min(rect.height, clientY - rect.top)) / rect.height) * 100).toFixed(2));
+
+        state.tempEditorSlots[slotIndex].soilCorners[cornerIndex] = { x: newX, y: newY };
+        renderPerspectiveSlotsAndTexts();
+      };
+
+      const onMouseUp = () => {
+        if (isDragging) {
+          isDragging = false;
+        }
+      };
+
+      handleEl.addEventListener('mousedown', onMouseDown);
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+
+      handleEl.addEventListener('touchstart', onMouseDown, { passive: false });
+      window.addEventListener('touchmove', onMouseMove, { passive: false });
+      window.addEventListener('touchend', onMouseUp);
+    }
+
+    // ================= RÊ TOÀN BỘ ẢNH ĐẤT (KÉO GIỮ VÙNG THÂN ẢNH) =================
+    function makeSoilQuadDraggable(dragTargetEl, slotIndex) {
+      let isDragging = false, startMouseX = 0, startMouseY = 0, originalSoilCorners = [];
+
+      dragTargetEl.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        selectSlotForEditing(slotIndex);
+        isDragging = true;
+        startMouseX = e.clientX; 
+        startMouseY = e.clientY;
+        initDefaultSoilCornersForSlot(state.tempEditorSlots[slotIndex]);
+        originalSoilCorners = JSON.parse(JSON.stringify(state.tempEditorSlots[slotIndex].soilCorners));
+        e.stopPropagation();
       });
 
       window.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         const rect = document.getElementById('editor-canvas-box').getBoundingClientRect();
-        state.tempEditorSlots[slotIndex].soilCorners[cornerIndex] = {
-          x: parseFloat((Math.max(0, Math.min(rect.width, e.clientX - rect.left)) / rect.width * 100).toFixed(2)),
-          y: parseFloat((Math.max(0, Math.min(rect.height, e.clientY - rect.top)) / rect.height * 100).toFixed(2))
-        };
+        const deltaX = ((e.clientX - startMouseX) / rect.width) * 100;
+        const deltaY = ((e.clientY - startMouseY) / rect.height) * 100;
+
+        let minX = Math.min(...originalSoilCorners.map(c => c.x)), maxX = Math.max(...originalSoilCorners.map(c => c.x));
+        let minY = Math.min(...originalSoilCorners.map(c => c.y)), maxY = Math.max(...originalSoilCorners.map(c => c.y));
+        let clampedX = deltaX, clampedY = deltaY;
+
+        if (minX + clampedX < 1) clampedX = 1 - minX;
+        if (maxX + clampedX > 99) clampedX = 99 - maxX;
+        if (minY + clampedY < 1) clampedY = 1 - minY;
+        if (maxY + clampedY > 99) clampedY = 99 - maxY;
+
+        for (let i = 0; i < 4; i++) {
+          state.tempEditorSlots[slotIndex].soilCorners[i].x = parseFloat((originalSoilCorners[i].x + clampedX).toFixed(2));
+          state.tempEditorSlots[slotIndex].soilCorners[i].y = parseFloat((originalSoilCorners[i].y + clampedY).toFixed(2));
+        }
         renderPerspectiveSlotsAndTexts();
       });
 
