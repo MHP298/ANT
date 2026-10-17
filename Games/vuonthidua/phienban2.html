@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Vườn Thi Đua Trồng Hoa - Sân Chơi Lớp Học</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -99,6 +102,20 @@
     </div>
   </div>
 
+  <!-- POPUP THÔNG BÁO MỚI NHẤT TỪ GIÁO VIÊN -->
+  <div id="announcement-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border border-slate-200 text-center space-y-4">
+      <div class="w-14 h-14 bg-indigo-100 text-indigo-700 rounded-2xl flex items-center justify-center mx-auto text-2xl shadow-inner">📢</div>
+      <h2 class="text-base font-black text-slate-800 uppercase">Thông Báo Mới Từ Giáo Viên</h2>
+      <div id="announcement-content" class="p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-700 font-medium text-left max-h-40 overflow-y-auto">
+        Chưa có thông báo mới.
+      </div>
+      <button onclick="closeAnnouncementModal()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase rounded-xl shadow transition">
+        Đã Hiểu & Vào Vườn
+      </button>
+    </div>
+  </div>
+
   <!-- POPUP ĐIỂM DANH TỪ KHÓA -->
   <div id="keyword-check-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 border border-slate-200 text-center">
@@ -154,8 +171,16 @@
           </button>
         </div>
 
+        <div class="p-3 bg-indigo-50 rounded-2xl border border-indigo-200 space-y-2">
+          <b class="text-indigo-900 uppercase block">3. Đăng Thông Báo / Cập Nhật Mới Cho Lớp</b>
+          <textarea id="t-announcement-text" rows="3" placeholder="Nhập thông báo hoặc thay đổi mới nhất..." class="w-full px-2.5 py-1.5 rounded-lg border bg-white text-xs"></textarea>
+          <button onclick="publishClassAnnouncement()" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition">
+            Phát Sóng Thông Báo Đến Học Sinh
+          </button>
+        </div>
+
         <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-          <b class="text-slate-800 uppercase block">3. Phân Quyền Chức Vụ Học Sinh</b>
+          <b class="text-slate-800 uppercase block">4. Phân Quyền Chức Vụ Học Sinh</b>
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="block text-[10px] font-bold text-slate-600 mb-1">Chức vụ:</label>
@@ -181,9 +206,8 @@
           </button>
         </div>
 
-        <!-- 4. CÁN BỘ LỚP CẬP NHẬT TỪ KHÓA TRONG NGÀY -->
         <div id="teacher-keyword-box" class="p-3 bg-emerald-50 rounded-2xl border border-emerald-200 space-y-2 hidden">
-          <b class="text-emerald-900 uppercase block">4. Cập Nhật Từ Khóa Điểm Danh (Cán bộ lớp / GV)</b>
+          <b class="text-emerald-900 uppercase block">5. Cập Nhật Từ Khóa Điểm Danh</b>
           <input type="text" id="t-daily-keyword" class="w-full px-2.5 py-1.5 rounded-lg border bg-white font-bold uppercase">
           <button onclick="saveDailyKeywordByTeacher()" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition">
             Lưu Từ Khóa Mới
@@ -222,7 +246,8 @@
       <button onclick="requestFullScreenLandscape()" class="text-slate-500 hover:text-emerald-700 text-xs p-1" title="Toàn màn hình">
         <i class="fa-solid fa-expand"></i>
       </button>
-      <button onclick="handleStudentLogout()" class="text-slate-400 hover:text-rose-600 text-xs p-1" title="Đổi tài khoản">
+      <!-- NÚT THOÁT / ĐỔI TÀI KHOẢN ĐÃ ĐƯỢC CHỈNH SỬA HOẠT ĐỘNG CHUẨN XÁC -->
+      <button onclick="handleStudentLogout()" class="text-slate-400 hover:text-rose-600 text-xs p-1 cursor-pointer" title="Đổi tài khoản / Thoát">
         <i class="fa-solid fa-arrow-right-from-bracket"></i>
       </button>
     </div>
@@ -268,7 +293,8 @@
     const GITHUB_REPO = 'ANT';
     const GITHUB_RAW_BASE = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/`;
 
-    const ALL_FOLDERS = ['hoacap1', 'hoacap2', 'nucap1', 'nucap2', 'congcu', 'nengame', 'nutgame', 'amthanh'];
+    // CẬP NHẬT ĐÚNG DANH MỤC THƯ MỤC: NENDAT VÀ CONGCU
+    const ALL_FOLDERS = ['hoacap1', 'hoacap2', 'nucap1', 'nucap2', 'congcu', 'nendat', 'nengame', 'nutgame', 'amthanh'];
     let cachedScannedAssets = {};
 
     let globalClassesData = {};
@@ -282,8 +308,8 @@
         buttonMappings: {
           'nuthoa.png': { label: 'HOA', targetFolders: ['hoacap1'], selectedImages: [], itemLockLevels: {} },
           'nutnu.png': { label: 'NỤ', targetFolders: ['nucap1'], selectedImages: [], itemLockLevels: {} },
-          'nutchunhat.png': { label: 'ĐẤT', targetFolders: ['nengame'], selectedImages: [], itemLockLevels: {} },
-          'nutxeng.png': { label: 'CÔNG CỤ', targetFolders: ['congcu'], selectedImages: [], itemLockLevels: {} }
+          'nutchunhat.png': { label: 'ĐẤT', targetFolders: ['nendat'], selectedImages: [], itemLockLevels: {} }, // Trỏ vào nendat
+          'nutxeng.png': { label: 'CÔNG CỤ', targetFolders: ['congcu'], selectedImages: [], itemLockLevels: {} } // Trỏ vào congcu
         },
         plotSlots: [
           { id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 19, y: 31 }, { x: 35, y: 31 }, { x: 34, y: 50 }, { x: 18, y: 50 }], soilImage: null },
@@ -297,7 +323,8 @@
       students: {},
       weeklyRanking: { 1: 1, 2: 2, 3: 3, 4: 4 },
       dailyKeyword: 'HOCAP',
-      checkedInStudents: []
+      checkedInStudents: [],
+      latestAnnouncement: ''
     };
 
     let currentStudent = null;
@@ -328,7 +355,7 @@
           }
         } catch (e) {}
       }
-      localStorage.setItem('garden_auto_scanned_assets_v5', JSON.stringify(cachedScannedAssets));
+      localStorage.setItem('garden_auto_scanned_assets_v6', JSON.stringify(cachedScannedAssets));
       renderDynamicButtonsFromAdmin();
       switchButtonCategory(currentActiveButtonKey);
     }
@@ -344,7 +371,7 @@
         currentClass = globalClassesData[activeClassName];
       }
 
-      const rawAssets = localStorage.getItem('garden_auto_scanned_assets_v5');
+      const rawAssets = localStorage.getItem('garden_auto_scanned_assets_v6');
       if (rawAssets) {
         try { cachedScannedAssets = JSON.parse(rawAssets); } catch (e) {}
       }
@@ -420,10 +447,37 @@
       sessionStorage.setItem('current_garden_student', JSON.stringify(currentStudent));
       
       applyClassConfiguration();
+      checkAndShowLatestAnnouncement();
 
       if (currentStudent.role === 'MEMBER') {
         document.getElementById('keyword-check-modal').classList.remove('hidden');
       }
+    }
+
+    function checkAndShowLatestAnnouncement() {
+      if (currentClass.latestAnnouncement && currentClass.latestAnnouncement.trim() !== '') {
+        const lastSeen = sessionStorage.getItem('seen_announcement_sig');
+        const currentSig = currentClass.latestAnnouncement;
+        if (lastSeen !== currentSig) {
+          document.getElementById('announcement-content').innerText = currentClass.latestAnnouncement;
+          document.getElementById('announcement-modal').classList.remove('hidden');
+        }
+      }
+    }
+
+    function closeAnnouncementModal() {
+      document.getElementById('announcement-modal').classList.add('hidden');
+      sessionStorage.setItem('seen_announcement_sig', currentClass.latestAnnouncement);
+    }
+
+    function publishClassAnnouncement() {
+      const text = document.getElementById('t-announcement-text').value.trim();
+      if (!text) return alert('Vui lòng nhập nội dung thông báo!');
+
+      currentClass.latestAnnouncement = text;
+      localStorage.setItem('garden_system_classes_v14', JSON.stringify(globalClassesData));
+      alert('Đã phát sóng thông báo mới nhất đến toàn bộ học sinh khi vào web!');
+      closeTeacherModal();
     }
 
     function handleStudentLogout() {
@@ -679,7 +733,7 @@
       let combinedItems = [];
       folderList.forEach(folder => {
         const files = cachedScannedAssets[folder] || [];
-        files.forEach(item => combinedItems.push({ ...item, isSoilItem: currentActiveButtonKey === 'nutchunhat.png' || folder === 'nengame' }));
+        files.forEach(item => combinedItems.push({ ...item, isSoilItem: currentActiveButtonKey === 'nutchunhat.png' || folder === 'nendat' }));
       });
 
       if (combinedItems.length === 0) {
@@ -824,6 +878,7 @@
             document.getElementById('teacher-keyword-box').classList.remove('hidden');
           }
           applyClassConfiguration();
+          checkAndShowLatestAnnouncement();
           return;
         } catch (e) {}
       }
