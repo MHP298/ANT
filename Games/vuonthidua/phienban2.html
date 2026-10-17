@@ -37,7 +37,7 @@
     ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.25); border-radius: 4px; }
     .garden-placed-flower { position: absolute; touch-action: none; user-select: none; cursor: grab; z-index: 30; transform: translate(-50%, -50%); }
     .plot-group-hover { transform-box: fill-box; transform-origin: center; transition: transform 0.22s ease-out; cursor: pointer; }
-    .plot-group-hover:hover { transform: scale(1.015); filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35)); }
+    .plot-group-hover:hover { transform: scale(1.015); filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35)); }
     .admin-node { fill: #10b981; stroke: #ffffff; stroke-width: 3px; cursor: pointer; transition: transform 0.15s; }
     .admin-node:hover { transform: scale(1.3); }
   </style>
@@ -228,7 +228,7 @@
           'nutchunhat.png': { label: 'ĐẤT', targetFolders: ['nendat'] },
           'nutxeng.png': { label: 'CÔNG CỤ', targetFolders: ['congcu'] }
         },
-        // MẶC ĐỊNH BAN ĐẦU CHỈ CÓ ĐÚNG 1 VÙNG CHỌN (KHU 1)
+        // MẶC ĐỊNH DUY NHẤT 1 VÙNG CHỌN (KHU 1) KHI KHỞI TẠO MỚI
         plotSlots: [
           { id: 'slot_1', name: 'Khu 1', teamId: 1, corners: [{ x: 20, y: 31 }, { x: 48, y: 31 }, { x: 48, y: 50 }, { x: 20, y: 50 }], soilImage: null }
         ],
@@ -321,8 +321,18 @@
       if (unsubscribeFirestore) unsubscribeFirestore();
       unsubscribeFirestore = db.collection('classes').doc(className).onSnapshot((doc) => {
         if (doc.exists) {
-          currentClass = doc.data();
+          const remoteData = doc.data();
+          // Nếu dữ liệu trên Firebase cũ không có plotSlots hoặc bị lỗi, ép về 1 khu đất mặc định
+          if (!remoteData.config.plotSlots || remoteData.config.plotSlots.length === 0) {
+            remoteData.config.plotSlots = [
+              { id: 'slot_1', name: 'Khu 1', teamId: 1, corners: [{ x: 20, y: 31 }, { x: 48, y: 31 }, { x: 48, y: 50 }, { x: 20, y: 50 }], soilImage: null }
+            ];
+          }
+          currentClass = remoteData;
           applyClassConfiguration();
+        } else {
+          // Nếu chưa có trên Firebase, lưu cấu hình mặc định chỉ có 1 khu đất lên
+          saveClassToFirebase();
         }
         if (callback) { callback(); callback = null; }
       });
@@ -348,16 +358,33 @@
         csvContent += `${sttStr},${username},hs123,Tổ ${teamNum}\n`;
       }
 
-      let newClassData = JSON.parse(JSON.stringify(currentClass));
-      newClassData.name = className;
-      newClassData.students = newStudents;
+      // Khởi tạo lớp mới với cấu hình mặc định chỉ có 1 Khu 1 duy nhất
+      let newClassData = {
+        name: className,
+        config: {
+          bgGlobal: 'assets/nengame/nenungdung.jpg',
+          bgA: 'assets/nengame/vuonlop.jpg',
+          bgB: 'assets/nengame/nenungdung.jpg',
+          buttonMappings: currentClass.config.buttonMappings,
+          plotSlots: [
+            { id: 'slot_1', name: 'Khu 1', teamId: 1, corners: [{ x: 20, y: 31 }, { x: 48, y: 31 }, { x: 48, y: 50 }, { x: 20, y: 50 }], soilImage: null }
+          ],
+          textOverlays: currentClass.config.textOverlays
+        },
+        students: newStudents,
+        weeklyRanking: { 1: 1, 2: 2, 3: 3, 4: 4 },
+        dailyKeyword: 'HOCAP',
+        checkedInStudents: [],
+        latestAnnouncement: '',
+        placedFlowers: []
+      };
 
       db.collection('classes').doc(className).set(newClassData).then(() => {
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url; a.download = `dulieudangnhap_${className}.csv`; a.click();
-        alert(`Đã khởi tạo lớp ${className} và tải file CSV đăng nhập!`);
+        alert(`Đã khởi tạo lớp ${className} với 1 Khu đất mặc định và tải file CSV đăng nhập!`);
         closeTeacherModal();
       }).catch(err => alert("Lỗi Firebase: " + err.message));
     }
@@ -463,7 +490,7 @@
         }).join('')}
       </svg>
       
-      <!-- CỤM NÚT CÔNG CỤ (COPY, KHÓA, XÓA) ĐÁNH SỐ THỨ TỰ TĂNG DẦN (KHU 1, KHU 2,...) -->
+      <!-- CỤM NÚT CÔNG CỤ (COPY, KHÓA, XÓA) -->
       ${isAdmin && selectedPlotIdForAdmin ? (() => {
         const slot = slots.find(s => s.id === selectedPlotIdForAdmin);
         if(!slot) return '';
@@ -512,7 +539,6 @@
       window.addEventListener('mouseup', onMouseUp);
     }
 
-    // SAO CHÉP VÙNG CHỌN VÀ TỰ ĐỘNG TĂNG SỐ THỨ TỰ TƯƠNG TỨNG (KHU 2, KHU 3,...)
     function copyPlot(plotId) {
       const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
       if (!slot) return;
@@ -527,6 +553,9 @@
     function toggleLockPlot(plotId) { alert('Trạng thái khóa khu đất đã được cập nhật!'); }
 
     function deletePlot(plotId) {
+      if (currentClass.config.plotSlots.length <= 1) {
+        return alert('Cần giữ lại ít nhất 1 khu đất trong vườn!');
+      }
       currentClass.config.plotSlots = currentClass.config.plotSlots.filter(s => s.id !== plotId);
       selectedPlotIdForAdmin = null;
       renderPerspectivePlotsOnCanvas();
