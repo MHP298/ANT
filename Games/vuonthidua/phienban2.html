@@ -94,26 +94,45 @@
     </div>
   </div>
 
-  <!-- POPUP ADMIN GIÁO VIÊN -->
+  <!-- POPUP ADMIN GIÁO VIÊN (GIAO DIỆN CHUẨN CŨ) -->
   <div id="teacher-admin-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 text-left max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-        <h3 class="font-extrabold text-sm text-emerald-800 uppercase flex items-center gap-2"><i class="fa-solid fa-gear"></i> Bảng Điều Hành Giáo Viên (Firebase Realtime)</h3>
-        <button onclick="closeTeacherModal()" class="w-7 h-7 rounded-full bg-slate-100 font-bold">✕</button>
+        <h3 class="font-extrabold text-sm text-emerald-800 uppercase flex items-center gap-2"><i class="fa-solid fa-gear text-emerald-600"></i> BẢNG ĐIỀU HÀNH GIÁO VIÊN</h3>
+        <button onclick="closeTeacherModal()" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold flex items-center justify-center">✕</button>
       </div>
       <div class="space-y-4 text-xs">
-        <div class="p-3 bg-slate-50 rounded-2xl border space-y-2">
-          <b class="text-slate-800 uppercase block">1. Khởi Tạo Lớp & Đồng Bộ Firebase</b>
+        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+          <b class="text-slate-800 uppercase block">1. KHỞI TẠO TÀI KHOẢN LỚP</b>
           <div class="grid grid-cols-2 gap-2">
-            <input type="text" id="t-class-name" placeholder="Tên lớp VD: 10A1" class="px-2.5 py-1.5 rounded-lg border font-bold uppercase">
-            <input type="number" id="t-class-size" placeholder="Sĩ số VD: 45" class="px-2.5 py-1.5 rounded-lg border font-bold">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-600 mb-1">Tên lớp:</label>
+              <input type="text" id="t-class-name" placeholder="VD: 10A1" class="w-full px-2.5 py-1.5 rounded-lg border bg-white font-bold uppercase">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-600 mb-1">Sĩ số học sinh:</label>
+              <input type="number" id="t-class-size" placeholder="VD: 45" class="w-full px-2.5 py-1.5 rounded-lg border bg-white font-bold">
+            </div>
           </div>
-          <button onclick="generateAndSyncClass()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl">Khởi Tạo & Lưu Lên Firebase</button>
+          <button onclick="generateAndSyncClass()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition">
+            Lưu & Tải Xuống File Đăng Nhập (CSV)
+          </button>
         </div>
+
+        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+          <b class="text-slate-800 uppercase block">2. LIÊN KẾT BẢNG THI ĐUA GOOGLE SHEETS</b>
+          <input type="text" id="t-drive-link" placeholder="Dán link Google Sheets..." class="w-full px-2.5 py-1.5 rounded-lg border bg-white font-mono text-[11px]">
+          <button onclick="saveDriveCompetitionLink()" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition">
+            Cập Nhật Bảng Thi Đua
+          </button>
+        </div>
+
         <div class="p-3 bg-indigo-50 rounded-2xl border border-indigo-200 space-y-2">
-          <b class="text-indigo-900 uppercase block">2. Đăng Thông Báo Lớp Học</b>
-          <textarea id="t-announcement-text" rows="2" placeholder="Nội dung thông báo..." class="w-full px-2.5 py-1.5 rounded-lg border bg-white"></textarea>
-          <button onclick="publishClassAnnouncement()" class="w-full py-1.5 bg-indigo-600 text-white font-bold rounded-xl">Phát Sóng Thông Báo</button>
+          <b class="text-indigo-900 uppercase block">3. ĐĂNG THÔNG BÁO / CẬP NHẬT MỚI CHO LỚP</b>
+          <textarea id="t-announcement-text" rows="3" placeholder="Nhập thông báo hoặc thay đổi mới nhất..." class="w-full px-2.5 py-1.5 rounded-lg border bg-white text-xs"></textarea>
+          <button onclick="publishClassAnnouncement()" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition">
+            Phát Sóng Thông Báo Đến Học Sinh
+          </button>
         </div>
       </div>
     </div>
@@ -129,8 +148,8 @@
       </div>
     </div>
     <div class="flex items-center gap-2.5">
-      <button onclick="openTeacherModal()" id="btn-admin-panel" class="hidden px-2.5 py-1 text-[11px] font-black rounded-lg bg-emerald-600 text-white">⚙️ ADMIN</button>
-      <button onclick="clearPlacedGardenFlowers()" class="px-2.5 py-1 text-[10px] font-bold rounded-lg bg-rose-50 text-rose-600"><i class="fa-solid fa-trash-can"></i> Dọn Hoa</button>
+      <button onclick="openTeacherModal()" id="btn-admin-panel" class="hidden px-2.5 py-1 text-[11px] font-black rounded-lg bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 transition">⚙️ ADMIN</button>
+      <button onclick="clearPlacedGardenFlowers()" class="px-2.5 py-1 text-[10px] font-bold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition"><i class="fa-solid fa-trash-can"></i> Dọn Hoa</button>
       <div class="text-xs text-slate-700 font-semibold border-l pl-2.5 flex items-center gap-1.5">
         <span id="hdr-student-name">Đang tải...</span>
         <span class="text-[9px] px-1.5 py-0.5 rounded font-black uppercase text-amber-900 bg-amber-100" id="hdr-rank-badge">Hạng 1 ★</span>
@@ -163,7 +182,6 @@
   </div>
 
   <script>
-    // ================= CẤU HÌNH FIREBASE CHUẨN XÁC =================
     const firebaseConfig = {
       apiKey: "AIzaSyBWcjpJ-rEg1T7DPsEdxe76NtEn5keWKQU",
       authDomain: "gametronghoa-29c3d.firebaseapp.com",
@@ -194,11 +212,12 @@
           'nutchunhat.png': { label: 'ĐẤT', targetFolders: ['nendat'] },
           'nutxeng.png': { label: 'CÔNG CỤ', targetFolders: ['congcu'] }
         },
+        // ĐIỀU CHỈNH TỌA ĐỘ VÙNG CHỌN KHU ĐẤT ÔM TRỌN SÂN GẠCH VÀNG (Y HỆT ẢNH MẪU 3)
         plotSlots: [
-          { id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 19, y: 31 }, { x: 35, y: 31 }, { x: 34, y: 50 }, { x: 18, y: 50 }], soilImage: null },
-          { id: 'slot_2', name: 'Khu đất 2', teamId: 2, corners: [{ x: 17, y: 52 }, { x: 34, y: 52 }, { x: 33, y: 73 }, { x: 16, y: 73 }], soilImage: null },
-          { id: 'slot_3', name: 'Khu đất 3', teamId: 3, corners: [{ x: 39, y: 31 }, { x: 55, y: 31 }, { x: 56, y: 50 }, { x: 40, y: 50 }], soilImage: null },
-          { id: 'slot_4', name: 'Khu đất 4', teamId: 4, corners: [{ x: 40, y: 52 }, { x: 56, y: 52 }, { x: 57, y: 73 }, { x: 40, y: 73 }], soilImage: null }
+          { id: 'slot_1', name: 'Khu 1', teamId: 1, corners: [{ x: 19, y: 19 }, { x: 38, y: 19 }, { x: 38, y: 50 }, { x: 19, y: 50 }], soilImage: null },
+          { id: 'slot_2', name: 'Khu 2', teamId: 2, corners: [{ x: 19, y: 52 }, { x: 38, y: 52 }, { x: 38, y: 88 }, { x: 19, y: 88 }], soilImage: null },
+          { id: 'slot_3', name: 'Khu 3', teamId: 3, corners: [{ x: 44, y: 19 }, { x: 67, y: 19 }, { x: 67, y: 50 }, { x: 44, y: 50 }], soilImage: null },
+          { id: 'slot_4', name: 'Khu 4', teamId: 4, corners: [{ x: 44, y: 52 }, { x: 67, y: 52 }, { x: 67, y: 88 }, { x: 44, y: 88 }], soilImage: null }
         ],
         textOverlays: [{ id: 'txt_default', content: 'Vườn hạnh phúc của lớp', x: 48, y: 16, fontSize: 17 }]
       },
@@ -242,7 +261,6 @@
       switchButtonCategory(currentActiveButtonKey);
     }
 
-    // ĐĂNG NHẬP VÀ LẮNG NGHE REALTIME TỪ FIREBASE
     async function handleStudentLogin() {
       const user = document.getElementById('input-student-user').value.trim();
       const pass = document.getElementById('input-student-pass').value.trim();
@@ -250,7 +268,6 @@
 
       if (!user) { err.innerText = 'Vui lòng nhập tài khoản!'; err.classList.remove('hidden'); return; }
 
-      // ADMIN (GIÁO VIÊN): Toàn quyền test mọi thứ trên mọi khu đất
       if (user === 'admin') {
         if (pass !== 'admjn1234') { err.innerText = 'Sai mật khẩu giáo viên!'; err.classList.remove('hidden'); return; }
         currentStudent = { username: 'admin', name: 'Giáo Viên', role: 'TEACHER', team: 0 };
@@ -267,7 +284,7 @@
       const docSnap = await docRef.get();
 
       if (!docSnap.exists) {
-        err.innerText = 'Không tìm thấy lớp học trên hệ thống Firebase!'; err.classList.remove('hidden'); return;
+        err.innerText = 'Không tìm thấy lớp học trên Firebase!'; err.classList.remove('hidden'); return;
       }
 
       const classData = docSnap.data();
@@ -284,9 +301,6 @@
       listenClassFromFirebase(activeClassName, () => {
         applyClassConfiguration();
         checkAndShowLatestAnnouncement();
-        if (currentStudent.role === 'CB' || currentStudent.role === 'MEMBER' || currentStudent.role.startsWith('TT')) {
-          document.getElementById('keyword-check-modal').classList.remove('hidden');
-        }
       });
     }
 
@@ -303,7 +317,7 @@
 
     function saveClassToFirebase() {
       if (!activeClassName) return;
-      db.collection('classes').doc(activeClassName).set(currentClass).catch(err => console.error("Lỗi đồng bộ Firebase:", err));
+      db.collection('classes').doc(activeClassName).set(currentClass).catch(err => console.error(err));
     }
 
     function generateAndSyncClass() {
@@ -312,11 +326,13 @@
       if (!className || size <= 0) return alert('Nhập tên lớp và sĩ số hợp lệ!');
 
       let newStudents = {};
+      let csvContent = "STT,TaiKhoan,MatKhau,To\n";
       for (let i = 1; i <= size; i++) {
         let sttStr = i < 10 ? `0${i}` : `${i}`;
         let username = `${className}_stt${sttStr}`;
         let teamNum = ((i - 1) % 4) + 1;
         newStudents[username] = { username, name: `Học sinh ${sttStr}`, stt: sttStr, team: teamNum, class: className, password: 'hs123', role: 'MEMBER' };
+        csvContent += `${sttStr},${username},hs123,Tổ ${teamNum}\n`;
       }
 
       let newClassData = JSON.parse(JSON.stringify(currentClass));
@@ -324,9 +340,13 @@
       newClassData.students = newStudents;
 
       db.collection('classes').doc(className).set(newClassData).then(() => {
-        alert(`Đã khởi tạo và đồng bộ thành công lớp ${className} lên Firebase!`);
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `dulieudangnhap_${className}.csv`; a.click();
+        alert(`Đã khởi tạo lớp ${className} và tải file CSV đăng nhập!`);
         closeTeacherModal();
-      }).catch(err => alert("Lỗi kết nối Firebase: " + err.message));
+      }).catch(err => alert("Lỗi Firebase: " + err.message));
     }
 
     function publishClassAnnouncement() {
@@ -359,7 +379,7 @@
 
     function checkPermissionOnPlot(targetTeamId) {
       if (!currentStudent) return { allowed: false, msg: 'Chưa đăng nhập!' };
-      if (currentStudent.role === 'TEACHER') return { allowed: true }; // ADMIN CÓ MỌI QUYỀN ĐỂ TEST
+      if (currentStudent.role === 'TEACHER') return { allowed: true }; // ADMIN TOÀN QUYỀN TEST
       if (currentStudent.role === `TT${targetTeamId}`) return { allowed: true };
       return { allowed: false, msg: `Chỉ Tổ trưởng Tổ ${targetTeamId} mới có quyền thao tác khu đất này!` };
     }
@@ -409,11 +429,14 @@
           const hasSoil = !!slot.soilImage;
           const limitSP = getPlotAllowedProductsCount(slot.teamId);
           return `<g class="plot-group-hover" ondragover="handleDragOver(event)" ondrop="handleDropOnPlot(event, '${slot.id}',${slot.teamId})">
-            ${!hasSoil ? `<polygon points="${xs.map((v, i) => `${v},${ys[i]}`).join(' ')}" fill="rgba(180, 83, 9, 0.3)" stroke="#f59e0b" stroke-width="3"/>` : `
+            ${!hasSoil ? `<polygon points="${xs.map((v, i) => `${v},${ys[i]}`).join(' ')}" fill="rgba(245, 158, 11, 0.25)" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="6"/>` : `
               <image href="${slot.soilImage}" x="${minX}" y="${minY}" width="${maxX - minX}" height="${maxY - minY}" preserveAspectRatio="none" clip-path="url(#clip-slot-${slot.id})"/>
               <g onclick="clearSoilFromSlot('${slot.id}', ${slot.teamId}, event)" class="cursor-pointer"><circle cx="${maxX-14}" cy="${minY+14}" r="11" fill="#e11d48"/><text x="${maxX-14}" y="${minY+15}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="11">✕</text></g>
             `}
-            ${!hasSoil ? `<g style="pointer-events: none;"><rect x="${(xs.reduce((a,b)=>a+b)/4)-57}" y="${(ys.reduce((a,b)=>a+b)/4)-13}" width="114" height="26" rx="13" fill="rgba(69, 26, 3, 0.88)" stroke="#fbbf24"/><text x="${xs.reduce((a,b)=>a+b)/4}" y="${ys.reduce((a,b)=>a+b)/4}" text-anchor="middle" dominant-baseline="central" fill="#fef08a" font-size="11" font-weight="900">🌾 Khu ${slot.teamId} (${limitSP} SP)</text></g>` : ''}
+            <g style="pointer-events: none;">
+              <rect x="${(xs.reduce((a,b)=>a+b)/4)-50}" y="${(ys.reduce((a,b)=>a+b)/4)-13}" width="100" height="26" rx="13" fill="rgba(69, 26, 3, 0.85)" stroke="#fbbf24"/>
+              <text x="${xs.reduce((a,b)=>a+b)/4}" y="${ys.reduce((a,b)=>a+b)/4}" text-anchor="middle" dominant-baseline="central" fill="#fef08a" font-size="11" font-weight="900">🌾 Khu ${slot.teamId} (${limitSP} SP)</text>
+            </g>
           </g>`;
         }).join('')}
       </svg>`;
@@ -453,13 +476,40 @@
       const perm = checkPermissionOnPlot(teamId);
       if (!perm.allowed) return alert(perm.msg);
 
+      const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
+
       if (draggedItemData.isSoil) {
-        currentClass.config.plotSlots.find(s => s.id === plotId).soilImage = draggedItemData.rawUrl;
+        slot.soilImage = draggedItemData.rawUrl;
         renderPerspectivePlotsOnCanvas();
         saveClassToFirebase();
       } else {
-        const rect = document.getElementById('section-a').getBoundingClientRect();
-        spawnFlowerOnCanvas(draggedItemData.rawUrl, e.clientX - rect.left, e.clientY - rect.top, teamId, true);
+        // KIỂM TRA HẠN MỨC SẢN PHẨM TRÊN Ô ĐẤT ĐÓ
+        const placedCount = (currentClass.placedFlowers || []).filter(f => parseInt(f.teamId) === teamId).length;
+        const limit = getPlotAllowedProductsCount(teamId);
+        if (placedCount >= limit) {
+          return alert(`Khu đất ${teamId} chỉ được phép tối đa ${limit} sản phẩm theo hạng thi đua!`);
+        }
+
+        // TÍNH TOÁN TỌA ĐỘ NẰM TRONG GIỚI HẠN PHẠM VI Ô ĐẤT ĐÓ
+        const sectionA = document.getElementById('section-a');
+        const cW = sectionA.clientWidth || 960;
+        const cH = sectionA.clientHeight || 640;
+        const xs = slot.corners.map(c => (c.x / 100) * cW);
+        const ys = slot.corners.map(c => (c.y / 100) * cH);
+        const minX = Math.min(...xs), maxX = Math.max(...xs);
+        const minY = Math.min(...ys), maxY = Math.max(...ys);
+
+        const rect = sectionA.getBoundingClientRect();
+        let dropX = e.clientX - rect.left;
+        let dropY = e.clientY - rect.top;
+
+        // Nếu thả ngoài ô đất, tự động căn vào tâm ô đất để đảm bảo nằm trong phạm vi
+        if (dropX < minX || dropX > maxX || dropY < minY || dropY > maxY) {
+          dropX = (minX + maxX) / 2;
+          dropY = (minY + maxY) / 2;
+        }
+
+        spawnFlowerOnCanvas(draggedItemData.rawUrl, dropX, dropY, teamId, true);
       }
     }
 
