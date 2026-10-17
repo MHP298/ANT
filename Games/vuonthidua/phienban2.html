@@ -246,7 +246,6 @@
       <button onclick="requestFullScreenLandscape()" class="text-slate-500 hover:text-emerald-700 text-xs p-1" title="Toàn màn hình">
         <i class="fa-solid fa-expand"></i>
       </button>
-      <!-- NÚT THOÁT / ĐỔI TÀI KHOẢN ĐÃ ĐƯỢC CHỈNH SỬA HOẠT ĐỘNG CHUẨN XÁC -->
       <button onclick="handleStudentLogout()" class="text-slate-400 hover:text-rose-600 text-xs p-1 cursor-pointer" title="Đổi tài khoản / Thoát">
         <i class="fa-solid fa-arrow-right-from-bracket"></i>
       </button>
@@ -293,7 +292,6 @@
     const GITHUB_REPO = 'ANT';
     const GITHUB_RAW_BASE = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/`;
 
-    // CẬP NHẬT ĐÚNG DANH MỤC THƯ MỤC: NENDAT VÀ CONGCU
     const ALL_FOLDERS = ['hoacap1', 'hoacap2', 'nucap1', 'nucap2', 'congcu', 'nendat', 'nengame', 'nutgame', 'amthanh'];
     let cachedScannedAssets = {};
 
@@ -308,8 +306,8 @@
         buttonMappings: {
           'nuthoa.png': { label: 'HOA', targetFolders: ['hoacap1'], selectedImages: [], itemLockLevels: {} },
           'nutnu.png': { label: 'NỤ', targetFolders: ['nucap1'], selectedImages: [], itemLockLevels: {} },
-          'nutchunhat.png': { label: 'ĐẤT', targetFolders: ['nendat'], selectedImages: [], itemLockLevels: {} }, // Trỏ vào nendat
-          'nutxeng.png': { label: 'CÔNG CỤ', targetFolders: ['congcu'], selectedImages: [], itemLockLevels: {} } // Trỏ vào congcu
+          'nutchunhat.png': { label: 'ĐẤT', targetFolders: ['nendat'], selectedImages: [], itemLockLevels: {} },
+          'nutxeng.png': { label: 'CÔNG CỤ', targetFolders: ['congcu'], selectedImages: [], itemLockLevels: {} }
         },
         plotSlots: [
           { id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 19, y: 31 }, { x: 35, y: 31 }, { x: 34, y: 50 }, { x: 18, y: 50 }], soilImage: null },
@@ -444,6 +442,8 @@
       }
 
       document.getElementById('student-login-modal').classList.add('hidden');
+      
+      // SỬ DỤNG sessionStorage (XÓA SẠCH KHI LOAD LẠI TRANG / F5)
       sessionStorage.setItem('current_garden_student', JSON.stringify(currentStudent));
       
       applyClassConfiguration();
@@ -482,7 +482,17 @@
 
     function handleStudentLogout() {
       sessionStorage.removeItem('current_garden_student');
-      location.reload();
+      sessionStorage.removeItem('seen_announcement_sig');
+      // Bắt buộc hiện lại bảng đăng nhập thay vì giữ nguyên giao diện
+      const loginModal = document.getElementById('student-login-modal');
+      if (loginModal) {
+        document.getElementById('input-student-user').value = '';
+        document.getElementById('input-student-pass').value = '';
+        document.getElementById('login-error-msg').classList.add('hidden');
+        loginModal.classList.remove('hidden');
+      } else {
+        location.reload();
+      }
     }
 
     function openTeacherModal() { document.getElementById('teacher-admin-modal').classList.remove('hidden'); }
@@ -864,25 +874,18 @@
       }
     }
 
+    // LUÔN XÓA SESSION KHI KHỞI ĐỘNG ĐỂ BẮT BUỘC ĐĂNG NHẬP LẠI KHI F5 / LOAD LẠI TRANG
     window.addEventListener('DOMContentLoaded', () => {
+      sessionStorage.removeItem('current_garden_student');
+      sessionStorage.removeItem('seen_announcement_sig');
+
       loadAdminSystemData();
       scanGithubAssetsAutomatically();
 
-      const savedStudent = sessionStorage.getItem('current_garden_student');
-      if (savedStudent) {
-        try {
-          currentStudent = JSON.parse(savedStudent);
-          document.getElementById('student-login-modal').classList.add('hidden');
-          if (currentStudent.role === 'TEACHER') {
-            document.getElementById('btn-admin-panel').classList.remove('hidden');
-            document.getElementById('teacher-keyword-box').classList.remove('hidden');
-          }
-          applyClassConfiguration();
-          checkAndShowLatestAnnouncement();
-          return;
-        } catch (e) {}
+      const loginModal = document.getElementById('student-login-modal');
+      if (loginModal) {
+        loginModal.classList.remove('hidden');
       }
-      document.getElementById('student-login-modal').classList.add('hidden');
     });
   </script>
 </body>
