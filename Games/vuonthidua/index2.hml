@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Vườn Thi Đua Trồng Hoa - Sân Chơi Lớp Học</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    #landscape-warning { display: none; }
+    @media screen and (orientation: portrait) and (max-width: 1024px) {
+      #landscape-warning { display: flex !important; }
+    }
+
+    .bg-trans-grid {
+      background-color: rgba(255, 255, 255, 0.75);
+      background-image: linear-gradient(45deg, #f1f5f9 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f1f5f9 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f1f5f9 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f1f5f9 75%);
+      background-size: 8px 8px;
+      background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+    }
+
+    .clean-transparent-asset {
+      filter: none !important;
+      transition: transform 0.15s ease-out;
+    }
+    .clean-transparent-asset:hover { transform: scale(1.1); }
+
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.25); border-radius: 4px; }
+
+    .garden-placed-flower {
+      position: absolute;
+      touch-action: none;
+      user-select: none;
+      cursor: grab;
+      z-index: 30;
+      transform: translate(-50%, -50%);
+    }
+    .garden-placed-flower:active { cursor: grabbing; }
+
+    .plot-group-hover {
+      transform-box: fill-box;
+      transform-origin: center;
+      transition: transform 0.22s ease-out, filter 0.22s ease-out;
+      cursor: pointer;
+    }
+    .plot-group-hover:hover, .plot-group-hover:active {
+      transform: scale(1.015);
+      filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35));
+    }
+
+    .lock-tooltip {
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      transform: translate(-50%, 6px);
+      pointer-events: none;
+      z-index: 90;
+    }
+    .group:hover .lock-tooltip {
+      visibility: visible;
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  </style>
+</head>
+<body id="game-wrapper" class="bg-cover bg-center h-screen w-screen overflow-hidden flex flex-col font-sans select-none" style="background-image: url('assets/nengame/nenungdung.jpg');">
+
+  <!-- CẢNH BÁO BẮT BUỘC XOAY NGANG TRÊN THIẾT BỊ DI ĐỘNG -->
+  <div id="landscape-warning" class="fixed inset-0 bg-slate-950 z-[100] flex-col items-center justify-center p-6 text-center text-white">
+    <div class="w-20 h-20 bg-emerald-600/20 text-emerald-400 rounded-3xl flex items-center justify-center text-4xl mb-4 border border-emerald-500/30 animate-pulse">
+      <i class="fa-solid fa-mobile-screen-button rotate-90"></i>
+    </div>
+    <h2 class="text-lg font-black uppercase text-amber-300 mb-2">Vui Lòng Xoay Ngang Thiết Bị</h2>
+    <p class="text-xs text-slate-300 max-w-xs leading-relaxed">
+      Để có trải nghiệm chăm sóc và trang trí khu vườn thi đua chuẩn xác nhất, hãy xoay ngang màn hình điện thoại của bạn nhé!
+    </p>
+    <button onclick="requestFullScreenLandscape()" class="mt-5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-xs font-bold text-white shadow-lg flex items-center gap-2">
+      <i class="fa-solid fa-expand"></i> Kích hoạt toàn màn hình
+    </button>
+  </div>
+
+  <!-- POPUP ĐĂNG NHẬP (HỌC SINH HOẶC GIÁO VIÊN admin1234) -->
+  <div id="student-login-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 border border-slate-200 text-center">
+      <div class="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto text-3xl mb-3 shadow-inner">🌸</div>
+      <h2 class="text-lg font-black text-slate-800 uppercase">Vườn Thi Đua Lớp Học</h2>
+      <p class="text-xs text-slate-500 mb-4">Nhập tài khoản học sinh hoặc tài khoản giáo viên (admin1234)</p>
+
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Tài khoản:</label>
+          <input type="text" id="input-student-user" placeholder="VD: 10A1_stt01 hoặc admin1234" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Mật khẩu:</label>
+          <input type="password" id="input-student-pass" placeholder="Mật khẩu (mặc định hs123)" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+        </div>
+        <div id="login-error-msg" class="hidden text-rose-500 text-xs font-bold text-center"></div>
+        <button onclick="handleStudentLogin()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md transition">
+          Vào Vườn Hoa
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP ĐIỂM DANH TỪ KHÓA (DÀNH CHO THÀNH VIÊN) -->
+  <div id="keyword-check-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 border border-slate-200 text-center">
+      <div class="w-14 h-14 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center mx-auto text-2xl mb-3 shadow-inner">🔑</div>
+      <h2 class="text-base font-black text-slate-800 uppercase">Điểm Danh Hàng Ngày</h2>
+      <p class="text-xs text-slate-500 mb-3">Nhập từ khóa do Cán bộ lớp cung cấp để giúp cây trồng của tổ phát triển tối đa!</p>
+
+      <div class="space-y-3 text-left">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Từ khóa trong ngày (TUKHOA):</label>
+          <input type="text" id="input-daily-keyword" placeholder="Nhập từ khóa..." class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-semibold uppercase">
+        </div>
+        <button onclick="submitDailyKeyword()" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs uppercase rounded-xl shadow transition">
+          Xác Nhận Điểm Danh
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP CÀI ĐẶT DÀNH CHO GIÁO VIÊN (NÚT ADMIN) -->
+  <div id="teacher-admin-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 border border-slate-200 text-left max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 class="font-extrabold text-sm text-emerald-800 uppercase flex items-center gap-2">
+          <i class="fa-solid fa-gear text-emerald-600"></i> Bảng Điều Hành Giáo Viên
+        </h3>
+        <button onclick="closeTeacherModal()" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold flex items-center justify-center">✕</button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <!-- 1. TẠO TÀI KHOẢN HỌC SINH THEO SĨ SỐ -->
+        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+          <b class="text-slate-800 uppercase block">1. Khởi Tạo Tài Khoản Lớp</b>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-600 mb-1">Tên lớp:</label>
+              <input type="text" id="t-class-name" placeholder="VD: 10A1" class="w-full px-2.5 py-1.5 rounded-lg border bg-white font-bold uppercase">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-600 mb-1">Sĩ số học sinh:</label>
+              <input type="number" id="t-class-size" placeholder="VD: 45" class="w-full px-2.5 py-1.5 rounded-lg border bg-white font-bold">
+            </div>
+          </div>
+          <button onclick="generateStudentAccounts()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xs transition">
+            Lưu & Tải Xuống File Đăng Nhập (CSV)
+          </button>
+        </div>
+
+        <!-- 2. LINK DRIVE GOOGLE SHEETS THI ĐUA -->
+        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+          <b class="text-slate-800 uppercase block">2. Liên Kết Bảng Thi Đua Google Sheets</b>
+          <input type="text" id="t-drive-link" placeholder="Dán link Google Sheets (chia sẻ công khai xem)..." class="w-full px-2.5 py-1.5 rounded-lg border bg-white font-mono text-[11px]">
+          <button onclick="saveDriveCompetitionLink()" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition">
+            Cập Nhật Bảng Thi Đua
+          </button>
+        </div>
+
+        <!-- 3. PHÂN QUYỀN TỔ TRƯỞNG & CÁN BỘ LỚP -->
+        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+          <b class="text-slate-800 uppercase block">3. Phân Quyền Chức Vụ Học Sinh</b>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] font-bold text-slate-600 mb-1">Chức vụ:</label>
+              <select id="t-role-select" class="w-full px-2 py-1.5 rounded-lg border bg-white font-bold">
+                <option value="TT1">Tổ trưởng 1</option>
+                <option value="TT2">Tổ trưởng 2</option>
+                <option value="TT3">Tổ trưởng 3</option>
+                <option value="TT4">Tổ trưởng 4</option>
+                <option value="CB">Cán bộ lớp</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-slate-600 mb-1">STT học sinh (VD: 1 hoặc 01):</label>
+              <input type="text" id="t-student-stt" placeholder="VD: 01" class="w-full px-2.5 py-1.5 rounded-lg border bg-white font-bold">
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-slate-600 mb-1">Mật khẩu riêng (hoặc để trống dùng hs123):</label>
+            <input type="password" id="t-student-custom-pass" placeholder="Mật khẩu..." class="w-full px-2.5 py-1.5 rounded-lg border bg-white">
+          </div>
+          <button onclick="assignStudentRole()" class="w-full py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl transition">
+            Gán Chức Vụ Học Sinh
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="h-10 bg-white/95 backdrop-blur-md border-b border-black/10 px-4 flex items-center justify-between z-30 shrink-0 shadow-xs">
+    <div class="flex items-center gap-2">
+      <span class="text-lg">🌸</span>
+      <h1 class="font-extrabold text-xs md:text-sm text-slate-800 uppercase tracking-wide">Vườn Thi Đua Trồng Hoa</h1>
+      
+      <div id="hdr-class-container" class="ml-1">
+        <span class="text-[10px] md:text-[11px] px-2 py-0.5 bg-emerald-100 text-emerald-900 rounded-full font-bold" id="hdr-class-badge">Lớp 10A1</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2.5">
+      <!-- NÚT ADMIN HIỂN THỊ KHI ĐĂNG NHẬP admin1234 -->
+      <button onclick="openTeacherModal()" id="btn-admin-panel" class="hidden px-2.5 py-1 text-[11px] font-black rounded-lg bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 transition flex items-center gap-1">
+        <i class="fa-solid fa-gear"></i> ADMIN
+      </button>
+
+      <!-- NÚT BẬT / TẮT ÂM THANH NỀN -->
+      <button onclick="toggleAudioMute()" id="btn-audio-toggle" class="px-2 py-1 text-xs font-bold rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition flex items-center gap-1" title="Bật/Tắt Nhạc Nền">
+        <i class="fa-solid fa-volume-high" id="icon-audio-mute"></i>
+      </button>
+
+      <button onclick="clearPlacedGardenFlowers()" class="px-2.5 py-1 text-[10px] md:text-[11px] font-bold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition flex items-center gap-1 border border-rose-200">
+        <i class="fa-solid fa-trash-can"></i> Dọn Hoa
+      </button>
+
+      <div class="text-[11px] md:text-xs text-slate-700 font-semibold border-l pl-2.5 border-slate-300 flex items-center gap-1.5">
+        <span id="hdr-student-name">Đang tải...</span>
+        <span class="text-[9px] md:text-[10px] px-1.5 py-0.5 rounded font-black uppercase" id="hdr-role-badge">Thành viên</span>
+        <span class="text-[9px] md:text-[10px] px-1.5 py-0.5 rounded font-black uppercase text-amber-900 bg-amber-100" id="hdr-rank-badge">Hạng 1 Tuần ★</span>
+      </div>
+
+      <button onclick="requestFullScreenLandscape()" class="text-slate-500 hover:text-emerald-700 text-xs p-1" title="Toàn màn hình">
+        <i class="fa-solid fa-expand"></i>
+      </button>
+      <button onclick="handleStudentLogout()" class="text-slate-400 hover:text-rose-600 text-xs p-1" title="Đổi tài khoản">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- BỐ CỤC CHÍNH 2 PHẦN -->
+  <div class="flex-1 flex flex-row h-[calc(100vh-40px)] overflow-hidden w-full">
+    
+    <!-- PHẦN A (3/4 BÊN TRÁI): SÂN VƯỜN -->
+    <section id="section-a" class="w-3/4 h-full relative bg-slate-950 overflow-hidden flex items-center justify-center border-r-2 border-black/20" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+      <img id="game-bg-image" src="assets/nengame/vuonlop.jpg" alt="Nền Game" class="absolute inset-0 w-full h-full object-fill pointer-events-none select-none transition-all duration-300">
+      
+      <div id="perspective-plots-layer" class="absolute inset-0 w-full h-full pointer-events-auto z-10"></div>
+      <div id="text-overlays-layer" class="absolute inset-0 w-full h-full pointer-events-none z-15"></div>
+      <div id="drop-flowers-layer" class="absolute inset-0 w-full h-full pointer-events-auto z-20"></div>
+
+      <div id="empty-hint" class="absolute bottom-3 left-3 z-30 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-white/20 text-white text-[11px] pointer-events-none flex items-center gap-1.5 shadow-lg">
+        <i class="fa-solid fa-hand-pointer text-amber-400"></i>
+        <span id="lbl-status-tip">Tổ trưởng kéo sản phẩm ra ô đất (kích thước gốc 40%) • Điểm danh để cây lớn 100%!</span>
+      </div>
+    </section>
+
+    <!-- PHẦN B (1/4 BÊN PHẢI): KHAY CÔNG CỤ -->
+    <aside id="section-b" class="w-1/4 h-full bg-cover bg-center flex flex-col shadow-2xl shrink-0 border-l border-black/20" style="background-image: url('assets/nengame/nenungdung.jpg');">
+      <div class="p-2 bg-black/20 backdrop-blur-xs border-b border-black/10 shadow-xs space-y-1.5 shrink-0">
+        <div class="text-[9px] font-black uppercase text-white drop-shadow-sm tracking-wide">MỤC VẬT PHẨM:</div>
+        <div class="grid grid-cols-4 gap-1.5" id="dynamic-button-bar"></div>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-2 flex flex-col bg-white/5 backdrop-blur-[1px]">
+        <div class="flex items-center justify-between mb-1.5 px-0.5">
+          <span id="category-title" class="text-[10px] font-black uppercase text-white drop-shadow-sm tracking-wider truncate">KHO VẬT PHẨM</span>
+          <span class="text-[9px] text-white/80 font-bold shrink-0">Kéo / Chạm</span>
+        </div>
+        <div id="tray-grid" class="grid grid-cols-3 gap-1.5"></div>
+      </div>
+    </aside>
+
+  </div>
+
+  <script>
+    const GITHUB_OWNER = 'MHP298';
+    const GITHUB_REPO = 'ANT';
+    const GITHUB_RAW_BASE = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/`;
+
+    let globalClassesData = {};
+    let activeClassName = '10A1';
+    let currentClass = {
+      name: '10A1',
+      config: {
+        bgGlobal: 'assets/nengame/nenungdung.jpg',
+        bgA: 'assets/nengame/vuonlop.jpg',
+        bgB: 'assets/nengame/nenungdung.jpg',
+        buttonMappings: {
+          'nuthoa.png': { label: 'HOA', targetFolders: ['hoacap1'], selectedImages: [], itemLockLevels: {} },
+          'nutnu.png': { label: 'NỤ', targetFolders: ['nucap1'], selectedImages: [], itemLockLevels: {} },
+          'nutchunhat.png': { label: 'ĐẤT', targetFolders: ['nengame'], selectedImages: [], itemLockLevels: {} },
+          'nutxeng.png': { label: 'CÔNG CỤ', targetFolders: ['congcu'], selectedImages: [], itemLockLevels: {} }
+        },
+        plotSlots: [
+          { id: 'slot_1', name: 'Khu đất 1', teamId: 1, corners: [{ x: 19, y: 31 }, { x: 35, y: 31 }, { x: 34, y: 50 }, { x: 18, y: 50 }], soilImage: null },
+          { id: 'slot_2', name: 'Khu đất 2', teamId: 2, corners: [{ x: 17, y: 52 }, { x: 34, y: 52 }, { x: 33, y: 73 }, { x: 16, y: 73 }], soilImage: null },
+          { id: 'slot_3', name: 'Khu đất 3', teamId: 3, corners: [{ x: 39, y: 31 }, { x: 55, y: 31 }, { x: 56, y: 50 }, { x: 40, y: 50 }], soilImage: null },
+          { id: 'slot_4', name: 'Khu đất 4', teamId: 4, corners: [{ x: 40, y: 52 }, { x: 56, y: 52 }, { x: 57, y: 73 }, { x: 40, y: 73 }], soilImage: null }
+        ],
+        textOverlays: [{ id: 'txt_default', content: 'Lớp 10A1', x: 48, y: 16, fontSize: 17 }],
+        assetScales: {}
+      },
+      students: {},
+      weeklyRanking: { 1: 1, 2: 2, 3: 3, 4: 4 },
+      dailyKeyword: 'HOCAP',
+      checkedInStudents: [] // Lưu danh sách stt đã điểm danh từ khóa trong ngày
+    };
+
+    let currentStudent = null;
+    let cachedScannedAssets = {};
+    let currentActiveButtonKey = 'nutchunhat.png';
+    let draggedItemData = null;
+    let bgmAudio = null;
+    let isBgmPlaying = false;
+
+    // NẠP DỮ LIỆU TỪ LOCALSTORAGE
+    function loadAdminSystemData() {
+      const saved = localStorage.getItem('garden_system_classes_v14');
+      if (saved) {
+        try { globalClassesData = JSON.parse(saved); } catch (e) {}
+      }
+      if (!globalClassesData[activeClassName]) {
+        globalClassesData[activeClassName] = currentClass;
+      } else {
+        currentClass = globalClassesData[activeClassName];
+      }
+
+      const rawAssets = localStorage.getItem('garden_auto_scanned_assets_v5');
+      if (rawAssets) {
+        try { cachedScannedAssets = JSON.parse(rawAssets); } catch (e) {}
+      }
+    }
+
+    function requestFullScreenLandscape() {
+      const docEl = document.documentElement;
+      if (docEl.requestFullscreen) docEl.requestFullscreen().catch(() => {});
+      else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(() => {});
+      }
+    }
+
+    // ĐĂNG NHẬP (HỌC SINH HOẶC GIÁO VIÊN admin1234)
+    function handleStudentLogin() {
+      const user = document.getElementById('input-student-user').value.trim();
+      const pass = document.getElementById('input-student-pass').value.trim();
+      const err = document.getElementById('login-error-msg');
+
+      if (!user) {
+        err.innerText = 'Vui lòng nhập tài khoản!';
+        err.classList.remove('hidden');
+        return;
+      }
+
+      // TÀI KHOẢN GIÁO VIÊN: admin1234 / admin1234
+      if (user === 'admin1234') {
+        if (pass !== 'admin1234') {
+          err.innerText = 'Sai mật khẩu giáo viên! (Mật khẩu: admin1234)';
+          err.classList.remove('hidden');
+          return;
+        }
+        currentStudent = { username: 'admin1234', name: 'Giáo Viên', role: 'TEACHER', team: 0 };
+        document.getElementById('student-login-modal').classList.add('hidden');
+        document.getElementById('btn-admin-panel').classList.remove('hidden');
+        applyClassConfiguration();
+        return;
+      }
+
+      // TÀI KHOẢN HỌC SINH
+      let matchedClass = null;
+      for (let cName in globalClassesData) {
+        if (user.toUpperCase().startsWith(cName.toUpperCase())) {
+          matchedClass = cName;
+          break;
+        }
+      }
+      if (!matchedClass) matchedClass = activeClassName;
+      currentClass = globalClassesData[matchedClass] || currentClass;
+
+      const studentObj = currentClass.students ? currentClass.students[user] : null;
+      if (studentObj) {
+        if (studentObj.password && studentObj.password !== pass) {
+          err.innerText = 'Mật khẩu học sinh không chính xác!';
+          err.classList.remove('hidden');
+          return;
+        }
+        currentStudent = { ...studentObj };
+      } else {
+        // Tự động nhận diện tổ từ tên tài khoản (VD: 10A1_stt01_To1 hoặc mặc định chia tổ theo STT)
+        const sttNum = parseInt(user.replace(/[^0-9]/g, '')) || 1;
+        const assignedTeam = ((sttNum - 1) % 4) + 1;
+        currentStudent = {
+          username: user,
+          name: user,
+          stt: sttNum,
+          team: assignedTeam,
+          class: matchedClass,
+          role: `MEMBER`
+        };
+      }
+
+      document.getElementById('student-login-modal').classList.add('hidden');
+      sessionStorage.setItem('current_garden_student', JSON.stringify(currentStudent));
+      
+      applyClassConfiguration();
+
+      // NẾU LÀ THÀNH VIÊN THƯỜNG, HIỆN POPUP ĐIỂM DANH TỪ KHÓA
+      if (currentStudent.role === 'MEMBER') {
+        document.getElementById('keyword-check-modal').classList.remove('hidden');
+      }
+    }
+
+    function handleStudentLogout() {
+      sessionStorage.removeItem('current_garden_student');
+      location.reload();
+    }
+
+    // GIAO DIỆN ADMIN GIÁO VIÊN
+    function openTeacherModal() {
+      document.getElementById('teacher-admin-modal').classList.remove('hidden');
+    }
+    function closeTeacherModal() {
+      document.getElementById('teacher-admin-modal').classList.add('hidden');
+    }
+
+    // TẠO TÀI KHOẢN HỌC SINH & XUẤT FILE CSV
+    function generateStudentAccounts() {
+      const className = document.getElementById('t-class-name').value.trim().toUpperCase();
+      const size = parseInt(document.getElementById('t-class-size').value) || 0;
+
+      if (!className || size <= 0) return alert('Vui lòng nhập tên lớp và sĩ số hợp lệ!');
+
+      if (!globalClassesData[className]) {
+        globalClassesData[className] = JSON.parse(JSON.stringify(currentClass));
+        globalClassesData[className].name = className;
+        globalClassesData[className].students = {};
+      }
+
+      let csvContent = "STT,TaiKhoan,MatKhau,To\n";
+      for (let i = 1; i <= size; i++) {
+        const sttStr = i < 10 ? `0${i}` : `${i}`;
+        const username = `${className}_stt${sttStr}`;
+        const password = 'hs123';
+        const teamNum = ((i - 1) % 4) + 1;
+
+        globalClassesData[className].students[username] = {
+          username, name: `Học sinh ${sttStr}`, stt: sttStr, team: teamNum, class: className, password, role: 'MEMBER'
+        };
+        csvContent += `${sttStr},${username},${password},Tổ ${teamNum}\n`;
+      }
+
+      localStorage.setItem('garden_system_classes_v14', JSON.stringify(globalClassesData));
+
+      // Tự động tải file CSV về máy giáo viên
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `dulieudangnhap_${className}.csv`;
+      a.click();
+
+      alert(`Đã tạo thành công ${size} tài khoản cho lớp ${className} và tải xuống file CSV để đưa lên Drive!`);
+    }
+
+    // ĐỌC DỮ LIỆU ĐIỂM SỐ TỪ GOOGLE SHEETS THI ĐUA
+    async function saveDriveCompetitionLink() {
+      let rawLink = document.getElementById('t-drive-link').value.trim();
+      if (!rawLink) return alert('Vui lòng dán link Google Sheets!');
+
+      let csvUrl = rawLink;
+      if (rawLink.includes('/edit')) {
+        csvUrl = rawLink.replace(/\/edit.*$/, '/export?format=csv');
+      }
+
+      try {
+        const res = await fetch(csvUrl);
+        if (!res.ok) throw new Error('Không thể đọc file từ link cung cấp.');
+        const text = await res.text();
+        const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+        
+        // Đọc dòng điểm mới nhất (dòng cuối hoặc dòng 2 tùy bảng)
+        const lastRow = lines[lines.length - 1].split(',').map(c => parseFloat(c.trim()) || 0);
+        // Cấu trúc cột: [Tuần, Tổ 1, Tổ 2, Tổ 3, Tổ 4]
+        if (lastRow.length >= 5) {
+          const scores = { 1: lastRow[1], 2: lastRow[2], 3: lastRow[3], 4: lastRow[4] };
+          
+          // Sắp xếp tìm hạng (điểm cao nhất = Hạng 1)
+          const sortedTeams = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
+          let ranking = {};
+          sortedTeams.forEach((teamId, index) => {
+            ranking[teamId] = index + 1; // Hạng 1, 2, 3, 4
+          });
+
+          currentClass.weeklyRanking = ranking;
+          localStorage.setItem('garden_system_classes_v14', JSON.stringify(globalClassesData));
+          alert('Đã cập nhật thành công bảng điểm thi đua từ Google Sheets!');
+          applyClassConfiguration();
+        }
+      } catch (e) {
+        alert('Lỗi đọc link Drive: Đảm bảo bạn đã chia sẻ quyền "Bất kỳ ai có đường liên kết đều có thể xem".');
+      }
+    }
+
+    // GÁN CHỨC VỤ TỔ TRƯỞNG HOẶC CÁN BỘ LỚP
+    function assignStudentRole() {
+      const role = document.getElementById('t-role-select').value;
+      const sttInput = document.getElementById('t-student-stt').value.trim();
+      const customPass = document.getElementById('t-student-custom-pass').value.trim();
+
+      if (!sttInput) return alert('Vui lòng nhập STT học sinh!');
+      const sttFormatted = parseInt(sttInput) < 10 && !sttInput.startsWith('0') ? `0${parseInt(sttInput)}` : sttInput;
+      const username = `${currentClass.name}_stt${sttFormatted}`;
+
+      if (!currentClass.students[username]) {
+        currentClass.students[username] = { username, name: `Học sinh ${sttFormatted}`, stt: sttFormatted, team: role.startsWith('TT') ? parseInt(role.replace('TT','')) : 1, class: currentClass.name, password: 'hs123', role };
+      }
+
+      currentClass.students[username].role = role;
+      if (customPass) currentClass.students[username].password = customPass;
+
+      if (role.startsWith('TT')) {
+        currentClass.students[username].team = parseInt(role.replace('TT', ''));
+      }
+
+      localStorage.setItem('garden_system_classes_v14', JSON.stringify(globalClassesData));
+      alert(`Đã gán thành công tài khoản ${username} làm ${role}!`);
+    }
+
+    // CÁN BỘ LỚP LƯU TỪ KHÓA TRONG NGÀY
+    function submitDailyKeyword() {
+      const keyword = document.getElementById('input-daily-keyword').value.trim().toUpperCase();
+      if (!keyword) return alert('Vui lòng nhập từ khóa!');
+
+      currentClass.dailyKeyword = keyword;
+      localStorage.setItem('garden_system_classes_v14', JSON.stringify(globalClassesData));
+      document.getElementById('keyword-check-modal').classList.add('hidden');
+      alert(`Đã ghi nhận từ khóa điểm danh trong ngày: ${keyword}`);
+    }
+
+    // THÀNH VIÊN ĐIỂM DANH NHẬP TỪ KHÓA TĂNG TRƯỞNG CÂY
+    function submitDailyKeyword() {
+      const inputKw = document.getElementById('input-daily-keyword').value.trim().toUpperCase();
+      const correctKw = (currentClass.dailyKeyword || 'HOCAP').toUpperCase();
+
+      if (inputKw !== correctKw) {
+        alert('Từ khóa không chính xác! Vui lòng hỏi Cán bộ lớp.');
+        return;
+      }
+
+      if (!currentClass.checkedInStudents) currentClass.checkedInStudents = [];
+      if (!currentClass.checkedInStudents.includes(currentStudent.username)) {
+        currentClass.checkedInStudents.push(currentStudent.username);
+        localStorage.setItem('garden_system_classes_v14', JSON.stringify(globalClassesData));
+      }
+
+      document.getElementById('keyword-check-modal').classList.add('hidden');
+      alert('Điểm danh thành công! Cây trồng của tổ bạn đã được kích hoạt tăng trưởng.');
+      renderPerspectivePlotsOnCanvas();
+    }
+
+    function checkPermissionOnPlot(targetTeamId) {
+      if (!currentStudent) return { allowed: false, msg: 'Vui lòng đăng nhập!' };
+      if (currentStudent.role === 'TEACHER' || currentStudent.role === 'SUPER_TESTER') return { allowed: true };
+      if (currentStudent.role === `TT${targetTeamId}`) return { allowed: true };
+      if (currentStudent.role && currentStudent.role.startsWith('TT')) {
+        return { allowed: false, msg: `Bạn là Tổ trưởng Tổ ${currentStudent.team}, chỉ được thao tác tại Khu đất ${currentStudent.team} của tổ mình!` };
+      }
+      return { allowed: false, msg: `Chỉ Tổ trưởng (TT${targetTeamId}) mới có quyền trang trí tại Khu đất ${targetTeamId}!` };
+    }
+
+    function applyClassConfiguration() {
+      const cfg = currentClass.config;
+      if (currentStudent) {
+        document.getElementById('hdr-student-name').innerText = `${currentStudent.name} ${currentStudent.team ? '(Tổ ' + currentStudent.team + ')' : ''}`;
+        const roleBadge = document.getElementById('hdr-role-badge');
+        roleBadge.innerText = currentStudent.role;
+      }
+      document.getElementById('game-bg-image').src = cfg.bgA;
+      renderPerspectivePlotsOnCanvas();
+      renderDynamicButtonsFromAdmin();
+      switchButtonCategory('nutchunhat.png');
+    }
+
+    // TÍNH TOÁN HẠN MỨC SẢN PHẨM & TỈ LỆ TĂNG TRƯỞNG DO ĐIỂM DANH
+    function getPlotAllowedProductsCount(teamId) {
+      const rank = currentClass.weeklyRanking ? (currentClass.weeklyRanking[teamId] || 4) : 4;
+      // Hạng 1: 4 SP, Hạng 2: 3 SP, Hạng 3: 2 SP, Hạng 4: 1 SP
+      if (rank === 1) return 4;
+      if (rank === 2) return 3;
+      if (rank === 3) return 2;
+      return 1;
+    }
+
+    function getGrowthScaleMultiplier(teamId) {
+      // Tính % điểm danh thành viên trong tổ
+      const teamStudents = Object.values(currentClass.students || {}).filter(s => s.team === teamId);
+      const totalInTeam = Math.max(1, teamStudents.length);
+      const checkedInInTeam = teamStudents.filter(s => (currentClass.checkedInStudents || []).includes(s.username)).length;
+      
+      const percent = checkedInInTeam / totalInTeam; // từ 0 đến 1 (100%)
+      // Kích thước khởi điểm 40%, khi đạt 100% điểm danh sẽ đạt 100% kích thước chuẩn
+      return 0.4 + (0.6 * percent);
+    }
+
+    function renderPerspectivePlotsOnCanvas() {
+      const container = document.getElementById('perspective
