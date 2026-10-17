@@ -84,10 +84,10 @@
         </div>
         <div>
           <label class="block text-[11px] font-bold text-slate-600 mb-1">Mật khẩu:</label>
-          <div class="relative">
+          <div class="relative flex items-center">
             <input type="password" id="input-student-pass" class="w-full px-3 py-2 pr-10 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-            <button type="button" onclick="togglePasswordVisibility('input-student-pass', 'eye-icon-login')" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
-              <i id="eye-icon-login" class="fa-solid fa-eye text-xs"></i>
+            <button type="button" onclick="togglePasswordVisibility('input-student-pass', 'eye-icon-login')" class="absolute right-2.5 p-1.5 text-slate-400 hover:text-slate-700 cursor-pointer z-20">
+              <i id="eye-icon-login" class="fa-solid fa-eye text-xs pointer-events-none"></i>
             </button>
           </div>
         </div>
@@ -304,15 +304,16 @@
     let currentActiveButtonKey = 'nutchunhat.png';
     let draggedItemData = null;
 
-    function togglePasswordVisibility(id, iconId) {
-      const el = document.getElementById(id);
-      const icon = document.getElementById(iconId);
-      if (el.type === 'password') {
-        el.type = 'text';
-        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    function togglePasswordVisibility(inputId, iconId) {
+      const inputEl = document.getElementById(inputId);
+      const iconEl = document.getElementById(iconId);
+      if (!inputEl || !iconEl) return;
+      if (inputEl.type === 'password') {
+        inputEl.type = 'text';
+        iconEl.classList.replace('fa-eye', 'fa-eye-slash');
       } else {
-        el.type = 'password';
-        icon.classList.replace('fa-eye-slash', 'fa-eye');
+        inputEl.type = 'password';
+        iconEl.classList.replace('fa-eye-slash', 'fa-eye');
       }
     }
 
