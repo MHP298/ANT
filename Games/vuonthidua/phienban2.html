@@ -36,8 +36,7 @@
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.25); border-radius: 4px; }
     .garden-placed-flower { position: absolute; touch-action: none; user-select: none; cursor: grab; z-index: 30; transform: translate(-50%, -50%); }
-    .plot-group-hover { transform-box: fill-box; transform-origin: center; transition: transform 0.22s ease-out; cursor: pointer; }
-    .plot-group-hover:hover { transform: scale(1.015); filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35)); }
+    .plot-group-hover { transform-box: fill-box; transform-origin: center; cursor: pointer; }
     .admin-node { fill: #10b981; stroke: #ffffff; stroke-width: 3px; cursor: pointer; transition: transform 0.15s; }
     .admin-node:hover { transform: scale(1.3); }
     .btn-cat-active { background-color: #059669 !important; color: #ffffff !important; border-color: #34d399 !important; }
@@ -168,7 +167,7 @@
       <div id="drop-flowers-layer" class="absolute inset-0 w-full h-full pointer-events-auto z-20"></div>
     </section>
 
-    <!-- KHAY CÔNG CỤ BÊN PHẢI & BẢNG ĐIỀU KHIỂN DÀNH CHO ADMIN Ở DƯỚI -->
+    <!-- KHAY CÔNG CỤ & BẢNG ĐIỀU KHIỂN ADMIN -->
     <aside id="section-b" class="w-1/4 h-full bg-cover flex flex-col shadow-2xl shrink-0 justify-between" style="background-image: url('assets/nengame/nenungdung.jpg');">
       <div>
         <div class="p-2 bg-black/20 border-b shrink-0">
@@ -183,10 +182,10 @@
         </div>
       </div>
 
-      <!-- BẢNG ĐIỀU KHIỂN ADMIN NHÚNG TRỰC TIẾP Ở CUỐI KHAY (CHỈ HIỆN KHI ADMIN ĐĂNG NHẬP) -->
+      <!-- BẢNG ĐIỀU KHIỂN ADMIN TRỰC TIẾP Ở CUỐI KHAY -->
       <div id="admin-bottom-panel" class="p-2.5 bg-slate-900/90 backdrop-blur border-t border-white/20 text-white space-y-2 hidden shrink-0 text-xs">
         <div class="font-black text-[10px] uppercase text-emerald-400 flex items-center gap-1">
-          <i class="fa-solid fa-gear"></i> Bảng Điều Hành Admin
+          <i class="fa-solid fa-gear"></i> BẢNG ĐIỀU KHIỂN ADMIN
         </div>
         <div class="grid grid-cols-2 gap-1.5">
           <input type="text" id="admin-input-classname" placeholder="Tên lớp (VD: 10A1)" class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-xs font-bold uppercase text-white">
@@ -219,9 +218,20 @@
 
     const GITHUB_OWNER = 'MHP298';
     const GITHUB_REPO = 'ANT';
-    const ALL_FOLDERS = ['hoacap1', 'hoacap2', 'nucap1', 'nucap2', 'congcu', 'nendat', 'nengame', 'nutgame'];
-    let cachedScannedAssets = {};
 
+    // ĐỊNH NGHĨA TRỰC TIẾP DANH SÁCH FILE ẢNH ĐỂ KHÔNG BỊ LỖI CORS / 403 TỪ GITHUB API
+    const assetFolders = {
+      'hoacap1': ['hoa1.png', 'hoa2.png', 'hoa3.png', 'hoa4.png', 'hoa5.png', 'hoa6.png'],
+      'hoacap2': ['hoa1.png', 'hoa2.png', 'hoa3.png'],
+      'nucap1': ['nu1.png', 'nu2.png', 'nu3.png'],
+      'nucap2': ['nu1.png', 'nu2.png'],
+      'congcu': ['xeng.png', 'cuốc.png', 'binhtuoisuong.png', 'binhnuoc.png'],
+      'nendat': ['datvang.png', 'datnau.png', 'datcat.png'],
+      'nengame': ['vuonlop.jpg', 'nenungdung.jpg'],
+      'nutgame': ['nuthoa.png', 'nutnu.png', 'nutchunhat.png', 'nutxeng.png']
+    };
+
+    let cachedScannedAssets = {};
     let activeClassName = '';
     let selectedPlotIdForAdmin = null;
 
@@ -232,8 +242,8 @@
         bgA: 'assets/nengame/vuonlop.jpg',
         bgB: 'assets/nengame/nenungdung.jpg',
         buttonMappings: {
-          'nuthoa.png': { label: 'HOA', targetFolders: ['hoacap1'] },
-          'nutnu.png': { label: 'NỤ', targetFolders: ['nucap1'] },
+          'nuthoa.png': { label: 'HOA', targetFolders: ['hoacap1', 'hoacap2'] },
+          'nutnu.png': { label: 'NỤ', targetFolders: ['nucap1', 'nucap2'] },
           'nutchunhat.png': { label: 'ĐẤT', targetFolders: ['nendat'] },
           'nutxeng.png': { label: 'CÔNG CỤ', targetFolders: ['congcu'] }
         },
@@ -267,16 +277,13 @@
       }
     }
 
-    async function scanGithubAssetsAutomatically() {
-      for (const folder of ALL_FOLDERS) {
-        try {
-          const res = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/Games/vuonthidua/assets/${folder}`);
-          if (res.ok) {
-            const data = await res.json();
-            cachedScannedAssets[folder] = data.filter(item => item.type === 'file' && /\.(png|jpe?g|webp|svg)$/i.test(item.name))
-              .map(item => ({ fileName: item.name, rawUrl: `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${item.path}` }));
-          }
-        } catch (e) {}
+    // NẠP TRỰC TIẾP TỪ LINK RAW CỦA GITHUB KHÔNG QUA API ĐỂ TRÁNH LỖI 403
+    function loadAssetsDirectly() {
+      for (const folder in assetFolders) {
+        cachedScannedAssets[folder] = assetFolders[folder].map(fileName => ({
+          fileName: fileName,
+          rawUrl: `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/Games/vuonthidua/assets/${folder}/${fileName}`
+        }));
       }
       renderDynamicButtonsFromAdmin();
       switchButtonCategory(currentActiveButtonKey);
@@ -349,7 +356,6 @@
       db.collection('classes').doc(activeClassName).set(currentClass).catch(err => console.error(err));
     }
 
-    // NÚT "LƯU CẤU HÌNH": TỰ ĐỘNG TẠO DỮ LIỆU LỚP, THÀNH VIÊN, MẬT KHẨU & ĐỒNG BỘ LÊN FIREBASE
     function saveAdminClassConfiguration() {
       const className = document.getElementById('admin-input-classname').value.trim().toUpperCase();
       const size = parseInt(document.getElementById('admin-input-size').value) || 0;
@@ -426,7 +432,7 @@
 
     function checkPermissionOnPlot(targetTeamId) {
       if (!currentStudent) return { allowed: false, msg: 'Chưa đăng nhập!' };
-      if (currentStudent.role === 'TEACHER') return { allowed: true };
+      if (currentStudent.role === 'TEACHER' || currentStudent.username === 'admin') return { allowed: true };
       if (currentStudent.role === `TT${targetTeamId}`) return { allowed: true };
       return { allowed: false, msg: `Chỉ Tổ trưởng Tổ ${targetTeamId} mới có quyền thao tác khu đất này!` };
     }
@@ -469,7 +475,7 @@
       const sectionA = document.getElementById('section-a');
       const cW = sectionA.clientWidth || 960;
       const cH = sectionA.clientHeight || 640;
-      const isAdmin = currentStudent && currentStudent.role === 'TEACHER';
+      const isAdmin = currentStudent && (currentStudent.role === 'TEACHER' || currentStudent.username === 'admin');
 
       container.innerHTML = `<svg class="absolute inset-0 w-full h-full pointer-events-auto" viewBox="0 0 ${cW} ${cH}">
         <defs>${slots.map(slot => `<clipPath id="clip-slot-${slot.id}"><polygon points="${slot.corners.map(c => `${(c.x/100)*cW},${(c.y/100)*cH}`).join(' ')}" /></clipPath>`).join('')}</defs>
@@ -480,7 +486,7 @@
           const limitSP = getPlotAllowedProductsCount(slot.teamId);
           const isSelected = isAdmin && selectedPlotIdForAdmin === slot.id;
 
-          return `<g class="plot-group-hover" onclick="selectPlotForAdmin('${slot.id}', event)" ondragover="handleDragOver(event)" ondrop="handleDropOnPlot(event, '${slot.id}',${slot.teamId})">
+          return `<g class="plot-group-hover" onclick="selectPlotForAdmin('${slot.id}', event)" onmousedown="startDragEntirePlot('${slot.id}', event)" ondragover="handleDragOver(event)" ondrop="handleDropOnPlot(event, '${slot.id}',${slot.teamId})">
             ${!hasSoil ? `<polygon points="${xs.map((v, i) => `${v},${ys[i]}`).join(' ')}" fill="${isSelected ? 'rgba(16, 185, 129, 0.35)' : 'rgba(245, 158, 11, 0.25)'}" stroke="${isSelected ? '#10b981' : '#f59e0b'}" stroke-width="${isSelected ? '3' : '2'}" stroke-dasharray="6"/>` : `
               <image href="${slot.soilImage}" x="${minX}" y="${minY}" width="${maxX - minX}" height="${maxY - minY}" preserveAspectRatio="none" clip-path="url(#clip-slot-${slot.id})"/>
               <g onclick="clearSoilFromSlot('${slot.id}', ${slot.teamId}, event)" class="cursor-pointer"><circle cx="${maxX-14}" cy="${minY+14}" r="11" fill="#e11d48"/><text x="${maxX-14}" y="${minY+15}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="11">✕</text></g>
@@ -499,26 +505,63 @@
         }).join('')}
       </svg>
       
-      <!-- CỤM NÚT CÔNG CỤ (COPY, KHÓA, XÓA) BÁM SÁT GÓC TRÊN VÙNG CHỌN -->
       ${isAdmin && selectedPlotIdForAdmin ? (() => {
         const slot = slots.find(s => s.id === selectedPlotIdForAdmin);
         if(!slot) return '';
         const xs = slot.corners.map(c => (c.x / 100) * cW), ys = slot.corners.map(c => (c.y / 100) * cH);
         const minX = Math.min(...xs), minY = Math.min(...ys);
         return `<div style="position: absolute; left: ${minX}px; top:${Math.max(10, minY - 45)}px;" class="flex items-center gap-1.5 z-40 bg-white/90 backdrop-blur px-2 py-1 rounded-xl shadow-lg border">
-          <button onclick="copyPlot('${slot.id}')" class="w-7 h-7 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center justify-center text-xs" title="Sao chép tăng số thứ tự"><i class="fa-solid fa-copy"></i></button>
+          <button onclick="copyPlot('${slot.id}')" class="w-7 h-7 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center justify-center text-xs" title="Sao chép"><i class="fa-solid fa-copy"></i></button>
           <button onclick="toggleLockPlot('${slot.id}')" class="w-7 h-7 bg-slate-700 hover:bg-slate-800 text-white rounded-lg flex items-center justify-center text-xs" title="Khóa/Mở"><i class="fa-solid fa-lock-open"></i></button>
-          <button onclick="deletePlot('${slot.id}')" class="w-7 h-7 bg-rose-600 hover:bg-rose-700 text-white rounded-lg flex items-center justify-center text-xs" title="Xóa vùng chọn"><i class="fa-solid fa-xmark"></i></button>
+          <button onclick="deletePlot('${slot.id}')" class="w-7 h-7 bg-rose-600 hover:bg-rose-700 text-white rounded-lg flex items-center justify-center text-xs" title="Xóa"><i class="fa-solid fa-xmark"></i></button>
         </div>`;
       })() : ''}`;
     }
 
     function selectPlotForAdmin(plotId, e) {
-      if (currentStudent && currentStudent.role === 'TEACHER') {
+      const isAdmin = currentStudent && (currentStudent.role === 'TEACHER' || currentStudent.username === 'admin');
+      if (isAdmin) {
         selectedPlotIdForAdmin = plotId;
         renderPerspectivePlotsOnCanvas();
         e.stopPropagation();
       }
+    }
+
+    function startDragEntirePlot(plotId, e) {
+      const isAdmin = currentStudent && (currentStudent.role === 'TEACHER' || currentStudent.username === 'admin');
+      if (!isAdmin || e.target.tagName === 'CIRCLE' || e.target.tagName === 'BUTTON') return;
+      selectedPlotIdForAdmin = plotId;
+      renderPerspectivePlotsOnCanvas();
+
+      const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
+      if (!slot) return;
+      const sectionA = document.getElementById('section-a');
+      const cW = sectionA.clientWidth || 960;
+      const cH = sectionA.clientHeight || 640;
+
+      let startX = e.clientX;
+      let startY = e.clientY;
+      const initialCorners = JSON.parse(JSON.stringify(slot.corners));
+
+      const onMouseMove = (moveEvent) => {
+        const dx = ((moveEvent.clientX - startX) / cW) * 100;
+        const dy = ((moveEvent.clientY - startY) / cH) * 100;
+        slot.corners = initialCorners.map(c => ({
+          x: Math.max(0, Math.min(100, c.x + dx)),
+          y: Math.max(0, Math.min(100, c.y + dy))
+        }));
+        renderPerspectivePlotsOnCanvas();
+      };
+
+      const onMouseUp = () => {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+        saveClassToFirebase();
+      };
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+      e.stopPropagation();
     }
 
     function startResizePlot(plotId, cornerIndex, e) {
@@ -571,7 +614,6 @@
       saveClassToFirebase();
     }
 
-    // TÍCH HỢP HIỆU ỨNG ĐỔI MÀU NÚT KHI ĐƯỢC CHỌN VÀ LOAD ĐÚNG THƯ MỤC ASSETS
     function renderDynamicButtonsFromAdmin() {
       const bar = document.getElementById('dynamic-button-bar');
       const mappings = currentClass.config.buttonMappings || {};
@@ -589,7 +631,7 @@
 
     function switchButtonCategory(iconFile) {
       currentActiveButtonKey = iconFile;
-      renderDynamicButtonsFromAdmin(); // Cập nhật lại màu sắc nút
+      renderDynamicButtonsFromAdmin();
       const targetFolders = currentClass.config.buttonMappings[iconFile]?.targetFolders || ['hoacap1'];
       renderTrayItemsFromFolders(targetFolders);
     }
@@ -600,7 +642,7 @@
       folderList.forEach(folder => { (cachedScannedAssets[folder] || []).forEach(item => combined.push({ ...item, isSoil: currentActiveButtonKey === 'nutchunhat.png' })); });
       
       if (combined.length === 0) {
-        tray.innerHTML = `<div class="col-span-3 text-center text-white/70 text-[10px] py-6">Đang quét thư mục...</div>`;
+        tray.innerHTML = `<div class="col-span-3 text-center text-white/70 text-[10px] py-6">Đang tải ảnh...</div>`;
         return;
       }
 
@@ -722,7 +764,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      scanGithubAssetsAutomatically();
+      loadAssetsDirectly();
       const loginModal = document.getElementById('student-login-modal');
       if (loginModal) loginModal.classList.remove('hidden');
     });
