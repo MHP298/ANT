@@ -3,16 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <!-- 1. CÁC THẺ META HTTP-EQUIV CHỐNG LƯU CACHE -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
+
   <title>Vườn Thi Đua Trồng Hoa - Sân Chơi Lớp Học</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- NHÚNG FIREBASE SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+  <!-- 2. SCRIPT TỰ ĐỘNG GẮN THAM SỐ ?v=TIMESTAMP ĐỂ TRÁNH VÒNG LẶP VÔ TẬN -->
+  <script>
+    (function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const vParam = urlParams.get('v');
+      // Chỉ gắn tham số phiên bản nếu chưa có để tránh vòng lặp chuyển hướng vô tận
+      if (!vParam) {
+        const timestamp = Date.now();
+        urlParams.set('v', timestamp);
+        const newUrl = window.location.pathname + '?' + urlParams.toString() + window.location.hash;
+        window.history.replaceState({}, '', newUrl);
+      }
+    })();
+  </script>
+
+  <!-- 3. GẮN ĐUÔI ?v= ĐỘNG CHO CÁC THƯ VIỆN BÊN NGOÀI -->
+  <script>
+    const appVersion = Date.now();
+    document.write('<script src="https://cdn.tailwindcss.com?v=' + appVersion + '"><\/script>');
+    document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css?v=' + appVersion + '">');
+    document.write('<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js?v=' + appVersion + '"><\/script>');
+    document.write('<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js?v=' + appVersion + '"><\/script>');
+  </script>
 
   <style>
     #landscape-warning { display: none; }
@@ -94,7 +115,7 @@
     </div>
   </div>
 
-  <!-- POPUP ADMIN GIÁO VIÊN (GIAO DIỆN CHUẨN CŨ) -->
+  <!-- POPUP ADMIN GIÁO VIÊN -->
   <div id="teacher-admin-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 text-left max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
@@ -212,7 +233,6 @@
           'nutchunhat.png': { label: 'ĐẤT', targetFolders: ['nendat'] },
           'nutxeng.png': { label: 'CÔNG CỤ', targetFolders: ['congcu'] }
         },
-        // ĐIỀU CHỈNH TỌA ĐỘ VÙNG CHỌN KHU ĐẤT ÔM TRỌN SÂN GẠCH VÀNG (Y HỆT ẢNH MẪU 3)
         plotSlots: [
           { id: 'slot_1', name: 'Khu 1', teamId: 1, corners: [{ x: 19, y: 19 }, { x: 38, y: 19 }, { x: 38, y: 50 }, { x: 19, y: 50 }], soilImage: null },
           { id: 'slot_2', name: 'Khu 2', teamId: 2, corners: [{ x: 19, y: 52 }, { x: 38, y: 52 }, { x: 38, y: 88 }, { x: 19, y: 88 }], soilImage: null },
@@ -483,14 +503,12 @@
         renderPerspectivePlotsOnCanvas();
         saveClassToFirebase();
       } else {
-        // KIỂM TRA HẠN MỨC SẢN PHẨM TRÊN Ô ĐẤT ĐÓ
         const placedCount = (currentClass.placedFlowers || []).filter(f => parseInt(f.teamId) === teamId).length;
         const limit = getPlotAllowedProductsCount(teamId);
         if (placedCount >= limit) {
           return alert(`Khu đất ${teamId} chỉ được phép tối đa ${limit} sản phẩm theo hạng thi đua!`);
         }
 
-        // TÍNH TOÁN TỌA ĐỘ NẰM TRONG GIỚI HẠN PHẠM VI Ô ĐẤT ĐÓ
         const sectionA = document.getElementById('section-a');
         const cW = sectionA.clientWidth || 960;
         const cH = sectionA.clientHeight || 640;
@@ -503,7 +521,7 @@
         let dropX = e.clientX - rect.left;
         let dropY = e.clientY - rect.top;
 
-        // Nếu thả ngoài ô đất, tự động căn vào tâm ô đất để đảm bảo nằm trong phạm vi
+        // Ép vị trí hiển thị luôn nằm gọn gàng bên trong phạm vi ô đất được chọn
         if (dropX < minX || dropX > maxX || dropY < minY || dropY > maxY) {
           dropX = (minX + maxX) / 2;
           dropY = (minY + maxY) / 2;
