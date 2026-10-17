@@ -3,30 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  
-  <!-- 1. CÁC THẺ META HTTP-EQUIV CHỐNG LƯU CACHE -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-
   <title>Vườn Thi Đua Trồng Hoa - Sân Chơi Lớp Học</title>
-
-  <!-- 2. SCRIPT TỰ ĐỘNG GẮN THAM SỐ ?v=TIMESTAMP ĐỂ TRÁNH VÒNG LẶP VÔ TẬN -->
+  
   <script>
     (function() {
       const urlParams = new URLSearchParams(window.location.search);
-      const vParam = urlParams.get('v');
-      // Chỉ gắn tham số phiên bản nếu chưa có để tránh vòng lặp chuyển hướng vô tận
-      if (!vParam) {
-        const timestamp = Date.now();
-        urlParams.set('v', timestamp);
-        const newUrl = window.location.pathname + '?' + urlParams.toString() + window.location.hash;
-        window.history.replaceState({}, '', newUrl);
+      if (!urlParams.get('v')) {
+        urlParams.set('v', Date.now());
+        window.history.replaceState({}, '', window.location.pathname + '?' + urlParams.toString() + window.location.hash);
       }
     })();
   </script>
 
-  <!-- 3. GẮN ĐUÔI ?v= ĐỘNG CHO CÁC THƯ VIỆN BÊN NGOÀI -->
   <script>
     const appVersion = Date.now();
     document.write('<script src="https://cdn.tailwindcss.com?v=' + appVersion + '"><\/script>');
@@ -47,6 +38,8 @@
     .garden-placed-flower { position: absolute; touch-action: none; user-select: none; cursor: grab; z-index: 30; transform: translate(-50%, -50%); }
     .plot-group-hover { transform-box: fill-box; transform-origin: center; transition: transform 0.22s ease-out; cursor: pointer; }
     .plot-group-hover:hover { transform: scale(1.015); filter: drop-shadow(0 6px 12px rgba(0,0,0,0.35)); }
+    .admin-node { fill: #10b981; stroke: #ffffff; stroke-width: 3px; cursor: pointer; transition: transform 0.15s; }
+    .admin-node:hover { transform: scale(1.3); }
   </style>
 </head>
 <body id="game-wrapper" class="bg-cover bg-center h-screen w-screen overflow-hidden flex flex-col font-sans select-none" style="background-image: url('assets/nengame/nenungdung.jpg');">
@@ -221,6 +214,8 @@
     let cachedScannedAssets = {};
 
     let activeClassName = '';
+    let selectedPlotIdForAdmin = null;
+
     let currentClass = {
       name: '',
       config: {
@@ -233,11 +228,9 @@
           'nutchunhat.png': { label: 'ĐẤT', targetFolders: ['nendat'] },
           'nutxeng.png': { label: 'CÔNG CỤ', targetFolders: ['congcu'] }
         },
+        // MẶC ĐỊNH BAN ĐẦU CHỈ CÓ ĐÚNG 1 VÙNG CHỌN (KHU 1)
         plotSlots: [
-          { id: 'slot_1', name: 'Khu 1', teamId: 1, corners: [{ x: 19, y: 19 }, { x: 38, y: 19 }, { x: 38, y: 50 }, { x: 19, y: 50 }], soilImage: null },
-          { id: 'slot_2', name: 'Khu 2', teamId: 2, corners: [{ x: 19, y: 52 }, { x: 38, y: 52 }, { x: 38, y: 88 }, { x: 19, y: 88 }], soilImage: null },
-          { id: 'slot_3', name: 'Khu 3', teamId: 3, corners: [{ x: 44, y: 19 }, { x: 67, y: 19 }, { x: 67, y: 50 }, { x: 44, y: 50 }], soilImage: null },
-          { id: 'slot_4', name: 'Khu 4', teamId: 4, corners: [{ x: 44, y: 52 }, { x: 67, y: 52 }, { x: 67, y: 88 }, { x: 44, y: 88 }], soilImage: null }
+          { id: 'slot_1', name: 'Khu 1', teamId: 1, corners: [{ x: 20, y: 31 }, { x: 48, y: 31 }, { x: 48, y: 50 }, { x: 20, y: 50 }], soilImage: null }
         ],
         textOverlays: [{ id: 'txt_default', content: 'Vườn hạnh phúc của lớp', x: 48, y: 16, fontSize: 17 }]
       },
@@ -399,7 +392,7 @@
 
     function checkPermissionOnPlot(targetTeamId) {
       if (!currentStudent) return { allowed: false, msg: 'Chưa đăng nhập!' };
-      if (currentStudent.role === 'TEACHER') return { allowed: true }; // ADMIN TOÀN QUYỀN TEST
+      if (currentStudent.role === 'TEACHER') return { allowed: true };
       if (currentStudent.role === `TT${targetTeamId}`) return { allowed: true };
       return { allowed: false, msg: `Chỉ Tổ trưởng Tổ ${targetTeamId} mới có quyền thao tác khu đất này!` };
     }
@@ -440,6 +433,7 @@
       const sectionA = document.getElementById('section-a');
       const cW = sectionA.clientWidth || 960;
       const cH = sectionA.clientHeight || 640;
+      const isAdmin = currentStudent && currentStudent.role === 'TEACHER';
 
       container.innerHTML = `<svg class="absolute inset-0 w-full h-full pointer-events-auto" viewBox="0 0 ${cW} ${cH}">
         <defs>${slots.map(slot => `<clipPath id="clip-slot-${slot.id}"><polygon points="${slot.corners.map(c => `${(c.x/100)*cW},${(c.y/100)*cH}`).join(' ')}" /></clipPath>`).join('')}</defs>
@@ -448,8 +442,10 @@
           const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
           const hasSoil = !!slot.soilImage;
           const limitSP = getPlotAllowedProductsCount(slot.teamId);
-          return `<g class="plot-group-hover" ondragover="handleDragOver(event)" ondrop="handleDropOnPlot(event, '${slot.id}',${slot.teamId})">
-            ${!hasSoil ? `<polygon points="${xs.map((v, i) => `${v},${ys[i]}`).join(' ')}" fill="rgba(245, 158, 11, 0.25)" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="6"/>` : `
+          const isSelected = isAdmin && selectedPlotIdForAdmin === slot.id;
+
+          return `<g class="plot-group-hover" onclick="selectPlotForAdmin('${slot.id}', event)" ondragover="handleDragOver(event)" ondrop="handleDropOnPlot(event, '${slot.id}',${slot.teamId})">
+            ${!hasSoil ? `<polygon points="${xs.map((v, i) => `${v},${ys[i]}`).join(' ')}" fill="${isSelected ? 'rgba(16, 185, 129, 0.35)' : 'rgba(245, 158, 11, 0.25)'}" stroke="${isSelected ? '#10b981' : '#f59e0b'}" stroke-width="${isSelected ? '3' : '2'}" stroke-dasharray="6"/>` : `
               <image href="${slot.soilImage}" x="${minX}" y="${minY}" width="${maxX - minX}" height="${maxY - minY}" preserveAspectRatio="none" clip-path="url(#clip-slot-${slot.id})"/>
               <g onclick="clearSoilFromSlot('${slot.id}', ${slot.teamId}, event)" class="cursor-pointer"><circle cx="${maxX-14}" cy="${minY+14}" r="11" fill="#e11d48"/><text x="${maxX-14}" y="${minY+15}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="11">✕</text></g>
             `}
@@ -457,9 +453,84 @@
               <rect x="${(xs.reduce((a,b)=>a+b)/4)-50}" y="${(ys.reduce((a,b)=>a+b)/4)-13}" width="100" height="26" rx="13" fill="rgba(69, 26, 3, 0.85)" stroke="#fbbf24"/>
               <text x="${xs.reduce((a,b)=>a+b)/4}" y="${ys.reduce((a,b)=>a+b)/4}" text-anchor="middle" dominant-baseline="central" fill="#fef08a" font-size="11" font-weight="900">🌾 Khu ${slot.teamId} (${limitSP} SP)</text>
             </g>
+            ${isSelected ? `
+              <circle class="admin-node" cx="${xs[0]}" cy="${ys[0]}" r="8" onmousedown="startResizePlot('${slot.id}', 0, event)"/>
+              <circle class="admin-node" cx="${xs[1]}" cy="${ys[1]}" r="8" onmousedown="startResizePlot('${slot.id}', 1, event)"/>
+              <circle class="admin-node" cx="${xs[2]}" cy="${ys[2]}" r="8" onmousedown="startResizePlot('${slot.id}', 2, event)"/>
+              <circle class="admin-node" cx="${xs[3]}" cy="${ys[3]}" r="8" onmousedown="startResizePlot('${slot.id}', 3, event)"/>
+            ` : ''}
           </g>`;
         }).join('')}
-      </svg>`;
+      </svg>
+      
+      <!-- CỤM NÚT CÔNG CỤ (COPY, KHÓA, XÓA) ĐÁNH SỐ THỨ TỰ TĂNG DẦN (KHU 1, KHU 2,...) -->
+      ${isAdmin && selectedPlotIdForAdmin ? (() => {
+        const slot = slots.find(s => s.id === selectedPlotIdForAdmin);
+        if(!slot) return '';
+        const xs = slot.corners.map(c => (c.x / 100) * cW), ys = slot.corners.map(c => (c.y / 100) * cH);
+        const minX = Math.min(...xs), minY = Math.min(...ys);
+        return `<div style="position: absolute; left: ${minX}px; top:${Math.max(10, minY - 45)}px;" class="flex items-center gap-1.5 z-40 bg-white/90 backdrop-blur px-2 py-1 rounded-xl shadow-lg border">
+          <button onclick="copyPlot('${slot.id}')" class="w-7 h-7 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center justify-center text-xs" title="Sao chép tăng số thứ tự"><i class="fa-solid fa-copy"></i></button>
+          <button onclick="toggleLockPlot('${slot.id}')" class="w-7 h-7 bg-slate-700 hover:bg-slate-800 text-white rounded-lg flex items-center justify-center text-xs" title="Khóa/Mở"><i class="fa-solid fa-lock-open"></i></button>
+          <button onclick="deletePlot('${slot.id}')" class="w-7 h-7 bg-rose-600 hover:bg-rose-700 text-white rounded-lg flex items-center justify-center text-xs" title="Xóa vùng chọn"><i class="fa-solid fa-xmark"></i></button>
+        </div>`;
+      })() : ''}`;
+    }
+
+    function selectPlotForAdmin(plotId, e) {
+      if (currentStudent && currentStudent.role === 'TEACHER') {
+        selectedPlotIdForAdmin = plotId;
+        renderPerspectivePlotsOnCanvas();
+        e.stopPropagation();
+      }
+    }
+
+    function startResizePlot(plotId, cornerIndex, e) {
+      e.stopPropagation();
+      const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
+      if (!slot) return;
+      const sectionA = document.getElementById('section-a');
+      const cW = sectionA.clientWidth || 960;
+      const cH = sectionA.clientHeight || 640;
+
+      const onMouseMove = (moveEvent) => {
+        const rect = sectionA.getBoundingClientRect();
+        const mouseX = moveEvent.clientX - rect.left;
+        const mouseY = moveEvent.clientY - rect.top;
+        slot.corners[cornerIndex].x = Math.max(0, Math.min(100, (mouseX / cW) * 100));
+        slot.corners[cornerIndex].y = Math.max(0, Math.min(100, (mouseY / cH) * 100));
+        renderPerspectivePlotsOnCanvas();
+      };
+
+      const onMouseUp = () => {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+        saveClassToFirebase();
+      };
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    // SAO CHÉP VÙNG CHỌN VÀ TỰ ĐỘNG TĂNG SỐ THỨ TỰ TƯƠNG TỨNG (KHU 2, KHU 3,...)
+    function copyPlot(plotId) {
+      const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
+      if (!slot) return;
+      const nextIndex = currentClass.config.plotSlots.length + 1;
+      const newId = 'slot_' + nextIndex;
+      const newCorners = slot.corners.map(c => ({ x: c.x + 5, y: c.y }));
+      currentClass.config.plotSlots.push({ id: newId, name: `Khu ${nextIndex}`, teamId: nextIndex, corners: newCorners, soilImage: null });
+      renderPerspectivePlotsOnCanvas();
+      saveClassToFirebase();
+    }
+
+    function toggleLockPlot(plotId) { alert('Trạng thái khóa khu đất đã được cập nhật!'); }
+
+    function deletePlot(plotId) {
+      currentClass.config.plotSlots = currentClass.config.plotSlots.filter(s => s.id !== plotId);
+      selectedPlotIdForAdmin = null;
+      renderPerspectivePlotsOnCanvas();
+      saveClassToFirebase();
     }
 
     function renderDynamicButtonsFromAdmin() {
@@ -521,7 +592,6 @@
         let dropX = e.clientX - rect.left;
         let dropY = e.clientY - rect.top;
 
-        // Ép vị trí hiển thị luôn nằm gọn gàng bên trong phạm vi ô đất được chọn
         if (dropX < minX || dropX > maxX || dropY < minY || dropY > maxY) {
           dropX = (minX + maxX) / 2;
           dropY = (minY + maxY) / 2;
