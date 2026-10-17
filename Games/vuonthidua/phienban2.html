@@ -28,10 +28,10 @@
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 35;
+      z-index: 20;
     }
     .plot-polygon-fill {
-      fill: rgba(16, 185, 129, 0.28);
+      fill: rgba(16, 185, 129, 0.25);
       stroke: #10b981;
       stroke-width: 3.5;
       stroke-dasharray: 6 4;
@@ -42,13 +42,17 @@
     .plot-polygon-fill:hover {
       fill: rgba(16, 185, 129, 0.38);
     }
+    .plot-polygon-fill.has-soil {
+      fill: transparent !important;
+      stroke: transparent !important; /* Vùng chọn biến mất khi đã có đất */
+    }
     .plot-polygon-fill.locked {
       stroke: #64748b;
       fill: rgba(100, 116, 139, 0.25);
       cursor: not-allowed;
     }
 
-    /* ĐIỂM NEO GÓC ĐỘC LẬP HOÀN TOÀN */
+    /* ĐIỂM NEO GÓC ĐỘC LẬP TỪNG ĐỈNH */
     .polygon-node {
       position: absolute;
       width: 22px;
@@ -75,13 +79,25 @@
       border-color: #34d399 !important;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25);
     }
-    .garden-placed-flower {
+    
+    /* VẬT PHẨM HOA / NỤ / CÔNG CỤ (NẰM Ở LỚP TRÊN) */
+    .garden-placed-item {
       position: absolute;
       touch-action: none;
       user-select: none;
       cursor: grab;
-      z-index: 25;
+      z-index: 35; /* Luôn nổi trên nền đất và vùng chọn */
       transform: translate(-50%, -50%);
+    }
+
+    /* NỀN ĐẤT TỰ ĐỘNG KHỚP THEO ĐA GIÁC */
+    .polygon-soil-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 15;
     }
   </style>
 </head>
@@ -125,6 +141,67 @@
     </div>
   </div>
 
+  <!-- POPUP GÁN CHỨC VỤ HỌC SINH (KHÔI PHỤC) -->
+  <div id="role-assign-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 text-left space-y-3">
+      <div class="flex items-center justify-between pb-2 border-b">
+        <h3 class="font-extrabold text-xs text-emerald-800 uppercase"><i class="fa-solid fa-user-shield"></i> Phân Quyền Chức Vụ Học Sinh</h3>
+        <button onclick="closeRoleModal()" class="text-slate-400 hover:text-slate-700 font-bold">✕</button>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-slate-600 mb-1">Chức vụ:</label>
+        <select id="admin-role-select" class="w-full px-2 py-1.5 rounded-lg border text-xs font-bold bg-white">
+          <option value="TT1">Tổ trưởng 1</option>
+          <option value="TT2">Tổ trưởng 2</option>
+          <option value="TT3">Tổ trưởng 3</option>
+          <option value="TT4">Tổ trưởng 4</option>
+          <option value="CB">Cán bộ lớp</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-slate-600 mb-1">STT học sinh:</label>
+        <input type="text" id="admin-role-stt" placeholder="VD: 01" class="w-full px-2.5 py-1.5 rounded-lg border text-xs font-bold">
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-slate-600 mb-1">Mật khẩu riêng (tuỳ chọn):</label>
+        <input type="password" id="admin-role-pass" placeholder="Mặc định hs123" class="w-full px-2.5 py-1.5 rounded-lg border text-xs">
+      </div>
+      <button onclick="saveStudentRoleAssignment()" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs uppercase rounded-xl transition shadow">
+        Xác Nhận Gán Chức Vụ
+      </button>
+    </div>
+  </div>
+
+  <!-- POPUP CÁN BỘ LỚP KHAI BÁO TỪ KHÓA MỖI NGÀY -->
+  <div id="daily-keyword-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 text-left space-y-3">
+      <div class="flex items-center justify-between pb-2 border-b">
+        <h3 class="font-extrabold text-xs text-emerald-800 uppercase"><i class="fa-solid fa-key"></i> Khai Báo Điểm Danh TỪ KHÓA</h3>
+        <button onclick="closeDailyKeywordModal()" class="text-slate-400 hover:text-slate-700 font-bold">✕</button>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-slate-600 mb-1">Chọn ngày học trong tuần (Tối đa 5 ngày):</label>
+        <select id="keyword-day-select" class="w-full px-2 py-1.5 rounded-lg border text-xs font-bold bg-white">
+          <option value="day1">Ngày 1</option>
+          <option value="day2">Ngày 2</option>
+          <option value="day3">Ngày 3</option>
+          <option value="day4">Ngày 4</option>
+          <option value="day5">Ngày 5</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-slate-600 mb-1">Số thành viên đã nhập đúng từ khóa:</label>
+        <div class="flex items-center gap-2">
+          <input type="number" id="keyword-completed-count" placeholder="VD: 45" class="w-full px-2.5 py-1.5 rounded-lg border text-xs font-bold">
+          <span id="keyword-total-students" class="text-xs font-bold text-slate-500 whitespace-nowrap">/ 45 HS</span>
+        </div>
+      </div>
+      <button onclick="confirmDailyKeywordProgress()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase rounded-xl transition shadow">
+        Cập Nhật Tiến Độ Lớp
+      </button>
+    </div>
+  </div>
+
   <!-- HEADER -->
   <header class="h-10 bg-white/95 backdrop-blur-md border-b px-4 flex items-center justify-between z-30 shrink-0">
     <div class="flex items-center gap-2">
@@ -135,6 +212,7 @@
       </div>
     </div>
     <div class="flex items-center gap-2.5">
+      <button id="btn-cb-keyword" onclick="openDailyKeywordModal()" class="hidden px-2.5 py-1 text-[10px] font-bold rounded-lg bg-amber-50 text-amber-700 border border-amber-300 hover:bg-amber-100 transition"><i class="fa-solid fa-calendar-check"></i> Điểm Danh Từ Khóa</button>
       <button onclick="clearPlacedGardenFlowers()" class="px-2.5 py-1 text-[10px] font-bold rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition"><i class="fa-solid fa-trash-can"></i> Dọn Hoa</button>
       <div class="text-xs text-slate-700 font-semibold border-l pl-2.5 flex items-center gap-1.5">
         <span id="hdr-student-name">Chưa đăng nhập</span>
@@ -158,10 +236,13 @@
         </div>
       </div>
 
-      <!-- LỚP ĐẶT HOA / CÂY TRỒNG -->
-      <div id="drop-flowers-layer" class="absolute inset-0 w-full h-full pointer-events-auto z-20"></div>
+      <!-- LỚP NỀN ĐẤT (CLIP THEO ĐA GIÁC) -->
+      <div id="plots-soils-layer" class="polygon-soil-layer"></div>
 
-      <!-- LỚP VÙNG CHỌN ĐA GIÁC TỰ DO (SVG + 4 NODES) -->
+      <!-- LỚP ĐẶT VẬT PHẨM TRỒNG HOA (LỚP TRÊN ĐẤT) -->
+      <div id="drop-flowers-layer" class="absolute inset-0 w-full h-full pointer-events-auto z-30"></div>
+
+      <!-- LỚP VÙNG CHỌN ĐA GIÁC & CÁC NODE NEO -->
       <svg id="plots-svg-layer" class="polygon-selection-layer"></svg>
       <div id="plots-nodes-layer" class="absolute inset-0 w-full h-full pointer-events-none z-40"></div>
     </section>
@@ -183,7 +264,7 @@
         </div>
       </div>
 
-      <!-- BẢNG ĐIỀU KHIỂN ADMIN DƯỚI ĐÁY -->
+      <!-- BẢNG ĐIỀU KHIỂN ADMIN DƯỚI ĐÁY ĐẦY ĐỦ 2 NÚT: GÁN CHỨC VỤ + LƯU CẤU HÌNH -->
       <div id="admin-bottom-panel" class="p-2.5 bg-slate-900/95 backdrop-blur border-t border-white/20 text-white space-y-2 hidden shrink-0 text-xs">
         <div class="font-black text-[10px] uppercase text-emerald-400 flex items-center justify-between">
           <span><i class="fa-solid fa-gear"></i> BẢNG ĐIỀU KHIỂN ADMIN</span>
@@ -192,12 +273,15 @@
           </button>
         </div>
         <div class="grid grid-cols-2 gap-1.5">
-          <input type="text" id="admin-input-classname" placeholder="Tên lớp (VD: 10A1)" class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-xs font-bold uppercase text-white">
+          <input type="text" id="admin-input-classname" placeholder="Tên lớp (VD: 11TA3)" class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-xs font-bold uppercase text-white">
           <input type="number" id="admin-input-size" placeholder="Sĩ số (VD: 45)" class="px-2 py-1 rounded bg-slate-800 border border-slate-700 text-xs font-bold text-white">
         </div>
         <div class="grid grid-cols-2 gap-1.5">
-          <button onclick="saveAdminClassConfiguration()" class="col-span-2 py-1.5 px-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded text-[11px] transition shadow">
-            Lưu Cấu Hình Lên Firebase
+          <button onclick="openRoleModal()" class="py-1.5 px-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded text-[11px] transition shadow flex items-center justify-center gap-1">
+            <i class="fa-solid fa-user-shield"></i> Gán Chức Vụ
+          </button>
+          <button onclick="saveAdminClassConfiguration()" class="py-1.5 px-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded text-[11px] transition shadow flex items-center justify-center gap-1">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Lưu Cấu Hình
           </button>
         </div>
       </div>
@@ -225,21 +309,21 @@
     const db = firebase.firestore();
 
     const BUTTON_CATEGORIES = [
-      { key: 'nutnu.png', label: 'NỤ', folder: 'nucap1' },
-      { key: 'nuthoa.png', label: 'HOA', folder: 'hoacap1' },
-      { key: 'nutchunhat.png', label: 'ĐẤT', folder: 'nendat' },
-      { key: 'nutxeng.png', label: 'CÔNG CỤ', folder: 'congcu' }
+      { key: 'nutnu.png', label: 'NỤ', folder: 'nucap1', type: 'flower' },
+      { key: 'nuthoa.png', label: 'HOA', folder: 'hoacap1', type: 'flower' },
+      { key: 'nutchunhat.png', label: 'ĐẤT', folder: 'nendat', type: 'soil' },
+      { key: 'nutxeng.png', label: 'CÔNG CỤ', folder: 'congcu', type: 'tool' }
     ];
 
     let currentActiveButtonKey = 'nutnu.png';
-    let activeClassName = ''; 
+    let activeClassName = '';
     let selectedPlotId = 'slot_1';
 
     const repoImageCache = {};
 
-    // MỖI KHU ĐẤT CÓ 4 TỌA ĐỘ ĐỈNH ĐỘC LẬP TÍNH THEO PHẦN TRĂM (%)[cite: 1]
     let currentClass = {
       name: '',
+      size: 45,
       config: {
         bgA: 'assets/nengame/vuonlop.jpg',
         plotSlots: [
@@ -247,12 +331,11 @@
             id: 'slot_1',
             name: 'Khu 1',
             teamId: 1,
-            // 4 đỉnh: Top-Left, Top-Right, Bottom-Right, Bottom-Left
             points: [
-              { x: 26, y: 32 }, // Đỉnh 0: TL
-              { x: 74, y: 32 }, // Đỉnh 1: TR
-              { x: 74, y: 76 }, // Đỉnh 2: BR
-              { x: 26, y: 76 }  // Đỉnh 3: BL
+              { x: 26, y: 32 },
+              { x: 74, y: 32 },
+              { x: 74, y: 76 },
+              { x: 26, y: 76 }
             ],
             locked: false,
             soilImage: null
@@ -261,7 +344,7 @@
       },
       students: {},
       weeklyRanking: { 1: 1, 2: 2, 3: 3, 4: 4 },
-      checkedInStudents: [],
+      dailyKeywords: { day1: false, day2: false, day3: false, day4: false, day5: false },
       placedFlowers: []
     };
 
@@ -288,17 +371,18 @@
 
       if (!user) { err.innerText = 'Vui lòng nhập tài khoản!'; err.classList.remove('hidden'); return; }
 
-      // ADMIN ĐĂNG NHẬP: CHỈ BẬT GIAO DIỆN QUẢN TRỊ, KHÔNG TỰ Ý GHI FIREBASE
+      // ADMIN
       if (user === 'admin') {
         if (pass !== 'admjn1234') { err.innerText = 'Sai mật khẩu giáo viên!'; err.classList.remove('hidden'); return; }
         currentStudent = { username: 'admin', name: 'Giáo Viên (Admin)', role: 'TEACHER', team: 0 };
         document.getElementById('student-login-modal').classList.add('hidden');
         document.getElementById('admin-bottom-panel').classList.remove('hidden');
+        document.getElementById('btn-cb-keyword').classList.remove('hidden');
         applyClassConfiguration();
         return;
       }
 
-      // HỌC SINH ĐĂNG NHẬP
+      // HỌC SINH
       let matchedClass = user.split('_')[0].toUpperCase();
       const docRef = db.collection('classes').doc(matchedClass);
       const docSnap = await docRef.get();
@@ -317,6 +401,11 @@
       currentStudent = studentObj;
       activeClassName = matchedClass;
       document.getElementById('student-login-modal').classList.add('hidden');
+
+      if (currentStudent.role === 'CB' || currentStudent.role === 'TEACHER') {
+        document.getElementById('btn-cb-keyword').classList.remove('hidden');
+      }
+
       listenClassFromFirebase(activeClassName, () => { applyClassConfiguration(); });
     }
 
@@ -327,7 +416,6 @@
         if (doc.exists) {
           const remoteData = doc.data();
           if (remoteData.config && remoteData.config.plotSlots) {
-            // Chuyển đổi định dạng cũ sang 4 đỉnh đa giác nếu cần
             remoteData.config.plotSlots = remoteData.config.plotSlots.map(s => {
               if (!s.points && s.left !== undefined) {
                 s.points = [
@@ -347,10 +435,11 @@
       });
     }
 
+    // LƯU CẤU HÌNH LÊN FIREBASE CHUẨN XÁC DOCUMENT
     function saveAdminClassConfiguration() {
       const className = document.getElementById('admin-input-classname').value.trim().toUpperCase();
       const size = parseInt(document.getElementById('admin-input-size').value) || 0;
-      if (!className || size <= 0) return alert('Vui lòng nhập tên lớp và sĩ số hợp lệ!');
+      if (!className || size <= 0) return alert('Vui lòng nhập tên lớp (VD: 11TA3) và sĩ số hợp lệ!');
 
       activeClassName = className;
       let newStudents = {};
@@ -364,16 +453,89 @@
       }
 
       currentClass.name = className;
+      currentClass.size = size;
       currentClass.students = newStudents;
+      if (!currentClass.dailyKeywords) {
+        currentClass.dailyKeywords = { day1: false, day2: false, day3: false, day4: false, day5: false };
+      }
 
-      db.collection('classes').doc(className).set(currentClass).then(() => {
+      // Làm sạch toàn bộ dữ liệu trước khi gửi để tránh lỗi Firestore
+      const cleanData = JSON.parse(JSON.stringify(currentClass));
+
+      db.collection('classes').doc(className).set(cleanData).then(() => {
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url; a.download = `dulieudangnhap_${className}.csv`; a.click();
-        alert(`Đã lưu cấu hình lớp ${className} lên Firebase thành công!`);
+        alert(`Đã lưu cấu hình lớp ${className} thành công lên Firebase!`);
         applyClassConfiguration();
-      }).catch(err => alert("Lỗi Firebase: " + err.message));
+      }).catch(err => {
+        console.error("Lỗi Firestore:", err);
+        alert("Lỗi khi lưu lên Firebase: " + err.message);
+      });
+    }
+
+    // MODAL GÁN CHỨC VỤ HỌC SINH
+    function openRoleModal() {
+      const className = activeClassName || document.getElementById('admin-input-classname').value.trim().toUpperCase();
+      if (!className) return alert('Vui lòng nhập tên lớp và sĩ số ở bảng Admin trước!');
+      document.getElementById('role-assign-modal').classList.remove('hidden');
+    }
+    function closeRoleModal() { document.getElementById('role-assign-modal').classList.add('hidden'); }
+
+    function saveStudentRoleAssignment() {
+      const role = document.getElementById('admin-role-select').value;
+      const sttInput = document.getElementById('admin-role-stt').value.trim();
+      const customPass = document.getElementById('admin-role-pass').value.trim();
+      const className = activeClassName || document.getElementById('admin-input-classname').value.trim().toUpperCase();
+
+      if (!className || !sttInput) return alert('Vui lòng nhập STT học sinh!');
+      const sttFormatted = parseInt(sttInput) < 10 && !sttInput.startsWith('0') ? `0${parseInt(sttInput)}` : sttInput;
+      const username = `${className}_stt${sttFormatted}`;
+
+      if (!currentClass.students) currentClass.students = {};
+      if (!currentClass.students[username]) {
+        currentClass.students[username] = { username, name: `Học sinh ${sttFormatted}`, stt: sttFormatted, team: 1, class: className, password: 'hs123', role };
+      }
+
+      currentClass.students[username].role = role;
+      if (customPass) currentClass.students[username].password = customPass;
+      if (role.startsWith('TT')) currentClass.students[username].team = parseInt(role.replace('TT', ''));
+
+      db.collection('classes').doc(className).set(currentClass).then(() => {
+        closeRoleModal();
+        alert(`Đã gán học sinh ${username} chức vụ ${role}!`);
+      }).catch(err => alert("Lỗi lưu chức vụ: " + err.message));
+    }
+
+    // MODAL KHAI BÁO TỪ KHÓA MỖI NGÀY
+    function openDailyKeywordModal() {
+      const total = currentClass.size || Object.keys(currentClass.students || {}).length || 45;
+      document.getElementById('keyword-total-students').innerText = `/ ${total} HS`;
+      document.getElementById('daily-keyword-modal').classList.remove('hidden');
+    }
+    function closeDailyKeywordModal() { document.getElementById('daily-keyword-modal').classList.add('hidden'); }
+
+    function confirmDailyKeywordProgress() {
+      const day = document.getElementById('keyword-day-select').value;
+      const count = parseInt(document.getElementById('keyword-completed-count').value) || 0;
+      const total = currentClass.size || Object.keys(currentClass.students || {}).length || 45;
+
+      if (!currentClass.dailyKeywords) currentClass.dailyKeywords = {};
+
+      if (count >= total) {
+        currentClass.dailyKeywords[day] = true;
+        alert(`Xuất sắc! Ngày ${day.replace('day','')} đạt 100% sĩ số nhập TỪ KHÓA (+10% kích thước sản phẩm)!`);
+      } else {
+        currentClass.dailyKeywords[day] = false;
+        alert(`Ngày ${day.replace('day','')} chưa đạt 100% (${count}/${total} HS), sản phẩm sẽ không tăng kích thước.`);
+      }
+
+      if (activeClassName) {
+        db.collection('classes').doc(activeClassName).set(currentClass);
+      }
+      closeDailyKeywordModal();
+      restorePlacedFlowers(); // Cập nhật lại kích thước ngay lập tức
     }
 
     function centerPlotToGarden() {
@@ -405,16 +567,24 @@
       return { allowed: false, msg: `Chỉ Tổ trưởng Tổ ${targetTeamId} hoặc Admin mới có quyền thao tác khu đất này!` };
     }
 
+    // QUY ĐỊNH SỐ LƯỢNG SP THEO THỨ HẠNG (HẠNG 1: 4SP, HẠNG 2: 3SP, HẠNG 3: 2SP, HẠNG 4: 1SP)
     function getPlotAllowedProductsCount(teamId) {
       const rank = currentClass.weeklyRanking ? (currentClass.weeklyRanking[teamId] || 4) : 4;
-      if (rank === 1) return 4; if (rank === 2) return 3; if (rank === 3) return 2; return 1;
+      if (rank === 1) return 4;
+      if (rank === 2) return 3;
+      if (rank === 3) return 2;
+      return 1;
     }
 
-    function getGrowthScaleMultiplier(teamId) {
-      const teamStudents = Object.values(currentClass.students || {}).filter(s => s.team === teamId);
-      if (teamStudents.length === 0) return 1.0;
-      const checkedInInTeam = teamStudents.filter(s => (currentClass.checkedInStudents || []).includes(s.username)).length;
-      return 0.4 + (0.6 * (checkedInInTeam / teamStudents.length));
+    // TÍNH TOÁN TỈ LỆ KÍCH THƯỚC HOA / NỤ (BAN ĐẦU 10%, ĐỦ 100% TỪ KHÓA MỖI NGÀY +10%, TỐI ĐA 60%)
+    function calculateProductScale() {
+      const days = currentClass.dailyKeywords || {};
+      let completedDays = 0;
+      ['day1', 'day2', 'day3', 'day4', 'day5'].forEach(d => {
+        if (days[d] === true) completedDays++;
+      });
+      // 10% ban đầu + 10% cho mỗi ngày hoàn thành 100% sĩ số -> tối đa 60%
+      return 0.10 + (completedDays * 0.10);
     }
 
     function applyClassConfiguration() {
@@ -425,6 +595,8 @@
         classContainer.classList.remove('hidden');
         const inputClassEl = document.getElementById('admin-input-classname');
         if (inputClassEl && !inputClassEl.value) inputClassEl.value = currentClass.name;
+        const inputSizeEl = document.getElementById('admin-input-size');
+        if (inputSizeEl && !inputSizeEl.value) inputSizeEl.value = currentClass.size || 45;
       }
       if (currentStudent) {
         document.getElementById('hdr-student-name').innerText = `${currentStudent.name} ${currentStudent.team ? '(Tổ ' + currentStudent.team + ')' : ''}`;
@@ -435,14 +607,14 @@
       restorePlacedFlowers();
     }
 
-    // TẢI ẢNH QUA GITHUB API NẾU CÓ, NẾU KHÔNG DÙNG LOCAL
-    async function loadCategoryImages(folderName) {
+    // QUÉT ẢNH TỪ REPO GITHUB
+    async function loadCategoryImages(catObj) {
       const tray = document.getElementById('tray-grid');
       const countEl = document.getElementById('category-count');
-      const isSoil = (folderName === 'nendat');
+      const folderName = catObj.folder;
 
       if (repoImageCache[folderName]) {
-        renderTrayList(repoImageCache[folderName], isSoil);
+        renderTrayList(repoImageCache[folderName], catObj.type);
         return;
       }
 
@@ -465,7 +637,7 @@
           }));
 
         repoImageCache[folderName] = imageList;
-        renderTrayList(imageList, isSoil);
+        renderTrayList(imageList, catObj.type);
 
       } catch (err) {
         const localList = [];
@@ -476,11 +648,11 @@
           });
         }
         repoImageCache[folderName] = localList;
-        renderTrayList(localList, isSoil);
+        renderTrayList(localList, catObj.type);
       }
     }
 
-    function renderTrayList(list, isSoil) {
+    function renderTrayList(list, itemType) {
       const tray = document.getElementById('tray-grid');
       const countEl = document.getElementById('category-count');
       if (countEl) countEl.innerText = `(${list.length} mục)`;
@@ -491,7 +663,7 @@
       }
 
       tray.innerHTML = list.map(item => `
-        <div draggable="true" ondragstart="handleDragStart(event, '${item.url}', ${isSoil})" 
+        <div draggable="true" ondragstart="handleDragStart(event, '${item.url}', '${itemType}')" 
              class="rounded-xl border bg-white/10 hover:border-emerald-400 p-1 flex items-center justify-center h-16 cursor-grab transition"
              title="${item.name}">
           <img src="${item.url}" class="max-h-full object-contain pointer-events-none" onerror="this.parentElement.style.opacity='0.2'">
@@ -516,16 +688,17 @@
       currentActiveButtonKey = buttonKey;
       renderDynamicButtons();
       const item = BUTTON_CATEGORIES.find(b => b.key === buttonKey);
-      if (item) loadCategoryImages(item.folder);
+      if (item) loadCategoryImages(item);
     }
 
     // ==========================================
-    // RENDER VÙNG CHỌN ĐA GIÁC VỚI 4 ĐỈNH ĐỘC LẬP
+    // RENDER VÙNG CHỌN ĐA GIÁC & NỀN ĐẤT TỰ ĐỘNG
     // ==========================================
     function renderPolygonPlots() {
       const svgLayer = document.getElementById('plots-svg-layer');
       const nodesLayer = document.getElementById('plots-nodes-layer');
-      if (!svgLayer || !nodesLayer) return;
+      const soilsLayer = document.getElementById('plots-soils-layer');
+      if (!svgLayer || !nodesLayer || !soilsLayer) return;
 
       const sectionA = document.getElementById('section-a');
       const cW = sectionA.clientWidth || 800;
@@ -536,56 +709,69 @@
 
       let svgHtml = '';
       let nodesHtml = '';
+      let soilsHtml = '';
 
       slots.forEach(slot => {
         const isSelected = selectedPlotId === slot.id;
         const pts = slot.points;
         const limitSP = getPlotAllowedProductsCount(slot.teamId);
 
-        // Chuyển % thành pixel trên SVG
         const svgPointsStr = pts.map(p => `${(p.x * cW) / 100},${(p.y * cH) / 100}`).join(' ');
+        const cssClipPolygon = pts.map(p => `${p.x}% ${p.y}%`).join(', ');
 
-        // Tâm của tứ giác để đặt nhãn tên
         const centerX = pts.reduce((sum, p) => sum + p.x, 0) / 4;
         const centerY = pts.reduce((sum, p) => sum + p.y, 0) / 4;
 
-        // Điểm đặt thanh công cụ (ngay trên đỉnh trên cùng)
         const minY = Math.min(...pts.map(p => p.y));
         const correspondingX = pts.find(p => p.y === minY)?.x || centerX;
 
+        // 1. NỀN ĐẤT: CO GIÃN VỪA KHÍT THEO ĐA GIÁC (CLIP-PATH)
+        if (slot.soilImage) {
+          soilsHtml += `
+            <div style="position: absolute; inset: 0; clip-path: polygon(${cssClipPolygon}); -webkit-clip-path: polygon(${cssClipPolygon});" class="pointer-events-none">
+              <img src="${slot.soilImage}" class="w-full h-full object-cover">
+            </div>
+          `;
+        }
+
+        // 2. SVG VÙNG CHỌN: NẾU ĐÃ CÓ ĐẤT THÌ ĐƯỜNG VIỀN BIẾN MẤT
         svgHtml += `
-          <polygon class="plot-polygon-fill ${slot.locked ? 'locked' : ''}" 
+          <polygon class="plot-polygon-fill ${slot.soilImage ? 'has-soil' : ''} ${slot.locked ? 'locked' : ''}" 
                    points="${svgPointsStr}"
                    onmousedown="startDragEntirePolygon('${slot.id}', event)">
           </polygon>
         `;
 
-        // Nhãn tên khu đất ở giữa
+        // 3. NHÃN TÊN KHU ĐẤT
         nodesHtml += `
-          <div style="position: absolute; left: ${centerX}%; top: ${centerY}%; transform: translate(-50%, -50%); pointer-events: none;" class="z-40">
-            <div class="px-3.5 py-1 bg-amber-600/90 border-2 border-white rounded-full shadow-lg text-white font-black text-xs flex items-center gap-1.5 whitespace-nowrap select-none">
+          <div style="position: absolute; left: ${centerX}%; top: ${centerY}%; transform: translate(-50%, -50%); pointer-events: none;" class="z-25">
+            <div class="px-3 py-1 bg-amber-700/80 border-2 border-white rounded-full shadow text-white font-black text-xs flex items-center gap-1 whitespace-nowrap">
               🌾 ${slot.name} (${limitSP} SP)
             </div>
           </div>
         `;
 
+        // 4. NÚT ĐIỀU KHIỂN & 4 NODE NEO GÓC
         if (isAdmin && isSelected) {
-          // THANH CÔNG CỤ (Sao chép, Khóa, Xóa)
           nodesHtml += `
             <div style="position: absolute; left: ${correspondingX}%; top: ${Math.max(4, minY - 6)}%; transform: translateX(-50%); pointer-events: auto;" class="flex items-center gap-1.5 z-50">
-              <button onclick="copyPolygonPlot('${slot.id}', event)" class="w-7 h-7 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center shadow-md text-xs cursor-pointer border border-white" title="Sao chép">
+              <button onclick="copyPolygonPlot('${slot.id}', event)" class="w-7 h-7 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center shadow text-xs cursor-pointer border border-white" title="Sao chép">
                 <i class="fa-solid fa-copy"></i>
               </button>
-              <button onclick="toggleLockPolygonPlot('${slot.id}', event)" class="w-7 h-7 rounded-lg bg-slate-700 hover:bg-slate-800 text-white flex items-center justify-center shadow-md text-xs cursor-pointer border border-white" title="Khóa/Mở">
+              <button onclick="toggleLockPolygonPlot('${slot.id}', event)" class="w-7 h-7 rounded-lg bg-slate-700 hover:bg-slate-800 text-white flex items-center justify-center shadow text-xs cursor-pointer border border-white" title="Khóa/Mở">
                 <i class="fa-solid ${slot.locked ? 'fa-lock' : 'fa-lock-open'}"></i>
               </button>
-              <button onclick="deletePolygonPlot('${slot.id}', event)" class="w-7 h-7 rounded-lg bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center shadow-md text-xs cursor-pointer border border-white" title="Xóa">
+              ${slot.soilImage ? `
+                <button onclick="clearSoilFromPlot('${slot.id}', event)" class="w-7 h-7 rounded-lg bg-amber-600 hover:bg-amber-700 text-white flex items-center justify-center shadow text-xs cursor-pointer border border-white" title="Xóa nền đất (hiện lại vùng chọn)">
+                  <i class="fa-solid fa-eraser"></i>
+                </button>
+              ` : ''}
+              <button onclick="deletePolygonPlot('${slot.id}', event)" class="w-7 h-7 rounded-lg bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center shadow text-xs cursor-pointer border border-white" title="Xóa">
                 <i class="fa-solid fa-xmark"></i>
               </button>
             </div>
           `;
 
-          // 4 ĐIỂM NEO Ở 4 ĐỈNH ĐỘC LẬP HOÀN TOÀN
           if (!slot.locked) {
             pts.forEach((pt, index) => {
               nodesHtml += `
@@ -600,13 +786,12 @@
         }
       });
 
+      soilsLayer.innerHTML = soilsHtml;
       svgLayer.innerHTML = svgHtml;
       nodesLayer.innerHTML = nodesHtml;
     }
 
-    // ========================================================
-    // KÉO MỘT NODE DUY NHẤT: CHỈ CÓ ĐỈNH ĐÓ DI CHUYỂN TỰ DO
-    // ========================================================
+    // KÉO TỰ DO 1 ĐỈNH DUY NHẤT
     function startDragSingleNode(plotId, nodeIndex, e) {
       e.stopPropagation();
       const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
@@ -621,14 +806,11 @@
         let newX = ((moveEvent.clientX - rect.left) / cW) * 100;
         let newY = ((moveEvent.clientY - rect.top) / cH) * 100;
 
-        // Giới hạn trong sân vườn
         newX = Math.max(1, Math.min(99, Math.round(newX * 10) / 10));
         newY = Math.max(1, Math.min(99, Math.round(newY * 10) / 10));
 
-        // CHỈ CẬP NHẬT TỌA ĐỘ DUY NHẤT CỦA NODE NÀY
         slot.points[nodeIndex].x = newX;
         slot.points[nodeIndex].y = newY;
-
         renderPolygonPlots();
       };
 
@@ -641,9 +823,7 @@
       window.addEventListener('mouseup', onMouseUp);
     }
 
-    // ========================================================
-    // RÊ TOÀN BỘ VÙNG CHỌN (TẤT CẢ 4 ĐỈNH CÙNG TỊNH TIẾN)
-    // ========================================================
+    // RÊ TỊNH TIẾN CẢ VÙNG ĐA GIÁC
     function startDragEntirePolygon(plotId, e) {
       const isAdmin = currentStudent && (currentStudent.role === 'TEACHER' || currentStudent.username === 'admin');
       if (!isAdmin) return;
@@ -692,7 +872,6 @@
       const nextIndex = currentClass.config.plotSlots.length + 1;
       const newId = 'slot_' + nextIndex;
 
-      // Nhân bản 4 đỉnh lệch sang một chút
       const newPoints = slot.points.map(p => ({
         x: Math.min(95, p.x + 4),
         y: Math.min(95, p.y + 4)
@@ -720,6 +899,16 @@
       }
     }
 
+    function clearSoilFromPlot(plotId, e) {
+      if (e) e.stopPropagation();
+      const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
+      if (slot) {
+        slot.soilImage = null;
+        renderPolygonPlots();
+        if (activeClassName) db.collection('classes').doc(activeClassName).set(currentClass);
+      }
+    }
+
     function deletePolygonPlot(plotId, e) {
       if (e) e.stopPropagation();
       if (currentClass.config.plotSlots.length <= 1) {
@@ -730,67 +919,182 @@
       renderPolygonPlots();
     }
 
-    function handleDragStart(e, rawUrl, isSoil) {
-      draggedItemData = { rawUrl, isSoil };
+    // ==========================================
+    // KÉO THẢ VẬT PHẨM (1 LẦN KÉO ĐÚNG 1 SẢN PHẨM)
+    // ==========================================
+    function handleDragStart(e, rawUrl, itemType) {
+      draggedItemData = { rawUrl, itemType };
       e.dataTransfer.setData('text/plain', '');
     }
     function handleDragOver(e) { e.preventDefault(); }
 
+    // Kiểm tra xem tọa độ drop (X, Y) có nằm trong đa giác khu đất không
+    function isPointInPolygon(px, py, points, cW, cH) {
+      let inside = false;
+      for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+        const xi = (points[i].x * cW) / 100, yi = (points[i].y * cH) / 100;
+        const xj = (points[j].x * cW) / 100, yj = (points[j].y * cH) / 100;
+        const intersect = ((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+
     function handleDrop(e) {
       e.preventDefault();
       if (!draggedItemData) return;
+
       const sectionA = document.getElementById('section-a');
       const rect = sectionA.getBoundingClientRect();
-      let dropX = e.clientX - rect.left;
-      let dropY = e.clientY - rect.top;
+      const dropX = e.clientX - rect.left;
+      const dropY = e.clientY - rect.top;
+      const cW = rect.width || 800;
+      const cH = rect.height || 600;
 
-      spawnFlowerOnCanvas(draggedItemData.rawUrl, dropX, dropY, 1, false);
+      // Tìm khu đất đang nhận điểm thả
+      const slots = currentClass.config.plotSlots || [];
+      let targetSlot = null;
+      for (const slot of slots) {
+        if (isPointInPolygon(dropX, dropY, slot.points, cW, cH)) {
+          targetSlot = slot;
+          break;
+        }
+      }
+
+      if (!targetSlot) {
+        draggedItemData = null;
+        return; // Thả ngoài khu đất thì bỏ qua
+      }
+
+      const perm = checkPermissionOnPlot(targetSlot.teamId);
+      if (!perm.allowed) {
+        alert(perm.msg);
+        draggedItemData = null;
+        return;
+      }
+
+      // TRƯỜNG HỢP 1: KÉO NỀN ĐẤT
+      if (draggedItemData.itemType === 'soil') {
+        targetSlot.soilImage = draggedItemData.rawUrl;
+        renderPolygonPlots(); // Vùng chọn biến mất, nền đất bám khít đa giác
+        if (activeClassName) db.collection('classes').doc(activeClassName).set(currentClass);
+        draggedItemData = null;
+        return;
+      }
+
+      // TRƯỜNG HỢP 2: KÉO HOA / NỤ / CÔNG CỤ (NẰM Ở LỚP TRÊN)
+      const placedCount = (currentClass.placedFlowers || []).filter(f => parseInt(f.teamId) === targetSlot.teamId).length;
+      const limit = getPlotAllowedProductsCount(targetSlot.teamId);
+
+      if (placedCount >= limit) {
+        alert(`Tổ ${targetSlot.teamId} chỉ được phép kéo tối đa ${limit} SP trong tuần này theo thứ hạng thi đua!`);
+        draggedItemData = null;
+        return;
+      }
+
+      // THẢ ĐÚNG 1 SẢN PHẨM
+      spawnFlowerOnCanvas(draggedItemData.rawUrl, dropX, dropY, targetSlot.teamId, draggedItemData.itemType, true);
+      draggedItemData = null;
     }
 
     let flowerCounter = 0;
-    function spawnFlowerOnCanvas(rawUrl, posX, posY, teamId, shouldSave = false) {
+    function spawnFlowerOnCanvas(rawUrl, posX, posY, teamId, itemType = 'flower', shouldSave = false) {
       const container = document.getElementById('drop-flowers-layer');
       flowerCounter++;
-      const id = 'flower_' + flowerCounter;
-      const scale = getGrowthScaleMultiplier(teamId);
+      const id = 'item_' + flowerCounter;
+
+      // Kích thước thật chuẩn: khoảng 180px -> Tỉ lệ bắt đầu 10% (= 18px), khi đủ 5 ngày là 60% (= 108px)
+      const currentScale = (itemType === 'flower') ? calculateProductScale() : 0.5;
+      const baseSize = 180;
+      const renderW = Math.round(baseSize * currentScale);
 
       const el = document.createElement('div');
-      el.id = id; el.dataset.teamId = teamId; el.dataset.rawUrl = rawUrl;
-      el.className = 'garden-placed-flower flex items-center justify-center';
-      el.style.width = `${Math.round(80 * scale)}px`; el.style.height = `${Math.round(100 * scale)}px`;
-      el.style.left = `${posX}px`; el.style.top = `${posY}px`;
-      el.innerHTML = `<div class="relative group"><img src="${rawUrl}" class="max-h-full object-contain"><button onclick="removeFlower('${id}', ${teamId}, event)" class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-rose-500 text-white text-[8px] hidden group-hover:flex items-center justify-center">✕</button></div>`;
+      el.id = id; 
+      el.dataset.teamId = teamId; 
+      el.dataset.rawUrl = rawUrl;
+      el.dataset.itemType = itemType;
+      el.className = 'garden-placed-item flex items-center justify-center';
+      el.style.width = `${renderW}px`;
+      el.style.left = `${posX}px`; 
+      el.style.top = `${posY}px`;
+      
+      el.innerHTML = `
+        <div class="relative group pointer-events-auto">
+          <img src="${rawUrl}" class="w-full h-auto object-contain select-none pointer-events-none">
+          <button onclick="removeItem('${id}', ${teamId}, event)" class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-rose-500 text-white text-[8px] hidden group-hover:flex items-center justify-center shadow">✕</button>
+        </div>
+      `;
       
       makeElementDraggable(el, teamId);
       container.appendChild(el);
+
+      if (shouldSave) savePlacedItemsState();
+    }
+
+    function savePlacedItemsState() {
+      if (!activeClassName) return;
+      const elements = document.querySelectorAll('#drop-flowers-layer > div');
+      let data = [];
+      elements.forEach(el => data.push({ 
+        id: el.id, 
+        teamId: el.dataset.teamId, 
+        rawUrl: el.dataset.rawUrl, 
+        itemType: el.dataset.itemType,
+        left: el.style.left, 
+        top: el.style.top 
+      }));
+      currentClass.placedFlowers = data;
+      db.collection('classes').doc(activeClassName).set(currentClass);
     }
 
     function restorePlacedFlowers() {
       const container = document.getElementById('drop-flowers-layer');
       container.innerHTML = '';
       if (!currentClass.placedFlowers) return;
-      currentClass.placedFlowers.forEach(item => spawnFlowerOnCanvas(item.rawUrl, parseFloat(item.left), parseFloat(item.top), item.teamId, false));
+      currentClass.placedFlowers.forEach(item => {
+        spawnFlowerOnCanvas(item.rawUrl, parseFloat(item.left), parseFloat(item.top), item.teamId, item.itemType || 'flower', false);
+      });
     }
 
     function makeElementDraggable(el, teamId) {
       let isDragging = false, startX, startY, initL, initT;
       el.addEventListener('mousedown', (e) => {
         if (e.target.tagName === 'BUTTON') return;
-        if (checkPermissionOnPlot(teamId).allowed) { isDragging = true; startX = e.clientX; startY = e.clientY; initL = el.offsetLeft; initT = el.offsetTop; el.style.zIndex = 100; }
+        if (checkPermissionOnPlot(teamId).allowed) { 
+          isDragging = true; 
+          startX = e.clientX; 
+          startY = e.clientY; 
+          initL = el.offsetLeft; 
+          initT = el.offsetTop; 
+          el.style.zIndex = 50; 
+        }
       });
-      window.addEventListener('mousemove', (e) => { if (isDragging) { el.style.left = `${initL + (e.clientX - startX)}px`; el.style.top = `${initT + (e.clientY - startY)}px`; } });
-      window.addEventListener('mouseup', () => { if (isDragging) { isDragging = false; el.style.zIndex = 25; } });
+      window.addEventListener('mousemove', (e) => { 
+        if (isDragging) { 
+          el.style.left = `${initL + (e.clientX - startX)}px`; 
+          el.style.top = `${initT + (e.clientY - startY)}px`; 
+        } 
+      });
+      window.addEventListener('mouseup', () => { 
+        if (isDragging) { 
+          isDragging = false; 
+          el.style.zIndex = 35; 
+          savePlacedItemsState(); 
+        } 
+      });
     }
 
-    function removeFlower(id, teamId, event) {
+    function removeItem(id, teamId, event) {
       event.stopPropagation();
       const perm = checkPermissionOnPlot(teamId);
       if (!perm.allowed) return alert(perm.msg);
       document.getElementById(id)?.remove();
+      savePlacedItemsState();
     }
 
     function clearPlacedGardenFlowers() {
       document.getElementById('drop-flowers-layer').innerHTML = '';
+      savePlacedItemsState();
     }
 
     window.addEventListener('DOMContentLoaded', () => {
