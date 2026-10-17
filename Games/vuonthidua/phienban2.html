@@ -21,18 +21,18 @@
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
     
-    /* VÙNG CHỌN MÀU XANH ADMIN TỰ DO ĐIỀU CHỈNH */
+    /* VÙNG CHỌN MÀU XANH ADMIN TỰ DO ĐIỀU CHỈNH HÌNH DÁNG */
     .admin-plot-box {
       position: absolute;
-      border: 3.5px dashed #10b981;
-      background-color: rgba(16, 185, 129, 0.28);
+      border: 3px dashed #10b981;
+      background-color: rgba(16, 185, 129, 0.25);
       touch-action: none;
       cursor: move;
       z-index: 40;
       box-sizing: border-box;
       pointer-events: auto !important;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(16, 185, 129, 0.35);
+      border-radius: 10px;
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.35);
     }
     .admin-plot-box.locked {
       cursor: not-allowed;
@@ -41,7 +41,7 @@
       box-shadow: none;
     }
 
-    /* 4 ĐIỂM NEO Ở 4 GÓC - TỰ DO CO DÃN */
+    /* 4 ĐIỂM NEO Ở 4 GÓC - KÉO DÃN TỰ DO ĐỘC LẬP TỪNG TRỤC */
     .corner-node {
       position: absolute;
       width: 22px;
@@ -53,9 +53,9 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.5);
       z-index: 60;
       pointer-events: auto !important;
-      transition: transform 0.15s;
+      transition: transform 0.1s;
     }
-    .corner-node:hover { transform: scale(1.35); background-color: #059669; }
+    .corner-node:hover { transform: scale(1.3); background-color: #059669; }
     .node-tl { top: -11px; left: -11px; cursor: nwse-resize; }
     .node-tr { top: -11px; right: -11px; cursor: nesw-resize; }
     .node-bl { bottom: -11px; left: -11px; cursor: nesw-resize; }
@@ -143,17 +143,17 @@
     <section id="section-a" class="w-3/4 h-full relative bg-slate-950 overflow-hidden flex items-center justify-center border-r-2 border-black/20" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
       <img id="game-bg-image" src="assets/nengame/vuonlop.jpg" onerror="this.src='nengame/vuonlop.jpg'" class="absolute inset-0 w-full h-full object-fill pointer-events-none select-none">
       
-      <!-- Bảng tên trường/lớp cố định -->
+      <!-- Bảng tên trường/lớp -->
       <div class="absolute top-2 left-1/2 transform -translate-x-1/2 z-10 pointer-events-none">
         <div class="px-6 py-1.5 bg-amber-100/90 border-2 border-amber-800 rounded-xl shadow-md text-amber-950 font-black text-xs md:text-sm tracking-wider uppercase">
           Vườn hạnh phúc của lớp
         </div>
       </div>
 
-      <!-- LỚP ĐẶT HOA / CÂY TRỒNG -->
+      <!-- LỚP ĐẶT VẬT PHẨM TRỒNG HOA -->
       <div id="drop-flowers-layer" class="absolute inset-0 w-full h-full pointer-events-auto z-20"></div>
 
-      <!-- LỚP VÙNG CHỌN MÀU XANH ADMIN -->
+      <!-- LỚP VÙNG CHỌN ADMIN -->
       <div id="plots-container" class="absolute inset-0 w-full h-full pointer-events-auto z-30"></div>
     </section>
 
@@ -196,6 +196,14 @@
   </div>
 
   <script>
+    // THÔNG TIN REPO GITHUB CHÍNH XÁC TỪ CÂY THƯ MỤC CỦA BẠN
+    const GITHUB_REPO_INFO = {
+      owner: 'MHP298',
+      repo: 'ANT',
+      branch: 'main',
+      basePath: 'Games/vuonthidua/assets'
+    };
+
     const firebaseConfig = {
       apiKey: "AIzaSyBWcjpJ-rEg1T7DPsEdxe76NtEn5keWKQU",
       authDomain: "gametronghoa-29c3d.firebaseapp.com",
@@ -209,20 +217,21 @@
     const db = firebase.firestore();
 
     const BUTTON_CATEGORIES = [
-      { key: 'nutnu.png', label: 'NỤ', folder: 'nucap1', prefix: 'nu' },
-      { key: 'nuthoa.png', label: 'HOA', folder: 'hoacap1', prefix: 'hoa' },
-      { key: 'nutchunhat.png', label: 'ĐẤT', folder: 'nendat', prefix: 'dat' },
-      { key: 'nutxeng.png', label: 'CÔNG CỤ', folder: 'congcu', prefix: 'congcu' }
+      { key: 'nutnu.png', label: 'NỤ', folder: 'nucap1' },
+      { key: 'nuthoa.png', label: 'HOA', folder: 'hoacap1' },
+      { key: 'nutchunhat.png', label: 'ĐẤT', folder: 'nendat' },
+      { key: 'nutxeng.png', label: 'CÔNG CỤ', folder: 'congcu' }
     ];
 
     let currentActiveButtonKey = 'nutnu.png';
-    let activeClassName = '10A1';
+    let activeClassName = ''; // Mặc định để rỗng, không tự ý gán 10A1
     let selectedPlotId = 'slot_1';
 
     const repoImageCache = {};
 
+    // VÙNG CHỌN MẶC ĐỊNH CHÍNH GIỮA KHUNG ĐẤT
     let currentClass = {
-      name: '10A1',
+      name: '',
       config: {
         bgA: 'assets/nengame/vuonlop.jpg',
         plotSlots: [
@@ -258,17 +267,17 @@
 
       if (!user) { err.innerText = 'Vui lòng nhập tài khoản!'; err.classList.remove('hidden'); return; }
 
+      // ĐĂNG NHẬP ADMIN - CHỈ BẬT GIAO DIỆN QUẢN TRỊ, TUYỆT ĐỐI KHÔNG TỰ TẠO DỮ LIỆU LÊN FIREBASE
       if (user === 'admin') {
         if (pass !== 'admjn1234') { err.innerText = 'Sai mật khẩu giáo viên!'; err.classList.remove('hidden'); return; }
         currentStudent = { username: 'admin', name: 'Giáo Viên (Admin)', role: 'TEACHER', team: 0 };
         document.getElementById('student-login-modal').classList.add('hidden');
         document.getElementById('admin-bottom-panel').classList.remove('hidden');
-        
-        activeClassName = '10A1';
-        listenClassFromFirebase(activeClassName, () => { applyClassConfiguration(); });
+        applyClassConfiguration();
         return;
       }
 
+      // ĐĂNG NHẬP HỌC SINH
       let matchedClass = user.split('_')[0].toUpperCase();
       const docRef = db.collection('classes').doc(matchedClass);
       const docSnap = await docRef.get();
@@ -290,7 +299,9 @@
       listenClassFromFirebase(activeClassName, () => { applyClassConfiguration(); });
     }
 
+    // LẮNG NGHE DỮ LIỆU TỪ FIREBASE - ĐÃ XÓA LỆNH TỰ LƯU SAVE BỪA BÃI
     function listenClassFromFirebase(className, callback) {
+      if (!className) return;
       if (unsubscribeFirestore) unsubscribeFirestore();
       unsubscribeFirestore = db.collection('classes').doc(className).onSnapshot((doc) => {
         if (doc.exists) {
@@ -301,6 +312,7 @@
               { id: 'slot_1', name: 'Khu 1', teamId: 1, left: 24, top: 32, width: 50, height: 46, locked: false, soilImage: null }
             ];
           } else {
+            // Đảm bảo không bị lọt lên góc trên
             remoteData.config.plotSlots = remoteData.config.plotSlots.map(slot => {
               if (slot.top < 10 || slot.left < 5) {
                 slot.left = 24; slot.top = 32; slot.width = 50; slot.height = 46;
@@ -310,31 +322,16 @@
           }
           currentClass = remoteData;
           applyClassConfiguration();
-        } else {
-          saveClassToFirebase();
         }
         if (callback) { callback(); callback = null; }
       });
     }
 
-    function saveClassToFirebase() {
-      if (!activeClassName) return;
-      db.collection('classes').doc(activeClassName).set(currentClass).catch(err => console.error(err));
-    }
-
-    function centerPlotToGarden() {
-      currentClass.config.plotSlots = [
-        { id: 'slot_1', name: 'Khu 1', teamId: 1, left: 24, top: 32, width: 50, height: 46, locked: false, soilImage: null }
-      ];
-      selectedPlotId = 'slot_1';
-      renderAdminPlots();
-      saveClassToFirebase();
-    }
-
+    // CHỈ LƯU KHI ADMIN CHỦ ĐỘNG BẤM NÚT "LƯU CẤU HÌNH"
     function saveAdminClassConfiguration() {
       const className = document.getElementById('admin-input-classname').value.trim().toUpperCase();
       const size = parseInt(document.getElementById('admin-input-size').value) || 0;
-      if (!className || size <= 0) return alert('Vui lòng nhập tên lớp và sĩ số!');
+      if (!className || size <= 0) return alert('Vui lòng nhập tên lớp và sĩ số hợp lệ!');
 
       activeClassName = className;
       let newStudents = {};
@@ -355,9 +352,17 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url; a.download = `dulieudangnhap_${className}.csv`; a.click();
-        alert(`Đã lưu cấu hình lớp ${className} lên Firebase!`);
+        alert(`Đã lưu cấu hình lớp ${className} lên Firebase thành công!`);
         applyClassConfiguration();
       }).catch(err => alert("Lỗi Firebase: " + err.message));
+    }
+
+    function centerPlotToGarden() {
+      currentClass.config.plotSlots = [
+        { id: 'slot_1', name: 'Khu 1', teamId: 1, left: 24, top: 32, width: 50, height: 46, locked: false, soilImage: null }
+      ];
+      selectedPlotId = 'slot_1';
+      renderAdminPlots();
     }
 
     function handleStudentLogout() { location.reload(); }
@@ -399,50 +404,52 @@
       restorePlacedFlowers();
     }
 
-    // 1. TẢI ẢNH TỰ ĐỘNG KHÔNG BỊ TREO HOẶC NGHẼN API
-    function checkSingleImage(src) {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => resolve(src);
-        img.onerror = () => resolve(null);
-        img.src = src;
-      });
-    }
-
-    async function loadCategoryImages(catObj) {
+    // 1. QUÉT CHÍNH XÁC FILE ẢNH TRONG THƯ MỤC QUA GITHUB API (KHÔNG ĐOÁN TÊN)
+    async function loadCategoryImages(folderName) {
       const tray = document.getElementById('tray-grid');
       const countEl = document.getElementById('category-count');
-      const isSoil = (catObj.folder === 'nendat');
+      const isSoil = (folderName === 'nendat');
 
-      if (repoImageCache[catObj.folder] && repoImageCache[catObj.folder].length > 0) {
-        renderTrayList(repoImageCache[catObj.folder], isSoil);
+      if (repoImageCache[folderName]) {
+        renderTrayList(repoImageCache[folderName], isSoil);
         return;
       }
 
-      tray.innerHTML = `<div class="col-span-3 text-center text-white/80 text-[10px] py-4"><i class="fa-solid fa-spinner animate-spin"></i> Đang tải ảnh...</div>`;
+      tray.innerHTML = `<div class="col-span-3 text-center text-white/80 text-[10px] py-4"><i class="fa-solid fa-spinner animate-spin"></i> Đang đọc thư mục...</div>`;
 
-      // Tạo sẵn danh sách các URL tiềm năng trên cả máy cục bộ và GitHub Raw
-      const candidateUrls = [];
-      const prefixes = [
-        `assets/${catObj.folder}/`,
-        `https://raw.githubusercontent.com/MHP298/ANT/main/Games/vuonthidua/assets/${catObj.folder}/`
-      ];
+      const apiUrl = `https://api.github.com/repos/${GITHUB_REPO_INFO.owner}/${GITHUB_REPO_INFO.repo}/contents/${GITHUB_REPO_INFO.basePath}/${folderName}?ref=${GITHUB_REPO_INFO.branch}`;
 
-      prefixes.forEach(prefix => {
-        for (let i = 1; i <= 20; i++) {
-          candidateUrls.push(`${prefix}${catObj.prefix}${i}.png`);
-          candidateUrls.push(`${prefix}${catObj.prefix}${i}.jpg`);
-          candidateUrls.push(`${prefix}${i}.png`);
-          candidateUrls.push(`${prefix}${i}.jpg`);
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+        
+        const data = await response.json();
+        const validExts = ['.png', '.jpg', '.jpeg', '.webp', '.svg'];
+        
+        // Quét lấy đúng các file thực tế đang tồn tại trong thư mục
+        const imageList = data
+          .filter(item => item.type === 'file' && validExts.some(ext => item.name.toLowerCase().endsWith(ext)))
+          .map(item => ({
+            name: item.name,
+            url: `https://raw.githubusercontent.com/${GITHUB_REPO_INFO.owner}/${GITHUB_REPO_INFO.repo}/${GITHUB_REPO_INFO.branch}/${GITHUB_REPO_INFO.basePath}/${folderName}/${item.name}`
+          }));
+
+        repoImageCache[folderName] = imageList;
+        renderTrayList(imageList, isSoil);
+
+      } catch (err) {
+        console.warn("GitHub API hạn chế lượt gọi, chuyển sang đọc đường dẫn assets cục bộ:", err);
+        // Đọc đường dẫn assets tương đối không làm đỏ F12
+        const localList = [];
+        for (let i = 1; i <= 8; i++) {
+          localList.push({
+            name: `${i}.png`,
+            url: `assets/${folderName}/${folderName.replace('cap1','')}${i}.png`
+          });
         }
-      });
-
-      // Kiểm tra đồng loạt song song
-      const results = await Promise.all(candidateUrls.map(u => checkSingleImage(u)));
-      const validImages = [...new Set(results.filter(Boolean))];
-
-      repoImageCache[catObj.folder] = validImages;
-      renderTrayList(validImages, isSoil);
+        repoImageCache[folderName] = localList;
+        renderTrayList(localList, isSoil);
+      }
     }
 
     function renderTrayList(list, isSoil) {
@@ -455,10 +462,11 @@
         return;
       }
 
-      tray.innerHTML = list.map(src => `
-        <div draggable="true" ondragstart="handleDragStart(event, '${src}', ${isSoil})" 
-             class="rounded-xl border bg-white/10 hover:border-emerald-400 p-1 flex items-center justify-center h-16 cursor-grab transition">
-          <img src="${src}" class="max-h-full object-contain pointer-events-none">
+      tray.innerHTML = list.map(item => `
+        <div draggable="true" ondragstart="handleDragStart(event, '${item.url}', ${isSoil})" 
+             class="rounded-xl border bg-white/10 hover:border-emerald-400 p-1 flex items-center justify-center h-16 cursor-grab transition"
+             title="${item.name}">
+          <img src="${item.url}" class="max-h-full object-contain pointer-events-none" onerror="this.parentElement.style.opacity='0.3'">
         </div>
       `).join('');
     }
@@ -480,10 +488,10 @@
       currentActiveButtonKey = buttonKey;
       renderDynamicButtons();
       const item = BUTTON_CATEGORIES.find(b => b.key === buttonKey);
-      if (item) loadCategoryImages(item);
+      if (item) loadCategoryImages(item.folder);
     }
 
-    // 2. VÙNG CHỌN ADMIN TỰ DO KÉO DÃN 4 GÓC ĐỘC LẬP
+    // 2. VÙNG CHỌN ADMIN TỰ DO KÉO DÃN 4 GÓC ĐỘC LẬP TỪNG TRỤC
     function renderAdminPlots() {
       const container = document.getElementById('plots-container');
       if (!container) return;
@@ -527,7 +535,7 @@
                 </button>
               </div>
 
-              <!-- 4 NÚT NEO CO DÃN TỰ DO ĐỘC LẬP TỪNG HƯỚNG -->
+              <!-- 4 NÚT NEO CO DÃN TỰ DO ĐỘC LẬP TỪNG TRỤC -->
               <div class="corner-node node-tl pointer-events-auto" onmousedown="startResizeFreeNode('${slot.id}', 'tl', event)"></div>
               <div class="corner-node node-tr pointer-events-auto" onmousedown="startResizeFreeNode('${slot.id}', 'tr', event)"></div>
               <div class="corner-node node-bl pointer-events-auto" onmousedown="startResizeFreeNode('${slot.id}', 'bl', event)"></div>
@@ -579,7 +587,6 @@
       const onMouseUp = () => {
         window.removeEventListener('mousemove', onMouseMove);
         window.removeEventListener('mouseup', onMouseUp);
-        saveClassToFirebase();
       };
 
       window.addEventListener('mousemove', onMouseMove);
@@ -587,7 +594,7 @@
       e.stopPropagation();
     }
 
-    // THUẬT TOÁN CO DÃN TỰ DO ĐỘC LẬP TỪNG GÓC (KHÔNG BỊ ÉP TỈ LỆ)
+    // THUẬT TOÁN CO DÃN TỰ DO ĐỘC LẬP TỪNG TRỤC X VÀ Y
     function startResizeFreeNode(plotId, corner, e) {
       e.stopPropagation();
       const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
@@ -611,30 +618,26 @@
         const dy = ((moveEvent.clientY - startY) / cH) * 100;
 
         if (corner === 'br') {
-          // Kéo góc Dưới - Phải: Thay đổi tự do Width & Height
-          slot.width = Math.max(8, Math.min(100 - origLeft, Math.round((origWidth + dx) * 10) / 10));
-          slot.height = Math.max(8, Math.min(100 - origTop, Math.round((origHeight + dy) * 10) / 10));
+          slot.width = Math.max(6, Math.min(100 - origLeft, Math.round((origWidth + dx) * 10) / 10));
+          slot.height = Math.max(6, Math.min(100 - origTop, Math.round((origHeight + dy) * 10) / 10));
         } 
         else if (corner === 'tr') {
-          // Kéo góc Trên - Phải: Thay đổi tự do Width & Top/Height
-          const newH = Math.max(8, Math.round((origHeight - dy) * 10) / 10);
-          slot.top = Math.max(0, Math.min(origTop + origHeight - 8, Math.round((origTop + dy) * 10) / 10));
+          const newH = Math.max(6, Math.round((origHeight - dy) * 10) / 10);
+          slot.top = Math.max(0, Math.min(origTop + origHeight - 6, Math.round((origTop + dy) * 10) / 10));
           slot.height = newH;
-          slot.width = Math.max(8, Math.min(100 - origLeft, Math.round((origWidth + dx) * 10) / 10));
+          slot.width = Math.max(6, Math.min(100 - origLeft, Math.round((origWidth + dx) * 10) / 10));
         } 
         else if (corner === 'bl') {
-          // Kéo góc Dưới - Trái: Thay đổi tự do Left/Width & Height
-          const newW = Math.max(8, Math.round((origWidth - dx) * 10) / 10);
-          slot.left = Math.max(0, Math.min(origLeft + origWidth - 8, Math.round((origLeft + dx) * 10) / 10));
+          const newW = Math.max(6, Math.round((origWidth - dx) * 10) / 10);
+          slot.left = Math.max(0, Math.min(origLeft + origWidth - 6, Math.round((origLeft + dx) * 10) / 10));
           slot.width = newW;
-          slot.height = Math.max(8, Math.min(100 - origTop, Math.round((origHeight + dy) * 10) / 10));
+          slot.height = Math.max(6, Math.min(100 - origTop, Math.round((origHeight + dy) * 10) / 10));
         } 
         else if (corner === 'tl') {
-          // Kéo góc Trên - Trái: Thay đổi tự do cả Left/Width và Top/Height
-          const newW = Math.max(8, Math.round((origWidth - dx) * 10) / 10);
-          const newH = Math.max(8, Math.round((origHeight - dy) * 10) / 10);
-          slot.left = Math.max(0, Math.min(origLeft + origWidth - 8, Math.round((origLeft + dx) * 10) / 10));
-          slot.top = Math.max(0, Math.min(origTop + origHeight - 8, Math.round((origTop + dy) * 10) / 10));
+          const newW = Math.max(6, Math.round((origWidth - dx) * 10) / 10);
+          const newH = Math.max(6, Math.round((origHeight - dy) * 10) / 10);
+          slot.left = Math.max(0, Math.min(origLeft + origWidth - 6, Math.round((origLeft + dx) * 10) / 10));
+          slot.top = Math.max(0, Math.min(origTop + origHeight - 6, Math.round((origTop + dy) * 10) / 10));
           slot.width = newW;
           slot.height = newH;
         }
@@ -645,7 +648,6 @@
       const onMouseUp = () => {
         window.removeEventListener('mousemove', onMouseMove);
         window.removeEventListener('mouseup', onMouseUp);
-        saveClassToFirebase();
       };
 
       window.addEventListener('mousemove', onMouseMove);
@@ -673,7 +675,6 @@
 
       selectedPlotId = newId;
       renderAdminPlots();
-      saveClassToFirebase();
     }
 
     function toggleLockPlot(plotId, e) {
@@ -682,7 +683,6 @@
       if (slot) {
         slot.locked = !slot.locked;
         renderAdminPlots();
-        saveClassToFirebase();
       }
     }
 
@@ -694,7 +694,6 @@
       currentClass.config.plotSlots = currentClass.config.plotSlots.filter(s => s.id !== plotId);
       selectedPlotId = currentClass.config.plotSlots[0].id;
       renderAdminPlots();
-      saveClassToFirebase();
     }
 
     function handleDragStart(e, rawUrl, isSoil) {
@@ -714,7 +713,6 @@
       if (draggedItemData.isSoil) {
         slot.soilImage = draggedItemData.rawUrl;
         renderAdminPlots();
-        saveClassToFirebase();
       } else {
         const placedCount = (currentClass.placedFlowers || []).filter(f => parseInt(f.teamId) === teamId).length;
         const limit = getPlotAllowedProductsCount(teamId);
@@ -727,7 +725,7 @@
         let dropX = e.clientX - rect.left;
         let dropY = e.clientY - rect.top;
 
-        spawnFlowerOnCanvas(draggedItemData.rawUrl, dropX, dropY, teamId, true);
+        spawnFlowerOnCanvas(draggedItemData.rawUrl, dropX, dropY, teamId, false);
       }
     }
 
@@ -737,7 +735,6 @@
       if (!perm.allowed) return alert(perm.msg);
       currentClass.config.plotSlots.find(s => s.id === plotId).soilImage = null;
       renderAdminPlots();
-      saveClassToFirebase();
     }
 
     let flowerCounter = 0;
@@ -756,16 +753,6 @@
       
       makeElementDraggable(el, teamId);
       container.appendChild(el);
-      if (shouldSave) savePlacedFlowersState();
-    }
-
-    function savePlacedFlowersState() {
-      if (!activeClassName) return;
-      const elements = document.querySelectorAll('#drop-flowers-layer > div');
-      let data = [];
-      elements.forEach(el => data.push({ id: el.id, teamId: el.dataset.teamId, rawUrl: el.dataset.rawUrl, left: el.style.left, top: el.style.top }));
-      currentClass.placedFlowers = data;
-      saveClassToFirebase();
     }
 
     function restorePlacedFlowers() {
@@ -782,7 +769,7 @@
         if (checkPermissionOnPlot(teamId).allowed) { isDragging = true; startX = e.clientX; startY = e.clientY; initL = el.offsetLeft; initT = el.offsetTop; el.style.zIndex = 100; }
       });
       window.addEventListener('mousemove', (e) => { if (isDragging) { el.style.left = `${initL + (e.clientX - startX)}px`; el.style.top = `${initT + (e.clientY - startY)}px`; } });
-      window.addEventListener('mouseup', () => { if (isDragging) { isDragging = false; el.style.zIndex = 25; savePlacedFlowersState(); } });
+      window.addEventListener('mouseup', () => { if (isDragging) { isDragging = false; el.style.zIndex = 25; } });
     }
 
     function removeFlower(id, teamId, event) {
@@ -790,12 +777,10 @@
       const perm = checkPermissionOnPlot(teamId);
       if (!perm.allowed) return alert(perm.msg);
       document.getElementById(id)?.remove();
-      savePlacedFlowersState();
     }
 
     function clearPlacedGardenFlowers() {
       document.getElementById('drop-flowers-layer').innerHTML = '';
-      savePlacedFlowersState();
     }
 
     window.addEventListener('DOMContentLoaded', () => {
