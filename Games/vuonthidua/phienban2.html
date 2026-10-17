@@ -21,45 +21,53 @@
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
     
-    /* VÙNG CHỌN MÀU XANH ADMIN TỰ DO ĐIỀU CHỈNH HÌNH DÁNG */
-    .admin-plot-box {
+    /* VÙNG CHỌN ĐA GIÁC TỰ DO */
+    .polygon-selection-layer {
       position: absolute;
-      border: 3px dashed #10b981;
-      background-color: rgba(16, 185, 129, 0.25);
-      touch-action: none;
-      cursor: move;
-      z-index: 40;
-      box-sizing: border-box;
-      pointer-events: auto !important;
-      border-radius: 10px;
-      box-shadow: 0 0 14px rgba(16, 185, 129, 0.35);
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 35;
     }
-    .admin-plot-box.locked {
+    .plot-polygon-fill {
+      fill: rgba(16, 185, 129, 0.28);
+      stroke: #10b981;
+      stroke-width: 3.5;
+      stroke-dasharray: 6 4;
+      cursor: move;
+      pointer-events: auto;
+      transition: fill 0.15s;
+    }
+    .plot-polygon-fill:hover {
+      fill: rgba(16, 185, 129, 0.38);
+    }
+    .plot-polygon-fill.locked {
+      stroke: #64748b;
+      fill: rgba(100, 116, 139, 0.25);
       cursor: not-allowed;
-      border-color: #64748b;
-      background-color: rgba(100, 116, 139, 0.25);
-      box-shadow: none;
     }
 
-    /* 4 ĐIỂM NEO Ở 4 GÓC - KÉO DÃN TỰ DO ĐỘC LẬP TỪNG TRỤC */
-    .corner-node {
+    /* ĐIỂM NEO GÓC ĐỘC LẬP HOÀN TOÀN */
+    .polygon-node {
       position: absolute;
       width: 22px;
       height: 22px;
       background-color: #047857;
       border: 3px solid #ffffff;
       border-radius: 50%;
-      cursor: pointer;
+      cursor: crosshair;
       box-shadow: 0 2px 8px rgba(0,0,0,0.5);
       z-index: 60;
       pointer-events: auto !important;
+      transform: translate(-50%, -50%);
+      touch-action: none;
       transition: transform 0.1s;
     }
-    .corner-node:hover { transform: scale(1.3); background-color: #059669; }
-    .node-tl { top: -11px; left: -11px; cursor: nwse-resize; }
-    .node-tr { top: -11px; right: -11px; cursor: nesw-resize; }
-    .node-bl { bottom: -11px; left: -11px; cursor: nesw-resize; }
-    .node-br { bottom: -11px; right: -11px; cursor: nwse-resize; }
+    .polygon-node:hover {
+      transform: translate(-50%, -50%) scale(1.35);
+      background-color: #059669;
+    }
 
     .btn-cat-active {
       background-color: #047857 !important;
@@ -143,18 +151,19 @@
     <section id="section-a" class="w-3/4 h-full relative bg-slate-950 overflow-hidden flex items-center justify-center border-r-2 border-black/20" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
       <img id="game-bg-image" src="assets/nengame/vuonlop.jpg" onerror="this.src='nengame/vuonlop.jpg'" class="absolute inset-0 w-full h-full object-fill pointer-events-none select-none">
       
-      <!-- Bảng tên trường/lớp -->
+      <!-- Bảng tên lớp -->
       <div class="absolute top-2 left-1/2 transform -translate-x-1/2 z-10 pointer-events-none">
         <div class="px-6 py-1.5 bg-amber-100/90 border-2 border-amber-800 rounded-xl shadow-md text-amber-950 font-black text-xs md:text-sm tracking-wider uppercase">
           Vườn hạnh phúc của lớp
         </div>
       </div>
 
-      <!-- LỚP ĐẶT VẬT PHẨM TRỒNG HOA -->
+      <!-- LỚP ĐẶT HOA / CÂY TRỒNG -->
       <div id="drop-flowers-layer" class="absolute inset-0 w-full h-full pointer-events-auto z-20"></div>
 
-      <!-- LỚP VÙNG CHỌN ADMIN -->
-      <div id="plots-container" class="absolute inset-0 w-full h-full pointer-events-auto z-30"></div>
+      <!-- LỚP VÙNG CHỌN ĐA GIÁC TỰ DO (SVG + 4 NODES) -->
+      <svg id="plots-svg-layer" class="polygon-selection-layer"></svg>
+      <div id="plots-nodes-layer" class="absolute inset-0 w-full h-full pointer-events-none z-40"></div>
     </section>
 
     <!-- PHẦN B: KHAY CÔNG CỤ -->
@@ -196,7 +205,6 @@
   </div>
 
   <script>
-    // THÔNG TIN REPO GITHUB CHÍNH XÁC TỪ CÂY THƯ MỤC CỦA BẠN
     const GITHUB_REPO_INFO = {
       owner: 'MHP298',
       repo: 'ANT',
@@ -224,18 +232,31 @@
     ];
 
     let currentActiveButtonKey = 'nutnu.png';
-    let activeClassName = ''; // Mặc định để rỗng, không tự ý gán 10A1
+    let activeClassName = ''; 
     let selectedPlotId = 'slot_1';
 
     const repoImageCache = {};
 
-    // VÙNG CHỌN MẶC ĐỊNH CHÍNH GIỮA KHUNG ĐẤT
+    // MỖI KHU ĐẤT CÓ 4 TỌA ĐỘ ĐỈNH ĐỘC LẬP TÍNH THEO PHẦN TRĂM (%)[cite: 1]
     let currentClass = {
       name: '',
       config: {
         bgA: 'assets/nengame/vuonlop.jpg',
         plotSlots: [
-          { id: 'slot_1', name: 'Khu 1', teamId: 1, left: 24, top: 32, width: 50, height: 46, locked: false, soilImage: null }
+          {
+            id: 'slot_1',
+            name: 'Khu 1',
+            teamId: 1,
+            // 4 đỉnh: Top-Left, Top-Right, Bottom-Right, Bottom-Left
+            points: [
+              { x: 26, y: 32 }, // Đỉnh 0: TL
+              { x: 74, y: 32 }, // Đỉnh 1: TR
+              { x: 74, y: 76 }, // Đỉnh 2: BR
+              { x: 26, y: 76 }  // Đỉnh 3: BL
+            ],
+            locked: false,
+            soilImage: null
+          }
         ]
       },
       students: {},
@@ -267,7 +288,7 @@
 
       if (!user) { err.innerText = 'Vui lòng nhập tài khoản!'; err.classList.remove('hidden'); return; }
 
-      // ĐĂNG NHẬP ADMIN - CHỈ BẬT GIAO DIỆN QUẢN TRỊ, TUYỆT ĐỐI KHÔNG TỰ TẠO DỮ LIỆU LÊN FIREBASE
+      // ADMIN ĐĂNG NHẬP: CHỈ BẬT GIAO DIỆN QUẢN TRỊ, KHÔNG TỰ Ý GHI FIREBASE
       if (user === 'admin') {
         if (pass !== 'admjn1234') { err.innerText = 'Sai mật khẩu giáo viên!'; err.classList.remove('hidden'); return; }
         currentStudent = { username: 'admin', name: 'Giáo Viên (Admin)', role: 'TEACHER', team: 0 };
@@ -277,7 +298,7 @@
         return;
       }
 
-      // ĐĂNG NHẬP HỌC SINH
+      // HỌC SINH ĐĂNG NHẬP
       let matchedClass = user.split('_')[0].toUpperCase();
       const docRef = db.collection('classes').doc(matchedClass);
       const docSnap = await docRef.get();
@@ -299,25 +320,24 @@
       listenClassFromFirebase(activeClassName, () => { applyClassConfiguration(); });
     }
 
-    // LẮNG NGHE DỮ LIỆU TỪ FIREBASE - ĐÃ XÓA LỆNH TỰ LƯU SAVE BỪA BÃI
     function listenClassFromFirebase(className, callback) {
       if (!className) return;
       if (unsubscribeFirestore) unsubscribeFirestore();
       unsubscribeFirestore = db.collection('classes').doc(className).onSnapshot((doc) => {
         if (doc.exists) {
           const remoteData = doc.data();
-          if (!remoteData.config || !remoteData.config.plotSlots || remoteData.config.plotSlots.length === 0) {
-            remoteData.config = remoteData.config || {};
-            remoteData.config.plotSlots = [
-              { id: 'slot_1', name: 'Khu 1', teamId: 1, left: 24, top: 32, width: 50, height: 46, locked: false, soilImage: null }
-            ];
-          } else {
-            // Đảm bảo không bị lọt lên góc trên
-            remoteData.config.plotSlots = remoteData.config.plotSlots.map(slot => {
-              if (slot.top < 10 || slot.left < 5) {
-                slot.left = 24; slot.top = 32; slot.width = 50; slot.height = 46;
+          if (remoteData.config && remoteData.config.plotSlots) {
+            // Chuyển đổi định dạng cũ sang 4 đỉnh đa giác nếu cần
+            remoteData.config.plotSlots = remoteData.config.plotSlots.map(s => {
+              if (!s.points && s.left !== undefined) {
+                s.points = [
+                  { x: s.left, y: s.top },
+                  { x: s.left + s.width, y: s.top },
+                  { x: s.left + s.width, y: s.top + s.height },
+                  { x: s.left, y: s.top + s.height }
+                ];
               }
-              return slot;
+              return s;
             });
           }
           currentClass = remoteData;
@@ -327,7 +347,6 @@
       });
     }
 
-    // CHỈ LƯU KHI ADMIN CHỦ ĐỘNG BẤM NÚT "LƯU CẤU HÌNH"
     function saveAdminClassConfiguration() {
       const className = document.getElementById('admin-input-classname').value.trim().toUpperCase();
       const size = parseInt(document.getElementById('admin-input-size').value) || 0;
@@ -359,10 +378,22 @@
 
     function centerPlotToGarden() {
       currentClass.config.plotSlots = [
-        { id: 'slot_1', name: 'Khu 1', teamId: 1, left: 24, top: 32, width: 50, height: 46, locked: false, soilImage: null }
+        {
+          id: 'slot_1',
+          name: 'Khu 1',
+          teamId: 1,
+          points: [
+            { x: 26, y: 32 },
+            { x: 74, y: 32 },
+            { x: 74, y: 76 },
+            { x: 26, y: 76 }
+          ],
+          locked: false,
+          soilImage: null
+        }
       ];
       selectedPlotId = 'slot_1';
-      renderAdminPlots();
+      renderPolygonPlots();
     }
 
     function handleStudentLogout() { location.reload(); }
@@ -398,13 +429,13 @@
       if (currentStudent) {
         document.getElementById('hdr-student-name').innerText = `${currentStudent.name} ${currentStudent.team ? '(Tổ ' + currentStudent.team + ')' : ''}`;
       }
-      renderAdminPlots();
+      renderPolygonPlots();
       renderDynamicButtons();
       switchButtonCategory(currentActiveButtonKey);
       restorePlacedFlowers();
     }
 
-    // 1. QUÉT CHÍNH XÁC FILE ẢNH TRONG THƯ MỤC QUA GITHUB API (KHÔNG ĐOÁN TÊN)
+    // TẢI ẢNH QUA GITHUB API NẾU CÓ, NẾU KHÔNG DÙNG LOCAL
     async function loadCategoryImages(folderName) {
       const tray = document.getElementById('tray-grid');
       const countEl = document.getElementById('category-count');
@@ -426,7 +457,6 @@
         const data = await response.json();
         const validExts = ['.png', '.jpg', '.jpeg', '.webp', '.svg'];
         
-        // Quét lấy đúng các file thực tế đang tồn tại trong thư mục
         const imageList = data
           .filter(item => item.type === 'file' && validExts.some(ext => item.name.toLowerCase().endsWith(ext)))
           .map(item => ({
@@ -438,8 +468,6 @@
         renderTrayList(imageList, isSoil);
 
       } catch (err) {
-        console.warn("GitHub API hạn chế lượt gọi, chuyển sang đọc đường dẫn assets cục bộ:", err);
-        // Đọc đường dẫn assets tương đối không làm đỏ F12
         const localList = [];
         for (let i = 1; i <= 8; i++) {
           localList.push({
@@ -466,7 +494,7 @@
         <div draggable="true" ondragstart="handleDragStart(event, '${item.url}', ${isSoil})" 
              class="rounded-xl border bg-white/10 hover:border-emerald-400 p-1 flex items-center justify-center h-16 cursor-grab transition"
              title="${item.name}">
-          <img src="${item.url}" class="max-h-full object-contain pointer-events-none" onerror="this.parentElement.style.opacity='0.3'">
+          <img src="${item.url}" class="max-h-full object-contain pointer-events-none" onerror="this.parentElement.style.opacity='0.2'">
         </div>
       `).join('');
     }
@@ -491,77 +519,137 @@
       if (item) loadCategoryImages(item.folder);
     }
 
-    // 2. VÙNG CHỌN ADMIN TỰ DO KÉO DÃN 4 GÓC ĐỘC LẬP TỪNG TRỤC
-    function renderAdminPlots() {
-      const container = document.getElementById('plots-container');
-      if (!container) return;
+    // ==========================================
+    // RENDER VÙNG CHỌN ĐA GIÁC VỚI 4 ĐỈNH ĐỘC LẬP
+    // ==========================================
+    function renderPolygonPlots() {
+      const svgLayer = document.getElementById('plots-svg-layer');
+      const nodesLayer = document.getElementById('plots-nodes-layer');
+      if (!svgLayer || !nodesLayer) return;
+
+      const sectionA = document.getElementById('section-a');
+      const cW = sectionA.clientWidth || 800;
+      const cH = sectionA.clientHeight || 600;
+
       const slots = currentClass.config.plotSlots || [];
       const isAdmin = currentStudent && (currentStudent.role === 'TEACHER' || currentStudent.username === 'admin');
 
-      container.innerHTML = slots.map(slot => {
+      let svgHtml = '';
+      let nodesHtml = '';
+
+      slots.forEach(slot => {
         const isSelected = selectedPlotId === slot.id;
+        const pts = slot.points;
         const limitSP = getPlotAllowedProductsCount(slot.teamId);
 
-        return `
-          <div id="plot-box-${slot.id}" class="admin-plot-box ${slot.locked ? 'locked' : ''}"
-               style="left: ${slot.left}%; top: ${slot.top}%; width: ${slot.width}%; height: ${slot.height}%;"
-               onmousedown="startDragPlot('${slot.id}', event)"
-               ondragover="handleDragOver(event)"
-               ondrop="handleDropOnPlot(event, '${slot.id}', ${slot.teamId})">
-            
-            ${slot.soilImage ? `
-              <img src="${slot.soilImage}" class="absolute inset-0 w-full h-full object-fill pointer-events-none rounded-xl">
-              <button onclick="clearSoilFromSlot('${slot.id}',${slot.teamId}, event)" class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-rose-600 text-white font-black text-xs flex items-center justify-center shadow z-40 pointer-events-auto" title="Xóa nền đất">✕</button>
-            ` : ''}
+        // Chuyển % thành pixel trên SVG
+        const svgPointsStr = pts.map(p => `${(p.x * cW) / 100},${(p.y * cH) / 100}`).join(' ');
 
-            <!-- Nhãn tên khu đất ở giữa -->
-            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div class="px-3.5 py-1 bg-amber-600/90 border-2 border-white rounded-full shadow-lg text-white font-black text-xs flex items-center gap-1.5">
-                🌾 ${slot.name} (${limitSP} SP)
-              </div>
+        // Tâm của tứ giác để đặt nhãn tên
+        const centerX = pts.reduce((sum, p) => sum + p.x, 0) / 4;
+        const centerY = pts.reduce((sum, p) => sum + p.y, 0) / 4;
+
+        // Điểm đặt thanh công cụ (ngay trên đỉnh trên cùng)
+        const minY = Math.min(...pts.map(p => p.y));
+        const correspondingX = pts.find(p => p.y === minY)?.x || centerX;
+
+        svgHtml += `
+          <polygon class="plot-polygon-fill ${slot.locked ? 'locked' : ''}" 
+                   points="${svgPointsStr}"
+                   onmousedown="startDragEntirePolygon('${slot.id}', event)">
+          </polygon>
+        `;
+
+        // Nhãn tên khu đất ở giữa
+        nodesHtml += `
+          <div style="position: absolute; left: ${centerX}%; top: ${centerY}%; transform: translate(-50%, -50%); pointer-events: none;" class="z-40">
+            <div class="px-3.5 py-1 bg-amber-600/90 border-2 border-white rounded-full shadow-lg text-white font-black text-xs flex items-center gap-1.5 whitespace-nowrap select-none">
+              🌾 ${slot.name} (${limitSP} SP)
             </div>
-
-            <!-- THANH CÔNG CỤ (COPY, KHÓA, XÓA) -->
-            ${(isAdmin && isSelected && !slot.locked) ? `
-              <div style="position: absolute; top: -38px; left: 0px;" class="flex items-center gap-1.5 z-50 pointer-events-auto" onmousedown="event.stopPropagation()">
-                <button onclick="copyPlot('${slot.id}', event)" class="w-7 h-7 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center shadow-md text-xs cursor-pointer border border-white" title="Sao chép">
-                  <i class="fa-solid fa-copy"></i>
-                </button>
-                <button onclick="toggleLockPlot('${slot.id}', event)" class="w-7 h-7 rounded-lg bg-slate-700 hover:bg-slate-800 text-white flex items-center justify-center shadow-md text-xs cursor-pointer border border-white" title="Khóa">
-                  <i class="fa-solid fa-lock-open"></i>
-                </button>
-                <button onclick="deletePlot('${slot.id}', event)" class="w-7 h-7 rounded-lg bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center shadow-md text-xs cursor-pointer border border-white" title="Xóa">
-                  <i class="fa-solid fa-xmark"></i>
-                </button>
-              </div>
-
-              <!-- 4 NÚT NEO CO DÃN TỰ DO ĐỘC LẬP TỪNG TRỤC -->
-              <div class="corner-node node-tl pointer-events-auto" onmousedown="startResizeFreeNode('${slot.id}', 'tl', event)"></div>
-              <div class="corner-node node-tr pointer-events-auto" onmousedown="startResizeFreeNode('${slot.id}', 'tr', event)"></div>
-              <div class="corner-node node-bl pointer-events-auto" onmousedown="startResizeFreeNode('${slot.id}', 'bl', event)"></div>
-              <div class="corner-node node-br pointer-events-auto" onmousedown="startResizeFreeNode('${slot.id}', 'br', event)"></div>
-            ` : ''}
-
-            ${(isAdmin && isSelected && slot.locked) ? `
-              <div style="position: absolute; top: -38px; left: 0px;" class="flex items-center gap-1.5 z-50 pointer-events-auto" onmousedown="event.stopPropagation()">
-                <button onclick="toggleLockPlot('${slot.id}', event)" class="w-7 h-7 rounded-lg bg-amber-600 text-white flex items-center justify-center shadow-md text-xs border border-white">
-                  <i class="fa-solid fa-lock"></i>
-                </button>
-              </div>
-            ` : ''}
-
           </div>
         `;
-      }).join('');
+
+        if (isAdmin && isSelected) {
+          // THANH CÔNG CỤ (Sao chép, Khóa, Xóa)
+          nodesHtml += `
+            <div style="position: absolute; left: ${correspondingX}%; top: ${Math.max(4, minY - 6)}%; transform: translateX(-50%); pointer-events: auto;" class="flex items-center gap-1.5 z-50">
+              <button onclick="copyPolygonPlot('${slot.id}', event)" class="w-7 h-7 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center shadow-md text-xs cursor-pointer border border-white" title="Sao chép">
+                <i class="fa-solid fa-copy"></i>
+              </button>
+              <button onclick="toggleLockPolygonPlot('${slot.id}', event)" class="w-7 h-7 rounded-lg bg-slate-700 hover:bg-slate-800 text-white flex items-center justify-center shadow-md text-xs cursor-pointer border border-white" title="Khóa/Mở">
+                <i class="fa-solid ${slot.locked ? 'fa-lock' : 'fa-lock-open'}"></i>
+              </button>
+              <button onclick="deletePolygonPlot('${slot.id}', event)" class="w-7 h-7 rounded-lg bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center shadow-md text-xs cursor-pointer border border-white" title="Xóa">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          `;
+
+          // 4 ĐIỂM NEO Ở 4 ĐỈNH ĐỘC LẬP HOÀN TOÀN
+          if (!slot.locked) {
+            pts.forEach((pt, index) => {
+              nodesHtml += `
+                <div class="polygon-node"
+                     style="left: ${pt.x}%; top: ${pt.y}%;"
+                     onmousedown="startDragSingleNode('${slot.id}', ${index}, event)"
+                     title="Kéo tự do đỉnh ${index + 1}">
+                </div>
+              `;
+            });
+          }
+        }
+      });
+
+      svgLayer.innerHTML = svgHtml;
+      nodesLayer.innerHTML = nodesHtml;
     }
 
-    // RÊ DI CHUYỂN NGUYÊN VÙNG CHỌN
-    function startDragPlot(plotId, e) {
+    // ========================================================
+    // KÉO MỘT NODE DUY NHẤT: CHỈ CÓ ĐỈNH ĐÓ DI CHUYỂN TỰ DO
+    // ========================================================
+    function startDragSingleNode(plotId, nodeIndex, e) {
+      e.stopPropagation();
+      const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
+      if (!slot || slot.locked) return;
+
+      const sectionA = document.getElementById('section-a');
+      const rect = sectionA.getBoundingClientRect();
+      const cW = rect.width || 800;
+      const cH = rect.height || 600;
+
+      const onMouseMove = (moveEvent) => {
+        let newX = ((moveEvent.clientX - rect.left) / cW) * 100;
+        let newY = ((moveEvent.clientY - rect.top) / cH) * 100;
+
+        // Giới hạn trong sân vườn
+        newX = Math.max(1, Math.min(99, Math.round(newX * 10) / 10));
+        newY = Math.max(1, Math.min(99, Math.round(newY * 10) / 10));
+
+        // CHỈ CẬP NHẬT TỌA ĐỘ DUY NHẤT CỦA NODE NÀY
+        slot.points[nodeIndex].x = newX;
+        slot.points[nodeIndex].y = newY;
+
+        renderPolygonPlots();
+      };
+
+      const onMouseUp = () => {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      };
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    // ========================================================
+    // RÊ TOÀN BỘ VÙNG CHỌN (TẤT CẢ 4 ĐỈNH CÙNG TỊNH TIẾN)
+    // ========================================================
+    function startDragEntirePolygon(plotId, e) {
       const isAdmin = currentStudent && (currentStudent.role === 'TEACHER' || currentStudent.username === 'admin');
-      if (!isAdmin || e.target.classList.contains('corner-node') || e.target.closest('button')) return;
+      if (!isAdmin) return;
 
       selectedPlotId = plotId;
-      renderAdminPlots();
+      renderPolygonPlots();
 
       const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
       if (!slot || slot.locked) return;
@@ -573,15 +661,18 @@
 
       let startX = e.clientX;
       let startY = e.clientY;
-      let initialLeft = slot.left;
-      let initialTop = slot.top;
+      const origPoints = slot.points.map(p => ({ x: p.x, y: p.y }));
 
       const onMouseMove = (moveEvent) => {
         const dx = ((moveEvent.clientX - startX) / cW) * 100;
         const dy = ((moveEvent.clientY - startY) / cH) * 100;
-        slot.left = Math.max(0, Math.min(100 - slot.width, Math.round((initialLeft + dx) * 10) / 10));
-        slot.top = Math.max(0, Math.min(100 - slot.height, Math.round((initialTop + dy) * 10) / 10));
-        renderAdminPlots();
+
+        slot.points.forEach((p, idx) => {
+          p.x = Math.max(1, Math.min(99, Math.round((origPoints[idx].x + dx) * 10) / 10));
+          p.y = Math.max(1, Math.min(99, Math.round((origPoints[idx].y + dy) * 10) / 10));
+        });
+
+        renderPolygonPlots();
       };
 
       const onMouseUp = () => {
@@ -594,106 +685,49 @@
       e.stopPropagation();
     }
 
-    // THUẬT TOÁN CO DÃN TỰ DO ĐỘC LẬP TỪNG TRỤC X VÀ Y
-    function startResizeFreeNode(plotId, corner, e) {
-      e.stopPropagation();
-      const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
-      if (!slot || slot.locked) return;
-
-      const sectionA = document.getElementById('section-a');
-      const rect = sectionA.getBoundingClientRect();
-      const cW = rect.width || 800;
-      const cH = rect.height || 600;
-
-      let startX = e.clientX;
-      let startY = e.clientY;
-
-      let origLeft = slot.left;
-      let origTop = slot.top;
-      let origWidth = slot.width;
-      let origHeight = slot.height;
-
-      const onMouseMove = (moveEvent) => {
-        const dx = ((moveEvent.clientX - startX) / cW) * 100;
-        const dy = ((moveEvent.clientY - startY) / cH) * 100;
-
-        if (corner === 'br') {
-          slot.width = Math.max(6, Math.min(100 - origLeft, Math.round((origWidth + dx) * 10) / 10));
-          slot.height = Math.max(6, Math.min(100 - origTop, Math.round((origHeight + dy) * 10) / 10));
-        } 
-        else if (corner === 'tr') {
-          const newH = Math.max(6, Math.round((origHeight - dy) * 10) / 10);
-          slot.top = Math.max(0, Math.min(origTop + origHeight - 6, Math.round((origTop + dy) * 10) / 10));
-          slot.height = newH;
-          slot.width = Math.max(6, Math.min(100 - origLeft, Math.round((origWidth + dx) * 10) / 10));
-        } 
-        else if (corner === 'bl') {
-          const newW = Math.max(6, Math.round((origWidth - dx) * 10) / 10);
-          slot.left = Math.max(0, Math.min(origLeft + origWidth - 6, Math.round((origLeft + dx) * 10) / 10));
-          slot.width = newW;
-          slot.height = Math.max(6, Math.min(100 - origTop, Math.round((origHeight + dy) * 10) / 10));
-        } 
-        else if (corner === 'tl') {
-          const newW = Math.max(6, Math.round((origWidth - dx) * 10) / 10);
-          const newH = Math.max(6, Math.round((origHeight - dy) * 10) / 10);
-          slot.left = Math.max(0, Math.min(origLeft + origWidth - 6, Math.round((origLeft + dx) * 10) / 10));
-          slot.top = Math.max(0, Math.min(origTop + origHeight - 6, Math.round((origTop + dy) * 10) / 10));
-          slot.width = newW;
-          slot.height = newH;
-        }
-
-        renderAdminPlots();
-      };
-
-      const onMouseUp = () => {
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
-      };
-
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
-    }
-
-    function copyPlot(plotId, e) {
+    function copyPolygonPlot(plotId, e) {
       if (e) e.stopPropagation();
       const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
       if (!slot) return;
       const nextIndex = currentClass.config.plotSlots.length + 1;
       const newId = 'slot_' + nextIndex;
 
+      // Nhân bản 4 đỉnh lệch sang một chút
+      const newPoints = slot.points.map(p => ({
+        x: Math.min(95, p.x + 4),
+        y: Math.min(95, p.y + 4)
+      }));
+
       currentClass.config.plotSlots.push({
         id: newId,
         name: `Khu ${nextIndex}`,
         teamId: nextIndex,
-        left: Math.min(48, slot.left + 4),
-        top: Math.min(48, slot.top + 4),
-        width: slot.width,
-        height: slot.height,
+        points: newPoints,
         locked: false,
         soilImage: null
       });
 
       selectedPlotId = newId;
-      renderAdminPlots();
+      renderPolygonPlots();
     }
 
-    function toggleLockPlot(plotId, e) {
+    function toggleLockPolygonPlot(plotId, e) {
       if (e) e.stopPropagation();
       const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
       if (slot) {
         slot.locked = !slot.locked;
-        renderAdminPlots();
+        renderPolygonPlots();
       }
     }
 
-    function deletePlot(plotId, e) {
+    function deletePolygonPlot(plotId, e) {
       if (e) e.stopPropagation();
       if (currentClass.config.plotSlots.length <= 1) {
         return alert('Cần giữ lại ít nhất 1 khu đất!');
       }
       currentClass.config.plotSlots = currentClass.config.plotSlots.filter(s => s.id !== plotId);
       selectedPlotId = currentClass.config.plotSlots[0].id;
-      renderAdminPlots();
+      renderPolygonPlots();
     }
 
     function handleDragStart(e, rawUrl, isSoil) {
@@ -702,39 +736,15 @@
     }
     function handleDragOver(e) { e.preventDefault(); }
 
-    function handleDropOnPlot(e, plotId, teamId) {
+    function handleDrop(e) {
       e.preventDefault();
       if (!draggedItemData) return;
-      const perm = checkPermissionOnPlot(teamId);
-      if (!perm.allowed) return alert(perm.msg);
+      const sectionA = document.getElementById('section-a');
+      const rect = sectionA.getBoundingClientRect();
+      let dropX = e.clientX - rect.left;
+      let dropY = e.clientY - rect.top;
 
-      const slot = currentClass.config.plotSlots.find(s => s.id === plotId);
-
-      if (draggedItemData.isSoil) {
-        slot.soilImage = draggedItemData.rawUrl;
-        renderAdminPlots();
-      } else {
-        const placedCount = (currentClass.placedFlowers || []).filter(f => parseInt(f.teamId) === teamId).length;
-        const limit = getPlotAllowedProductsCount(teamId);
-        if (placedCount >= limit) {
-          return alert(`Khu đất ${teamId} chỉ được phép trồng tối đa ${limit} hoa/sản phẩm!`);
-        }
-
-        const sectionA = document.getElementById('section-a');
-        const rect = sectionA.getBoundingClientRect();
-        let dropX = e.clientX - rect.left;
-        let dropY = e.clientY - rect.top;
-
-        spawnFlowerOnCanvas(draggedItemData.rawUrl, dropX, dropY, teamId, false);
-      }
-    }
-
-    function clearSoilFromSlot(plotId, teamId, event) {
-      event.stopPropagation();
-      const perm = checkPermissionOnPlot(teamId);
-      if (!perm.allowed) return alert(perm.msg);
-      currentClass.config.plotSlots.find(s => s.id === plotId).soilImage = null;
-      renderAdminPlots();
+      spawnFlowerOnCanvas(draggedItemData.rawUrl, dropX, dropY, 1, false);
     }
 
     let flowerCounter = 0;
@@ -785,8 +795,12 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       renderDynamicButtons();
-      renderAdminPlots();
+      renderPolygonPlots();
       switchButtonCategory('nutnu.png');
+    });
+
+    window.addEventListener('resize', () => {
+      renderPolygonPlots();
     });
   </script>
 </body>
