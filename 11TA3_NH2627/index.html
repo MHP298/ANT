@@ -533,7 +533,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- HIỆU ỨNG VÀ BẢNG MÀU LỊCH KIỂM TRA (PASTEL) --- */
+        /* HIỆU ỨNG VÀ BẢNG MÀU LỊCH KIỂM TRA (PASTEL) */
         @keyframes pulseAlert {
             0% { transform: scale(1); opacity: 0.95; }
             50% { transform: scale(1.015); opacity: 1; box-shadow: 0 4px 14px rgba(230, 57, 70, 0.25); }
@@ -600,7 +600,6 @@
             vertical-align: middle;
         }
 
-        /* Màu Pastel cho hàng kiểm tra */
         .row-pastel-red {
             background-color: #ffe3e3 !important;
             color: #c92a2a !important;
@@ -619,6 +618,13 @@
         .row-normal {
             background-color: #ffffff;
             color: #1d3557;
+        }
+
+        .exam-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 12px;
+            align-items: stretch;
         }
 
         /* RESPONSIVE DỌC */
@@ -646,6 +652,11 @@
             .content-b { flex: 1; min-height: 0; overflow: hidden; padding: 8px; }
             .pdf-iframe { height: 260px; }
             .welcome-greeting-text { font-size: 2.1rem; }
+            .exam-form-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
         }
 
         @media screen and (max-height: 520px) and (orientation: landscape) {
@@ -776,10 +787,10 @@
         let trashBin = [];
         let scheduleUrl = "";
         
-        // MẢNG DỮ LIỆU LỊCH KIỂM TRA (Collection exam_schedules)
+        // MẢNG DỮ LIỆU LỊCH KIỂM TRA
         let examSchedules = [];
-        let tempExamList = []; // Danh sách thêm tạm trước khi nhấn Lưu
-        let adminExamSubTab = 'add'; // 'add' hoặc 'edit'
+        let tempExamList = [];
+        let adminExamSubTab = 'add';
         let editingExamDocId = null;
 
         let currentUser = null;
@@ -841,7 +852,6 @@
             return url;
         }
 
-        // HÀM TÍNH KHOẢNG CÁCH NGÀY SO VỚI HÔM NAY (00:00)
         function getDayDiffFromToday(targetDateStr) {
             if (!targetDateStr) return 999;
             let today = new Date();
@@ -856,7 +866,6 @@
             return Math.round(diffTime / (1000 * 3600 * 24));
         }
 
-        // ĐỊNH DẠNG NGÀY dd/mm/yy
         function formatDateToDDMMYY(dateStr) {
             if (!dateStr) return "";
             let p = dateStr.split('-');
@@ -865,19 +874,16 @@
             return `${p[2]}/${p[1]}/${yy}`;
         }
 
-        // TỰ ĐỘNG VIẾT HOA CHỮ CÁI ĐẦU MÔN HỌC
         function capitalizeSubject(val) {
             if (!val) return "";
             val = val.trim();
             return val.charAt(0).toUpperCase() + val.slice(1);
         }
 
-        // KIỂM TRA CÓ LỊCH THI TRONG VÒNG 10 NGÀY LÀM VIỆC (KHÔNG TÍNH T7, CN)
         function hasExamInNext10WorkingDays() {
             let validExams = getValidExams();
             if (validExams.length === 0) return false;
 
-            // Tạo danh sách 10 ngày làm việc tiếp theo
             let workingDays = [];
             let checkDate = new Date();
             checkDate.setHours(0, 0, 0, 0);
@@ -885,7 +891,7 @@
             while (workingDays.length < 10) {
                 checkDate.setDate(checkDate.getDate() + 1);
                 let day = checkDate.getDay();
-                if (day !== 0 && day !== 6) { // Không phải T7 (6), CN (0)
+                if (day !== 0 && day !== 6) {
                     let y = checkDate.getFullYear();
                     let m = String(checkDate.getMonth() + 1).padStart(2, '0');
                     let d = String(checkDate.getDate()).padStart(2, '0');
@@ -896,38 +902,30 @@
             return validExams.some(item => workingDays.includes(item.examDate));
         }
 
-        // LẤY DANH SÁCH BÀI THI CHƯA QUA NGÀY (SẮP XẾP GẦN NHẤT LÊN ĐẦU)
         function getValidExams() {
-            let today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
             return examSchedules
                 .filter(item => {
                     let diff = getDayDiffFromToday(item.examDate);
-                    return diff >= 0; // Chưa qua ngày
+                    return diff >= 0;
                 })
                 .sort((a, b) => {
                     return new Date(a.examDate) - new Date(b.examDate);
                 });
         }
 
-        // --- CƠ CHẾ KẾT NỐI REALTIME DUY NHẤT VÀ CHUẨN XÁC VỚI FIRESTORE ---
         function initRealtimeDatabase() {
-            // 1. Thông báo
             db.collection("notifications").onSnapshot({ includeMetadataChanges: true }, snapshot => {
                 notifications = [];
                 snapshot.forEach(doc => notifications.push({ ...doc.data(), docId: doc.id }));
                 renderApp();
             }, err => console.log("Lỗi notifications:", err));
 
-            // 2. Báo bài
             db.collection("homeworks").onSnapshot({ includeMetadataChanges: true }, snapshot => {
                 homeworks = [];
                 snapshot.forEach(doc => homeworks.push({ ...doc.data(), docId: doc.id }));
                 renderApp();
             }, err => console.log("Lỗi homeworks:", err));
 
-            // 3. Góc kỷ niệm
             db.collection("albums").onSnapshot({ includeMetadataChanges: true }, snapshot => {
                 albums = [];
                 snapshot.forEach(doc => {
@@ -939,14 +937,12 @@
                 renderApp();
             }, err => console.log("Lỗi albums:", err));
 
-            // 4. Thùng rác
             db.collection("trashBin").onSnapshot({ includeMetadataChanges: true }, snapshot => {
                 trashBin = [];
                 snapshot.forEach(doc => trashBin.push({ ...doc.data(), docId: doc.id }));
                 renderApp();
             }, err => console.log("Lỗi trashBin:", err));
 
-            // 5. Tài khoản
             db.collection("subAccounts").onSnapshot({ includeMetadataChanges: true }, snapshot => {
                 subAccounts = [];
                 snapshot.forEach(doc => subAccounts.push({ ...doc.data(), docId: doc.id }));
@@ -957,7 +953,6 @@
                 renderApp();
             }, err => console.log("Lỗi subAccounts:", err));
 
-            // 6. Cài đặt chung (TKB, Biểu mẫu, Banner)
             db.collection("settings").doc("general").onSnapshot({ includeMetadataChanges: true }, doc => {
                 if (doc.exists) {
                     let data = doc.data();
@@ -970,7 +965,6 @@
                 }
             }, err => console.log("Lỗi settings/general:", err));
 
-            // 7. LỊCH KIỂM TRA (COLLECTION RIÊNG BIỆT exam_schedules)
             db.collection("exam_schedules").onSnapshot({ includeMetadataChanges: true }, snapshot => {
                 examSchedules = [];
                 snapshot.forEach(doc => examSchedules.push({ ...doc.data(), docId: doc.id }));
@@ -978,7 +972,6 @@
             }, err => console.log("Lỗi exam_schedules:", err));
         }
 
-        // TỰ ĐỘNG XÓA LỊCH THI ĐÃ QUA NGÀY KHỎI FIREBASE (Chạy ngầm an toàn khi Admin/Cán bộ đăng nhập)
         async function autoCleanupExpiredExams() {
             if (!currentUser) return;
             try {
@@ -986,21 +979,19 @@
                 let hasExpired = false;
                 examSchedules.forEach(item => {
                     let diff = getDayDiffFromToday(item.examDate);
-                    if (diff < 0 && item.docId) { // Đã qua ngày
+                    if (diff < 0 && item.docId) {
                         batch.delete(db.collection("exam_schedules").doc(item.docId));
                         hasExpired = true;
                     }
                 });
                 if (hasExpired) {
                     await batch.commit();
-                    console.log("Đã dọn dẹp các lịch kiểm tra quá hạn.");
                 }
             } catch (e) {
                 console.log("Lỗi tự dọn dẹp lịch thi:", e);
             }
         }
 
-        // LƯU CÀI ĐẶT CHUNG (settings/general)
         async function saveSettingsToFirebase() {
             let payload = { 
                 banners: banners || [], 
@@ -1196,7 +1187,6 @@
                 let visitorBg = (currentHour < 12) ? "linear-gradient(135deg, #fff9db 0%, #ffe8cc 100%)" : (currentHour < 18 ? "linear-gradient(135deg, #e3fafc 0%, #c5f6fa 100%)" : "linear-gradient(135deg, #f3f0ff 0%, #e5dbff 100%)");
                 let visitorColor = (currentHour < 12) ? "#d9480f" : (currentHour < 18 ? "#0c8599" : "#5f3dc4");
 
-                // ĐẾM SỐ BÀI KIỂM TRA TRONG VÀI NGÀY TỚI (CẢNH BÁO ĐỎ VÀ VÀNG: CÒN 1 HOẶC 2 NGÀY)
                 let urgentExamsCount = getValidExams().filter(item => {
                     let diff = getDayDiffFromToday(item.examDate);
                     return diff === 1 || diff === 2;
@@ -1244,12 +1234,10 @@
                     b.appendChild(pageNav);
                 }
             }
-            // --- GIAO DIỆN XEM LỊCH KIỂM TRA (NGƯỜI XEM) ---
             else if (currentView === 'exam_schedule_view') {
                 let validExams = getValidExams();
                 let hkFileSection = '';
 
-                // Tìm xem có lịch thi HK dạng file đính kèm (ảnh hoặc pdf) không
                 let hkExamItem = validExams.find(e => e.hkFileUrl && (e.examType === 'HK1' || e.examType === 'HK2'));
                 if (hkExamItem) {
                     let fileUrl = hkExamItem.hkFileUrl;
@@ -1324,7 +1312,6 @@
                     </div>
                 `;
             }
-            // --- GIAO DIỆN ĐĂNG & ĐIỀU CHỈNH LỊCH KT (ADMIN / CÁN BỘ LỚP) ---
             else if (currentView === 'admin_exam_schedule') {
                 let addActiveStyle = adminExamSubTab === 'add' ? 'background:#1d3557;' : 'background:#457b9d;';
                 let editActiveStyle = adminExamSubTab === 'edit' ? 'background:#1d3557;' : 'background:#457b9d;';
@@ -1472,7 +1459,6 @@
                         <iframe src="${parseGoogleDrivePdfEmbed(item.pdfUrl)}" class="pdf-iframe" allow="autoplay"></iframe>
                     </div>` : '';
 
-                // NÚT NHẮP NHÁY BÁO LỊCH KIỂM TRA SẮP TỚI Ở ĐẦU NỘI DUNG BÁO BÀI
                 let examNoticeButton = '';
                 if (hasExamInNext10WorkingDays()) {
                     examNoticeButton = `
@@ -1926,7 +1912,7 @@
             }
         }
 
-        // --- CÁC HÀM XỬ LÝ LỊCH KIỂM TRA (ADMIN SUB-VIEWS) ---
+        // --- GIAO DIỆN QUẢN TRỊ LỊCH KT VỚI BỐ CỤC 1/3 - 2/3 VÀ NÚT KẾT THÚC ---
         function setAdminExamTab(tab) {
             adminExamSubTab = tab;
             renderAdminExamSubView();
@@ -1939,44 +1925,47 @@
             if (adminExamSubTab === 'add') {
                 area.innerHTML = `
                     <div style="background:white; padding:12px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03); margin-bottom:8px;">
-                        <div style="display:flex; gap:10px;">
-                            <div class="form-group" style="flex:1;">
-                                <label>Ngày kiểm tra:</label>
-                                <input type="date" id="inpExamDate">
+                        <div class="exam-form-grid">
+                            <!-- CỘT TRÁI (1/3): Ngày, Loại, Môn -->
+                            <div style="display:flex; flex-direction:column; gap:6px;">
+                                <div class="form-group" style="margin:0;">
+                                    <label>Ngày kiểm tra:</label>
+                                    <input type="date" id="inpExamDate">
+                                </div>
+                                <div class="form-group" style="margin:0;">
+                                    <label>Loại kiểm tra:</label>
+                                    <select id="inpExamType" onchange="toggleExamFormFields()">
+                                        <option value="KTTX">KTTX</option>
+                                        <option value="Giữa HK1">Giữa HK1</option>
+                                        <option value="HK1">HK1</option>
+                                        <option value="Giữa HK2">Giữa HK2</option>
+                                        <option value="HK2">HK2</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="examSubjectGroup" style="margin:0;">
+                                    <label>Môn kiểm tra:</label>
+                                    <input type="text" id="inpExamSubject" placeholder="Nhập tên môn..." oninput="this.value = capitalizeSubject(this.value)">
+                                </div>
                             </div>
-                            <div class="form-group" style="flex:1;">
-                                <label>Loại kiểm tra:</label>
-                                <select id="inpExamType" onchange="toggleExamFormFields()">
-                                    <option value="KTTX">KTTX</option>
-                                    <option value="Giữa HK1">Giữa HK1</option>
-                                    <option value="HK1">HK1</option>
-                                    <option value="Giữa HK2">Giữa HK2</option>
-                                    <option value="HK2">HK2</option>
-                                </select>
-                            </div>
-                        </div>
 
-                        <!-- CỤM Ô NHẬP CHO KTTX, GIỮA KỲ -->
-                        <div id="examSubjectContentGroup" style="display:flex; gap:10px; margin-top:4px;">
-                            <div class="form-group" style="flex:1;">
-                                <label>Môn kiểm tra:</label>
-                                <input type="text" id="inpExamSubject" placeholder="Nhập tên môn..." oninput="this.value = capitalizeSubject(this.value)">
-                            </div>
-                            <div class="form-group" style="flex:1.5;">
-                                <label>Nội dung kiểm tra:</label>
-                                <input type="text" id="inpExamContent" placeholder="Nhập bài học / nội dung kiểm tra...">
-                            </div>
-                        </div>
+                            <!-- CỘT PHẢI (2/3): Nội dung kiểm tra nhiều dòng (hoặc Tải lịch thi HK) -->
+                            <div style="display:flex; flex-direction:column;">
+                                <div class="form-group" id="examContentGroup" style="margin:0; height:100%; display:flex; flex-direction:column;">
+                                    <label>Nội dung kiểm tra (Nhập nhiều dòng):</label>
+                                    <textarea id="inpExamContent" placeholder="Nhập chi tiết các bài học, giới hạn hoặc nội dung kiểm tra..." style="flex:1; min-height:85px; resize:none; font-family:inherit;"></textarea>
+                                </div>
 
-                        <!-- CỤM TẢI LỊCH THI HK (HK1 / HK2) -->
-                        <div id="examHkFileGroup" style="display:none; flex-direction:column; gap:6px; margin-top:4px;">
-                            <label style="font-size:0.75rem; font-weight:600; color:var(--primary);">Tải lịch thi Học kỳ (Link Drive hoặc Tải file Ảnh/PDF):</label>
-                            <div style="display:flex; gap:8px; align-items:center;">
-                                <input type="text" id="inpExamHkUrl" placeholder="Dán link Google Drive ảnh/PDF..." style="flex:1;">
-                                <input type="file" id="inpExamHkFile" accept="image/*,application/pdf" style="display:none;" onchange="handleHkFileUpload(this)">
-                                <button type="button" class="menu-btn" style="background:#457b9d; padding:6px 10px; font-size:0.75rem;" onclick="document.getElementById('inpExamHkFile').click()">📁 Tải lên file</button>
+                                <!-- CỤM TẢI LỊCH THI HK (HIỂN THỊ KHI CHỌN HK1 / HK2) -->
+                                <div id="examHkFileGroup" style="display:none; flex-direction:column; justify-content:center; gap:6px; height:100%;">
+                                    <label style="font-size:0.75rem; font-weight:600; color:var(--primary);">Tải lịch thi Học kỳ (Link Drive hoặc Tải file Ảnh/PDF):</label>
+                                    <div style="display:flex; gap:8px; align-items:center;">
+                                        <input type="text" id="inpExamHkUrl" placeholder="Dán link Google Drive ảnh/PDF..." style="flex:1;">
+                                        <input type="file" id="inpExamHkFile" accept="image/*,application/pdf" style="display:none;" onchange="handleHkFileUpload(this)">
+                                        <button type="button" class="menu-btn" style="background:#457b9d; padding:6px 10px; font-size:0.75rem; white-space:nowrap;" onclick="document.getElementById('inpExamHkFile').click()">📁 Tải lên file</button>
+                                    </div>
+                                    <span id="hkFileStatus" style="font-size:0.72rem; color:#2a9d8f;"></span>
+                                </div>
                             </div>
-                            <span id="hkFileStatus" style="font-size:0.72rem; color:#2a9d8f;"></span>
                         </div>
 
                         <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
@@ -1992,13 +1981,12 @@
 
                     <div style="display:flex; justify-content:center; gap:12px;">
                         <button type="button" class="menu-btn" style="width:140px; justify-content:center; background:#2a9d8f;" onclick="saveAllTempExams()">💾 Lưu tất cả</button>
-                        <button type="button" class="menu-btn" style="width:140px; justify-content:center; background:#6c757d;" onclick="switchView('admin_homework')">Hủy</button>
+                        <button type="button" class="menu-btn" style="width:140px; justify-content:center; background:#6c757d;" onclick="switchView('welcome_dashboard')">🏁 Kết thúc</button>
                     </div>
                 `;
                 renderTempExamRows();
                 toggleExamFormFields();
             } else {
-                // TAB ĐIỀU CHỈNH LỊCH KIỂM TRA
                 let validExams = getValidExams();
                 area.innerHTML = `
                     <div style="flex:1; overflow-y:auto; border:1px solid #dee2e6; border-radius:6px; background:white; padding:6px; margin-bottom:8px;">
@@ -2019,7 +2007,7 @@
                         </div>
                     </div>
                     <div style="display:flex; justify-content:center;">
-                        <button type="button" class="menu-btn" style="width:140px; justify-content:center; background:#6c757d;" onclick="switchView('admin_homework')">Quay lại Báo Bài</button>
+                        <button type="button" class="menu-btn" style="width:140px; justify-content:center; background:#6c757d;" onclick="switchView('welcome_dashboard')">🏁 Kết thúc</button>
                     </div>
                 `;
             }
@@ -2027,16 +2015,19 @@
 
         function toggleExamFormFields() {
             let typeElem = document.getElementById('inpExamType');
-            let subContentGroup = document.getElementById('examSubjectContentGroup');
+            let subGroup = document.getElementById('examSubjectGroup');
+            let contentGroup = document.getElementById('examContentGroup');
             let hkFileGroup = document.getElementById('examHkFileGroup');
-            if (!typeElem || !subContentGroup || !hkFileGroup) return;
+            if (!typeElem || !subGroup || !contentGroup || !hkFileGroup) return;
 
             let val = typeElem.value;
             if (val === 'HK1' || val === 'HK2') {
-                subContentGroup.style.display = 'none';
+                subGroup.style.display = 'none';
+                contentGroup.style.display = 'none';
                 hkFileGroup.style.display = 'flex';
             } else {
-                subContentGroup.style.display = 'flex';
+                subGroup.style.display = 'flex';
+                contentGroup.style.display = 'flex';
                 hkFileGroup.style.display = 'none';
             }
         }
@@ -2155,7 +2146,7 @@
                 await batch.commit();
                 alert(`Đã lưu thành công ${tempExamList.length} lịch kiểm tra lên máy chủ!`);
                 tempExamList = [];
-                switchView('admin_homework'); // Tự động quay về giao diện báo bài
+                switchView('admin_homework');
             } catch (err) {
                 alert("Lỗi khi lưu lịch kiểm tra: " + err.message);
             }
@@ -2288,7 +2279,7 @@
             });
         }
 
-        // CÁC HÀM XỬ LÝ ẢNH NHIỀU LINK CHO THÔNG BÁO, BÁO BÀI, ALBUM, BANNER
+        // CÁC HÀM XỬ LÝ ẢNH NHIỀU LINK
         function initMultiNotiRows() {
             let container = document.getElementById('multiNotiLinksContainer');
             if (!container) return;
@@ -2610,568 +2601,4 @@
 
             if (currentMultiLinks.length > 0) {
                 processSave(currentMultiLinks, 'image');
-            } else if (fileInput && fileInput.files && fileInput.files[0]) {
-                let reader = new FileReader();
-                reader.onload = (e) => processSave([e.target.result], 'image');
-                reader.readAsDataURL(fileInput.files[0]);
-            } else {
-                let existingMediaUrl = [];
-                let existingMediaType = "";
-                if (editingNotiId !== null) {
-                    let oldItem = notifications.find(n => n.id === editingNotiId);
-                    if (oldItem) { 
-                        existingMediaUrl = Array.isArray(oldItem.mediaUrl) ? oldItem.mediaUrl : [oldItem.mediaUrl]; 
-                        existingMediaType = oldItem.mediaType; 
-                    }
-                }
-                processSave(existingMediaUrl, existingMediaType);
-            }
-        }
-
-        async function submitHomework(event) {
-            let title = document.getElementById('hwTitle').value.trim();
-            let content = document.getElementById('hwContent').innerHTML.trim();
-            let pdfUrl = document.getElementById('hwPdfInput').value.trim();
-            let fileInput = document.getElementById('hwMediaFile');
-            let btnSubmit = event.target;
-
-            if (!content || content === "<br>") { alert("Vui lòng nhập nội dung báo bài!"); return; }
-            
-            btnSubmit.disabled = true;
-            btnSubmit.innerText = "⏳ Đang đăng...";
-
-            let processHwSave = async (mediaUrls) => {
-                try {
-                    if (mediaUrls && mediaUrls.length > 0) {
-                        mediaUrls.forEach(u => {
-                            let parsedU = parseGoogleDriveLink(u);
-                            content += `<br><div style="width:100%; margin-top:8px;"><img src="${parsedU}" style="width:100%; max-width:100%; height:auto; border-radius:6px; cursor:pointer;" onclick="openZoomModal('${parsedU}')"></div>`;
-                        });
-                    }
-
-                    let maxId = homeworks.length > 0 ? Math.max(...homeworks.map(h => h.id || 0)) : 0;
-                    let newId = maxId + 1;
-                    let now = new Date();
-                    let dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-
-                    let newHw = {
-                        id: newId,
-                        title,
-                        content,
-                        pdfUrl,
-                        timestamp: Date.now(),
-                        date: dateStr,
-                        author: currentUser.name
-                    };
-
-                    await db.collection("homeworks").doc("hw_" + newId).set(newHw);
-                    alert("Đăng báo bài thành công!");
-                    currentHwMultiLinks = [];
-                    tempHwContent = ""; tempHwPdf = "";
-                    switchView('homework_list');
-                } catch (err) {
-                    alert("Lỗi khi đăng báo bài: " + err.message);
-                } finally {
-                    btnSubmit.disabled = false;
-                    btnSubmit.innerText = "Đăng";
-                }
-            };
-
-            if (currentHwMultiLinks.length > 0) {
-                processHwSave(currentHwMultiLinks);
-            } else if (fileInput && fileInput.files && fileInput.files[0]) {
-                let reader = new FileReader();
-                reader.onload = (e) => processHwSave([e.target.result]);
-                reader.readAsDataURL(fileInput.files[0]);
-            } else {
-                processHwSave([]);
-            }
-        }
-
-        async function submitDynamicBatchAlbum() {
-            let title = document.getElementById('albumBatchTitle').value.trim();
-            let linksArray = [];
-            document.querySelectorAll('.multi-album-input').forEach(inp => {
-                let val = inp.value.trim();
-                if (val) linksArray.push(parseGoogleDriveLink(val));
-            });
-
-            if (!title) { alert("Vui lòng nhập tên Album!"); return; }
-            if (linksArray.length === 0) { alert("Vui lòng dán ít nhất một đường dẫn ảnh hợp lệ!"); return; }
-
-            try {
-                if (editingAlbumId !== null) {
-                    let albItem = albums.find(a => a.docId === editingAlbumId || a.id === editingAlbumId);
-                    if (albItem && albItem.docId) {
-                        await db.collection("albums").doc(albItem.docId).update({ title, mediaUrl: linksArray[0] });
-                        alert("Đã cập nhật album thành công!");
-                    }
-                } else {
-                    let batch = db.batch();
-                    linksArray.forEach((link, index) => {
-                        let newDocId = "alb_" + (Date.now() + index);
-                        let docRef = db.collection("albums").doc(newDocId);
-                        batch.set(docRef, {
-                            id: Date.now() + index,
-                            title: linksArray.length > 1 ? `${title} (${index + 1}/${linksArray.length})` : title,
-                            mediaUrl: link,
-                            type: 'image',
-                            author: currentUser.name
-                        });
-                    });
-                    await batch.commit();
-                    alert(`Đã đăng thành công ${linksArray.length} ảnh kỷ niệm!`);
-                }
-
-                editingAlbumId = null;
-                tempAlbumTitle = "";
-                currentAlbumLinks = [];
-                switchView(currentUser.role === 'admin' ? 'admin_manage_album' : 'home');
-            } catch (err) {
-                alert("Lỗi khi lưu album: " + err.message);
-            }
-        }
-
-        function startEditAlbum(docId) {
-            editingAlbumId = docId;
-            let albItem = albums.find(a => a.docId === docId || a.id === docId);
-            if (albItem) {
-                tempAlbumTitle = albItem.title.replace(/\s\(\d+\/\d+\)$/, '');
-                currentAlbumLinks = [albItem.mediaUrl];
-            }
-            switchView(currentUser.role === 'admin' ? 'admin_album' : 'sub_album');
-        }
-
-        async function deleteAlbumItem(docId) {
-            if (confirm("Bạn có chắc chắn muốn xóa ảnh này?")) {
-                try {
-                    await db.collection("albums").doc(docId).delete();
-                } catch (err) {
-                    alert("Lỗi khi xóa: " + err.message);
-                }
-            }
-        }
-
-        function changeAlbum(step) {
-            if (albums.length === 0) return;
-            albumIndex += step;
-            if (albumIndex < 0) albumIndex = albums.length - 1;
-            if (albumIndex >= albums.length) albumIndex = 0;
-            renderContentB();
-        }
-
-        async function saveDynamicBanners() {
-            let fileInput = document.getElementById('bannerFileInput');
-            let linksArray = [];
-            document.querySelectorAll('.multi-banner-input').forEach(inp => {
-                let val = inp.value.trim();
-                if (val) linksArray.push(parseGoogleDriveLink(val));
-            });
-
-            if (fileInput && fileInput.files && fileInput.files[0]) {
-                let reader = new FileReader();
-                reader.onload = async (e) => {
-                    banners.unshift(e.target.result);
-                    await saveSettingsToFirebase();
-                    alert("Đã lưu banner thành công!");
-                    renderBannerSlideshow();
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-                return;
-            }
-
-            if (linksArray.length > 0) {
-                banners = [...linksArray];
-                await saveSettingsToFirebase();
-                alert("Đã lưu danh sách banner thành công!");
-                renderBannerSlideshow();
-            } else {
-                alert("Vui lòng đính kèm ít nhất một link banner!");
-            }
-        }
-
-        async function saveSchedule() {
-            let linkInput = document.getElementById('scheduleLinkInput').value.trim();
-            let fileInput = document.getElementById('scheduleFileInput');
-
-            if (fileInput && fileInput.files && fileInput.files[0]) {
-                let reader = new FileReader();
-                reader.onload = async (e) => {
-                    scheduleUrl = e.target.result;
-                    await saveSettingsToFirebase();
-                    alert("Đăng Thời khóa biểu thành công!");
-                    renderContentB();
-                };
-                reader.readAsDataURL(fileInput.files[0]);
-            } else if (linkInput) {
-                scheduleUrl = parseGoogleDriveLink(linkInput);
-                await saveSettingsToFirebase();
-                alert("Đăng Thời khóa biểu thành công!");
-                renderContentB();
-            } else {
-                alert("Vui lòng dán link hoặc chọn file ảnh TKB!");
-            }
-        }
-
-        async function deleteSchedule() {
-            if (!scheduleUrl) { alert("Chưa có TKB để xóa!"); return; }
-            if (confirm("Xóa TKB này?")) {
-                scheduleUrl = "";
-                await saveSettingsToFirebase();
-                alert("Đã xóa Thời Khóa Biểu!");
-                renderContentB();
-            }
-        }
-
-        async function deleteHomework(docId) {
-            if (confirm("Xóa bài báo bài này?")) {
-                try {
-                    let item = homeworks.find(h => h.docId === docId);
-                    if (item) {
-                        let trashData = { ...item, isHomework: true, deletedBy: currentUser.name, deletedAt: new Date().toLocaleString() };
-                        delete trashData.docId;
-                        await db.collection("trashBin").add(trashData);
-                        await db.collection("homeworks").doc(docId).delete();
-                    }
-                } catch (err) {
-                    alert("Lỗi khi xóa: " + err.message);
-                }
-            }
-        }
-
-        function showHwDetail(id) { window.currentHwId = id; currentView = 'homework_detail'; renderContentB(); }
-        function changeHwPage(step) { homeworkPageOffset += step; renderContentB(); }
-        function showFullDetail(id) { window.currentDetailId = id; currentView = 'full_detail'; renderContentB(); }
-
-        function showTrashDetail(idx) {
-            let item = trashBin[idx];
-            if (!item) return;
-            if (item.isHomework || (item.title && item.title.startsWith("BÁO BÀI"))) {
-                window.currentHwId = item.id;
-                currentView = 'homework_detail';
-                if (!homeworks.find(h => h.id === item.id)) homeworks.push(item);
-                renderContentB();
-            } else {
-                window.currentDetailId = item.id;
-                currentView = 'full_detail';
-                if (!notifications.find(n => n.id === item.id)) notifications.push(item);
-                renderContentB();
-            }
-        }
-
-        let bannerTimer = null;
-        function renderBannerSlideshow() {
-            let container = document.getElementById('dynamicBannerContainer');
-            if (!container) return;
-            if (banners.length === 0) { container.style.display = 'none'; return; }
-            container.style.display = 'block';
-            container.innerHTML = '';
-            banners.forEach((src) => {
-                let img = document.createElement('img');
-                img.src = parseGoogleDriveLink(src);
-                if (container.children.length === 0) img.className = 'active';
-                container.appendChild(img);
-            });
-            if (bannerTimer) clearInterval(bannerTimer);
-            let imgs = container.querySelectorAll('img');
-            if (imgs.length > 1) {
-                let currentIdx = 0;
-                bannerTimer = setInterval(() => {
-                    imgs = container.querySelectorAll('img');
-                    if (imgs.length === 0) return;
-                    imgs[currentIdx].classList.remove('active');
-                    currentIdx = (currentIdx + 1) % imgs.length;
-                    imgs[currentIdx].classList.add('active');
-                }, 6000);
-            }
-        }
-
-        function togglePasswordVisibility() {
-            let passInput = document.getElementById('loginPass');
-            let toggleBtn = document.querySelector('.toggle-password');
-            if (passInput.type === 'password') {
-                passInput.type = 'text';
-                toggleBtn.innerText = '🙈';
-            } else {
-                passInput.type = 'password';
-                toggleBtn.innerText = '👁️';
-            }
-        }
-
-        function changePage(step) { notiPageOffset += step; renderContentB(); }
-
-        function handleLogin() {
-            let u = document.getElementById('loginUser').value.trim();
-            let p = document.getElementById('loginPass').value.trim();
-
-            if (u === 'admin298' && p === 'ADM!n298') {
-                currentUser = { name: "GVCN", role: "admin" };
-                autoCleanupExpiredExams();
-                switchView('welcome_dashboard');
-            } 
-            else if (u === 'admin') {
-                let foundAdmin = subAccounts.find(acc => acc.name === 'admin' && acc.pass === p);
-                if (foundAdmin || p === 'ad1234') {
-                    currentUser = { name: "Admin Phụ (admin)", role: "admin" };
-                    autoCleanupExpiredExams();
-                    switchView('welcome_dashboard');
-                } else {
-                    alert("Mật khẩu tài khoản admin không chính xác!");
-                }
-            } 
-            else {
-                let found = subAccounts.find(acc => acc.name === u && acc.pass === p);
-                if (found) {
-                    currentUser = { name: found.studentName || found.name, role: "sub" };
-                    autoCleanupExpiredExams();
-                    switchView('welcome_dashboard');
-                } else {
-                    alert("Tên tài khoản hoặc mật khẩu không chính xác!");
-                }
-            }
-        }
-
-        function logout() { currentUser = null; switchView('home'); }
-
-        async function deleteAccountByName(accName, docId) {
-            if (accName.toLowerCase() === 'admin') { alert("Không thể xóa tài khoản admin chính!"); return; }
-            if (confirm("Xóa tài khoản này?")) {
-                try {
-                    await db.collection("subAccounts").doc(docId).delete();
-                } catch (err) {
-                    alert("Lỗi khi xóa: " + err.message);
-                }
-            }
-        }
-
-        function startEdit(id) { 
-            editingNotiId = id; 
-            currentMultiLinks = []; 
-            let item = notifications.find(n => n.id === id);
-            if (item) {
-                tempPostTitle = item.title;
-                tempPostContent = item.content;
-                tempPostPdf = item.pdfUrl || "";
-                currentMultiLinks = Array.isArray(item.mediaUrl) ? [...item.mediaUrl] : (item.mediaUrl ? item.mediaUrl.split('\n').filter(l => l.trim()) : []);
-            }
-            switchView(currentUser.role === 'admin' ? 'admin_post' : 'sub_post'); 
-        }
-
-        function cancelEdit() { 
-            editingNotiId = null; 
-            currentMultiLinks = [];
-            tempPostTitle = ""; tempPostContent = ""; tempPostPdf = "";
-            switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti'); 
-        }
-
-        async function deleteNotification(docId, id) {
-            if (confirm("Chuyển thông báo này vào thùng rác?")) {
-                try {
-                    let item = notifications.find(n => n.docId === docId || n.id === id);
-                    if (item) {
-                        let trashData = { ...item, isHomework: false, deletedBy: currentUser.name, deletedAt: new Date().toLocaleString() };
-                        delete trashData.docId;
-                        await db.collection("trashBin").add(trashData);
-                        await db.collection("notifications").doc(item.docId).delete();
-                    }
-                } catch (err) {
-                    alert("Lỗi khi xóa: " + err.message);
-                }
-            }
-        }
-
-        async function restoreNotification(docId) {
-            try {
-                let item = trashBin.find(t => t.docId === docId);
-                if (item) {
-                    let restoreData = { ...item };
-                    delete restoreData.docId; delete restoreData.deletedBy; delete restoreData.deletedAt;
-
-                    if (restoreData.isHomework || (restoreData.title && restoreData.title.startsWith("BÁO BÀI"))) {
-                        delete restoreData.isHomework;
-                        await db.collection("homeworks").doc("hw_" + restoreData.id).set(restoreData);
-                    } else {
-                        await db.collection("notifications").doc("noti_" + restoreData.id).set(restoreData);
-                    }
-                    await db.collection("trashBin").doc(docId).delete();
-                    alert("Khôi phục thành công!");
-                }
-            } catch (err) {
-                alert("Lỗi khi khôi phục: " + err.message);
-            }
-        }
-
-        async function deleteSelectedTrash() {
-            let checkboxes = document.querySelectorAll('.trash-check:checked');
-            if (checkboxes.length === 0) { alert("Chọn ít nhất một mục!"); return; }
-            if (confirm("Xóa vĩnh viễn các mục đã chọn?")) {
-                let batch = db.batch();
-                checkboxes.forEach(cb => {
-                    let dId = cb.dataset.docid;
-                    if (dId) batch.delete(db.collection("trashBin").doc(dId));
-                });
-                await batch.commit();
-                alert("Đã xóa vĩnh viễn các mục đã chọn!");
-            }
-        }
-
-        /* ZOOM & PAN */
-        let currentScale = 1, panX = 0, panY = 0, isDragging = false, startX = 0, startY = 0, initialDistance = 0, initialScale = 1;
-
-        function openZoomModal(imgSrc) {
-            let modal = document.getElementById('zoomModal');
-            let img = document.getElementById('zoomedImg');
-            img.src = parseGoogleDriveLink(imgSrc);
-            resetZoom();
-            modal.style.display = 'flex';
-        }
-
-        function closeZoomModal() { document.getElementById('zoomModal').style.display = 'none'; }
-        function zoomIn() { currentScale = Math.min(currentScale + 0.4, 5); updateImageTransform(); }
-        function zoomOut() { currentScale = Math.max(currentScale - 0.4, 0.6); updateImageTransform(); }
-        function resetZoom() { currentScale = 1; panX = 0; panY = 0; updateImageTransform(); }
-
-        function updateImageTransform() {
-            let img = document.getElementById('zoomedImg');
-            if (img) img.style.transform = `translate(${panX}px, ${panY}px) scale(${currentScale})`;
-        }
-
-        const zoomModalEl = document.getElementById('zoomModal');
-        zoomModalEl.addEventListener('mousedown', (e) => { isDragging = true; startX = e.clientX - panX; startY = e.clientY - panY; });
-        window.addEventListener('mousemove', (e) => { if (!isDragging) return; panX = e.clientX - startX; panY = e.clientY - startY; updateImageTransform(); });
-        window.addEventListener('mouseup', () => { isDragging = false; });
-        zoomModalEl.addEventListener('wheel', (e) => { e.preventDefault(); if (e.deltaY < 0) zoomIn(); else zoomOut(); }, { passive: false });
-
-        zoomModalEl.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 1) {
-                isDragging = true; startX = e.touches[0].clientX - panX; startY = e.touches[0].clientY - panY;
-            } else if (e.touches.length === 2) {
-                isDragging = false;
-                initialDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                initialScale = currentScale;
-            }
-        }, { passive: false });
-
-        zoomModalEl.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            if (e.touches.length === 1 && isDragging) {
-                panX = e.touches[0].clientX - startX; panY = e.touches[0].clientY - startY; updateImageTransform();
-            } else if (e.touches.length === 2) {
-                let dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                if (initialDistance > 0) {
-                    currentScale = Math.min(Math.max(initialScale * (dist / initialDistance), 0.6), 5);
-                    updateImageTransform();
-                }
-            }
-        }, { passive: false });
-
-        zoomModalEl.addEventListener('touchend', (e) => {
-            if (e.touches.length === 0) isDragging = false;
-            else if (e.touches.length === 1) { isDragging = true; startX = e.touches[0].clientX - panX; startY = e.touches[0].clientY - panY; }
-        });
-
-        function openSearchModal() { document.getElementById('searchModal').style.display = 'flex'; }
-        function closeSearchModal() { document.getElementById('searchModal').style.display = 'none'; }
-
-        function executeSearch() {
-            let aName = document.getElementById('sAuthor').value.toLowerCase().trim();
-            let sId = document.getElementById('sId').value.trim();
-            let sDate = document.getElementById('sDate').value.trim();
-
-            let res = notifications.filter(n => {
-                let matchA = aName ? n.author.toLowerCase().includes(aName) : true;
-                let matchId = sId ? n.id.toString() === sId : true;
-                let matchDate = sDate ? n.date.startsWith(sDate) : true;
-                return matchA && matchId && matchDate;
-            });
-
-            let box = document.getElementById('searchResults');
-            box.innerHTML = '';
-            if (res.length === 0) {
-                box.innerHTML = '<p style="color:#6c757d; font-size:0.75rem; margin-top:3px;">Không tìm thấy thông báo phù hợp.</p>';
-            } else {
-                res.forEach(item => {
-                    box.innerHTML += `
-                        <div class="card-item" style="margin-top:5px; padding:5px; cursor:pointer;" onclick="closeSearchModal(); showFullDetail(${item.id})">
-                            <div class="card-info">
-                                <h4 style="font-size:0.78rem;">Số ${item.id}: ${item.title}</h4>
-                                <span style="font-size:0.65rem;">${item.date} - ${item.author}</span>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-        }
-
-        async function saveOrUpdateAccount() {
-            let studentName = document.getElementById('newStudentName').value.trim();
-            let accName = document.getElementById('newAccName').value.trim();
-            if (!studentName && !accName) { alert("Vui lòng nhập thông tin!"); return; }
-            if (!accName && studentName) {
-                let parts = studentName.split(" ");
-                accName = parts[parts.length - 1].toLowerCase();
-            }
-            let initials = studentName ? studentName.split(" ").map(w => w.charAt(0).toLowerCase()).join("") : accName.charAt(0).toLowerCase();
-            let generatedPass = initials + Math.floor(1000 + Math.random() * 9000);
-
-            try {
-                await db.collection("subAccounts").doc("acc_" + accName.toLowerCase()).set({
-                    name: accName,
-                    pass: generatedPass,
-                    studentName: studentName
-                });
-
-                lastCreatedAccountInfo = `Tài khoản: ${accName} | Mật khẩu: ${generatedPass}`;
-                let infoBox = document.getElementById('resAccountInfo');
-                if (infoBox) infoBox.value = lastCreatedAccountInfo;
-                alert("Tạo/cập nhật tài khoản thành công!");
-            } catch (err) {
-                alert("Lỗi khi lưu tài khoản: " + err.message);
-            }
-        }
-
-        function copyAccountInfo() {
-            let infoBox = document.getElementById('resAccountInfo');
-            if (!infoBox || infoBox.value.includes("Chưa có")) return;
-            navigator.clipboard.writeText(infoBox.value).then(() => alert("Đã copy thông tin tài khoản!"));
-        }
-
-        function toggleFormat(btn, cmd) {
-            document.execCommand(cmd, false, null);
-            btn.classList.toggle('active');
-        }
-
-        function toggleAlign(btn, cmd) {
-            let toolbar = btn.closest('.editor-toolbar');
-            let alignBtns = toolbar.querySelectorAll('button[data-align]');
-            let wasActive = btn.classList.contains('active');
-            alignBtns.forEach(b => b.classList.remove('active'));
-            if (!wasActive) {
-                document.execCommand(cmd, false, null);
-                btn.classList.add('active');
-            } else {
-                document.execCommand('justifyLeft', false, null);
-            }
-        }
-
-        function changeTextColor(color) { document.execCommand('foreColor', false, color); }
-
-        function getCalculatedHomeworkTitle() {
-            let targetDate = new Date();
-            targetDate.setDate(targetDate.getDate() + 1);
-            let dayOfWeek = targetDate.getDay();
-            if (dayOfWeek === 6) targetDate.setDate(targetDate.getDate() + 2);
-            else if (dayOfWeek === 0) targetDate.setDate(targetDate.getDate() + 1);
-
-            let daysMap = ["Chủ Nhật", "Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy"];
-            let dName = daysMap[targetDate.getDay()];
-            let dayNum = String(targetDate.getDate()).padStart(2, '0');
-            let monthNum = String(targetDate.getMonth() + 1).padStart(2, '0');
-            let yearNum = targetDate.getFullYear();
-            return `BÁO BÀI thứ ${dName} ngày ${dayNum}/${monthNum}/${yearNum}`;
-        }
-
-        initRealtimeDatabase();
-    </script>
-</body>
-</html>
+            } else if (fileInput && fileInput.files && fileInput.files
