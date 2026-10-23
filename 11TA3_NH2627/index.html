@@ -872,7 +872,7 @@
         </div>
     </div>
 
-    <!-- 4. POPUP SỬA LỊCH KIỂM TRA ĐỘC LẬP (ẢNH 6) -->
+    <!-- 4. POPUP SỬA LỊCH KIỂM TRA ĐỘC LẬP -->
     <div class="modal" id="editExamModal">
         <div class="modal-content" style="width: 75%; max-width: 900px; max-height: 88vh;">
             <h3 style="font-size: 1rem; color: var(--primary); border-bottom: 2px solid #e9ecef; padding-bottom: 6px;">✏️ Điều Chỉnh Lịch Kiểm Tra</h3>
@@ -3808,3 +3808,234 @@
             currentMultiLinks = []; 
             let item = notifications.find(n => n.id === id);
             if (item) {
+                tempPostTitle = item.title;
+                tempPostContent = item.content;
+                tempPostPdf = item.pdfUrl || "";
+                currentMultiLinks = Array.isArray(item.mediaUrl) ? [...item.mediaUrl] : (item.mediaUrl ? item.mediaUrl.split('\n').filter(l => l.trim()) : []);
+            }
+            switchView(currentUser.role === 'admin' ? 'admin_post' : 'sub_post'); 
+        }
+
+        function cancelEdit() { 
+            editingNotiId = null; 
+            currentMultiLinks = [];
+            tempPostTitle = ""; tempPostContent = ""; tempPostPdf = "";
+            switchView(currentUser.role === 'admin' ? 'admin_manage_noti' : 'sub_manage_noti'); 
+        }
+
+        async function deleteNotification(docId, id) {
+            if (confirm("Chuyển thông báo này vào thùng rác?")) {
+                try {
+                    let item = notifications.find(n => n.docId === docId || n.id === id);
+                    if (item) {
+                        let trashData = { ...item, isHomework: false, deletedBy: currentUser.name, deletedAt: new Date().toLocaleString() };
+                        delete trashData.docId;
+                        await db.collection("trashBin").add(trashData);
+                        await db.collection("notifications").doc(item.docId).delete();
+                    }
+                } catch (err) {
+                    alert("Lỗi khi xóa: " + err.message);
+                }
+            }
+        }
+
+        async function restoreNotification(docId) {
+            try {
+                let item = trashBin.find(t => t.docId === docId);
+                if (item) {
+                    let restoreData = { ...item };
+                    delete restoreData.docId; delete restoreData.deletedBy; delete restoreData.deletedAt;
+
+                    if (restoreData.isHomework || (restoreData.title && restoreData.title.startsWith("BÁO BÀI"))) {
+                        delete restoreData.isHomework;
+                        await db.collection("homeworks").doc("hw_" + restoreData.id).set(restoreData);
+                    } else {
+                        await db.collection("notifications").doc("noti_" + restoreData.id).set(restoreData);
+                    }
+                    await db.collection("trashBin").doc(docId).delete();
+                    alert("Khôi phục thành công!");
+                }
+            } catch (err) {
+                alert("Lỗi khi khôi phục: " + err.message);
+            }
+        }
+
+        async function deleteSelectedTrash() {
+            let checkboxes = document.querySelectorAll('.trash-check:checked');
+            if (checkboxes.length === 0) { alert("Chọn ít nhất một mục!"); return; }
+            if (confirm("Xóa vĩnh viễn các mục đã chọn?")) {
+                let batch = db.batch();
+                checkboxes.forEach(cb => {
+                    let dId = cb.dataset.docid;
+                    if (dId) batch.delete(db.collection("trashBin").doc(dId));
+                });
+                await batch.commit();
+                alert("Đã xóa vĩnh viễn các mục đã chọn!");
+            }
+        }
+
+        /* ZOOM & PAN */
+        let currentScale = 1, panX = 0, panY = 0, isDragging = false, startX = 0, startY = 0, initialDistance = 0, initialScale = 1;
+
+        function openZoomModal(imgSrc) {
+            let modal = document.getElementById('zoomModal');
+            let img = document.getElementById('zoomedImg');
+            img.src = parseGoogleDriveLink(imgSrc);
+            resetZoom();
+            modal.style.display = 'flex';
+        }
+
+        function closeZoomModal() { document.getElementById('zoomModal').style.display = 'none'; }
+        function zoomIn() { currentScale = Math.min(currentScale + 0.4, 5); updateImageTransform(); }
+        function zoomOut() { currentScale = Math.max(currentScale - 0.4, 0.6); updateImageTransform(); }
+        function resetZoom() { currentScale = 1; panX = 0; panY = 0; updateImageTransform(); }
+
+        function updateImageTransform() {
+            let img = document.getElementById('zoomedImg');
+            if (img) img.style.transform = `translate(${panX}px, ${panY}px) scale(${currentScale})`;
+        }
+
+        const zoomModalEl = document.getElementById('zoomModal');
+        zoomModalEl.addEventListener('mousedown', (e) => { isDragging = true; startX = e.clientX - panX; startY = e.clientY - panY; });
+        window.addEventListener('mousemove', (e) => { if (!isDragging) return; panX = e.clientX - startX; panY = e.clientY - startY; updateImageTransform(); });
+        window.addEventListener('mouseup', () => { isDragging = false; });
+        zoomModalEl.addEventListener('wheel', (e) => { e.preventDefault(); if (e.deltaY < 0) zoomIn(); else zoomOut(); }, { passive: false });
+
+        zoomModalEl.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                isDragging = true; startX = e.touches[0].clientX - panX; startY = e.touches[0].clientY - panY;
+            } else if (e.touches.length === 2) {
+                isDragging = false;
+                initialDistance = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                initialScale = currentScale;
+            }
+        }, { passive: false });
+
+        zoomModalEl.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (e.touches.length === 1 && isDragging) {
+                panX = e.touches[0].clientX - startX; panY = e.touches[0].clientY - startY; updateImageTransform();
+            } else if (e.touches.length === 2) {
+                let dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                if (initialDistance > 0) {
+                    currentScale = Math.min(Math.max(initialScale * (dist / initialDistance), 0.6), 5);
+                    updateImageTransform();
+                }
+            }
+        }, { passive: false });
+
+        zoomModalEl.addEventListener('touchend', (e) => {
+            if (e.touches.length === 0) isDragging = false;
+            else if (e.touches.length === 1) { isDragging = true; startX = e.touches[0].clientX - panX; startY = e.touches[0].clientY - panY; }
+        });
+
+        function openSearchModal() { document.getElementById('searchModal').style.display = 'flex'; }
+        function closeSearchModal() { document.getElementById('searchModal').style.display = 'none'; }
+
+        function executeSearch() {
+            let aName = document.getElementById('sAuthor').value.toLowerCase().trim();
+            let sId = document.getElementById('sId').value.trim();
+            let sDate = document.getElementById('sDate').value.trim();
+
+            let res = notifications.filter(n => {
+                let matchA = aName ? n.author.toLowerCase().includes(aName) : true;
+                let matchId = sId ? n.id.toString() === sId : true;
+                let matchDate = sDate ? n.date.startsWith(sDate) : true;
+                return matchA && matchId && matchDate;
+            });
+
+            let box = document.getElementById('searchResults');
+            box.innerHTML = '';
+            if (res.length === 0) {
+                box.innerHTML = '<p style="color:#6c757d; font-size:0.75rem; margin-top:3px;">Không tìm thấy thông báo phù hợp.</p>';
+            } else {
+                res.forEach(item => {
+                    box.innerHTML += `
+                        <div class="card-item" style="margin-top:5px; padding:5px; cursor:pointer;" onclick="closeSearchModal(); showFullDetail(${item.id})">
+                            <div class="card-info">
+                                <h4 style="font-size:0.78rem;">Số ${item.id}: ${item.title}</h4>
+                                <span style="font-size:0.65rem;">${item.date} - ${item.author}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        async function saveOrUpdateAccount() {
+            let studentName = document.getElementById('newStudentName').value.trim();
+            let accName = document.getElementById('newAccName').value.trim();
+            if (!studentName && !accName) { alert("Vui lòng nhập thông tin!"); return; }
+            if (!accName && studentName) {
+                let parts = studentName.split(" ");
+                accName = parts[parts.length - 1].toLowerCase();
+            }
+            let initials = studentName ? studentName.split(" ").map(w => w.charAt(0).toLowerCase()).join("") : accName.charAt(0).toLowerCase();
+            let generatedPass = initials + Math.floor(1000 + Math.random() * 9000);
+
+            try {
+                await db.collection("subAccounts").doc("acc_" + accName.toLowerCase()).set({
+                    name: accName,
+                    pass: generatedPass,
+                    studentName: studentName
+                });
+
+                lastCreatedAccountInfo = `Tài khoản: ${accName} | Mật khẩu: ${generatedPass}`;
+                let infoBox = document.getElementById('resAccountInfo');
+                if (infoBox) infoBox.value = lastCreatedAccountInfo;
+                alert("Tạo/cập nhật tài khoản thành công!");
+            } catch (err) {
+                alert("Lỗi khi lưu tài khoản: " + err.message);
+            }
+        }
+
+        function copyAccountInfo() {
+            let infoBox = document.getElementById('resAccountInfo');
+            if (!infoBox || infoBox.value.includes("Chưa có")) return;
+            navigator.clipboard.writeText(infoBox.value).then(() => alert("Đã copy thông tin tài khoản!"));
+        }
+
+        function toggleFormat(btn, cmd) {
+            document.execCommand(cmd, false, null);
+            btn.classList.toggle('active');
+        }
+
+        function toggleAlign(btn, cmd) {
+            let toolbar = btn.closest('.editor-toolbar');
+            let alignBtns = toolbar.querySelectorAll('button[data-align]');
+            let wasActive = btn.classList.contains('active');
+            alignBtns.forEach(b => b.classList.remove('active'));
+            if (!wasActive) {
+                document.execCommand(cmd, false, null);
+                btn.classList.add('active');
+            } else {
+                document.execCommand('justifyLeft', false, null);
+            }
+        }
+
+        function changeTextColor(color) { document.execCommand('foreColor', false, color); }
+
+        function getCalculatedHomeworkTitle() {
+            let targetDate = new Date();
+            targetDate.setDate(targetDate.getDate() + 1);
+            let dayOfWeek = targetDate.getDay();
+            if (dayOfWeek === 6) targetDate.setDate(targetDate.getDate() + 2);
+            else if (dayOfWeek === 0) targetDate.setDate(targetDate.getDate() + 1);
+
+            let daysMap = ["Chủ Nhật", "Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy"];
+            let dName = daysMap[targetDate.getDay()];
+            let dayNum = String(targetDate.getDate()).padStart(2, '0');
+            let monthNum = String(targetDate.getMonth() + 1).padStart(2, '0');
+            let yearNum = targetDate.getFullYear();
+            return `BÁO BÀI thứ ${dName} ngày ${dayNum}/${monthNum}/${yearNum}`;
+        }
+
+        // KHỞI ĐỘNG ỨNG DỤNG
+        renderApp(); 
+        
+        window.addEventListener('load', () => {
+            initRealtimeDatabase();
+        });
+    </script>
+</body>
+</html>
