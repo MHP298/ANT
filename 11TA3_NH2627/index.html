@@ -812,7 +812,7 @@
         </div>
     </div>
 
-    <!-- 1. POPUP NHẬP NỘI DUNG THI HỌC KỲ (HK1/HK2) - 70% PHẦN B (ẢNH 1) -->
+    <!-- 1. POPUP NHẬP NỘI DUNG THI HỌC KỲ (HK1/HK2) - 70% PHẦN B -->
     <div class="modal" id="examHkContentModal">
         <div class="modal-content" id="examHkContentBox" style="width: 70%; max-width: 850px; min-width: 320px; max-height: 85vh;">
             <div style="border-bottom: 2px solid #e9ecef; padding-bottom: 6px;">
@@ -836,12 +836,12 @@
                 <textarea id="inpHkSubContent" placeholder="Nhập chi tiết các bài học, giới hạn hoặc nội dung ôn tập..." style="min-height: 75px; resize: vertical;"></textarea>
             </div>
 
-            <!-- NÚT LƯU TẠM (ĐỔI TỪ 'THÊM MÔN KHÁC') -->
+            <!-- NÚT LƯU TẠM -->
             <div style="display: flex; justify-content: flex-end;">
                 <button type="button" class="menu-btn" style="background: #2a9d8f; font-size: 0.78rem; padding: 6px 14px;" onclick="addHkSubItemToTemp()">💾 Lưu tạm</button>
             </div>
 
-            <!-- DANH SÁCH MÔN HỌC KỲ ĐÃ LƯU TẠM (ẨN NỘI DUNG, CÓ NÚT SỬA VÀ NÚT ✖) -->
+            <!-- DANH SÁCH MÔN HỌC KỲ ĐÃ LƯU TẠM (CÓ NÚT SỬA VÀ NÚT ✖) -->
             <div style="margin-top: 6px;">
                 <label style="font-weight: 600; font-size: 0.75rem; color: var(--primary);">📋 Danh sách môn ôn tập đã nhập:</label>
                 <div id="hkTempSubContainer" style="max-height: 140px; overflow-y: auto; border: 1px solid #ced4da; border-radius: 6px; padding: 6px; background: #f8f9fa; display: flex; flex-direction: column; gap: 4px; margin-top: 3px;">
@@ -857,7 +857,7 @@
         </div>
     </div>
 
-    <!-- POPUP CHỈNH SỬA MÔN HỌC KỲ TẠM (ẢNH 2) -->
+    <!-- POPUP CHỈNH SỬA MÔN HỌC KỲ TẠM -->
     <div class="modal" id="editHkSubModal">
         <div class="modal-content" style="width: 65%; max-width: 750px;">
             <h3 style="font-size: 0.95rem; color: var(--primary); border-bottom: 2px solid #e9ecef; padding-bottom: 6px;">✏️ Chỉnh Sửa Môn Thi Học Kỳ</h3>
@@ -918,7 +918,63 @@
         </div>
     </div>
 
-    <!-- 4. POPUP SỬA LỊCH KIỂM TRA ĐỘC LẬP (ẢNH 6) -->
+    <!-- 4. POPUP CHỈNH SỬA MÔN TRONG Ô TẠM (KTTX / GIỮA KỲ) -->
+    <div class="modal" id="editTempExamModal">
+        <div class="modal-content" style="width: 70%; max-width: 800px; max-height: 85vh;">
+            <h3 style="font-size: 1rem; color: var(--primary); border-bottom: 2px solid #e9ecef; padding-bottom: 6px;">Chỉnh sửa thông tin kiểm tra</h3>
+            <div class="exam-form-grid" style="margin-top: 8px;">
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    <div class="form-group" style="margin:0;">
+                        <label>Ngày kiểm tra:</label>
+                        <div style="position:relative; display:flex; align-items:center; cursor:pointer;" onclick="triggerEditTempDatePicker()">
+                            <input type="text" id="editTempExamDateDisplay" placeholder="Chọn ngày" readonly style="width:100%; cursor:pointer; background:#fff; padding-right:32px;">
+                            <span style="position:absolute; right:8px; font-size:0.95rem; pointer-events:none;">📅</span>
+                            <input type="date" id="editTempExamDate" style="position:absolute; opacity:0; pointer-events:none; width:0; height:0;" onchange="handleEditTempDateSelect(this.value)">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label>Loại kiểm tra:</label>
+                        <div style="display:flex; gap:6px; align-items:center;">
+                            <select id="editTempExamType" style="flex:1;" onchange="toggleEditTempFormFields()">
+                                <option value="HK1-KTTX">HK1-KTTX</option>
+                                <option value="Giữa HK1">Giữa HK1</option>
+                                <option value="HK2-KTTX">HK2-KTTX</option>
+                                <option value="Giữa HK2">Giữa HK2</option>
+                            </select>
+                            <div id="editTempExamRoundGroup" style="display:none; align-items:center; gap:3px;">
+                                <label style="font-size:0.75rem; white-space:nowrap;">Lần:</label>
+                                <input type="number" id="editTempExamRound" min="1" max="20" placeholder="?" style="width:48px; padding:5px 4px; text-align:center;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group" id="editTempExamSubjectGroup" style="margin:0;">
+                        <label>Môn kiểm tra:</label>
+                        <input type="text" id="editTempExamSubject" placeholder="Nhập tên môn..." oninput="this.value = capitalizeSubject(this.value)">
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column;">
+                    <div class="form-group" style="margin:0; height:100%; display:flex; flex-direction:column;">
+                        <label>Nội dung kiểm tra:</label>
+                        <textarea id="editTempExamContent" placeholder="Nhập chi tiết bài học..." style="flex:1; min-height:85px; resize:none; font-family:inherit; padding:6px; border:1px solid #ced4da; border-radius:6px; font-size:0.82rem;"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-top:8px;">
+                <button type="button" class="menu-btn" style="background:#457b9d; padding:5px 12px; font-size:0.78rem;" onclick="openExamContentFileModal(false, true)">📁 Tải lên file nội dung KT</button>
+                <span id="editTempAttachedContentStatus" style="font-size:0.72rem; color:#2a9d8f; font-weight:bold;"></span>
+            </div>
+
+            <!-- HÀNG NÚT: [HỦY (TRÁI)] VÀ [LƯU THAY ĐỔI (PHẢI)] -->
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px; border-top:1px solid #eee; padding-top:10px;">
+                <button type="button" class="menu-btn btn-del" style="padding:6px 18px;" onclick="closeEditTempExamModal()">Hủy</button>
+                <button type="button" class="menu-btn" style="background:#2a9d8f; padding:6px 20px;" onclick="saveEditTempExamChanges()">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. POPUP SỬA LỊCH KIỂM TRA ĐÃ LƯU TRÊN CSDL (ĐIỀU CHỈNH LỊCH KT) -->
     <div class="modal" id="editExamModal">
         <div class="modal-content" style="width: 75%; max-width: 900px; max-height: 88vh;">
             <h3 style="font-size: 1rem; color: var(--primary); border-bottom: 2px solid #e9ecef; padding-bottom: 6px;">✏️ Điều Chỉnh Lịch Kiểm Tra</h3>
@@ -1068,10 +1124,12 @@
         let editingExamDocId = null;
         let tempExamFileUrl = '';
         let isEditingModalActive = false;
+        let isEditingTempModalActive = false;
 
         // Dữ liệu tạm thời danh sách môn thi học kỳ & chỉ mục sửa
         let tempHkSubjectList = [];
         let editingHkSubIndex = null;
+        let editingTempExamIndex = null;
 
         let currentUser = null;
         let currentView = 'home';
@@ -1202,7 +1260,7 @@
             `;
         }
 
-        // HỆ THỐNG CẢNH BÁO CHÉO THÔNG MINH - CĂN GIỮA
+        // HỆ THỐNG CẢNH BÁO CHÉO THÔNG MINH (BÁO BÀI CHỈ HIỂN THỊ ĐẾN 17H CỦA NGÀY HỌC ĐÓ)
         function getCrossNotificationBanners(currentTab) {
             let bannersHtml = '';
 
@@ -1236,11 +1294,24 @@
             let sortedHw = [...homeworks].sort((a,b) => b.id - a.id);
             if (sortedHw.length > 0) {
                 let latestHw = sortedHw[0];
-                if (latestHw.date) {
-                    let dParts = latestHw.date.split(' ')[0].split('-');
-                    if (dParts.length === 3) {
-                        let hwPostDate = new Date(dParts[0], dParts[1] - 1, dParts[2]);
-                        if (hwPostDate >= yesterday) recentHw = latestHw;
+                if (latestHw.title) {
+                    // Trích xuất ngày từ tiêu đề ví dụ: "ngày 26/10/2026"
+                    let matchDate = latestHw.title.match(/ngày\s+(\d{1,2})\/(\d{1,2})\/(\d{4})/i);
+                    if (matchDate) {
+                        let d = parseInt(matchDate[1], 10);
+                        let m = parseInt(matchDate[2], 10) - 1;
+                        let y = parseInt(matchDate[3], 10);
+                        let deadline = new Date(y, m, d, 17, 0, 0, 0); // 17h của ngày được báo bài
+                        if (now <= deadline) {
+                            recentHw = latestHw;
+                        }
+                    } else if (latestHw.date) {
+                        let dParts = latestHw.date.split(' ')[0].split('-');
+                        if (dParts.length === 3) {
+                            let deadline = new Date(parseInt(dParts[0],10), parseInt(dParts[1],10)-1, parseInt(dParts[2],10), 17, 0, 0, 0);
+                            deadline.setDate(deadline.getDate() + 1); // fallback ngày tiếp theo
+                            if (now <= deadline) recentHw = latestHw;
+                        }
                     }
                 }
             }
@@ -2411,7 +2482,7 @@
                                     <textarea id="inpExamContent" placeholder="Nhập chi tiết các bài học, giới hạn hoặc nội dung kiểm tra..." style="flex:1; min-height:85px; resize:none; font-family:inherit; padding:6px; border:1px solid #ced4da; border-radius:6px; font-size:0.82rem;"></textarea>
                                 </div>
 
-                                <!-- CỤM TẢI LỊCH THI HK (ẢNH 3: CÓ ICON ✖ XÓA NHANH LINK) -->
+                                <!-- CỤM TẢI LỊCH THI HK (CÓ ICON ✖ XÓA NHANH LINK) -->
                                 <div id="examHkFileGroup" style="display:none; flex-direction:column; justify-content:center; gap:6px; height:100%;">
                                     <label style="font-size:0.75rem; font-weight:600; color:var(--primary);">Tải lịch thi Học kỳ (Link Drive hoặc Tải file Ảnh/PDF):</label>
                                     <div style="display:flex; gap:8px; align-items:center;">
@@ -2425,7 +2496,7 @@
                             </div>
                         </div>
 
-                        <!-- HÀNG NÚT FORM: VỊ TRÍ ĐỒNG NHẤT [HỦY/XÓA (TRÁI)] VÀ [LƯU (PHẢI)] -->
+                        <!-- HÀNG NÚT FORM: [HỦY/XÓA (TRÁI)] VÀ [LƯU TẠM (PHẢI)] -->
                         <div style="display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-top:8px;">
                             <button type="button" class="menu-btn" id="btnContentFileAction" style="background:#457b9d; padding:5px 12px; font-size:0.78rem;" onclick="handleOpenContentFileModalByExamType()">📁 Tải lên file nội dung KT</button>
                             <button type="button" class="menu-btn btn-del" id="btnClearInputsAction" style="padding:5px 12px; font-size:0.78rem;" onclick="handleClearCurrentInputs()">Xóa nội dung nhập</button>
@@ -2434,7 +2505,7 @@
                         <div id="attachedContentFileStatus" style="font-size:0.72rem; color:#2a9d8f; font-weight:bold; text-align:right; margin-top:4px;"></div>
                     </div>
 
-                    <!-- KHUNG DANH SÁCH MÔN VỪA THÊM (CHỜ LƯU) & 2 NÚT ĐÁY (SẼ ẨN KHI CHỌN HK1/HK2) -->
+                    <!-- KHUNG DANH SÁCH MÔN VỪA THÊM (CHỜ LƯU) & 2 NÚT ĐÁY ĐỒNG NHẤT -->
                     <div id="tempExamAreaWrapper" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
                         <h4 style="font-size:0.85rem; color:var(--primary); margin-bottom:4px; flex-shrink:0;">📋 Danh sách môn vừa thêm vào (Chờ lưu):</h4>
                         <div style="flex:1; overflow-y:auto; border:1px solid #dee2e6; border-radius:6px; background:white; padding:6px; margin-bottom:8px; min-height:80px;">
@@ -2477,7 +2548,6 @@
             }
         }
 
-        // HỖ TRỢ CHỌN VÀ HIỂN THỊ ĐỊNH DẠNG dd/mm/yyyy CHO Ô NGÀY KIỂM TRA
         function triggerExamDatePicker() {
             let dateInput = document.getElementById('inpExamDate');
             if (dateInput) {
@@ -2520,14 +2590,34 @@
             }
         }
 
-        // ĐIỀU KHIỂN BẬT TẮT VÀ ĐỔI TÊN NÚT BẤM KHI CHỌN LOẠI KT (ẢNH 3 & ẢNH 4)
+        function triggerEditTempDatePicker() {
+            let dateInput = document.getElementById('editTempExamDate');
+            if (dateInput) {
+                if (typeof dateInput.showPicker === 'function') dateInput.showPicker();
+                else { dateInput.focus(); dateInput.click(); }
+            }
+        }
+
+        function handleEditTempDateSelect(val) {
+            let displayInput = document.getElementById('editTempExamDateDisplay');
+            if (!val) {
+                if (displayInput) { displayInput.value = ''; displayInput.dataset.date = ''; }
+                return;
+            }
+            let p = val.split('-');
+            if (p.length === 3 && displayInput) {
+                displayInput.value = `${p[2]}/${p[1]}/${p[0]}`;
+                displayInput.dataset.date = val;
+            }
+        }
+
+        // ĐIỀU KHIỂN BẬT TẮT VÀ ĐỔI TÊN NÚT BẤM KHI CHỌN LOẠI KT
         function toggleExamFormFields() {
             let typeElem = document.getElementById('inpExamType');
             let roundGroup = document.getElementById('examRoundGroup');
             let subGroup = document.getElementById('examSubjectGroup');
             let contentGroup = document.getElementById('examContentGroup');
             let hkFileGroup = document.getElementById('examHkFileGroup');
-            let tempWrapper = document.getElementById('tempExamAreaWrapper');
 
             let btnContentFile = document.getElementById('btnContentFileAction');
             let btnClearInputs = document.getElementById('btnClearInputsAction');
@@ -2546,31 +2636,22 @@
                 if (roundInput) roundInput.value = '';
             }
 
-            // Phân biệt hiển thị giữa HK1/HK2 (Ảnh 3) và Loại KT thường (Ảnh 4)
             if (val === 'HK1' || val === 'HK2') {
                 subGroup.style.display = 'none';
                 contentGroup.style.display = 'none';
                 hkFileGroup.style.display = 'flex';
-                if (tempWrapper) tempWrapper.style.display = 'none';
 
                 if (btnContentFile) btnContentFile.innerHTML = '📁 Nhập nội dung KT';
-                if (btnClearInputs) btnClearInputs.innerHTML = 'Hủy tất cả';
-                if (btnSubmitExam) {
-                    btnSubmitExam.innerHTML = '💾 Lưu tất cả';
-                    btnSubmitExam.onclick = saveDirectHkExam;
-                }
+                if (btnClearInputs) btnClearInputs.innerHTML = 'Xóa nội dung nhập';
+                if (btnSubmitExam) btnSubmitExam.innerHTML = '➕ Lưu tạm';
             } else {
                 subGroup.style.display = 'flex';
                 contentGroup.style.display = 'flex';
                 hkFileGroup.style.display = 'none';
-                if (tempWrapper) tempWrapper.style.display = 'flex';
 
                 if (btnContentFile) btnContentFile.innerHTML = '📁 Tải lên file nội dung KT';
                 if (btnClearInputs) btnClearInputs.innerHTML = 'Xóa nội dung nhập';
-                if (btnSubmitExam) {
-                    btnSubmitExam.innerHTML = '➕ Lưu tạm';
-                    btnSubmitExam.onclick = addTempExamItem;
-                }
+                if (btnSubmitExam) btnSubmitExam.innerHTML = '➕ Lưu tạm';
             }
         }
 
@@ -2599,6 +2680,21 @@
                 subGroup.style.display = 'flex';
                 contentGroup.style.display = 'flex';
                 hkFileGroup.style.display = 'none';
+            }
+        }
+
+        function toggleEditTempFormFields() {
+            let typeElem = document.getElementById('editTempExamType');
+            let roundGroup = document.getElementById('editTempExamRoundGroup');
+            if (!typeElem || !roundGroup) return;
+
+            let val = typeElem.value;
+            if (val === 'HK1-KTTX' || val === 'HK2-KTTX') {
+                roundGroup.style.display = 'flex';
+            } else {
+                roundGroup.style.display = 'none';
+                let roundInput = document.getElementById('editTempExamRound');
+                if (roundInput) roundInput.value = '';
             }
         }
 
@@ -2632,7 +2728,6 @@
             }
         }
 
-        // --- ĐIỀU HƯỚNG TẢI NỘI DUNG DỰA VÀO LOẠI KT ---
         function handleOpenContentFileModalByExamType() {
             let typeVal = document.getElementById('inpExamType') ? document.getElementById('inpExamType').value : '';
             if (typeVal === 'HK1' || typeVal === 'HK2') {
@@ -2642,7 +2737,7 @@
             }
         }
 
-        // --- XỬ LÝ POPUP NHẬP NỘI DUNG THI HỌC KỲ (70% PHẦN B) (ẢNH 1) ---
+        // --- POPUP NHẬP NỘI DUNG THI HỌC KỲ (70% PHẦN B) ---
         function openExamHkContentModal(examType) {
             let modal = document.getElementById('examHkContentModal');
             let title = document.getElementById('examHkModalTitle');
@@ -2683,7 +2778,6 @@
             renderHkTempSubRows();
         }
 
-        // HIỂN THỊ RÚT GỌN DANH SÁCH MÔN TRONG POPUP HK: CHỈ CÒN TÊN MÔN, NÚT SỬA VÀ NÚT ✖
         function renderHkTempSubRows() {
             let box = document.getElementById('hkTempSubContainer');
             if (!box) return;
@@ -2715,7 +2809,6 @@
             renderHkTempSubRows();
         }
 
-        // POPUP CHỈNH SỬA MÔN THI HỌC KỲ TẠM (ẢNH 2)
         function openEditHkSubModal(idx) {
             if (!tempHkSubjectList[idx]) return;
             editingHkSubIndex = idx;
@@ -2916,8 +3009,9 @@
         }
 
         // --- POPUP TẢI FILE LINK ĐƠN ---
-        function openExamContentFileModal(isEditing = false) {
+        function openExamContentFileModal(isEditing = false, isEditingTemp = false) {
             isEditingModalActive = isEditing;
+            isEditingTempModalActive = isEditingTemp;
             let modal = document.getElementById('examContentFileModal');
             let inp = document.getElementById('inpExamContentFileUrl');
             if (inp) inp.value = tempExamFileUrl || '';
@@ -2936,6 +3030,9 @@
             if (isEditingModalActive) {
                 let stBox = document.getElementById('editAttachedContentStatus');
                 if (stBox) stBox.innerText = tempExamFileUrl ? `📎 Đã đính kèm link file` : ``;
+            } else if (isEditingTempModalActive) {
+                let stBox = document.getElementById('editTempAttachedContentStatus');
+                if (stBox) stBox.innerText = tempExamFileUrl ? `📎 Đã đính kèm link file` : ``;
             } else {
                 let stBox = document.getElementById('attachedContentFileStatus');
                 if (stBox) stBox.innerText = tempExamFileUrl ? `📎 Đã đính kèm link file nội dung` : ``;
@@ -2944,15 +3041,7 @@
         }
 
         function handleClearCurrentInputs() {
-            let typeElem = document.getElementById('inpExamType');
-            let val = typeElem ? typeElem.value : '';
-            if (val === 'HK1' || val === 'HK2') {
-                if (confirm("Hủy toàn bộ dữ liệu đang nhập của kỳ thi này?")) {
-                    clearTempExamInputFields();
-                }
-            } else {
-                clearTempExamInputFields();
-            }
+            clearTempExamInputFields();
         }
 
         function clearTempExamInputFields() {
@@ -2990,53 +3079,7 @@
             }
         }
 
-        // LƯU TRỰC TIẾP KỲ THI HK1/HK2 (ẢNH 3: BẤM "LƯU TẤT CẢ" LƯU THẲNG DATABASE)
-        async function saveDirectHkExam() {
-            let dateDisplay = document.getElementById('inpExamDateDisplay');
-            let dateVal = (dateDisplay && dateDisplay.dataset.date) ? dateDisplay.dataset.date : (document.getElementById('inpExamDate') ? document.getElementById('inpExamDate').value : '');
-            let typeElem = document.getElementById('inpExamType');
-            let typeVal = typeElem ? typeElem.value : '';
-            let hkUrlVal = document.getElementById('inpExamHkUrl') ? document.getElementById('inpExamHkUrl').value.trim() : '';
-
-            if (!dateVal) { alert("Vui lòng chọn ngày kiểm tra!"); return; }
-            if (!typeVal) { alert("Vui lòng chọn Loại kiểm tra!"); return; }
-
-            let hkFileFinal = hkUrlVal ? parseGoogleDriveLink(hkUrlVal) : tempHkFileBase64;
-            if (!hkFileFinal && tempHkSubjectList.length === 0) {
-                alert("Vui lòng đính kèm file/link lịch thi hoặc nhập ít nhất 1 môn thi học kỳ!");
-                return;
-            }
-
-            let now = new Date();
-            let y = now.getFullYear();
-            let m = String(now.getMonth() + 1).padStart(2, '0');
-            let d = String(now.getDate()).padStart(2, '0');
-            let createdDateStr = formatDateToDDMMYY(`${y}-${m}-${d}`);
-
-            let item = {
-                examDate: dateVal,
-                createdDate: createdDateStr,
-                examType: typeVal,
-                subject: `Lịch thi ${typeVal}`,
-                content: '',
-                contentFileUrl: '',
-                hkFileUrl: hkFileFinal,
-                hkSubjectList: [...tempHkSubjectList],
-                author: currentUser.name || "GVCN"
-            };
-
-            try {
-                let docRef = db.collection("exam_schedules").doc("exam_" + Date.now() + "_" + Math.floor(Math.random()*1000));
-                await docRef.set(item);
-                alert(`Đã lưu thành công lịch kiểm tra ${typeVal}!`);
-                clearTempExamInputFields();
-                switchView('admin_homework');
-            } catch (err) {
-                alert("Lỗi khi lưu lịch kiểm tra: " + err.message);
-            }
-        }
-
-        // LƯU TẠM BÀI KTTX/GIỮA KỲ (ẢNH 4)
+        // LƯU TẠM BÀI KT (ÁP DỤNG ĐỒNG BỘ CHO CẢ KTTX, GIỮA KỲ VÀ HỌC KỲ)
         function addTempExamItem() {
             let dateDisplay = document.getElementById('inpExamDateDisplay');
             let dateVal = (dateDisplay && dateDisplay.dataset.date) ? dateDisplay.dataset.date : (document.getElementById('inpExamDate') ? document.getElementById('inpExamDate').value : '');
@@ -3046,10 +3089,23 @@
             let roundVal = roundElem ? roundElem.value.trim() : '';
             let subjectVal = document.getElementById('inpExamSubject') ? document.getElementById('inpExamSubject').value.trim() : '';
             let contentVal = document.getElementById('inpExamContent') ? document.getElementById('inpExamContent').value.trim() : '';
+            let hkUrlVal = document.getElementById('inpExamHkUrl') ? document.getElementById('inpExamHkUrl').value.trim() : '';
 
             if (!dateVal) { alert("Vui lòng chọn ngày kiểm tra!"); return; }
             if (!typeVal) { alert("Vui lòng chọn Loại kiểm tra!"); return; }
-            if (!subjectVal) { alert("Vui lòng nhập môn kiểm tra!"); return; }
+
+            let isHk = (typeVal === 'HK1' || typeVal === 'HK2');
+            let hkFileFinal = hkUrlVal ? parseGoogleDriveLink(hkUrlVal) : tempHkFileBase64;
+
+            if (isHk && !hkFileFinal && tempHkSubjectList.length === 0) {
+                alert("Vui lòng đính kèm file/link lịch thi hoặc nhập ít nhất 1 môn thi học kỳ!");
+                return;
+            }
+
+            if (!isHk && !subjectVal) {
+                alert("Vui lòng nhập môn kiểm tra!");
+                return;
+            }
 
             let finalExamType = typeVal;
             if ((typeVal === 'HK1-KTTX' || typeVal === 'HK2-KTTX') && roundVal) {
@@ -3067,11 +3123,11 @@
                 examDate: dateVal,
                 createdDate: createdDateStr,
                 examType: finalExamType,
-                subject: subjectVal,
-                content: contentVal,
-                contentFileUrl: tempExamFileUrl || '',
-                hkFileUrl: '',
-                hkSubjectList: [],
+                subject: isHk ? `Lịch thi ${typeVal}` : subjectVal,
+                content: isHk ? '' : contentVal,
+                contentFileUrl: isHk ? '' : (tempExamFileUrl || ''),
+                hkFileUrl: isHk ? hkFileFinal : '',
+                hkSubjectList: isHk ? [...tempHkSubjectList] : [],
                 author: currentUser.name || "GVCN"
             };
 
@@ -3080,7 +3136,82 @@
             renderTempExamRows();
         }
 
-        // 3. HIỂN THỊ SIÊU GỌN DANH SÁCH MÔN VỪA THÊM (CHỜ LƯU) - ẢNH 2
+        // POPUP SỬA BÀI KIỂM TRA TRONG Ô TẠM (ẢNH 1 & 2)
+        function openEditTempExamModal(idx) {
+            if (!tempExamList[idx]) return;
+            editingTempExamIndex = idx;
+            let item = tempExamList[idx];
+
+            let d = document.getElementById('editTempExamDate');
+            let dDisplay = document.getElementById('editTempExamDateDisplay');
+            let t = document.getElementById('editTempExamType');
+            let r = document.getElementById('editTempExamRound');
+            let s = document.getElementById('editTempExamSubject');
+            let c = document.getElementById('editTempExamContent');
+            let stBox = document.getElementById('editTempAttachedContentStatus');
+
+            if (d && item.examDate) {
+                d.value = item.examDate;
+                handleEditTempDateSelect(item.examDate);
+            }
+
+            if (t && item.examType) {
+                let matchRound = item.examType.match(/(HK[12]-KTTX)\s+lần\s+(\d+)/);
+                if (matchRound) {
+                    t.value = matchRound[1];
+                    if (r) r.value = matchRound[2];
+                } else {
+                    t.value = item.examType;
+                    if (r) r.value = '';
+                }
+                toggleEditTempFormFields();
+            }
+
+            if (s) s.value = item.subject || '';
+            if (c) c.value = item.content || '';
+            tempExamFileUrl = item.contentFileUrl || '';
+            if (stBox) stBox.innerText = tempExamFileUrl ? `📎 Đã đính kèm link file` : ``;
+
+            document.getElementById('editTempExamModal').style.display = 'flex';
+        }
+
+        function closeEditTempExamModal() {
+            editingTempExamIndex = null;
+            document.getElementById('editTempExamModal').style.display = 'none';
+        }
+
+        function saveEditTempExamChanges() {
+            if (editingTempExamIndex === null || !tempExamList[editingTempExamIndex]) return;
+
+            let dateDisplay = document.getElementById('editTempExamDateDisplay');
+            let dateVal = (dateDisplay && dateDisplay.dataset.date) ? dateDisplay.dataset.date : (document.getElementById('editTempExamDate') ? document.getElementById('editTempExamDate').value : '');
+            let typeElem = document.getElementById('editTempExamType');
+            let typeVal = typeElem ? typeElem.value : '';
+            let roundElem = document.getElementById('editTempExamRound');
+            let roundVal = roundElem ? roundElem.value.trim() : '';
+            let subjectVal = document.getElementById('editTempExamSubject') ? document.getElementById('editTempExamSubject').value.trim() : '';
+            let contentVal = document.getElementById('editTempExamContent') ? document.getElementById('editTempExamContent').value.trim() : '';
+
+            if (!dateVal) { alert("Vui lòng chọn ngày kiểm tra!"); return; }
+            if (!typeVal) { alert("Vui lòng chọn Loại kiểm tra!"); return; }
+            if (!subjectVal) { alert("Vui lòng nhập môn kiểm tra!"); return; }
+
+            let finalExamType = typeVal;
+            if ((typeVal === 'HK1-KTTX' || typeVal === 'HK2-KTTX') && roundVal) {
+                finalExamType = `${typeVal} lần ${roundVal}`;
+            }
+
+            tempExamList[editingTempExamIndex].examDate = dateVal;
+            tempExamList[editingTempExamIndex].examType = finalExamType;
+            tempExamList[editingTempExamIndex].subject = subjectVal;
+            tempExamList[editingTempExamIndex].content = contentVal;
+            tempExamList[editingTempExamIndex].contentFileUrl = tempExamFileUrl || '';
+
+            closeEditTempExamModal();
+            renderTempExamRows();
+        }
+
+        // 3. HIỂN THỊ DANH SÁCH MÔN VỪA THÊM (CHỜ LƯU) - CÓ NÚT SỬA VÀ NÚT ✖ (ẢNH 1)
         function renderTempExamRows() {
             let container = document.getElementById('tempExamListContainer');
             if (!container) return;
@@ -3094,11 +3225,20 @@
                 let div = document.createElement('div');
                 div.className = 'card-item';
                 div.style.cssText = 'padding:6px 10px; margin:0;';
+                
+                let isHk = (item.examType === 'HK1' || item.examType === 'HK2');
+                let editBtnHtml = isHk 
+                    ? '' 
+                    : `<button type="button" class="menu-btn btn-edit" style="padding:3px 8px; font-size:0.72rem; margin:0;" onclick="openEditTempExamModal(${idx})">Sửa</button>`;
+
                 div.innerHTML = `
                     <div class="card-info" style="flex:1;">
                         <h4 style="font-size:0.84rem; color:var(--primary);">[${formatDateToDDMMYY(item.examDate)}] ${item.subject} (${item.examType})</h4>
                     </div>
-                    <button type="button" class="btn-clear-icon" style="width:24px; height:24px; font-size:0.75rem;" onclick="removeTempExamItem(${idx})">✖</button>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        ${editBtnHtml}
+                        <button type="button" class="btn-clear-icon" style="width:24px; height:24px; font-size:0.75rem;" onclick="removeTempExamItem(${idx})">✖</button>
+                    </div>
                 `;
                 container.appendChild(div);
             });
@@ -3133,7 +3273,7 @@
             }
         }
 
-        // --- POPUP ĐIỀU CHỈNH SỬA LỊCH KIỂM TRA ĐỘC LẬP (ẢNH 6) ---
+        // --- POPUP ĐIỀU CHỈNH SỬA LỊCH KIỂM TRA ĐÃ LƯU TRÊN CSDL ---
         function openEditExamModal(docId) {
             let item = examSchedules.find(e => e.docId === docId);
             if (!item) return;
