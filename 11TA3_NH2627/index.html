@@ -1134,6 +1134,124 @@
             }
         }
 
+        function setAdminExamTab(tab) { adminExamSubTab = tab; renderAdminExamSubView(); }
+
+        /* GIAO DIỆN ĐĂNG LỊCH KIỂM TRA ĐÃ TỐI ƯU CUỘN VÀ TỰ ĐỘNG XUỐNG HÀNG TRÊN DI ĐỘNG */
+        function renderAdminExamSubView() {
+            let area = document.getElementById('adminExamContentArea'); if (!area) return;
+            if (adminExamSubTab === '') { area.innerHTML = `<div style="flex:1; display:flex; align-items:center; justify-content:center;"><p style="color:#6c757d; font-size:0.85rem; text-align:center;">👈 Vui lòng chọn <b>"Thêm lịch kiểm tra"</b> hoặc <b>"Điều chỉnh lịch kiểm tra"</b> ở trên.</p></div>`; return; }
+            area.style.overflowY = 'auto'; area.style.paddingRight = '4px';
+
+            if (adminExamSubTab === 'add') {
+                area.innerHTML = `
+                    <div style="flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-right:4px; display:flex; flex-direction:column; gap:8px;">
+                        <div style="background:white; padding:10px; border-radius:8px; border:1px solid #ced4da; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+                            <div class="exam-form-grid">
+                                <div style="display:flex; flex-direction:column; gap:6px;">
+                                    <div class="form-group" style="margin:0;">
+                                        <label>Loại kiểm tra:</label>
+                                        <div style="display:flex; gap:6px; align-items:center;">
+                                            <select id="inpExamType" style="flex:1;" onchange="toggleExamFormFields()">
+                                                <option value="" disabled selected>-- Chọn loại KT --</option>
+                                                <option value="HK1-KTTX">HK1-KTTX</option>
+                                                <option value="HK1-ở lớp">HK1-ở lớp</option>
+                                                <option value="Giữa HK1">Giữa HK1</option>
+                                                <option value="HK1">HK1</option>
+                                                <option value="HK2-KTTX">HK2-KTTX</option>
+                                                <option value="HK2-ở lớp">HK2-ở lớp</option>
+                                                <option value="Giữa HK2">Giữa HK2</option>
+                                                <option value="HK2">HK2</option>
+                                            </select>
+                                            <div id="examRoundGroup" style="display:none; align-items:center; gap:3px;">
+                                                <label style="font-size:0.75rem; white-space:nowrap;">Lần:</label>
+                                                <input type="number" id="inpExamRound" min="1" max="20" placeholder="?" style="width:48px; padding:5px 4px; text-align:center;">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" id="inpExamDateWrapper" style="margin:0;">
+                                        <label>Ngày kiểm tra:</label>
+                                        <div style="position:relative; display:flex; align-items:center;">
+                                            <input type="text" id="inpExamDateDisplay" placeholder="Chọn ngày" readonly style="width:100%; background:#fff; padding-right:32px;">
+                                            <span style="position:absolute; right:8px; font-size:0.95rem; pointer-events:none;">📅</span>
+                                            <input type="date" id="inpExamDate" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; z-index:5;" onchange="handleExamDateSelect(this.value)">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group" id="examSubjectGroup" style="margin:0;">
+                                        <label>Môn kiểm tra:</label>
+                                        <input type="text" id="inpExamSubject" placeholder="Nhập tên môn..." oninput="this.value = capitalizeSubject(this.value)">
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; flex-direction:column;">
+                                    <div class="form-group" id="examContentGroup" style="margin:0; height:100%; display:flex; flex-direction:column;">
+                                        <label>Nội dung kiểm tra:</label>
+                                        <textarea id="inpExamContent" placeholder="Nhập chi tiết bài học..." style="flex:1; min-height:75px; resize:vertical; font-family:inherit; padding:6px; border:1px solid #ced4da; border-radius:6px; font-size:0.82rem;"></textarea>
+                                    </div>
+
+                                    <div id="examHkFileGroup" style="display:none; flex-direction:column; justify-content:flex-start; gap:3px;">
+                                        <label style="font-weight:600; font-size:0.75rem; color:var(--primary);">Tải lịch thi Học kỳ (Link Drive hoặc File Ảnh/PDF):</label>
+                                        <div style="display:flex; gap:6px; align-items:center;">
+                                            <input type="text" id="inpExamHkUrl" placeholder="Dán link Google Drive ảnh/PDF..." style="flex:1;">
+                                            <button type="button" class="btn-clear-icon" onclick="document.getElementById('inpExamHkUrl').value = ''" title="Xóa nhanh link">✖</button>
+                                            <input type="file" id="inpExamHkFile" accept="image/*,application/pdf" style="display:none;" onchange="handleHkFileUpload(this)">
+                                            <button type="button" class="menu-btn" style="background:#457b9d; padding:6px 10px; font-size:0.75rem; white-space:nowrap;" onclick="document.getElementById('inpExamHkFile').click()">📁 Tải lên file</button>
+                                        </div>
+                                        <span id="hkFileStatus" style="font-size:0.72rem; color:#2a9d8f;"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; justify-content:flex-end; align-items:center; flex-wrap:wrap; gap:6px; margin-top:8px;">
+                                <button type="button" class="menu-btn" id="btnContentFileAction" style="background:#457b9d; padding:5px 8px; font-size:0.74rem;" onclick="handleOpenContentFileModalByExamType()">📁 Tải file nội dung KT</button>
+                                <button type="button" class="menu-btn btn-del" id="btnClearInputsAction" style="padding:5px 8px; font-size:0.74rem;" onclick="handleClearCurrentInputs()">Xóa nội dung nhập</button>
+                                <button type="button" class="menu-btn" id="btnSubmitExamAction" style="background:#2a9d8f; padding:5px 10px; font-size:0.74rem;" onclick="addTempExamItem()">➕ Lưu tạm</button>
+                            </div>
+                            <div id="attachedContentFileStatus" style="font-size:0.72rem; color:#2a9d8f; font-weight:bold; text-align:right; margin-top:2px;"></div>
+                        </div>
+
+                        <div id="tempExamAreaWrapper" style="display:flex; flex-direction:column; gap:6px;">
+                            <h4 style="font-size:0.82rem; color:var(--primary); margin:0;">📋 Danh sách môn vừa thêm vào (Chờ lưu):</h4>
+                            <div style="max-height:140px; overflow-y:auto; border:1px solid #dee2e6; border-radius:6px; background:white; padding:6px;">
+                                <div id="tempExamListContainer" style="display:flex; flex-direction:column; gap:4px;"></div>
+                            </div>
+
+                            <div style="display:flex; justify-content:center; gap:10px; padding:6px 0 16px 0;">
+                                <button type="button" class="menu-btn btn-del" style="flex:1; max-width:140px; justify-content:center;" onclick="cancelAllTempExamInput()">Hủy tất cả</button>
+                                <button type="button" class="menu-btn" style="flex:1; max-width:140px; justify-content:center; background:#2a9d8f;" onclick="saveAllTempExams()">💾 Lưu tất cả</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                renderTempExamRows(); toggleExamFormFields();
+            } else {
+                let validExams = getValidExams();
+                area.innerHTML = `
+                    <div style="flex:1; overflow-y:auto; border:1px solid #dee2e6; border-radius:6px; background:white; padding:6px; margin-bottom:8px; min-height:100px;">
+                        ${validExams.length === 0 ? '<p style="color:#6c757d; font-size:0.8rem; text-align:center; padding:15px;">Chưa có lịch kiểm tra nào.</p>' : ''}
+                        <div style="display:flex; flex-direction:column; gap:5px;">
+                            ${validExams.map(item => `
+                                <div class="card-item" style="padding:6px 10px;">
+                                    <div class="card-info" style="flex:1;">
+                                        <h4 style="font-size:0.82rem;">[${item.examType === 'HK1' || item.examType === 'HK2' ? 'Theo lịch thi' : formatDateToDDMMYY(item.examDate)}] ${item.subject || item.examType} - ${item.examType}</h4>
+                                        <span style="font-size:0.7rem;">✍️ Đăng bởi: ${item.author || 'GVCN'}</span>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:5px;">
+                                        <button class="menu-btn btn-edit" style="padding:3px 7px; font-size:0.72rem;" onclick="openEditExamModal('${item.docId}')">Sửa</button>
+                                        <button class="menu-btn btn-del" style="padding:3px 7px; font-size:0.72rem;" onclick="deleteExistingExam('${item.docId}')">Xóa</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div style="display:flex; justify-content:center; flex-shrink:0; padding-bottom:10px;">
+                        <button type="button" class="menu-btn btn-del" style="width:140px; justify-content:center;" onclick="switchView('welcome_dashboard')">Hủy</button>
+                    </div>
+                `;
+            }
+        }
+
         function triggerExamDatePicker() { let el = document.getElementById('inpExamDate'); if (el) (typeof el.showPicker === 'function') ? el.showPicker() : el.click(); }
         function handleExamDateSelect(val) { let d = document.getElementById('inpExamDateDisplay'); if (!val) { if (d) { d.value = ''; d.dataset.date = ''; } return; } let p = val.split('-'); if (p.length === 3 && d) { d.value = `${p[2]}/${p[1]}/${p[0]}`; d.dataset.date = val; } }
         function triggerEditDatePicker() { let el = document.getElementById('editExamDate'); if (el) (typeof el.showPicker === 'function') ? el.showPicker() : el.click(); }
@@ -2152,130 +2270,7 @@
             let dName = daysMap[targetDate.getDay()], dayNum = String(targetDate.getDate()).padStart(2, '0'), monthNum = String(targetDate.getMonth() + 1).padStart(2, '0');
             return `BÁO BÀI thứ ${dName} ngày ${dayNum}/${monthNum}/${targetDate.getFullYear()}`;
         }
-// --- BỔ SUNG 2 HÀM BỊ THIẾU ĐỂ BẬT NÚT ĐĂNG LỊCH KIỂM TRA ---
 
-function setAdminExamTab(tab) {
-    adminExamSubTab = tab;
-    renderContentB();
-}
-
-function renderAdminExamSubView() {
-    let container = document.getElementById('adminExamContentArea');
-    if (!container) return;
-
-    // Nếu chưa chọn tab nào thì mặc định chọn tab 'add' (Thêm lịch KT)
-    if (!adminExamSubTab) adminExamSubTab = 'add';
-
-    if (adminExamSubTab === 'add') {
-        container.innerHTML = `
-            <div style="background:white; padding:12px; border-radius:8px; border:1px solid #ced4da; margin-bottom:10px;">
-                <div class="exam-form-grid">
-                    <div style="display:flex; flex-direction:column; gap:6px;">
-                        <div class="form-group" style="margin:0;">
-                            <label>Loại kiểm tra:</label>
-                            <div style="display:flex; gap:6px; align-items:center;">
-                                <select id="inpExamType" style="flex:1;" onchange="toggleExamFormFields()">
-                                    <option value="HK1-KTTX">HK1-KTTX</option>
-                                    <option value="HK1-ở lớp">HK1-ở lớp</option>
-                                    <option value="Giữa HK1">Giữa HK1</option>
-                                    <option value="HK1">HK1</option>
-                                    <option value="HK2-KTTX">HK2-KTTX</option>
-                                    <option value="HK2-ở lớp">HK2-ở lớp</option>
-                                    <option value="Giữa HK2">Giữa HK2</option>
-                                    <option value="HK2">HK2</option>
-                                </select>
-                                <div id="examRoundGroup" style="display:none; align-items:center; gap:3px;">
-                                    <label style="font-size:0.75rem; white-space:nowrap;">Lần:</label>
-                                    <input type="number" id="inpExamRound" min="1" max="20" placeholder="?" style="width:48px; padding:5px 4px; text-align:center;">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group" id="inpExamDateWrapper" style="margin:0;">
-                            <label>Ngày kiểm tra:</label>
-                            <div style="position:relative; display:flex; align-items:center;">
-                                <input type="text" id="inpExamDateDisplay" placeholder="Chọn ngày" readonly style="width:100%; background:#fff; padding-right:32px;">
-                                <span style="position:absolute; right:8px; font-size:0.95rem; pointer-events:none;">📅</span>
-                                <input type="date" id="inpExamDate" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; z-index:5;" onchange="handleExamDateSelect(this.value)">
-                            </div>
-                        </div>
-
-                        <div class="form-group" id="examSubjectGroup" style="margin:0;">
-                            <label>Môn kiểm tra:</label>
-                            <input type="text" id="inpExamSubject" placeholder="Nhập tên môn..." oninput="this.value = capitalizeSubject(this.value)">
-                        </div>
-
-                        <!-- KHUNG LỊCH THI HỌC KỲ NẾU CHỌN HK1/HK2 -->
-                        <div id="examHkFileGroup" style="display:none; flex-direction:column; gap:4px; margin-top:2px;">
-                            <label style="font-weight:600; font-size:0.75rem;">Link file lịch thi (Drive/URL) hoặc tải file ảnh/PDF:</label>
-                            <div style="display:flex; gap:6px; align-items:center;">
-                                <input type="text" id="inpExamHkUrl" placeholder="Dán link Drive..." style="flex:1;">
-                                <input type="file" id="inpExamHkFile" accept="image/*,application/pdf" style="display:none;" onchange="handleHkFileUpload(this)">
-                                <button type="button" class="menu-btn" style="background:#457b9d; padding:6px 10px; font-size:0.75rem; white-space:nowrap;" onclick="document.getElementById('inpExamHkFile').click()">📁 Tải file</button>
-                            </div>
-                            <span id="hkFileStatus" style="font-size:0.72rem; color:#2a9d8f;"></span>
-                        </div>
-                    </div>
-
-                    <div style="display:flex; flex-direction:column;">
-                        <div class="form-group" id="examContentGroup" style="margin:0; height:100%; display:flex; flex-direction:column;">
-                            <label>Nội dung kiểm tra:</label>
-                            <textarea id="inpExamContent" placeholder="Nhập bài học, giới hạn ôn tập..." style="flex:1; min-height:85px; resize:none; font-family:inherit; padding:6px; border:1px solid #ced4da; border-radius:6px; font-size:0.82rem;"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; flex-wrap:wrap; gap:8px;">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <button type="button" id="btnContentFileAction" class="menu-btn" style="background:#457b9d; padding:5px 12px; font-size:0.78rem;" onclick="handleOpenContentFileModalByExamType()">📁 Tải lên file nội dung KT</button>
-                        <span id="attachedContentFileStatus" style="font-size:0.72rem; color:#2a9d8f; font-weight:bold;"></span>
-                    </div>
-                    <div style="display:flex; gap:8px;">
-                        <button type="button" id="btnClearInputsAction" class="menu-btn btn-del" style="padding:5px 12px; font-size:0.78rem;" onclick="handleClearCurrentInputs()">Xóa nội dung nhập</button>
-                        <button type="button" id="btnSubmitExamAction" class="menu-btn" style="background:#2a9d8f; padding:5px 16px; font-size:0.78rem;" onclick="addTempExamItem()">➕ Lưu tạm</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- DANH SÁCH LƯU TẠM CHỜ GHI VÀO CSDL -->
-            <div style="background:white; padding:10px; border-radius:8px; border:1px solid #ced4da; flex:1; display:flex; flex-direction:column; overflow:hidden;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                    <label style="font-weight:700; font-size:0.8rem; color:var(--primary);">📋 Danh sách bài kiểm tra lưu tạm:</label>
-                    <div style="display:flex; gap:8px;">
-                        <button type="button" class="menu-btn btn-del" style="padding:4px 10px; font-size:0.75rem;" onclick="cancelAllTempExamInput()">Hủy tất cả</button>
-                        <button type="button" class="menu-btn" style="background:#2a9d8f; padding:4px 14px; font-size:0.75rem;" onclick="saveAllTempExams()">🚀 Lưu lên hệ thống</button>
-                    </div>
-                </div>
-                <div id="tempExamListContainer" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:5px; padding-right:2px;"></div>
-            </div>
-        `;
-        toggleExamFormFields();
-        renderTempExamRows();
-    } else if (adminExamSubTab === 'edit') {
-        container.innerHTML = `
-            <div style="background:white; padding:10px; border-radius:8px; border:1px solid #ced4da; flex:1; display:flex; flex-direction:column; overflow:hidden;">
-                <h4 style="color:var(--primary); font-size:0.85rem; margin-bottom:6px;">Danh sách lịch kiểm tra hiện có trên máy chủ:</h4>
-                <div id="adminDatabaseExamList" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px;">
-                    ${examSchedules.length === 0 ? '<p style="color:#6c757d; font-size:0.8rem; text-align:center; padding:15px;">Chưa có lịch kiểm tra nào trên CSDL.</p>' : ''}
-                    ${examSchedules.map(item => `
-                        <div class="card-item" style="padding:6px 10px;">
-                            <div class="card-info" style="flex:1;">
-                                <h4 style="font-size:0.84rem; color:var(--primary);">
-                                    ${(item.examType === 'HK1' || item.examType === 'HK2') ? `[Lịch thi ${item.examType}]` : `[${formatDateToDDMMYY(item.examDate)}]`} ${item.subject} (${item.examType})
-                                </h4>
-                                <span style="font-size:0.7rem; color:#6c757d;">Đăng bởi: ${item.author || 'GVCN'}</span>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:6px;">
-                                <button type="button" class="menu-btn btn-edit" style="padding:3px 8px; font-size:0.72rem; margin:0;" onclick="openEditExamModal('${item.docId}')">Sửa</button>
-                                <button type="button" class="menu-btn btn-del" style="padding:3px 8px; font-size:0.72rem; margin:0;" onclick="deleteExistingExam('${item.docId}')">Xóa</button>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-    }
-}
         // KHỞI ĐỘNG ỨNG DỤNG
         renderApp();
         window.addEventListener('load', () => { initRealtimeDatabase(); });
