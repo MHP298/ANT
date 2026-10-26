@@ -795,16 +795,16 @@
         }
 
         function initRealtimeDatabase() {
-            db.collection("notifications").onSnapshot({ includeMetadataChanges: true }, s => { notifications = []; s.forEach(d => notifications.push({ ...d.data(), docId: d.id })); renderApp(); });
-            db.collection("homeworks").onSnapshot({ includeMetadataChanges: true }, s => { homeworks = []; s.forEach(d => homeworks.push({ ...d.data(), docId: d.id })); renderApp(); });
-            db.collection("albums").onSnapshot({ includeMetadataChanges: true }, s => { albums = []; s.forEach(d => { if (d.data().title !== "Album banner") albums.push({ ...d.data(), docId: d.id }); }); renderApp(); });
-            db.collection("trashBin").onSnapshot({ includeMetadataChanges: true }, s => { trashBin = []; s.forEach(d => trashBin.push({ ...d.data(), docId: d.id })); renderApp(); });
-            db.collection("subAccounts").onSnapshot({ includeMetadataChanges: true }, s => {
+            db.collection("notifications").onSnapshot( s => { notifications = []; s.forEach(d => notifications.push({ ...d.data(), docId: d.id })); renderApp(); });
+            db.collection("homeworks").onSnapshot( s => { homeworks = []; s.forEach(d => homeworks.push({ ...d.data(), docId: d.id })); renderApp(); });
+            db.collection("albums").onSnapshot( s => { albums = []; s.forEach(d => { if (d.data().title !== "Album banner") albums.push({ ...d.data(), docId: d.id }); }); renderApp(); });
+            db.collection("trashBin").onSnapshot( s => { trashBin = []; s.forEach(d => trashBin.push({ ...d.data(), docId: d.id })); renderApp(); });
+            db.collection("subAccounts").onSnapshot( s => {
                 subAccounts = []; s.forEach(d => subAccounts.push({ ...d.data(), docId: d.id }));
                 if (!subAccounts.find(a => a.name === "admin")) subAccounts.push({ name: "admin", pass: "ad1234", studentName: "Quản Trị Viên Phụ", isAdmin: true });
                 renderApp();
             });
-            db.collection("settings").doc("general").onSnapshot({ includeMetadataChanges: true }, d => {
+            db.collection("settings").doc("general").onSnapshot( d => {
                 if (d.exists) {
                     let data = d.data();
                     if (data.scheduleUrl !== undefined) scheduleUrl = data.scheduleUrl;
@@ -813,7 +813,7 @@
                     renderApp();
                 }
             });
-            db.collection("exam_schedules").onSnapshot({ includeMetadataChanges: true }, s => { examSchedules = []; s.forEach(d => examSchedules.push({ ...d.data(), docId: d.id })); renderApp(); });
+            db.collection("exam_schedules").onSnapshot( s => { examSchedules = []; s.forEach(d => examSchedules.push({ ...d.data(), docId: d.id })); renderApp(); });
         }
 
         async function autoCleanupExpiredExams() {
@@ -2416,7 +2416,7 @@
 
         // KHỞI ĐỘNG ỨNG DỤNG
         renderApp();
-        window.addEventListener('load', () => { initRealtimeDatabase(); });
+        initRealtimeDatabase();
     </script>
 </body>
 </html>
