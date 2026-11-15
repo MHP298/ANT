@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Trang Thông Tin Lớp 11TA3 - 2026-2027</title>
+    <title>Cổng Thông Tin Lớp 11TA3 - Niên Khóa 2026-2027</title>
     
     <script>
         (function() {
@@ -26,10 +26,10 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <link rel="stylesheet" href="style.css?v=20261116">
+    <link rel="stylesheet" href="style.css?v=20261117">
 </head>
 <body>
 
@@ -37,18 +37,19 @@
 
     <header>
         <div class="header-main-title" onclick="switchView('home')" title="Nhấp vào để quay về Trang chủ">
-            <h1>Trang thông tin của lớp 11TA3<br><span style="font-size: 0.85rem;">Niên khóa 2026-2027</span></h1>
-            <div class="gvcn">GVCN: Trung Hiếu (Mr.Z)</div>
+            <h1>CỔNG THÔNG TIN LỚP 11TA3</h1>
+            <div class="school-year">Niên khóa 2026 – 2027</div>
+            <div class="gvcn-badge">GVCN: Trung Hiếu (Mr.Z)</div>
         </div>
 
-        <!-- BỘ CHỌN 5 THEME GIAO DIỆN -->
-        <div class="theme-switcher-wrap" onclick="event.stopPropagation()">
-            <button type="button" id="btnThemeToggle" class="theme-toggle-btn" onclick="toggleThemeDropdown(event)" title="Đổi giao diện màu sắc">
+        <!-- BỘ CHỌN 5 THEME GIAO DIỆN (DESKTOP & LANDSCAPE) -->
+        <div class="theme-switcher-wrap desktop-theme-wrap" onclick="event.stopPropagation()">
+            <button type="button" class="theme-toggle-btn" onclick="toggleThemeDropdown(event, 'desktop')" title="Đổi giao diện màu sắc">
                 <i class="fa-solid fa-palette"></i>
-                <span id="currentThemeLabel">Nordic</span>
+                <span class="theme-label-text">Nordic</span>
                 <i class="fa-solid fa-chevron-down" style="font-size: 0.65rem; opacity: 0.8;"></i>
             </button>
-            <div id="themeDropdownMenu" class="theme-dropdown-menu">
+            <div id="themeDropdownDesktop" class="theme-dropdown-menu">
                 <button type="button" class="theme-option-item" data-theme-key="nordic" onclick="applyAppTheme('nordic', 'Nordic')">
                     <span class="theme-dot" style="background: linear-gradient(135deg, #0284c7, #2563eb);"></span>
                     <span>Nordic Breeze</span>
@@ -406,9 +407,9 @@
         </div>
     </div>
 
-    <script src="app-core.js?v=20261116"></script>
-    <script src="ui-engine.js?v=20261116"></script>
-    <script src="exam-engine.js?v=20261116"></script>
-    <script src="content-manager.js?v=20261116"></script>
+    <script src="app-core.js?v=20261117"></script>
+    <script src="ui-engine.js?v=20261117"></script>
+    <script src="exam-engine.js?v=20261117"></script>
+    <script src="content-manager.js?v=20261117"></script>
 </body>
 </html>
