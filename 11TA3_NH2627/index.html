@@ -10,14 +10,42 @@
     
     <script>
         (function() {
-            var currentUrl = window.location.href;
-            if (currentUrl.indexOf('?') === -1) {
-                window.location.replace(currentUrl + '?v=' + new Date().getTime());
-            }
+            // 1. Khôi phục Theme ngay lập tức tránh nháy màu
             try {
                 var savedTheme = localStorage.getItem('class11ta3_theme') || 'nordic';
                 document.documentElement.setAttribute('data-theme', savedTheme);
             } catch (e) {}
+
+            // 2. Cơ chế tự động kiểm tra dấu vân tay (Last-Modified / ETag) của chính index.html (không cần version.json)
+            var savedSig = '';
+            try { savedSig = localStorage.getItem('class11ta3_index_sig') || ''; } catch (e) {}
+            var assetTag = savedSig ? savedSig.replace(/[^a-zA-Z0-9_-]/g, '').slice(-20) : ('ts_' + Date.now());
+
+            // Nạp CSS động kèm tham số chống cache
+            var cssLink = document.createElement('link');
+            cssLink.rel = 'stylesheet';
+            cssLink.href = 'style.css?v=' + encodeURIComponent(assetTag);
+            document.head.appendChild(cssLink);
+
+            // Kiểm tra cập nhật trực tiếp từ header của index.html trên máy chủ
+            if (window.location.protocol !== 'file:') {
+                fetch('index.html?nocache=' + Date.now(), { method: 'HEAD', cache: 'no-store' })
+                    .then(function(res) {
+                        if (!res.ok) return;
+                        var serverSig = res.headers.get('etag') || res.headers.get('last-modified') || '';
+                        if (!serverSig) return;
+                        if (savedSig && savedSig !== serverSig) {
+                            try { localStorage.setItem('class11ta3_index_sig', serverSig); } catch (e) {}
+                            var url = new URL(window.location.href);
+                            url.searchParams.set('v', Date.now());
+                            window.location.replace(url.toString());
+                        } else if (!savedSig) {
+                            try { localStorage.setItem('class11ta3_index_sig', serverSig); } catch (e) {}
+                        }
+                    })
+                    .catch(function() {});
+            }
+            window.__APP_ASSET_TAG__ = assetTag;
         })();
     </script>
 
@@ -28,8 +56,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <link rel="stylesheet" href="style.css?v=20261118">
 </head>
 <body>
 
@@ -74,8 +100,8 @@
         </div>
     </header>
 
-    <!-- LỚP PHỦ MỜ KHI BUNG MENU DI ĐỘNG -->
-    <div id="mobileMenuBackdrop" class="mobile-menu-backdrop" onclick="toggleMobileSidebarMenu(false)"></div>
+    <!-- LỚP PHỦ MỜ KHI BUNG MENU / DROPDOWN DI ĐỘNG -->
+    <div id="mobileMenuBackdrop" class="mobile-menu-backdrop" onclick="closeAllMobileOverlays()"></div>
 
     <div class="main-container">
         <div class="sidebar-a" id="sidebarA"></div>
@@ -407,9 +433,14 @@
         </div>
     </div>
 
-    <script src="app-core.js?v=20261118"></script>
-    <script src="ui-engine.js?v=20261118"></script>
-    <script src="exam-engine.js?v=20261118"></script>
-    <script src="content-manager.js?v=20261118"></script>
+    <script>
+        (function() {
+            var tag = encodeURIComponent(window.__APP_ASSET_TAG__ || ('ts_' + Date.now()));
+            var scripts = ['app-core.js', 'ui-engine.js', 'exam-engine.js', 'content-manager.js'];
+            scripts.forEach(function(src) {
+                document.write('<script src="' + src + '?v=' + tag + '"><\/script>');
+            });
+        })();
+    </script>
 </body>
 </html>
