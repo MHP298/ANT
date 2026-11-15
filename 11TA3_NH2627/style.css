@@ -11,8 +11,9 @@
     --text-main: #0c202d;
     --text-sub: #27526f;
     --input-bg: #ffffff;
-    --header-bg: linear-gradient(135deg, #0c202d 0%, #0369a1 100%);
-    --header-title-grad: linear-gradient(to right, #bae6fd, #7dd3fc, #e0f2fe);
+    --header-bg: linear-gradient(135deg, #091926 0%, #0369a1 55%, #0284c7 100%);
+    --header-3d-color: #e0f2fe;
+    --header-3d-shadow: 0 1px 0 #7dd3fc, 0 2px 0 #38bdf8, 0 3px 0 #0284c7, 0 4px 10px rgba(3, 105, 161, 0.55);
     --grad-primary: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
     --shadow-btn: 0 3px 10px rgba(2, 132, 199, 0.3);
     --btn-sec: #0369a1;
@@ -30,8 +31,9 @@
     --text-main: #23153c;
     --text-sub: #573a87;
     --input-bg: #ffffff;
-    --header-bg: linear-gradient(135deg, #23153c 0%, #6d28d9 100%);
-    --header-title-grad: linear-gradient(to right, #f3e8ff, #e9d5ff, #fae8ff);
+    --header-bg: linear-gradient(135deg, #1e1035 0%, #6d28d9 55%, #9333ea 100%);
+    --header-3d-color: #f3e8ff;
+    --header-3d-shadow: 0 1px 0 #e9d5ff, 0 2px 0 #c084fc, 0 3px 0 #7e22ce, 0 4px 10px rgba(88, 28, 135, 0.55);
     --grad-primary: linear-gradient(135deg, #7c3aed 0%, #c026d3 100%);
     --shadow-btn: 0 3px 10px rgba(124, 58, 237, 0.3);
     --btn-sec: #5b21b6;
@@ -49,8 +51,9 @@
     --text-main: #0f2b1d;
     --text-sub: #2d5a40;
     --input-bg: #ffffff;
-    --header-bg: linear-gradient(135deg, #0f2b1d 0%, #047857 100%);
-    --header-title-grad: linear-gradient(to right, #d1fae5, #a7f3d0, #ccfbf1);
+    --header-bg: linear-gradient(135deg, #0a2116 0%, #047857 55%, #059669 100%);
+    --header-3d-color: #d1fae5;
+    --header-3d-shadow: 0 1px 0 #a7f3d0, 0 2px 0 #34d399, 0 3px 0 #047857, 0 4px 10px rgba(6, 78, 59, 0.55);
     --grad-primary: linear-gradient(135deg, #059669 0%, #0d9488 100%);
     --shadow-btn: 0 3px 10px rgba(5, 150, 105, 0.3);
     --btn-sec: #047857;
@@ -68,8 +71,9 @@
     --text-main: #34230d;
     --text-sub: #6c512c;
     --input-bg: #ffffff;
-    --header-bg: linear-gradient(135deg, #34230d 0%, #b45309 100%);
-    --header-title-grad: linear-gradient(to right, #fef3c7, #fde68a, #ffedd5);
+    --header-bg: linear-gradient(135deg, #291a08 0%, #b45309 55%, #d97706 100%);
+    --header-3d-color: #fef3c7;
+    --header-3d-shadow: 0 1px 0 #fde68a, 0 2px 0 #fbbf24, 0 3px 0 #b45309, 0 4px 10px rgba(120, 53, 15, 0.55);
     --grad-primary: linear-gradient(135deg, #d97706 0%, #ea580c 100%);
     --shadow-btn: 0 3px 10px rgba(217, 119, 6, 0.3);
     --btn-sec: #c2410c;
@@ -87,8 +91,9 @@
     --text-main: #f3f6fa;
     --text-sub: #9eb5ce;
     --input-bg: #0e1724;
-    --header-bg: linear-gradient(135deg, #090e17 0%, #1e1b2e 100%);
-    --header-title-grad: linear-gradient(to right, #fda4af, #fb7185, #fecdd3);
+    --header-bg: linear-gradient(135deg, #070b14 0%, #1e1b2e 55%, #31102f 100%);
+    --header-3d-color: #ffe4e6;
+    --header-3d-shadow: 0 1px 0 #fda4af, 0 2px 0 #fb7185, 0 3px 0 #be123c, 0 4px 12px rgba(225, 29, 72, 0.6);
     --grad-primary: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
     --shadow-btn: 0 3px 12px rgba(244, 63, 94, 0.38);
     --btn-sec: #9f1239;
@@ -112,24 +117,44 @@ html, body {
     z-index: -1; background: var(--bg-body); transition: background 0.25s ease;
 }
 
-/* HEADER & THEME SWITCHER */
+/* ==========================================
+   HEADER 3 TẦNG CÂN ĐỐI & TIÊU ĐỀ NỔI 3D
+   ========================================== */
 header {
-    padding: 8px 15px; background: var(--header-bg); backdrop-filter: blur(12px);
-    color: white; border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+    padding: 7px 15px 8px 15px; background: var(--header-bg); backdrop-filter: blur(12px);
+    color: white; border-bottom: 2px solid rgba(255, 255, 255, 0.16);
     display: flex; align-items: center; justify-content: center; position: relative;
     flex-shrink: 0; z-index: 200; user-select: none;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
 }
 .header-main-title {
-    display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; text-align: center; gap: 2px;
 }
 header h1 {
-    font-size: 1.15rem; text-transform: uppercase; text-align: center; letter-spacing: 0.8px;
-    background: var(--header-title-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    font-weight: 800; line-height: 1.35; padding-top: 2px;
+    font-family: 'Montserrat', 'Segoe UI', sans-serif;
+    font-size: 1.24rem; text-transform: uppercase; text-align: center;
+    letter-spacing: 1.3px; font-weight: 900; line-height: 1.25;
+    color: var(--header-3d-color);
+    text-shadow: var(--header-3d-shadow);
+    transition: transform 0.2s ease;
 }
-header .gvcn { font-size: 0.75rem; color: rgba(255, 255, 255, 0.88); font-style: italic; margin-top: 2px; }
+.header-main-title:hover h1 { transform: translateY(-1px); }
 
-.theme-switcher-wrap {
+header .school-year {
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.6px;
+    color: rgba(255, 255, 255, 0.94); line-height: 1.2;
+}
+header .gvcn-badge {
+    font-size: 0.72rem; font-weight: 700; font-style: italic;
+    color: #ffffff; background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    padding: 1px 12px; border-radius: 999px; margin-top: 2px;
+    letter-spacing: 0.3px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* THEME SWITCHER (DESKTOP / LANDSCAPE) */
+.desktop-theme-wrap {
     position: absolute; right: 14px; top: 50%; transform: translateY(-50%); z-index: 300;
 }
 .theme-toggle-btn {
@@ -143,8 +168,8 @@ header .gvcn { font-size: 0.75rem; color: rgba(255, 255, 255, 0.88); font-style:
 .theme-dropdown-menu {
     display: none; position: absolute; right: 0; top: calc(100% + 6px); width: 175px;
     background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 12px;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25); padding: 5px; flex-direction: column; gap: 3px;
-    backdrop-filter: blur(12px); z-index: 400;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28); padding: 5px; flex-direction: column; gap: 3px;
+    backdrop-filter: blur(12px); z-index: 450;
 }
 .theme-dropdown-menu.open { display: flex; animation: fadeIn 0.16s ease-out; }
 .theme-option-item {
@@ -324,53 +349,74 @@ input[type="text"], input[type="password"], input[type="number"], input[type="da
 
 /* ==========================================
    RESPONSIVE DI ĐỘNG DỌC (MOBILE PORTRAIT)
-   THANH MENU THU GỌN + DROPDOWN GRID 2 CỘT
+   HEADER CÂN ĐỐI + THANH MENU 4 MỤC NGANG HÀNG
    ========================================== */
 @media screen and (max-width: 768px) {
+    /* Header căn giữa đối xứng hoàn toàn */
     header {
-        padding: 6px 10px; min-height: 52px; width: 100% !important;
-        max-width: 100vw !important; justify-content: space-between;
+        padding: 6px 10px 7px 10px; min-height: 62px; width: 100% !important;
+        max-width: 100vw !important; justify-content: center;
     }
-    .header-main-title { align-items: flex-start; padding-right: 78px; }
-    header h1 { font-size: 0.88rem; text-align: left; }
-    header .gvcn { font-size: 0.66rem; }
-    .theme-switcher-wrap { right: 8px; }
-    .theme-toggle-btn { padding: 4px 8px; font-size: 0.7rem; }
+    .header-main-title { align-items: center; padding-right: 0; }
+    header h1 { font-size: 0.98rem; text-align: center; letter-spacing: 0.9px; }
+    header .school-year { font-size: 0.72rem; }
+    header .gvcn-badge { font-size: 0.66rem; padding: 1px 10px; }
+
+    /* Ẩn nút Theme ở Header trên Mobile dọc vì đã chuyển xuống thanh ngang */
+    .desktop-theme-wrap { display: none !important; }
 
     .main-container {
         display: flex !important; flex-direction: column !important;
-        padding: 6px; gap: 6px; height: calc(100dvh - 52px);
+        padding: 6px; gap: 6px; height: calc(100dvh - 62px);
         overflow: hidden; overflow-x: hidden !important; width: 100%; max-width: 100vw;
     }
 
-    /* Thanh Sidebar A thu gọn thành 1 hàng ngang gọn nhẹ */
+    /* Thanh Sidebar A thu gọn thành 1 hàng ngang 4 phần tử: Trang chủ | Menu | Theme | Đăng nhập (hoặc Tên TK) */
     .sidebar-a {
         height: auto !important; max-height: none !important; overflow: visible !important;
-        flex-shrink: 0; padding: 5px 6px; width: 100%; position: relative; z-index: 250;
+        flex-shrink: 0; padding: 5px 5px; width: 100%; position: relative; z-index: 250;
     }
 
     .mobile-nav-bar {
-        display: flex; align-items: center; gap: 6px; width: 100%;
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 4px; width: 100%;
     }
     .mobile-nav-bar .m-bar-btn {
-        padding: 6px 10px; font-size: 0.78rem; border-radius: 8px;
-        justify-content: center; flex-shrink: 0;
-    }
-    .mobile-nav-bar .m-user-pill {
-        flex: 1; min-width: 0; padding: 5px 8px; font-size: 0.74rem;
-        background: var(--bg-sub); border: 1px solid var(--border-card);
-        border-radius: 8px; font-weight: 700; color: var(--primary);
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;
+        padding: 6px 7px; font-size: 0.72rem; border-radius: 8px;
+        justify-content: center; flex-shrink: 0; gap: 4px;
     }
     .mobile-nav-bar .m-more-btn {
-        margin-left: auto; padding: 6px 11px; font-size: 0.78rem;
+        padding: 6px 8px; font-size: 0.72rem;
         background: var(--bg-sub); color: var(--primary);
         border: 1.5px solid var(--border-card); border-radius: 8px;
         font-weight: 700; cursor: pointer; display: inline-flex;
-        align-items: center; gap: 5px; flex-shrink: 0;
+        align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;
     }
     .mobile-nav-bar .m-more-btn.is-open {
         background: var(--grad-primary); color: #ffffff; border-color: transparent;
+    }
+
+    /* Nút chọn Theme nằm ngang hàng */
+    .mobile-theme-wrap {
+        position: relative; flex-shrink: 0;
+    }
+    .mobile-theme-btn {
+        padding: 6px 7px; font-size: 0.72rem;
+        background: var(--bg-sub); color: var(--primary);
+        border: 1.5px solid var(--border-card); border-radius: 8px;
+        font-weight: 700; cursor: pointer; display: inline-flex;
+        align-items: center; justify-content: center; gap: 4px;
+    }
+    .mobile-theme-wrap .theme-dropdown-menu {
+        right: -35px; top: calc(100% + 6px); width: 170px;
+    }
+
+    /* Ô Tên tài khoản ở ngoài cùng bên phải khi đã đăng nhập */
+    .mobile-nav-bar .m-user-pill {
+        flex: 1; min-width: 0; padding: 6px 6px; font-size: 0.72rem;
+        background: var(--bg-sub); border: 1.5px solid var(--border-card);
+        border-radius: 8px; font-weight: 700; color: var(--primary);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;
     }
 
     /* Bảng Menu bung xuống dạng lưới 2 cột */
@@ -432,10 +478,17 @@ input[type="text"], input[type="password"], input[type="number"], input[type="da
 
 /* RESPONSIVE NGANG (LANDSCAPE) */
 @media screen and (max-height: 520px) and (orientation: landscape) {
-    header { padding: 3px 10px; min-height: 40px; }
-    header h1 { font-size: 0.85rem; line-height: 1.15; }
-    header .gvcn { font-size: 0.62rem; margin-top: 1px; }
-    .main-container { grid-template-columns: 28% 72%; padding: 4px; gap: 5px; height: calc(100dvh - 40px); overflow: hidden; }
+    header { padding: 3px 10px; min-height: 44px; }
+    header h1 { font-size: 0.88rem; line-height: 1.15; }
+    header .school-year { font-size: 0.64rem; }
+    header .gvcn-badge { font-size: 0.6rem; padding: 0px 8px; }
+    .desktop-theme-wrap { display: block !important; right: 8px; }
+    .mobile-nav-bar { display: none !important; }
+    .sidebar-menu-body { display: flex !important; position: static !important; box-shadow: none !important; border: none !important; background: transparent !important; padding: 0 !important; max-height: none !important; }
+    .sidebar-menu-body .mobile-hide-in-grid { display: flex !important; }
+    .sidebar-menu-body h3 { display: block !important; }
+
+    .main-container { grid-template-columns: 28% 72%; padding: 4px; gap: 5px; height: calc(100dvh - 44px); overflow: hidden; }
     .sidebar-a { height: 100%; max-height: 100%; overflow-y: auto; padding: 5px; gap: 3px; }
     .sidebar-a .menu-btn { padding: 4px 6px; font-size: 0.72rem; gap: 4px; }
     .sidebar-a h3 { font-size: 0.72rem; padding-bottom: 1px; }
