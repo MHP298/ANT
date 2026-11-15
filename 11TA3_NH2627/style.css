@@ -11,9 +11,9 @@
     --text-main: #0c202d;
     --text-sub: #27526f;
     --input-bg: #ffffff;
-    --header-bg: linear-gradient(135deg, #091926 0%, #0369a1 55%, #0284c7 100%);
-    --header-3d-color: #e0f2fe;
-    --header-3d-shadow: 0 1px 0 #7dd3fc, 0 2px 0 #38bdf8, 0 3px 0 #0284c7, 0 4px 10px rgba(3, 105, 161, 0.55);
+    --header-bg: linear-gradient(135deg, #071927 0%, #0369a1 55%, #0284c7 100%);
+    --header-3d-color: #ffffff;
+    --header-3d-shadow: 0 1px 0 #7dd3fc, 0 2px 0 #38bdf8, 0 3px 0 #0284c7, 0 4px 0 #0369a1, 0 6px 14px rgba(3, 105, 161, 0.65);
     --grad-primary: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
     --shadow-btn: 0 3px 10px rgba(2, 132, 199, 0.3);
     --btn-sec: #0369a1;
@@ -31,9 +31,9 @@
     --text-main: #23153c;
     --text-sub: #573a87;
     --input-bg: #ffffff;
-    --header-bg: linear-gradient(135deg, #1e1035 0%, #6d28d9 55%, #9333ea 100%);
-    --header-3d-color: #f3e8ff;
-    --header-3d-shadow: 0 1px 0 #e9d5ff, 0 2px 0 #c084fc, 0 3px 0 #7e22ce, 0 4px 10px rgba(88, 28, 135, 0.55);
+    --header-bg: linear-gradient(135deg, #1b0d33 0%, #6d28d9 55%, #9333ea 100%);
+    --header-3d-color: #ffffff;
+    --header-3d-shadow: 0 1px 0 #e9d5ff, 0 2px 0 #c084fc, 0 3px 0 #9333ea, 0 4px 0 #6d28d9, 0 6px 14px rgba(88, 28, 135, 0.65);
     --grad-primary: linear-gradient(135deg, #7c3aed 0%, #c026d3 100%);
     --shadow-btn: 0 3px 10px rgba(124, 58, 237, 0.3);
     --btn-sec: #5b21b6;
@@ -51,9 +51,9 @@
     --text-main: #0f2b1d;
     --text-sub: #2d5a40;
     --input-bg: #ffffff;
-    --header-bg: linear-gradient(135deg, #0a2116 0%, #047857 55%, #059669 100%);
-    --header-3d-color: #d1fae5;
-    --header-3d-shadow: 0 1px 0 #a7f3d0, 0 2px 0 #34d399, 0 3px 0 #047857, 0 4px 10px rgba(6, 78, 59, 0.55);
+    --header-bg: linear-gradient(135deg, #081c12 0%, #047857 55%, #059669 100%);
+    --header-3d-color: #ffffff;
+    --header-3d-shadow: 0 1px 0 #a7f3d0, 0 2px 0 #34d399, 0 3px 0 #059669, 0 4px 0 #047857, 0 6px 14px rgba(6, 78, 59, 0.65);
     --grad-primary: linear-gradient(135deg, #059669 0%, #0d9488 100%);
     --shadow-btn: 0 3px 10px rgba(5, 150, 105, 0.3);
     --btn-sec: #047857;
@@ -71,9 +71,9 @@
     --text-main: #34230d;
     --text-sub: #6c512c;
     --input-bg: #ffffff;
-    --header-bg: linear-gradient(135deg, #291a08 0%, #b45309 55%, #d97706 100%);
-    --header-3d-color: #fef3c7;
-    --header-3d-shadow: 0 1px 0 #fde68a, 0 2px 0 #fbbf24, 0 3px 0 #b45309, 0 4px 10px rgba(120, 53, 15, 0.55);
+    --header-bg: linear-gradient(135deg, #261606 0%, #b45309 55%, #d97706 100%);
+    --header-3d-color: #ffffff;
+    --header-3d-shadow: 0 1px 0 #fde68a, 0 2px 0 #fbbf24, 0 3px 0 #d97706, 0 4px 0 #b45309, 0 6px 14px rgba(120, 53, 15, 0.65);
     --grad-primary: linear-gradient(135deg, #d97706 0%, #ea580c 100%);
     --shadow-btn: 0 3px 10px rgba(217, 119, 6, 0.3);
     --btn-sec: #c2410c;
@@ -91,9 +91,9 @@
     --text-main: #f3f6fa;
     --text-sub: #9eb5ce;
     --input-bg: #0e1724;
-    --header-bg: linear-gradient(135deg, #070b14 0%, #1e1b2e 55%, #31102f 100%);
-    --header-3d-color: #ffe4e6;
-    --header-3d-shadow: 0 1px 0 #fda4af, 0 2px 0 #fb7185, 0 3px 0 #be123c, 0 4px 12px rgba(225, 29, 72, 0.6);
+    --header-bg: linear-gradient(135deg, #070b14 0%, #1e1b2e 55%, #3b0d2a 100%);
+    --header-3d-color: #ffffff;
+    --header-3d-shadow: 0 1px 0 #fda4af, 0 2px 0 #fb7185, 0 3px 0 #e11d48, 0 4px 0 #9f1239, 0 6px 16px rgba(225, 29, 72, 0.7);
     --grad-primary: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
     --shadow-btn: 0 3px 12px rgba(244, 63, 94, 0.38);
     --btn-sec: #9f1239;
@@ -121,11 +121,11 @@ html, body {
    HEADER 3 TẦNG CÂN ĐỐI & TIÊU ĐỀ NỔI 3D
    ========================================== */
 header {
-    padding: 7px 15px 8px 15px; background: var(--header-bg); backdrop-filter: blur(12px);
-    color: white; border-bottom: 2px solid rgba(255, 255, 255, 0.16);
+    padding: 8px 15px 9px 15px; background: var(--header-bg); backdrop-filter: blur(12px);
+    color: white; border-bottom: 2px solid rgba(255, 255, 255, 0.18);
     display: flex; align-items: center; justify-content: center; position: relative;
     flex-shrink: 0; z-index: 200; user-select: none;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 .header-main-title {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -133,8 +133,8 @@ header {
 }
 header h1 {
     font-family: 'Montserrat', 'Segoe UI', sans-serif;
-    font-size: 1.24rem; text-transform: uppercase; text-align: center;
-    letter-spacing: 1.3px; font-weight: 900; line-height: 1.25;
+    font-size: 1.28rem; text-transform: uppercase; text-align: center;
+    letter-spacing: 1.4px; font-weight: 900; line-height: 1.25;
     color: var(--header-3d-color);
     text-shadow: var(--header-3d-shadow);
     transition: transform 0.2s ease;
@@ -142,15 +142,15 @@ header h1 {
 .header-main-title:hover h1 { transform: translateY(-1px); }
 
 header .school-year {
-    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.6px;
-    color: rgba(255, 255, 255, 0.94); line-height: 1.2;
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.8px;
+    color: rgba(255, 255, 255, 0.94); line-height: 1.2; margin-top: 2px;
 }
 header .gvcn-badge {
     font-size: 0.72rem; font-weight: 700; font-style: italic;
-    color: #ffffff; background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    padding: 1px 12px; border-radius: 999px; margin-top: 2px;
-    letter-spacing: 0.3px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    color: #ffffff; background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    padding: 2px 13px; border-radius: 999px; margin-top: 2px;
+    letter-spacing: 0.3px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
 /* THEME SWITCHER (DESKTOP / LANDSCAPE) */
@@ -349,74 +349,76 @@ input[type="text"], input[type="password"], input[type="number"], input[type="da
 
 /* ==========================================
    RESPONSIVE DI ĐỘNG DỌC (MOBILE PORTRAIT)
-   HEADER CÂN ĐỐI + THANH MENU 4 MỤC NGANG HÀNG
+   HEADER CÂN ĐỐI + THANH MENU 4 CỘT ĐỒNG BỘ THEME
    ========================================== */
 @media screen and (max-width: 768px) {
     /* Header căn giữa đối xứng hoàn toàn */
     header {
-        padding: 6px 10px 7px 10px; min-height: 62px; width: 100% !important;
+        padding: 7px 10px 8px 10px; min-height: 66px; width: 100% !important;
         max-width: 100vw !important; justify-content: center;
     }
-    .header-main-title { align-items: center; padding-right: 0; }
-    header h1 { font-size: 0.98rem; text-align: center; letter-spacing: 0.9px; }
+    .header-main-title { align-items: center; padding-right: 0; width: 100%; }
+    header h1 { font-size: 1.02rem; text-align: center; letter-spacing: 0.9px; }
     header .school-year { font-size: 0.72rem; }
-    header .gvcn-badge { font-size: 0.66rem; padding: 1px 10px; }
+    header .gvcn-badge { font-size: 0.67rem; padding: 1.5px 11px; }
 
-    /* Ẩn nút Theme ở Header trên Mobile dọc vì đã chuyển xuống thanh ngang */
+    /* Ẩn hoàn toàn nút Theme ở Header trên Mobile dọc */
     .desktop-theme-wrap { display: none !important; }
 
     .main-container {
         display: flex !important; flex-direction: column !important;
-        padding: 6px; gap: 6px; height: calc(100dvh - 62px);
+        padding: 6px; gap: 6px; height: calc(100dvh - 66px);
         overflow: hidden; overflow-x: hidden !important; width: 100%; max-width: 100vw;
     }
 
-    /* Thanh Sidebar A thu gọn thành 1 hàng ngang 4 phần tử: Trang chủ | Menu | Theme | Đăng nhập (hoặc Tên TK) */
+    /* Thanh Sidebar A: Lưới 4 cột bằng nhau tuyệt đối, đồng bộ ngôn ngữ thiết kế theo Theme */
     .sidebar-a {
         height: auto !important; max-height: none !important; overflow: visible !important;
-        flex-shrink: 0; padding: 5px 5px; width: 100%; position: relative; z-index: 250;
+        flex-shrink: 0; padding: 5px; width: 100%; position: relative; z-index: 250;
     }
 
     .mobile-nav-bar {
-        display: flex; align-items: center; justify-content: space-between;
-        gap: 4px; width: 100%;
+        display: grid; grid-template-columns: repeat(4, 1fr);
+        align-items: stretch; gap: 5px; width: 100%;
     }
-    .mobile-nav-bar .m-bar-btn {
-        padding: 6px 7px; font-size: 0.72rem; border-radius: 8px;
-        justify-content: center; flex-shrink: 0; gap: 4px;
+    .mobile-nav-bar .m-nav-item {
+        width: 100%; height: 34px; padding: 0 4px;
+        background: var(--btn-sec); color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 8px;
+        font-size: 0.73rem; font-weight: 700; cursor: pointer;
+        display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+        transition: all 0.2s ease; transform: none !important;
     }
-    .mobile-nav-bar .m-more-btn {
-        padding: 6px 8px; font-size: 0.72rem;
-        background: var(--bg-sub); color: var(--primary);
-        border: 1.5px solid var(--border-card); border-radius: 8px;
-        font-weight: 700; cursor: pointer; display: inline-flex;
-        align-items: center; justify-content: center; gap: 4px; flex-shrink: 0;
-    }
-    .mobile-nav-bar .m-more-btn.is-open {
-        background: var(--grad-primary); color: #ffffff; border-color: transparent;
+    .mobile-nav-bar .m-nav-item:hover { filter: brightness(1.08); }
+    .mobile-nav-bar .m-nav-item.active-tab,
+    .mobile-nav-bar .m-nav-item.is-open {
+        background: var(--grad-primary) !important;
+        box-shadow: var(--shadow-btn), inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
+        border-color: rgba(255, 255, 255, 0.45);
     }
 
-    /* Nút chọn Theme nằm ngang hàng */
+    /* Nút chọn Theme đồng bộ y hệt 3 nút còn lại */
     .mobile-theme-wrap {
-        position: relative; flex-shrink: 0;
+        position: relative; width: 100%; display: flex;
     }
-    .mobile-theme-btn {
-        padding: 6px 7px; font-size: 0.72rem;
-        background: var(--bg-sub); color: var(--primary);
-        border: 1.5px solid var(--border-card); border-radius: 8px;
-        font-weight: 700; cursor: pointer; display: inline-flex;
-        align-items: center; justify-content: center; gap: 4px;
+    .mobile-theme-wrap .m-nav-item {
+        width: 100%;
     }
     .mobile-theme-wrap .theme-dropdown-menu {
-        right: -35px; top: calc(100% + 6px); width: 170px;
+        right: -25%; top: calc(100% + 6px); width: 175px;
     }
 
-    /* Ô Tên tài khoản ở ngoài cùng bên phải khi đã đăng nhập */
+    /* Thẻ Tên tài khoản ở cột 4 cũng đồng bộ màu nền & bo góc theo Theme */
     .mobile-nav-bar .m-user-pill {
-        flex: 1; min-width: 0; padding: 6px 6px; font-size: 0.72rem;
-        background: var(--bg-sub); border: 1.5px solid var(--border-card);
-        border-radius: 8px; font-weight: 700; color: var(--primary);
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;
+        width: 100%; height: 34px; padding: 0 5px;
+        background: var(--btn-sec); color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 8px;
+        font-size: 0.72rem; font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
     }
 
     /* Bảng Menu bung xuống dạng lưới 2 cột */
