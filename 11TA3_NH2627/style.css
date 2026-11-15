@@ -6,7 +6,7 @@
     --bg-body: #d9eaf7;
     --bg-card: rgba(255, 255, 255, 0.96);
     --bg-item: #ffffff;
-    --bg-sub: #f1f7fc;
+    --bg-sub: #e6f2fb;
     --border-card: #b0d2ec;
     --text-main: #0c202d;
     --text-sub: #27526f;
@@ -15,8 +15,9 @@
     --header-3d-color: #ffffff;
     --header-3d-shadow: 0 1px 0 #7dd3fc, 0 2px 0 #38bdf8, 0 3px 0 #0284c7, 0 4px 0 #0369a1, 0 6px 14px rgba(3, 105, 161, 0.65);
     --grad-primary: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
-    --shadow-btn: 0 3px 10px rgba(2, 132, 199, 0.3);
+    --shadow-btn: 0 3px 10px rgba(2, 132, 199, 0.35);
     --btn-sec: #0369a1;
+    --sub-btn-bg: #0284c7;
     --primary: #0369a1;
     --accent: #0284c7;
     --danger-bright: #e63946;
@@ -26,7 +27,7 @@
     --bg-body: #ece5f8;
     --bg-card: rgba(255, 255, 255, 0.96);
     --bg-item: #ffffff;
-    --bg-sub: #f6f2fc;
+    --bg-sub: #f1e9fc;
     --border-card: #d5c3f0;
     --text-main: #23153c;
     --text-sub: #573a87;
@@ -35,8 +36,9 @@
     --header-3d-color: #ffffff;
     --header-3d-shadow: 0 1px 0 #e9d5ff, 0 2px 0 #c084fc, 0 3px 0 #9333ea, 0 4px 0 #6d28d9, 0 6px 14px rgba(88, 28, 135, 0.65);
     --grad-primary: linear-gradient(135deg, #7c3aed 0%, #c026d3 100%);
-    --shadow-btn: 0 3px 10px rgba(124, 58, 237, 0.3);
+    --shadow-btn: 0 3px 10px rgba(124, 58, 237, 0.35);
     --btn-sec: #5b21b6;
+    --sub-btn-bg: #7c3aed;
     --primary: #6d28d9;
     --accent: #7c3aed;
     --danger-bright: #e11d48;
@@ -46,7 +48,7 @@
     --bg-body: #d8ede0;
     --bg-card: rgba(255, 255, 255, 0.96);
     --bg-item: #ffffff;
-    --bg-sub: #eff8f3;
+    --bg-sub: #e3f5ea;
     --border-card: #b1d8bf;
     --text-main: #0f2b1d;
     --text-sub: #2d5a40;
@@ -55,8 +57,9 @@
     --header-3d-color: #ffffff;
     --header-3d-shadow: 0 1px 0 #a7f3d0, 0 2px 0 #34d399, 0 3px 0 #059669, 0 4px 0 #047857, 0 6px 14px rgba(6, 78, 59, 0.65);
     --grad-primary: linear-gradient(135deg, #059669 0%, #0d9488 100%);
-    --shadow-btn: 0 3px 10px rgba(5, 150, 105, 0.3);
+    --shadow-btn: 0 3px 10px rgba(5, 150, 105, 0.35);
     --btn-sec: #047857;
+    --sub-btn-bg: #059669;
     --primary: #047857;
     --accent: #059669;
     --danger-bright: #e11d48;
@@ -66,7 +69,7 @@
     --bg-body: #f5eedb;
     --bg-card: rgba(255, 255, 255, 0.96);
     --bg-item: #ffffff;
-    --bg-sub: #fbf8f1;
+    --bg-sub: #f7efe0;
     --border-card: #e5d4b5;
     --text-main: #34230d;
     --text-sub: #6c512c;
@@ -75,8 +78,9 @@
     --header-3d-color: #ffffff;
     --header-3d-shadow: 0 1px 0 #fde68a, 0 2px 0 #fbbf24, 0 3px 0 #d97706, 0 4px 0 #b45309, 0 6px 14px rgba(120, 53, 15, 0.65);
     --grad-primary: linear-gradient(135deg, #d97706 0%, #ea580c 100%);
-    --shadow-btn: 0 3px 10px rgba(217, 119, 6, 0.3);
+    --shadow-btn: 0 3px 10px rgba(217, 119, 6, 0.35);
     --btn-sec: #c2410c;
+    --sub-btn-bg: #d97706;
     --primary: #b45309;
     --accent: #d97706;
     --danger-bright: #dc2626;
@@ -86,7 +90,7 @@
     --bg-body: #060b12;
     --bg-card: rgba(18, 27, 41, 0.96);
     --bg-item: #142033;
-    --bg-sub: #0e1724;
+    --bg-sub: #162338;
     --border-card: #263a52;
     --text-main: #f3f6fa;
     --text-sub: #9eb5ce;
@@ -95,8 +99,9 @@
     --header-3d-color: #ffffff;
     --header-3d-shadow: 0 1px 0 #fda4af, 0 2px 0 #fb7185, 0 3px 0 #e11d48, 0 4px 0 #9f1239, 0 6px 16px rgba(225, 29, 72, 0.7);
     --grad-primary: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
-    --shadow-btn: 0 3px 12px rgba(244, 63, 94, 0.38);
+    --shadow-btn: 0 3px 12px rgba(244, 63, 94, 0.42);
     --btn-sec: #9f1239;
+    --sub-btn-bg: #be123c;
     --primary: #fb7185;
     --accent: #f43f5e;
     --danger-bright: #f43f5e;
@@ -165,13 +170,16 @@ header .gvcn-badge {
 }
 .theme-toggle-btn:hover { background: rgba(255, 255, 255, 0.26); }
 
-.theme-dropdown-menu {
-    display: none; position: absolute; right: 0; top: calc(100% + 6px); width: 175px;
-    background: var(--bg-card); border: 1px solid var(--border-card); border-radius: 12px;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28); padding: 5px; flex-direction: column; gap: 3px;
-    backdrop-filter: blur(12px); z-index: 450;
+.theme-dropdown-menu,
+.account-dropdown-menu {
+    display: none; position: absolute; right: 0; top: calc(100% + 6px); width: 185px;
+    background: var(--bg-card); border: 1.5px solid var(--border-card); border-radius: 12px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28); padding: 6px; flex-direction: column; gap: 4px;
+    backdrop-filter: blur(12px); z-index: 460;
 }
-.theme-dropdown-menu.open { display: flex; animation: fadeIn 0.16s ease-out; }
+.theme-dropdown-menu.open,
+.account-dropdown-menu.open { display: flex; animation: fadeIn 0.16s ease-out; }
+
 .theme-option-item {
     display: flex; align-items: center; gap: 8px; width: 100%; padding: 7px 10px;
     border: none; background: transparent; color: var(--text-main); font-size: 0.78rem;
@@ -180,6 +188,12 @@ header .gvcn-badge {
 .theme-option-item:hover { background: rgba(125, 125, 125, 0.12); }
 .theme-option-item.active-theme { background: var(--grad-primary); color: #ffffff; font-weight: 700; }
 .theme-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(255, 255, 255, 0.6); }
+
+.account-info-header {
+    padding: 7px 10px; background: var(--bg-sub); border: 1px solid var(--border-card);
+    border-radius: 8px; color: var(--primary); font-size: 0.78rem; font-weight: 800;
+    text-align: center; word-break: break-word;
+}
 
 #dynamicBannerContainer { width: 100%; height: 75px; background: #000; overflow: hidden; position: relative; border-radius: 8px; margin-bottom: 8px; display: none; flex-shrink: 0; }
 #dynamicBannerContainer img { width: 100%; height: 100%; object-fit: cover; position: absolute; transition: opacity 1s ease-in-out; opacity: 0; }
@@ -209,12 +223,49 @@ header .gvcn-badge {
     max-width: 100%; box-sizing: border-box;
 }
 .menu-btn:hover { filter: brightness(1.1); transform: translateX(2px); }
-.menu-btn.active-tab {
+.menu-btn.active-tab,
+.menu-btn.parent-open {
     background: var(--grad-primary) !important;
-    box-shadow: var(--shadow-btn), inset 0 1px 2px rgba(255,255,255,0.25) !important;
+    box-shadow: var(--shadow-btn), inset 0 1px 2px rgba(255,255,255,0.28) !important;
     transform: translateX(3px);
 }
-.sub-menu { display: flex; flex-direction: column; gap: 4px; padding-left: 8px; border-left: 3px solid var(--accent); margin: 2px 0; }
+
+/* KHỐI NÚT CON PHÂN CẤP RÕ NÉT THEO THEME */
+.sub-menu {
+    display: flex; flex-direction: column; gap: 5px;
+    padding: 7px 8px; margin: 2px 0 4px 6px;
+    background: var(--bg-sub);
+    border: 1.5px dashed var(--accent);
+    border-left: 4px solid var(--accent);
+    border-radius: 9px;
+    box-shadow: inset 0 1px 4px rgba(0,0,0,0.05);
+}
+.sub-menu-label {
+    font-size: 0.67rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--primary); opacity: 0.9;
+    padding-bottom: 2px; border-bottom: 1px solid var(--border-card);
+}
+.sub-menu .sub-item-btn {
+    background: var(--bg-item) !important;
+    color: var(--primary) !important;
+    border: 1.5px solid var(--border-card) !important;
+    padding: 6px 9px !important;
+    font-size: 0.74rem !important;
+    font-weight: 700 !important;
+    border-radius: 7px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.sub-menu .sub-item-btn:hover {
+    border-color: var(--accent) !important;
+    transform: translateX(2px);
+}
+.sub-menu .sub-item-btn.active-tab {
+    background: var(--grad-primary) !important;
+    color: #ffffff !important;
+    border-color: transparent !important;
+    box-shadow: var(--shadow-btn) !important;
+}
+
 .user-badge-box {
     font-size: 0.76rem; padding: 5px 8px; background: var(--bg-sub);
     border: 1px solid var(--border-card); border-radius: 6px; font-weight: 700; color: var(--primary);
@@ -371,16 +422,20 @@ input[type="text"], input[type="password"], input[type="number"], input[type="da
         overflow: hidden; overflow-x: hidden !important; width: 100%; max-width: 100vw;
     }
 
-    /* Thanh Sidebar A: Lưới 4 cột bằng nhau tuyệt đối, đồng bộ ngôn ngữ thiết kế theo Theme */
+    /* Thanh Sidebar A: Lưới 4 phần tử cân đối: Trang chủ | Menu | Theme | Icon Tài khoản (hoặc Đăng nhập) */
     .sidebar-a {
         height: auto !important; max-height: none !important; overflow: visible !important;
         flex-shrink: 0; padding: 5px; width: 100%; position: relative; z-index: 250;
     }
 
     .mobile-nav-bar {
-        display: grid; grid-template-columns: repeat(4, 1fr);
+        display: grid; grid-template-columns: 1.15fr 0.95fr 1.1fr 0.8fr;
         align-items: stretch; gap: 5px; width: 100%;
     }
+    .mobile-nav-bar.guest-bar {
+        grid-template-columns: 1.1fr 0.9fr 1fr 1.1fr;
+    }
+
     .mobile-nav-bar .m-nav-item {
         width: 100%; height: 34px; padding: 0 4px;
         background: var(--btn-sec); color: #ffffff;
@@ -395,30 +450,27 @@ input[type="text"], input[type="password"], input[type="number"], input[type="da
     .mobile-nav-bar .m-nav-item.active-tab,
     .mobile-nav-bar .m-nav-item.is-open {
         background: var(--grad-primary) !important;
-        box-shadow: var(--shadow-btn), inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
-        border-color: rgba(255, 255, 255, 0.45);
+        box-shadow: var(--shadow-btn), inset 0 1px 2px rgba(255, 255, 255, 0.35) !important;
+        border-color: rgba(255, 255, 255, 0.55);
     }
 
-    /* Nút chọn Theme đồng bộ y hệt 3 nút còn lại */
-    .mobile-theme-wrap {
+    /* Nút chọn Theme & Nút Icon Tài khoản nằm ngang hàng */
+    .mobile-theme-wrap,
+    .mobile-account-wrap {
         position: relative; width: 100%; display: flex;
     }
-    .mobile-theme-wrap .m-nav-item {
+    .mobile-theme-wrap .m-nav-item,
+    .mobile-account-wrap .m-nav-item {
         width: 100%;
     }
-    .mobile-theme-wrap .theme-dropdown-menu {
-        right: -25%; top: calc(100% + 6px); width: 175px;
+    .mobile-account-wrap .m-nav-item i {
+        font-size: 0.95rem;
     }
-
-    /* Thẻ Tên tài khoản ở cột 4 cũng đồng bộ màu nền & bo góc theo Theme */
-    .mobile-nav-bar .m-user-pill {
-        width: 100%; height: 34px; padding: 0 5px;
-        background: var(--btn-sec); color: #ffffff;
-        border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 8px;
-        font-size: 0.72rem; font-weight: 700;
-        display: flex; align-items: center; justify-content: center;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    .mobile-theme-wrap .theme-dropdown-menu {
+        right: -20%; top: calc(100% + 6px); width: 175px;
+    }
+    .mobile-account-wrap .account-dropdown-menu {
+        right: 0; top: calc(100% + 6px); width: 195px;
     }
 
     /* Bảng Menu bung xuống dạng lưới 2 cột */
@@ -426,7 +478,7 @@ input[type="text"], input[type="password"], input[type="number"], input[type="da
         display: none; position: absolute; left: 0; right: 0; top: calc(100% + 5px);
         background: var(--bg-card); border: 1.5px solid var(--border-card);
         border-radius: 12px; padding: 8px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
-        max-height: 68dvh; overflow-y: auto; z-index: 260;
+        max-height: 70dvh; overflow-y: auto; z-index: 260;
         grid-template-columns: repeat(2, 1fr); gap: 6px;
     }
     .sidebar-menu-body.mobile-open {
@@ -442,11 +494,13 @@ input[type="text"], input[type="password"], input[type="number"], input[type="da
     }
     .sidebar-menu-body .sub-menu {
         grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, 1fr);
-        gap: 5px; padding: 6px; background: var(--bg-sub); border-radius: 8px;
-        border-left: 3px solid var(--accent);
+        gap: 6px; padding: 7px; margin: 2px 0;
     }
-    .sidebar-menu-body .btn-del {
-        grid-column: 1 / -1; justify-content: center; margin-top: 2px;
+    .sidebar-menu-body .sub-menu .sub-menu-label {
+        grid-column: 1 / -1;
+    }
+    .sidebar-menu-body .sub-menu .sub-item-btn {
+        font-size: 0.72rem !important; padding: 7px 6px !important;
     }
 
     .mobile-menu-backdrop.open {
